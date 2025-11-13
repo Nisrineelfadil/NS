@@ -1,0 +1,149 @@
+{
+  "en": {
+    "login": {
+      "title": "Student Portal",
+      "subtitle": "Login to view your grades and progress",
+      "email": "School Email",
+      "password": "Password",
+      "emailPlaceholder": "your.name@nisrineschool.com",
+      "passwordPlaceholder": "Enter your password",
+      "loginButton": "Login"
+    },
+    "header": {
+      "title": "Nisrine School",
+      "messages": "Messages",
+      "logout": "Logout"
+    },
+    "stats": {
+      "totalGrades": "Total Grades",
+      "averageScore": "Average Score",
+      "paymentStatus": "Payment Status"
+    },
+    "tabs": {
+      "allSubjects": "All Subjects",
+      "languages": "Languages",
+      "branches": "Branches"
+    },
+    "filters": {
+      "title": "Filter Grades",
+      "languageFormation": "Language Formation",
+      "allLanguages": "All Languages",
+      "branchFormation": "Branch Formation",
+      "allBranches": "All Branches",
+      "semester": "Semester",
+      "allSemesters": "All Semesters",
+      "academicYear": "Academic Year"
+    },
+    "grades": {
+      "title": "My Grades",
+      "loading": "Loading grades...",
+      "noGrades": "No grades yet",
+      "examType": "Exam Type",
+      "score": "Score",
+      "grade": "Grade"
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "theme": "Theme"
+    }
+  },
+  "de": {
+    "login": {
+      "title": "Schülerportal",
+      "subtitle": "Melden Sie sich an, um Ihre Noten anzuzeigen",
+      "email": "Schul-E-Mail",
+      "password": "Passwort",
+      "emailPlaceholder": "ihr.name@nisrineschool.com",
+      "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
+      "loginButton": "Anmelden"
+    },
+    "header": {
+      "title": "Nisrine Schule",
+      "messages": "Nachrichten",
+      "logout": "Abmelden"
+    },
+    "stats": {
+      "totalGrades": "Gesamtnoten",
+      "averageScore": "Durchschnittsnote",
+      "paymentStatus": "Zahlungsstatus"
+    },
+    "tabs": {
+      "allSubjects": "Alle Fächer",
+      "languages": "Sprachen",
+      "branches": "Zweige"
+    },
+    "filters": {
+      "title": "Noten filtern",
+      "languageFormation": "Sprachausbildung",
+      "allLanguages": "Alle Sprachen",
+      "branchFormation": "Zweigausbildung",
+      "allBranches": "Alle Zweige",
+      "semester": "Semester",
+      "allSemesters": "Alle Semester",
+      "academicYear": "Akademisches Jahr"
+    },
+    "grades": {
+      "title": "Meine Noten",
+      "loading": "Noten werden geladen...",
+      "noGrades": "Noch keine Noten",
+      "examType": "Prüfungstyp",
+      "score": "Punktzahl",
+      "grade": "Note"
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "language": "Sprache",
+      "theme": "Thema"
+    }
+  },
+  "fr": {
+    "login": {
+      "title": "Portail Étudiant",
+      "subtitle": "Connectez-vous pour voir vos notes",
+      "email": "Email Scolaire",
+      "password": "Mot de passe",
+      "emailPlaceholder": "votre.nom@nisrineschool.com",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "loginButton": "Connexion"
+    },
+    "header": {
+      "title": "École Nisrine",
+      "messages": "Messages",
+      "logout": "Déconnexion"
+    },
+    "stats": {
+      "totalGrades": "Total des Notes",
+      "averageScore": "Score Moyen",
+      "paymentStatus": "Statut de Paiement"
+    },
+    "tabs": {
+      "allSubjects": "Tous les Sujets",
+      "languages": "Langues",
+      "branches": "Branches"
+    },
+    "filters": {
+      "title": "Filtrer les Notes",
+      "languageFormation": "Formation Linguistique",
+      "allLanguages": "Toutes les Langues",
+      "branchFormation": "Formation de Branche",
+      "allBranches": "Toutes les Branches",
+      "semester": "Semestre",
+      "allSemesters": "Tous les Semestres",
+      "academicYear": "Année Académique"
+    },
+    "grades": {
+      "title": "Mes Notes",
+      "loading": "Chargement des notes...",
+      "noGrades": "Pas encore de notes",
+      "examType": "Type d'Examen",
+      "score": "Score",
+      "grade": "Note"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "language": "Langue",
+      "theme": "Thème"
+    }
+  }
+}

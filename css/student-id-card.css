@@ -1,0 +1,419 @@
+/* Student ID Card Generator Styles */
+
+.id-card-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10001;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+
+.id-card-modal.active {
+    display: flex !important;
+}
+
+.id-card-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 900px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.id-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.id-card-header h2 {
+    color: #1f2937;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.id-card-header h2 i {
+    color: #FFCC00;
+}
+
+.id-card-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1.8rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    border-radius: 50%;
+}
+
+.id-card-close:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.id-card-container {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ID Card Styles - Matching Reference Design */
+.id-card {
+    width: 350px;
+    height: 220px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: relative;
+    background: white;
+}
+
+/* Front Side */
+.id-card-front {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.id-card-front-header {
+    background: linear-gradient(to right, #000000 0%, #DD0000 33%, #DD0000 66%, #FFCE00 100%);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+}
+
+.id-card-front-header img {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    padding: 3px;
+    object-fit: contain;
+}
+
+.id-card-front-header .school-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.id-card-front-body {
+    flex: 1;
+    display: flex;
+    padding: 20px;
+    gap: 15px;
+    background: #f8f9fa;
+}
+
+.id-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.id-card-info-row {
+    display: flex;
+    font-size: 0.75rem;
+}
+
+.id-card-info-label {
+    font-weight: 600;
+    color: #1f2937;
+    min-width: 80px;
+}
+
+.id-card-info-value {
+    color: #4b5563;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.7rem;
+}
+
+.id-card-photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 110px;
+}
+
+.id-card-photo {
+    width: 85px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(to right, #000000 0%, #DD0000 33%, #DD0000 66%, #FFCE00 100%) border-box;
+}
+
+.id-card-name {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    width: 110px;
+    min-height: 24px;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.id-card-barcode {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.id-card-barcode svg {
+    width: 85px;
+    height: 30px;
+}
+
+.id-card-signature {
+    position: absolute;
+    bottom: 8px;
+    left: 20px;
+    font-size: 0.65rem;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* Back Side */
+.id-card-back {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #000000 0%, #DD0000 33%, #DD0000 66%, #FFCE00 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    color: white;
+    text-align: center;
+}
+
+.id-card-back-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.id-card-back-info {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 280px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.id-card-back-row {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.id-card-back-row:last-child {
+    margin-bottom: 0;
+}
+
+.id-card-back-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #4a5fc1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.id-card-back-value {
+    font-size: 0.68rem;
+    color: #1f2937;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+    line-height: 1.3;
+}
+
+.id-card-qr {
+    display: none; /* QR code removed as per requirements */
+}
+
+/* Action Buttons */
+.id-card-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.id-card-btn {
+    background: linear-gradient(135deg, #FFCC00, #FF9500);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.id-card-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 204, 0, 0.4);
+}
+
+.id-card-btn i {
+    font-size: 1.1rem;
+}
+
+.id-card-btn-secondary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.id-card-btn-secondary:hover {
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .id-card-modal,
+    .id-card-modal * {
+        visibility: visible;
+    }
+    
+    .id-card-header,
+    .id-card-actions {
+        display: none !important;
+    }
+    
+    .id-card-modal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: white;
+    }
+    
+    .id-card-modal-content {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+    }
+    
+    .id-card-container {
+        display: flex;
+        gap: 30px;
+        page-break-inside: avoid;
+    }
+    
+    .id-card {
+        page-break-inside: avoid;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+    
+    /* Force print backgrounds for gradients */
+    .id-card-front-header,
+    .id-card-back {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        background: linear-gradient(to right, #000000 0%, #DD0000 33%, #DD0000 66%, #FFCE00 100%) !important;
+    }
+    
+    /* Ensure all colors print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .id-card-modal-content {
+        padding: 20px;
+    }
+    
+    .id-card-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .id-card {
+        width: 100%;
+        max-width: 350px;
+    }
+    
+    .id-card-actions {
+        flex-direction: column;
+    }
+    
+    .id-card-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .id-card {
+        width: 100%;
+        max-width: 320px;
+        height: 200px;
+    }
+    
+    .id-card-front-body {
+        padding: 15px;
+    }
+    
+    .id-card-photo {
+        width: 70px;
+        height: 85px;
+    }
+    
+    .id-card-info-row {
+        font-size: 0.7rem;
+    }
+}

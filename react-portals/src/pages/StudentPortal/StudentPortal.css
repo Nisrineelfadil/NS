@@ -1,0 +1,235 @@
+.student-portal {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+
+/* Test Selection Tabs */
+.test-tabs-container {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.test-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.test-tab {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 20px;
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 204, 0, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: 600;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.test-tab:hover {
+  background: rgba(26, 26, 46, 0.8);
+  border-color: rgba(255, 204, 0, 0.5);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2);
+}
+
+.test-tab.active {
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.2), rgba(255, 149, 0, 0.2));
+  border-color: #FFCC00;
+  color: #FFCC00;
+  box-shadow: 0 4px 20px rgba(255, 204, 0, 0.3);
+  transform: scale(1.05);
+}
+
+.test-tab.exam-tab {
+  border-color: rgba(255, 149, 0, 0.3);
+}
+
+.test-tab.exam-tab:hover {
+  border-color: rgba(255, 149, 0, 0.6);
+}
+
+.test-tab.exam-tab.active {
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.3), rgba(255, 204, 0, 0.3));
+  border-color: #FF9500;
+  color: #FF9500;
+  box-shadow: 0 4px 20px rgba(255, 149, 0, 0.4);
+}
+
+.test-tab i {
+  font-size: 16px;
+}
+
+/* Mobile responsive for test tabs */
+@media (max-width: 768px) {
+  .test-tabs {
+    flex-direction: column;
+  }
+  
+  .test-tab {
+    min-width: 100%;
+  }
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Portal Tabs */
+.portal-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.portal-tab {
+  padding: 15px 30px;
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 204, 0, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 16px;
+  color: #aaa;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-tab:hover {
+  background: rgba(26, 26, 46, 0.8);
+  border-color: rgba(255, 204, 0, 0.5);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 204, 0, 0.2);
+}
+
+.portal-tab.active {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  color: #1a1a2e;
+  font-weight: bold;
+  border-color: transparent;
+}
+
+.messages-btn {
+  background: linear-gradient(135deg, #0088cc, #229ED9);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 10px;
+  box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+}
+
+.messages-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 136, 204, 0.5);
+}
+
+.message-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #ff4757;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid white;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
+  }
+}
+
+.grades-section {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  margin-top: 30px;
+}
+
+.grades-section h2 {
+  margin-bottom: 25px;
+  color: #FFCC00;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.no-grades {
+  text-align: center;
+  padding: 60px 20px;
+  color: #aaa;
+}
+
+.no-grades i {
+  font-size: 80px;
+  margin-bottom: 20px;
+  color: rgba(255, 204, 0, 0.3);
+}
+
+.no-grades h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .grades-section {
+    padding: 20px 15px;
+  }
+
+  .grades-section h2 {
+    font-size: 18px;
+  }
+
+  .no-grades i {
+    font-size: 60px;
+  }
+
+  .no-grades h3 {
+    font-size: 20px;
+  }
+}

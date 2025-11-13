@@ -1,0 +1,123 @@
+/* ===== Simple Student Slider ===== */
+
+.student-slider-container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.student-slider-wrapper {
+    overflow: hidden;
+    border-radius: 15px;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.student-slider {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 30px;
+    align-items: start;
+}
+
+.student-slide {
+    display: none;
+}
+
+.student-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    max-height: 300px;
+    border-radius: 20px;
+}
+
+/* Navigation Buttons */
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #FFCC00;
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+}
+
+.slider-nav:hover {
+    background: #FF9500;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+}
+
+.slider-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.slider-nav.prev {
+    left: 10px;
+}
+
+.slider-nav.next {
+    right: 10px;
+}
+
+/* Dots Navigation */
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+}
+
+.slider-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.slider-dot:hover,
+.slider-dot.active {
+    background: #FFCC00;
+    transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .student-slider {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .student-slider {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    
+    .student-image {
+        max-height: 250px;
+    }
+    
+    .slider-nav.prev {
+        left: 5px;
+    }
+    
+    .slider-nav.next {
+        right: 5px;
+    }
+}

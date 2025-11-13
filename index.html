@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nisrine School - German Language Center in Fez, Morocco</title>
+    <meta name="description" content="Nisrine School - Your gateway to learning German in Fez, Morocco. Professional German language courses, visa support, and cultural integration services.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:,">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/simple-slider.css">
+    <link rel="stylesheet" href="css/language-switcher.css">
+    <link rel="stylesheet" href="css/portal-access.css">
+    <link rel="stylesheet" href="css/student-life.css">
+    <link rel="stylesheet" href="css/registration-modal.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <a href="#">NISRINE <span class="red-text">SCHOOL</span></a>
+                </div>
+
+                <div class="nav-links">
+                    <a href="#home" class="active" data-i18n="nav.home">Home</a>
+                    <a href="#services" data-i18n="nav.services">Services</a>
+                    <a href="#about" data-i18n="nav.about">About Us</a>
+                    <a href="#students" data-i18n="nav.students">For Students</a>
+                    <a href="#contact" data-i18n="nav.contact">Contact</a>
+                    
+                    <!-- Portal Access -->
+                    <div class="portal-access-container">
+                        <div class="portal-selector">
+                            <button class="portal-button">
+                                <i class="fas fa-user-circle"></i>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="portal-dropdown">
+                                <li class="portal-section-title">Portals</li>
+                                <li><a href="/student-portal" class="portal-option student-portal">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span data-i18n="portal.student">Student Portal</span>
+                                </a></li>
+                                <li><a href="/teacher-portal" class="portal-option teacher-portal">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                    <span data-i18n="portal.teacher">Teacher Portal</span>
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="language-switcher-container">
+                        <div class="language-selector">
+                            <button class="language-button">
+                                <i class="fas fa-globe"></i>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="language-dropdown">
+                                <li><a href="#" data-lang="en" class="language-option">
+                                    <span class="flag-icon">🇬🇧</span> English
+                                </a></li>
+                                <li><a href="#" data-lang="fr" class="language-option">
+                                    <span class="flag-icon">🇫🇷</span> Français
+                                </a></li>
+                                <li><a href="#" data-lang="ar" class="language-option">
+                                    <span class="flag-icon">🇲🇦</span> العربية
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section with Video Background -->
+    <section id="home" class="hero">
+        <!-- Local Video Background -->
+        <div class="video-background">
+            <div class="video-foreground">
+                <video autoplay muted loop playsinline>
+                    <source src="Img/be.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+        
+        <!-- Floating Particles -->
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        
+        <!-- Overlay -->
+        <div class="hero-overlay"></div>
+        
+        <!-- Hero Content -->
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title" data-i18n="hero.title">Step into Your Future with German</h1>
+                <p class="hero-slogan" data-i18n="hero.slogan">خطوتك نحو المستقبل مع الألمانية</p>
+                <p class="hero-description" data-i18n="hero.description">Professional German language education and support services in Fez, Morocco</p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary" data-i18n="hero.cta_primary">Register Now!</a>
+                    <a href="#services" class="btn btn-secondary" data-i18n="hero.cta_secondary">Our Services</a>
+                    <a href="#contact" class="btn btn-secondary" data-i18n="hero.cta_contact">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="services.title">Our Services</h2>
+                <p data-i18n="services.subtitle">Comprehensive German language and support services tailored to your needs</p>
+            </div>
+            <div class="services-grid">
+                <!-- Service Box 1 -->
+                <div class="service-box">
+                    <div class="service-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3 data-i18n="services.language_courses.title">German Language Courses</h3>
+                    <p data-i18n="services.language_courses.description">Comprehensive German language training from beginner to advanced levels with certified instructors.</p>
+                    <div class="language-levels">
+                        <div class="level-circle"><span class="level-text">A1</span></div>
+                        <div class="level-circle"><span class="level-text">A2</span></div>
+                        <div class="level-circle"><span class="level-text">B1</span></div>
+                        <div class="level-circle"><span class="level-text">B2</span></div>
+                        <div class="level-circle"><span class="level-text">C1</span></div>
+                    </div>
+                </div>
+                
+                <!-- Service Box 2 -->
+                <div class="service-box">
+                    <div class="service-icon">
+                        <i class="fas fa-passport"></i>
+                    </div>
+                    <h3 data-i18n="services.visa_support.title">Student Visa Support</h3>
+                    <p data-i18n="services.visa_support.description">Expert guidance through the entire student visa application process for Germany.</p>
+                </div>
+                
+                <!-- Service Box 3 -->
+                <div class="service-box">
+                    <div class="service-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 data-i18n="services.cultural_integration.title">Cultural Integration</h3>
+                    <p data-i18n="services.cultural_integration.description">Support and resources to help you adapt to German culture and society.</p>
+                </div>
+                
+                <!-- Service Box 4 -->
+                <div class="service-box">
+                    <div class="service-icon">
+                        <i class="fas fa-user-nurse"></i>
+                    </div>
+                    <h3 data-i18n="services.nursing_preparation.title">Nursing Preparation</h3>
+                    <p data-i18n="services.nursing_preparation.description">Specialized training for nursing careers in both Morocco and Germany.</p>
+                </div>
+                
+                <!-- Service Box 5 -->
+                <div class="service-box">
+                    <div class="service-icon">
+                        <i class="fas fa-hotel"></i>
+                    </div>
+                    <h3 data-i18n="services.hotel_training.title">Hotel Service Training</h3>
+                    <p data-i18n="services.hotel_training.description">Professional hospitality and hotel service training programs.</p>
+                </div>
+                
+                <!-- Service Box 6 -->
+                <div class="service-box">
+                    <div class="service-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 data-i18n="services.educational_services.title">Educational Services</h3>
+                    <p data-i18n="services.educational_services.description">Additional educational programs and support services for students.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <div class="section-header">
+                        <h2 data-i18n="about.title">Who Are We</h2>
+                        <p data-i18n="about.subtitle">Your trusted partner in German language education</p>
+                    </div>
+                    <p data-i18n="about.content">Nisrine School is a premier German language center located in the heart of Fez, Morocco. With years of experience in language education, we are committed to providing high-quality German language instruction and comprehensive support services to help our students achieve their academic and professional goals.</p>
+                    <p data-i18n="about.content2">Our team of dedicated and certified instructors brings a wealth of knowledge and expertise to create an engaging and effective learning environment. We pride ourselves on our student-centered approach, ensuring that each learner receives personalized attention and support throughout their language journey.</p>
+                    <div class="about-features">
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-i18n="about.feature1">Certified Instructors</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-i18n="about.feature2">Small Class Sizes</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-i18n="about.feature3">Modern Teaching Methods</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="Img/about.png" alt="Nisrine School - German Language Center">
+                    <div class="experience-badge apple-glass">
+                        <div class="counter-container">
+                            <span class="counter" data-target="1000">0</span><span class="plus">+</span>
+                        </div>
+                        <span class="text" data-i18n="about.badge">Dreams Achieved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Life Section -->
+    <section id="students" class="student-life">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="students.title">Student Life</h2>
+                <p data-i18n="students.subtitle">Experience the vibrant life at Nisrine School through photos and videos</p>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="student-life-tabs">
+                <div class="tab-switcher">
+                    <button class="tab-button active" data-tab="photos">
+                        <i class="fas fa-images"></i>
+                        <span data-i18n="students.photos_tab">Photos</span>
+                    </button>
+                    <button class="tab-button" data-tab="videos">
+                        <i class="fas fa-video"></i>
+                        <span data-i18n="students.videos_tab">Videos</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="tab-content-wrapper">
+                <!-- Photos Tab -->
+                <div id="photos-tab" class="tab-content active">
+                    <!-- Modern Gallery Layout -->
+                    <div class="modern-gallery-container">
+                <div class="modern-gallery">
+                    <!-- Left Section: 3 Cards + Navigation -->
+                    <div class="gallery-left">
+                        <div class="gallery-left-header">
+                            <h3>Life at Nisrine <span class="red-text">School</span></h3>
+                            <p>Discover real moments from our students</p>
+                        </div>
+                        
+                        <div class="three-cards-container">
+                            <div class="gallery-card" data-index="0">
+                                <img src="Img/1.png" alt="Certificate Achievement" loading="lazy">
+                                <div class="card-label">Certificate Achievement</div>
+                            </div>
+                            <div class="gallery-card" data-index="1">
+                                <img src="Img/2.png" alt="German Graduate" loading="lazy">
+                                <div class="card-label">German Graduate</div>
+                            </div>
+                            <div class="gallery-card" data-index="2">
+                                <img src="Img/3.png" alt="Nursing Training" loading="lazy">
+                                <div class="card-label">Nursing Training</div>
+                            </div>
+                            <div class="gallery-card" data-index="3">
+                                <img src="Img/4.png" alt="Hotel Service" loading="lazy">
+                                <div class="card-label">Hotel Service</div>
+                            </div>
+                            <div class="gallery-card" data-index="4">
+                                <img src="Img/5.png" alt="Achievement Award" loading="lazy">
+                                <div class="card-label">Achievement Award</div>
+                            </div>
+                            <div class="gallery-card" data-index="5">
+                                <img src="Img/6.png" alt="Cultural Integration" loading="lazy">
+                                <div class="card-label">Cultural Integration</div>
+                            </div>
+                            <div class="gallery-card" data-index="6">
+                                <img src="Img/7.png" alt="Graduation Day" loading="lazy">
+                                <div class="card-label">Graduation Day</div>
+                            </div>
+                            <div class="gallery-card" data-index="7">
+                                <img src="Img/8.png" alt="Study Group" loading="lazy">
+                                <div class="card-label">Study Group</div>
+                            </div>
+                            <div class="gallery-card" data-index="8">
+                                <img src="Img/9.png" alt="Language Practice" loading="lazy">
+                                <div class="card-label">Language Practice</div>
+                            </div>
+                        </div>
+                        
+                        <button class="instagram-link">
+                            <i class="fab fa-instagram"></i>
+                            See More on Instagram
+                        </button>
+                        
+                        <div class="gallery-arrows">
+                            <button class="arrow-btn prev" aria-label="Previous">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="arrow-btn next" aria-label="Next">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Section: Main Display -->
+                    <div class="gallery-right">
+                        <div class="gallery-right-header">
+                            <h3>Life at Nisrine <span class="red-text">School</span></h3>
+                        </div>
+                        
+                        <div class="main-display-card">
+                            <img id="main-display-img" src="Img/1.png" alt="Certificate Achievement" loading="lazy">
+                            <div class="main-card-label" id="main-card-label">Use Next In Over</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden photos data -->
+                    <div class="photos-data" style="display: none;">
+                        <div data-src="Img/1.png" data-title="Certificate Achievement"></div>
+                        <div data-src="Img/2.png" data-title="German Graduate"></div>
+                        <div data-src="Img/3.png" data-title="Nursing Training"></div>
+                        <div data-src="Img/4.png" data-title="Hotel Service"></div>
+                        <div data-src="Img/5.png" data-title="Achievement Award"></div>
+                        <div data-src="Img/6.png" data-title="Cultural Integration"></div>
+                        <div data-src="Img/7.png" data-title="Graduation Day"></div>
+                        <div data-src="Img/8.png" data-title="Study Group"></div>
+                        <div data-src="Img/9.png" data-title="Language Practice"></div>
+                        <div data-src="Img/10.png" data-title="Student Activities"></div>
+                        <div data-src="Img/11.png" data-title="Professional Training"></div>
+                        <div data-src="Img/12.png" data-title="Student Achievements"></div>
+                        <div data-src="Img/13.png" data-title="Advanced German"></div>
+                        <div data-src="Img/14.png" data-title="Visa Success"></div>
+                        <div data-src="Img/15.png" data-title="Germany Journey"></div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+                
+                <!-- Videos Tab -->
+                <div id="videos-tab" class="tab-content">
+                    <!-- Modern Video Gallery Layout -->
+                    <div class="modern-gallery-container">
+                    <div class="modern-gallery video-gallery">
+                        <!-- Left Section: 3 Video Cards + Navigation -->
+                        <div class="gallery-left">
+                            <div class="gallery-left-header">
+                                <h3>Student Success <span class="red-text">Stories</span></h3>
+                                <p>Watch our students achieve their dreams</p>
+                            </div>
+                            
+                            <!-- Mobile Main Video Display -->
+                            <div class="mobile-main-video">
+                                <div class="mobile-video-title" id="mobile-video-title">Welcome to Nisrine School</div>
+                                <div class="mobile-video-container">
+                                    <video id="mobile-video-player" controls>
+                                        <source src="Img/Video/Intro_V.mp4" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                                <div class="mobile-video-nav">
+                                    <button class="mobile-nav-btn" id="mobile-prev-btn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button class="mobile-nav-btn" id="mobile-next-btn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="three-cards-container video-cards-container">
+                                <div class="video-card" data-index="0" data-video="Img/Video/Intro_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Intro_P.png" alt="Welcome to Nisrine School" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Welcome to Nisrine School</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Welcome to Nisrine School</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="1" data-video="Img/Video/Bestschool_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Bestschool_P.png" alt="Best German Language School" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Best German Language School</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Best German Language School</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="2" data-video="Img/Video/Nusring_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Nusring_P.png" alt="Nursing Training" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Nursing Training</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Nursing Training</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="3" data-video="Img/Video/Hotel_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Hotel_P.png" alt="Hotel Service" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Hotel Service</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Hotel Service</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="4" data-video="Img/Video/Job_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Job_P.png" alt="Job Training" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Job Training</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Job Training</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="5" data-video="Img/Video/Altenheim_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Altenheim_P.png" alt="Altenheim Training" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Altenheim Training</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Altenheim Training</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="6" data-video="Img/Video/Trio_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Trio_P.png" alt="Student Trio" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Student Trio</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Student Trio</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="7" data-video="Img/Video/Anas_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Anas_P.png" alt="Anas Success Story" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Anas Success Story</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Anas Success Story</h4>
+                                    </div>
+                                </div>
+                                <div class="video-card" data-index="8" data-video="Img/Video/Omar_V.mp4">
+                                    <div class="card-video video-thumbnail">
+                                        <img src="Img/Video/Omar_P.png" alt="Omar Success Story" class="video-poster">
+                                        <div class="video-overlay">
+                                            <div class="video-overlay-title">Omar Success Story</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4>Omar Success Story</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="instagram-link" onclick="window.open('https://www.instagram.com/nisrinegermanschool/', '_blank')">
+                                <i class="fab fa-instagram"></i>
+                                See More on Instagram
+                            </button>
+                            
+                            <div class="gallery-arrows">
+                                <button class="arrow-btn prev" aria-label="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="arrow-btn next" aria-label="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Section: Main Video Display -->
+                        <div class="gallery-right">
+                            <div class="gallery-right-header">
+                                <h3>Student Success <span class="red-text">Stories</span></h3>
+                            </div>
+                            
+                            <div class="main-display-card">
+                                <div class="card-video main-video-display">
+                                    <video id="main-video-player" controls>
+                                        <source src="Img/Video/Intro_V.mp4" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                                <div class="main-card-label" id="main-video-label">Welcome to Nisrine School</div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="contact.title">Contact Us</h2>
+                <p data-i18n="contact.subtitle">Get in touch with our team</p>
+            </div>
+            <!-- Contact Info and Form Side by Side -->
+            <div class="contact-grid">
+                <!-- Left: Contact Information -->
+                <div class="contact-info-side">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h3>Location</h3>
+                            <p>N° 429 AVENUE SAINT LOUIS LOT ZAZA, Fes 30000, Morocco</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div>
+                            <h3>Phone</h3>
+                            <p>+212 664-648455</p>
+                            <p>+212 5 356-06737</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div>
+                            <h3>WhatsApp</h3>
+                            <p><a href="https://wa.me/212666695793" target="_blank" rel="noopener noreferrer">+212 666-695793</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h3>Email</h3>
+                            <p>info@nisrineschool.com</p>
+                        </div>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/p/Nisrine-School-Acad%C3%A9mie-Polyvalente-Infirmier-H%C3%B4tellerie-et-Allemand-100064126113056/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/nisrinegermanschool/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://taplink.cc/nisrineschool" target="_blank" rel="noopener noreferrer" aria-label="Taplink"><i class="fas fa-link"></i></a>
+                    </div>
+                </div>
+
+                <!-- Right: Contact Form -->
+                <div class="contact-form-side">
+                    <h3 data-i18n="contact.form_title">Send Us a Message</h3>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <input type="text" id="fullName" name="fullName" placeholder="Full Name" data-i18n-placeholder="contact.full_name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" data-i18n-placeholder="contact.phone_number" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" name="message" rows="5" placeholder="What do you want to know?" data-i18n-placeholder="contact.message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-send-message">
+                            <span data-i18n="contact.send_button">Send Message</span>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <div id="formSuccess" class="form-message success" style="display: none;">
+                        <i class="fas fa-check-circle"></i>
+                        <span data-i18n="contact.success_message">Message sent successfully! We'll get back to you soon.</span>
+                    </div>
+                    <div id="formError" class="form-message error" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span data-i18n="contact.error_message">Something went wrong. Please try again.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Google Maps Section -->
+            <div class="map-container">
+                <h3 data-i18n="contact.find_us">Find Us on Map</h3>
+                <div class="map-wrapper">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3307.8947891234567!2d-5.0089474!3d34.022444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd9f8bb273463f77%3A0x467ae6cc14a093d2!2sNISRINE%20SCHOOL!5e0!3m2!1sen!2sma!4v1234567890123!5m2!1sen!2sma"
+                        width="100%" 
+                        height="400" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Nisrine School Location">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <img src="Img/logo.png" alt="Nisrine School Logo">
+                    </div>
+                    <p data-i18n="footer.about_text">Your trusted partner in German language education and cultural integration in Fez, Morocco.</p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/p/Nisrine-School-Acad%C3%A9mie-Polyvalente-Infirmier-H%C3%B4tellerie-et-Allemand-100064126113056/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/nisrinegermanschool/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://taplink.cc/nisrineschool" target="_blank" rel="noopener noreferrer" aria-label="Taplink"><i class="fas fa-link"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3 data-i18n="footer.quick_links">Quick Links</h3>
+                    <ul>
+                        <li><a href="#home" data-i18n="nav.home">Home</a></li>
+                        <li><a href="#services" data-i18n="nav.services">Services</a></li>
+                        <li><a href="#about" data-i18n="nav.about">About Us</a></li>
+                        <li><a href="#students" data-i18n="nav.students">For Students</a></li>
+                        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-services">
+                    <h3 data-i18n="services.title">Our Services</h3>
+                    <ul>
+                        <li><a href="#services" data-i18n="services.language_courses.title">German Language Courses</a></li>
+                        <li><a href="#services" data-i18n="services.visa_support.title">Student Visa Support</a></li>
+                        <li><a href="#services" data-i18n="services.cultural_integration.title">Cultural Integration</a></li>
+                        <li><a href="#services" data-i18n="services.nursing_preparation.title">Nursing Preparation</a></li>
+                        <li><a href="#services" data-i18n="services.hotel_training.title">Hotel Service Training</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3 data-i18n="footer.contact_info">Contact Info</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> <span data-i18n="footer.address">Fez, Morocco</span></li>
+                        <li><i class="fas fa-phone-alt"></i> <span data-i18n="footer.phone">+212 123 456 789</span></li>
+                        <li><i class="fab fa-whatsapp"></i> <span data-i18n="footer.phone">+212 123 456 789</span></li>
+                        <li><i class="fas fa-envelope"></i> <span data-i18n="footer.email">info@nisrineschool.com</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p data-i18n="footer.copyright">&copy; 2024 Nisrine School. All rights reserved.</p>
+                <div class="footer-legal">
+                    <a href="#" data-i18n="footer.privacy">Privacy Policy</a>
+                    <span>|</span>
+                    <a href="#" data-i18n="footer.terms">Terms & Conditions</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/212664648455" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contact us on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Student Slider JavaScript -->
+    <script src="js/simple-slider.js"></script>
+
+    <!-- Modern Gallery JavaScript -->
+    <script src="js/modern-gallery.js"></script>
+
+    <!-- Video Player JavaScript -->
+    <script src="js/video-player.js"></script>
+
+    <!-- Video Gallery JavaScript -->
+    <script src="js/video-gallery.js"></script>
+
+    <!-- Student Life JavaScript -->
+    <script src="js/student-life.js"></script>
+
+    <!-- Registration Modal JavaScript -->
+    <script src="js/registration-modal.js"></script>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>

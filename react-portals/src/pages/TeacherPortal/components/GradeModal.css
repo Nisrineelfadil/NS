@@ -1,0 +1,252 @@
+.grade-modal-content {
+  color: #fff;
+}
+
+.existing-grades {
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 2px solid rgba(255, 204, 0, 0.2);
+}
+
+.existing-grades h3 {
+  color: #FFCC00;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.grades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grade-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+.grade-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.grade-item-info strong {
+  color: #FFCC00;
+  font-size: 16px;
+}
+
+.grade-item-info span {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.grade-item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit-small,
+.btn-delete-small {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.btn-edit-small {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  color: #1a1a2e;
+}
+
+.btn-edit-small:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.btn-delete-small {
+  background: linear-gradient(135deg, #ff4757, #ff6348);
+  color: white;
+}
+
+.btn-delete-small:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+}
+
+.grade-form-section {
+  position: relative;
+}
+
+.grade-form-section h3 {
+  color: #FFCC00;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.btn-cancel-edit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(255, 71, 87, 0.2);
+  border: 1px solid #ff4757;
+  color: #ff4757;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.btn-cancel-edit:hover {
+  background: rgba(255, 71, 87, 0.4);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #FFCC00;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 15px;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #FFCC00;
+  box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-group select option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  color: #1a1a2e;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 2px solid rgba(255, 204, 0, 0.3);
+}
+
+.btn-secondary:hover {
+  border-color: #FFCC00;
+  background: rgba(255, 204, 0, 0.1);
+}
+
+.error-message {
+  background: rgba(255, 71, 87, 0.2);
+  border: 1px solid #ff4757;
+  color: #ff4757;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .grade-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .grade-item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel-edit {
+    position: static;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}

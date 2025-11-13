@@ -1,0 +1,177 @@
+.teacher-portal {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #fff;
+  position: relative;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+.teacher-portal::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,204,0,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Portal Tabs */
+.portal-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.portal-tab {
+  padding: 15px 30px;
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 204, 0, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 16px;
+  color: #aaa;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-tab:hover {
+  background: rgba(26, 26, 46, 0.8);
+  border-color: rgba(255, 204, 0, 0.5);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 204, 0, 0.2);
+}
+
+.portal-tab.active {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  color: #1a1a2e;
+  font-weight: bold;
+  border-color: transparent;
+}
+
+.card {
+  background: rgba(26, 26, 46, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 35px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+.card h2 {
+  margin-bottom: 25px;
+  color: #FFCC00;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-state i {
+  font-size: 80px;
+  margin-bottom: 20px;
+  color: rgba(255, 204, 0, 0.3);
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #aaa;
+}
+
+/* Light Theme Styles */
+body.light-theme .teacher-portal {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+}
+
+body.light-theme .teacher-portal::before {
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+}
+
+body.light-theme .card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .card h2 {
+  color: #FF9500;
+}
+
+body.light-theme .empty-state {
+  color: #666;
+}
+
+body.light-theme .empty-state i {
+  color: rgba(255, 153, 0, 0.4);
+}
+
+body.light-theme .empty-state h3 {
+  color: #2d3748;
+}
+
+body.light-theme .empty-state p {
+  color: #666;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 20px 15px;
+    border-radius: 15px;
+  }
+
+  .card h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .empty-state {
+    padding: 40px 15px;
+  }
+
+  .empty-state i {
+    font-size: 60px;
+  }
+
+  .empty-state h3 {
+    font-size: 20px;
+  }
+}

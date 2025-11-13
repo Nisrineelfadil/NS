@@ -1,0 +1,86 @@
+.exam-tabs-container {
+  margin: 20px 0;
+  width: 100%;
+}
+
+.exam-tabs {
+  display: flex;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 15px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 204, 0, 0.2);
+  flex-wrap: wrap;
+}
+
+.exam-tab {
+  flex: 1;
+  min-width: 120px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.exam-tab i {
+  font-size: 18px;
+  color: #FFCC00;
+}
+
+.exam-tab:hover {
+  background: rgba(255, 204, 0, 0.1);
+  border-color: rgba(255, 204, 0, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 204, 0, 0.2);
+}
+
+.exam-tab.active {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  border-color: #FFCC00;
+  color: #1a1a2e;
+  font-weight: 600;
+  box-shadow: 0 5px 20px rgba(255, 204, 0, 0.4);
+}
+
+.exam-tab.active i {
+  color: #1a1a2e;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .exam-tabs {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .exam-tab {
+    min-width: 80px;
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+
+  .exam-tab i {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .exam-tabs {
+    flex-direction: column;
+  }
+
+  .exam-tab {
+    width: 100%;
+    min-width: unset;
+  }
+}

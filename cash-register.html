@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Register - Nisrine School</title>
+    <link rel="stylesheet" href="css/cash-register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-cash-register"></i>
+                <h1 data-translate="title">Cash Register</h1>
+            </div>
+            <div class="user-section">
+                <!-- Language Selector -->
+                <div class="language-selector">
+                    <button class="lang-btn" onclick="toggleLanguageDropdown()">
+                        <i class="fas fa-globe"></i>
+                        <span id="currentLang">EN</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <button onclick="changeLanguage('en')">
+                            <img src="https://flagcdn.com/w20/gb.png" alt="EN"> English
+                        </button>
+                        <button onclick="changeLanguage('fr')">
+                            <img src="https://flagcdn.com/w20/fr.png" alt="FR"> Français
+                        </button>
+                        <button onclick="changeLanguage('ar')">
+                            <img src="https://flagcdn.com/w20/sa.png" alt="AR"> العربية
+                        </button>
+                        <button onclick="changeLanguage('de')">
+                            <img src="https://flagcdn.com/w20/de.png" alt="DE"> Deutsch
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Return Button -->
+                <button class="return-btn" onclick="returnToStudentManagement()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span data-translate="returnBtn">Return To Student Management</span>
+                </button>
+                
+                <span class="user-name" id="userName">Loading...</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span data-translate="logout">Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i> <span data-translate="tabDashboard">Dashboard</span>
+            </button>
+            <button class="tab-btn" data-tab="transactions">
+                <i class="fas fa-list"></i> <span data-translate="tabTransactions">Transactions</span>
+            </button>
+            <button class="tab-btn" data-tab="yearly" id="yearlyTab" style="display: none;">
+                <i class="fas fa-calendar-alt"></i> <span data-translate="tabYearly">Yearly Overview</span>
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <!-- Month Selector -->
+            <div class="month-selector">
+                <button class="month-nav-btn" onclick="changeMonth(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="month-display">
+                    <select id="monthSelect" onchange="loadMonthData()">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="yearSelect" onchange="loadMonthData()">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <button class="month-nav-btn" onclick="changeMonth(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card income">
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 data-translate="totalIncome">Total Income</h3>
+                        <p class="amount" id="totalIncome">0 MAD</p>
+                    </div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 data-translate="totalExpenses">Total Expenses</h3>
+                        <p class="amount" id="totalExpenses">0 MAD</p>
+                    </div>
+                </div>
+                <div class="summary-card balance">
+                    <div class="card-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 data-translate="netResult">Net Result</h3>
+                        <p class="amount" id="netResult">0 MAD</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Categories -->
+            <div class="top-categories">
+                <div class="category-card">
+                    <h4><i class="fas fa-trophy"></i> Top Income Source</h4>
+                    <p id="topIncome">-</p>
+                </div>
+                <div class="category-card">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Top Expense Category</h4>
+                    <p id="topExpense">-</p>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="insights-section" id="insightsSection">
+                <h3><i class="fas fa-lightbulb"></i> <span data-translate="insightsTitle">Insights</span></h3>
+                <div id="insightsList"></div>
+            </div>
+
+            <!-- Chart Controls -->
+            <div class="chart-controls">
+                <div class="chart-type-selector">
+                    <button class="chart-type-btn active" data-type="pie">
+                        <i class="fas fa-chart-pie"></i> <span data-translate="pieChart">Pie Chart</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="bar">
+                        <i class="fas fa-chart-bar"></i> <span data-translate="barChart">Bar Chart</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="line">
+                        <i class="fas fa-chart-line"></i> <span data-translate="lineChart">Line Chart</span>
+                    </button>
+                </div>
+                <div class="chart-filter">
+                    <select id="chartFilter" onchange="updateChart()">
+                        <option value="all" data-translate="allCategories">All Categories</option>
+                        <option value="income" data-translate="income">Income Only</option>
+                        <option value="expense" data-translate="expense">Expenses Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <p>No records of this month were uploaded.</p>
+            </div>
+
+            <!-- Admin Notes -->
+            <div class="notes-section">
+                <h3><i class="fas fa-sticky-note"></i> <span data-translate="notesTitle">Admin Notes for This Month</span></h3>
+                <textarea id="monthlyNotes" data-translate-placeholder="notesPlaceholder" placeholder="Add admin notes for this month..."></textarea>
+                <button class="save-notes-btn" onclick="saveNotes()">
+                    <i class="fas fa-save"></i> <span data-translate="saveNotes">Save Notes</span>
+                </button>
+            </div>
+
+            <!-- Export Button (Super Admin Only) -->
+            <div class="export-section" id="exportSection" style="display: none;">
+                <button class="export-btn" onclick="exportPDF()">
+                    <i class="fas fa-file-pdf"></i> <span data-translate="exportPDF">Export as PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div class="tab-content" id="transactions">
+            <!-- Add Transaction Button -->
+            <div class="action-bar">
+                <button class="add-btn" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> <span data-translate="addTransaction">Add Transaction</span>
+                </button>
+                <div class="filter-group">
+                    <select id="typeFilter" onchange="loadTransactions()">
+                        <option value="" data-translate="allTypes">All Types</option>
+                        <option value="income" data-translate="income">Income</option>
+                        <option value="expense" data-translate="expense">Expense</option>
+                    </select>
+                    <select id="categoryFilter" onchange="loadTransactions()">
+                        <option value="" data-translate="allCategories">All Categories</option>
+                    </select>
+                    <select id="statusFilter" onchange="loadTransactions()">
+                        <option value="">All Status</option>
+                        <option value="completed" data-translate="completed">Completed</option>
+                        <option value="pending" data-translate="pending">Pending</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="table-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th data-translate="date">Date</th>
+                            <th data-translate="type">Type</th>
+                            <th data-translate="title">Title</th>
+                            <th data-translate="category">Category</th>
+                            <th data-translate="amount">Amount</th>
+                            <th data-translate="status">Status</th>
+                            <th data-translate="remarks">Remarks</th>
+                            <th data-translate="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">Loading transactions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Yearly Overview Tab -->
+        <div class="tab-content" id="yearly">
+            <div class="yearly-header">
+                <h2 data-translate="yearlyTitle">Yearly Overview</h2>
+                <div class="yearly-filters">
+                    <select id="yearlyYearSelect" onchange="loadYearlyData()">
+                        <!-- Populated by JS -->
+                    </select>
+                    <div class="month-range-filter">
+                        <label data-translate="from">From:</label>
+                        <select id="startMonthSelect" onchange="loadYearlyData()">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <label data-translate="to">To:</label>
+                        <select id="endMonthSelect" onchange="loadYearlyData()">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12" selected>December</option>
+                        </select>
+                        <button class="filter-btn" onclick="resetYearlyFilter()">
+                            <i class="fas fa-redo"></i> <span data-translate="reset">Reset</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yearly Summary Cards -->
+            <div class="yearly-summary">
+                <div class="yearly-card">
+                    <h4 id="incomeTitle">Total Annual Income</h4>
+                    <p class="yearly-amount" id="yearlyIncome">0 MAD</p>
+                </div>
+                <div class="yearly-card">
+                    <h4 id="expensesTitle">Total Annual Expenses</h4>
+                    <p class="yearly-amount" id="yearlyExpenses">0 MAD</p>
+                </div>
+                <div class="yearly-card">
+                    <h4 id="netTitle">Annual Net Result</h4>
+                    <p class="yearly-amount" id="yearlyNet">0 MAD</p>
+                </div>
+            </div>
+
+            <!-- Yearly Chart -->
+            <div class="chart-container">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+
+            <!-- Cash Flow Timeline -->
+            <div class="timeline-section">
+                <h3><i class="fas fa-stream"></i> <span data-translate="cashFlowTimeline">Cash Flow Timeline</span></h3>
+                <div class="timeline" id="cashFlowTimeline">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Transaction Modal -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" data-translate="addTransactionTitle">Add Transaction</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="transactionForm" onsubmit="saveTransaction(event)">
+                    <input type="hidden" id="transactionId">
+                    
+                    <div class="form-group">
+                        <label for="transactionTitle" data-translate="transactionTitle">Title *</label>
+                        <input type="text" id="transactionTitle" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transactionType" data-translate="transactionType">Type *</label>
+                            <select id="transactionType" required onchange="updateCategoryOptions()">
+                                <option value="" data-translate="selectType">Select Type</option>
+                                <option value="income" data-translate="income">Income</option>
+                                <option value="expense" data-translate="expense">Expense</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="transactionAmount" data-translate="transactionAmount">Amount (MAD) *</label>
+                            <input type="number" id="transactionAmount" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transactionCategory" data-translate="transactionCategory">Category *</label>
+                            <select id="transactionCategory" required>
+                                <option value="" data-translate="selectCategory">Select Category</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="transactionDate" data-translate="transactionDate">Date *</label>
+                            <input type="date" id="transactionDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="transactionStatus" data-translate="transactionStatus">Status</label>
+                        <select id="transactionStatus">
+                            <option value="completed" data-translate="completed">Completed</option>
+                            <option value="pending" data-translate="pending">Pending</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="transactionRemarks" data-translate="transactionRemarks">Remarks</label>
+                        <textarea id="transactionRemarks" rows="3"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="closeModal()"><span data-translate="cancel">Cancel</span></button>
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save"></i> <span data-translate="save">Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cash-register-translations.js"></script>
+    <script src="js/cash-register.js"></script>
+</body>
+</html>

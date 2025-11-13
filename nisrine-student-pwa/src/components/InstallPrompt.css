@@ -1,0 +1,153 @@
+.install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  max-width: 90%;
+  width: 400px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.install-prompt-content {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.install-prompt-icon {
+  font-size: 48px;
+  text-align: center;
+}
+
+.install-prompt-text h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0 0 5px 0;
+  text-align: center;
+}
+
+.install-prompt-text p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+}
+
+.install-prompt-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.install-btn,
+.dismiss-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.install-btn {
+  background: #FFCC00;
+  color: #1f2937;
+}
+
+.install-btn:hover:not(:disabled) {
+  background: #e6b800;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.install-btn:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.dismiss-btn {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.dismiss-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.dismiss-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* iOS-specific styles */
+.ios-instructions {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.ios-instructions ol {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.ios-instructions li {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.ios-icon {
+  font-size: 18px;
+  margin-left: 5px;
+}
+
+.ios-prompt .install-prompt-content {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.ios-prompt .dismiss-btn {
+  width: 100%;
+  background: #FFCC00;
+  color: #1f2937;
+}
+
+.ios-prompt .dismiss-btn:hover {
+  background: #e6b800;
+}
+
+@media (max-width: 480px) {
+  .install-prompt {
+    bottom: 10px;
+    width: calc(100% - 20px);
+  }
+  
+  .install-prompt-content {
+    padding: 15px;
+  }
+  
+  .ios-instructions {
+    font-size: 13px;
+  }
+}

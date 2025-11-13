@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Nisrine School</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/student-portal.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Student Portal</h2>
+            </div>
+            <p>Login to view your grades and progress</p>
+            
+            <div id="loginError" class="error-message"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">School Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your.name@nisrineschool.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Portal -->
+    <div id="mainPortal" class="container hidden">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>Nisrine School</h1>
+            </div>
+            
+            <div class="user-info">
+                <div id="userAvatar" class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="userName">Student Name</h3>
+                    <p id="userEmail">student@nisrineschool.com</p>
+                </div>
+                <button class="messages-btn" onclick="toggleMessages()">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Messages</span>
+                    <span id="messageBadge" class="message-badge" style="display: none;"></span>
+                </button>
+                <button class="settings-btn" onclick="openSettings()" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Grades</h3>
+                    <p id="totalGrades">0</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon average">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Average Score</h3>
+                    <p id="averageScore">0%</p>
+                </div>
+            </div>
+
+            <div class="stat-card" id="paymentStatusCard" style="display: none;">
+                <div class="stat-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Payment Status</h3>
+                    <p id="paymentStatus">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Reminder Section -->
+        <div id="paymentReminderSection" class="payment-reminder" style="display: none;">
+            <div class="payment-reminder-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Payment Reminder</h3>
+            </div>
+            <div class="payment-reminder-content">
+                <p id="paymentReminderText"></p>
+                <div class="payment-details">
+                    <p id="paymentDueDate"></p>
+                    <p id="paymentAmount"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Tabs (All/Languages/Branches) -->
+        <div class="subject-tabs">
+            <button class="subject-tab active" id="tabAll" onclick="switchSubjectTab('all')">
+                <i class="fas fa-th-large"></i>
+                <span>All Subjects</span>
+            </button>
+            <button class="subject-tab" id="tabLanguages" onclick="switchSubjectTab('languages')">
+                <i class="fas fa-language"></i>
+                <span>Languages</span>
+            </button>
+            <button class="subject-tab" id="tabBranches" onclick="switchSubjectTab('branches')">
+                <i class="fas fa-briefcase"></i>
+                <span>Branches</span>
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <h3><i class="fas fa-filter"></i> Filter Grades</h3>
+            <div class="filter-grid">
+                <div class="filter-group" id="languageFilter" style="display: none;">
+                    <label>Language Formation</label>
+                    <select id="filterFormation" onchange="loadGrades()">
+                        <option value="">All Languages</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="branchFilter" style="display: none;">
+                    <label>Branch Formation</label>
+                    <select id="filterBranch" onchange="loadGrades()">
+                        <option value="">All Branches</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="levelFilter" style="display: none;">
+                    <label>Language Level</label>
+                    <select id="filterLevel" onchange="loadGrades()">
+                        <option value="">All Levels</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" id="testTypeFilter" style="display: none;">
+                    <label>Test Type</label>
+                    <select id="filterTestType" onchange="loadGrades()">
+                        <option value="">All Tests</option>
+                        <option value="miniTest">Mini Tests</option>
+                        <option value="finalExam">Final Exams</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="semesterFilter" style="display: none;">
+                    <label>Semester</label>
+                    <select id="filterSemester" onchange="loadGrades()">
+                        <option value="">All Semesters</option>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Academic Year</label>
+                    <select id="filterYear" onchange="loadGrades()">
+                        <option value="">All Years</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grades Section -->
+        <div class="grades-section">
+            <h2><i class="fas fa-chart-bar"></i> My Grades</h2>
+            <div id="gradesContent">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading grades...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div id="messagesPanel" class="messages-panel">
+        <div class="messages-header">
+            <h3><i class="fas fa-paper-plane"></i> Messages</h3>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="clear-messages-btn" onclick="clearAllMessages()" title="Clear all messages">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+                <button class="close-messages" onclick="toggleMessages()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="messagesContent" class="messages-content">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>Loading messages...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <button class="close-settings" onclick="closeSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="settings-body">
+                <div class="setting-item">
+                    <label><i class="fas fa-language"></i> Language</label>
+                    <select id="languageSelect" onchange="changeLanguage()">
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label><i class="fas fa-palette"></i> Theme</label>
+                    <div class="theme-options">
+                        <div class="theme-option dark active" onclick="setTheme('dark')">
+                            <i class="fas fa-moon"></i>
+                            <span>Dark</span>
+                        </div>
+                        <div class="theme-option light" onclick="setTheme('light')">
+                            <i class="fas fa-sun"></i>
+                            <span>Light</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/student-portal.js"></script>
+</body>
+</html>

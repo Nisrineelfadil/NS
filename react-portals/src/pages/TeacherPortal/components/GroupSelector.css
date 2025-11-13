@@ -1,0 +1,87 @@
+.group-selector {
+  margin-bottom: 30px;
+}
+
+.group-selector h3 {
+  color: #FFCC00;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.group-btn {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.group-btn:hover {
+  border-color: #FFCC00;
+  background: rgba(255, 204, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+}
+
+.group-btn.active {
+  border-color: #FFCC00;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.2), rgba(255, 149, 0, 0.2));
+  box-shadow: 0 5px 20px rgba(255, 204, 0, 0.4);
+}
+
+.group-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.group-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.group-info span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-info i {
+  color: #FFCC00;
+  width: 16px;
+}
+
+.no-groups {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: #aaa;
+}
+
+.no-groups i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: rgba(255, 204, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .group-grid {
+    grid-template-columns: 1fr;
+  }
+}

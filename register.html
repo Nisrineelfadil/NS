@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration - Nisrine School</title>
+    <meta name="description" content="Register for German language courses at Nisrine School - Your gateway to learning German in Fez, Morocco.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:,">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .registration-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Magical floating particles */
+        .magic-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 204, 0, 0.6);
+            border-radius: 50%;
+            animation: float-magic 8s infinite linear;
+        }
+        
+        .particle:nth-child(1) {
+            width: 6px;
+            height: 6px;
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 8s;
+        }
+        
+        .particle:nth-child(2) {
+            width: 4px;
+            height: 4px;
+            left: 20%;
+            animation-delay: 2s;
+            animation-duration: 10s;
+        }
+        
+        .particle:nth-child(3) {
+            width: 8px;
+            height: 8px;
+            left: 70%;
+            animation-delay: 4s;
+            animation-duration: 12s;
+        }
+        
+        .particle:nth-child(4) {
+            width: 5px;
+            height: 5px;
+            left: 80%;
+            animation-delay: 1s;
+            animation-duration: 9s;
+        }
+        
+        .particle:nth-child(5) {
+            width: 7px;
+            height: 7px;
+            left: 50%;
+            animation-delay: 3s;
+            animation-duration: 11s;
+        }
+        
+        .particle:nth-child(6) {
+            width: 4px;
+            height: 4px;
+            left: 90%;
+            animation-delay: 5s;
+            animation-duration: 7s;
+        }
+        
+        @keyframes float-magic {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .registration-content {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 60px 40px;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(255, 204, 0, 0.2);
+            animation: card-entrance 1s ease-out;
+        }
+        
+        @keyframes card-entrance {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .registration-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 204, 0, 0.1), rgba(255, 149, 0, 0.1));
+            border-radius: 25px;
+            z-index: -1;
+        }
+        
+        .registration-content h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #FF9500, #FFCC00, #FF6B35);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            font-weight: 700;
+            animation: title-glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes title-glow {
+            0% {
+                filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.3));
+            }
+            100% {
+                filter: drop-shadow(0 0 15px rgba(255, 204, 0, 0.6));
+            }
+        }
+        
+        .registration-content p {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #666, #FF9500);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            animation: text-fade-in 1.5s ease-out 0.3s both;
+        }
+        
+        @keyframes text-fade-in {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #FFCC00, #FF9500);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            animation: button-entrance 1.8s ease-out 0.6s both;
+        }
+        
+        @keyframes button-entrance {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .back-home-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .back-home-btn:hover::before {
+            left: 100%;
+        }
+        
+        .back-home-btn:hover {
+            background: linear-gradient(135deg, #FF9500, #FFCC00);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 204, 0, 0.6);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .back-home-btn i {
+            transition: transform 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .back-home-btn:hover i {
+            transform: translateX(-4px);
+            animation: arrowBounceBack 0.6s ease infinite;
+        }
+        
+        @keyframes arrowBounceBack {
+            0%, 100% { transform: translateX(-4px); }
+            50% { transform: translateX(-8px); }
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+            animation: logo-entrance 1.2s ease-out 0.1s both;
+        }
+        
+        @keyframes logo-entrance {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo a {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .logo a:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 5px 15px rgba(255, 204, 0, 0.3));
+        }
+        
+        .red-text {
+            color: #dc3545;
+        }
+        
+        /* Magical sparkles */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #FFCC00;
+            border-radius: 50%;
+            animation: sparkle-twinkle 2s infinite;
+        }
+        
+        .sparkle:nth-child(1) {
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+        
+        .sparkle:nth-child(2) {
+            top: 30%;
+            right: 20%;
+            animation-delay: 0.5s;
+        }
+        
+        .sparkle:nth-child(3) {
+            bottom: 25%;
+            left: 25%;
+            animation-delay: 1s;
+        }
+        
+        .sparkle:nth-child(4) {
+            bottom: 35%;
+            right: 15%;
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes sparkle-twinkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .registration-content {
+                padding: 40px 20px;
+            }
+            
+            .registration-content h1 {
+                font-size: 2rem;
+            }
+            
+            .registration-content p {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Form Styles */
+        #registrationForm {
+            text-align: left;
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        .form-group label i {
+            color: #FFCC00;
+            margin-right: 8px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #FFCC00;
+            box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+        }
+        
+        .form-group input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        .photo-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .photo-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FFCC00, #FF9500);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 204, 0, 0.6);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .back-home-btn {
+            margin-top: 20px;
+        }
+        
+        /* Checkbox/Radio Group Styles */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .checkbox-label:hover {
+            border-color: #FFCC00;
+            background: rgba(255, 204, 0, 0.05);
+        }
+        
+        .checkbox-label input[type="radio"],
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #FFCC00;
+        }
+        
+        .checkbox-label span {
+            font-size: 0.95rem;
+            color: #333;
+        }
+        
+        .checkbox-label input[type="radio"]:checked + span,
+        .checkbox-label input[type="checkbox"]:checked + span {
+            font-weight: 600;
+            color: #FF9500;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Instagram Follow Section */
+        .instagram-follow-section {
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.05), rgba(255, 149, 0, 0.05));
+            border: 2px solid rgba(255, 204, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0 20px 0;
+            text-align: center;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .instagram-follow-section h3 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .instagram-follow-section p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .instagram-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .instagram-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instagram-btn i {
+            font-size: 1.1rem;
+        }
+
+        .instagram-btn.follow-btn {
+            background: linear-gradient(135deg, #E1306C, #C13584, #833AB4);
+            color: white;
+            box-shadow: 0 5px 20px rgba(225, 48, 108, 0.4);
+        }
+
+        .instagram-btn.follow-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(225, 48, 108, 0.6);
+        }
+
+        .instagram-btn.confirm-btn {
+            background: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .instagram-btn.confirm-btn.enabled {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+            }
+            50% {
+                box-shadow: 0 5px 25px rgba(16, 185, 129, 0.7);
+            }
+        }
+
+        .instagram-btn.confirm-btn.enabled:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+        }
+
+        .instagram-btn.confirm-btn.confirmed {
+            background: linear-gradient(135deg, #FFCC00, #FF9500);
+            color: white;
+            cursor: default;
+            box-shadow: 0 5px 20px rgba(255, 204, 0, 0.4);
+        }
+
+        .submit-btn.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        @media (max-width: 768px) {
+            .instagram-buttons {
+                flex-direction: column;
+            }
+
+            .instagram-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Animated Background Gradient */
+        .registration-container {
+            background: linear-gradient(-45deg, #f8f9fa, #fff5e6, #ffe8cc, #f0f0f0);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Closed Message Styles - Clean & Balanced */
+        .closed-message {
+            background: white;
+            padding: 50px 45px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 480px;
+            margin: 0 auto;
+            display: none;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        /* Logo in closed message */
+        .closed-message .logo-container {
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out 0.1s both;
+        }
+
+        .closed-message .logo-container img {
+            width: 140px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Subtle shimmer effect on card */
+        .closed-message::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 204, 0, 0.03) 50%,
+                transparent 70%
+            );
+            animation: shimmer 6s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .closed-message.active {
+            display: block;
+            animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Lock icon with locking animation */
+        .closed-message i.fa-lock {
+            font-size: 42px;
+            color: #FF9500;
+            margin-bottom: 20px;
+            opacity: 0.85;
+            display: inline-block;
+            animation: lockAnimation 2s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+
+        @keyframes lockAnimation {
+            0%, 100% { 
+                transform: rotate(0deg) scale(1);
+            }
+            10% { 
+                transform: rotate(-8deg) scale(1.05);
+            }
+            20% { 
+                transform: rotate(8deg) scale(1.05);
+            }
+            30% { 
+                transform: rotate(-8deg) scale(1.05);
+            }
+            40% { 
+                transform: rotate(0deg) scale(1);
+            }
+        }
+
+        .closed-message h2 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            animation: fadeInDown 0.6s ease-out 0.2s both;
+        }
+
+        .closed-message > p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .closed-message .contact-info {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 14px;
+            margin-top: 24px;
+            border: 1px solid #f0f0f0;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        .closed-message .contact-info > p {
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        .closed-message .contact-info a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #1a1a1a;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 17px;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .closed-message .contact-info a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFCC00 0%, #FF9500 100%);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+            z-index: 0;
+        }
+
+        .closed-message .contact-info a:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .closed-message .contact-info a span,
+        .closed-message .contact-info a i {
+            position: relative;
+            z-index: 1;
+        }
+
+        .closed-message .contact-info a:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 16px rgba(255, 149, 0, 0.25);
+            color: white;
+            border-color: #FF9500;
+        }
+
+        .closed-message .contact-info a i {
+            font-size: 16px;
+            color: #FF9500;
+            transition: all 0.3s ease;
+            animation: phoneRing 1.5s ease-in-out infinite;
+        }
+
+        @keyframes phoneRing {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(-10deg); }
+            20%, 40% { transform: rotate(10deg); }
+            50% { transform: rotate(0deg); }
+        }
+
+        .closed-message .contact-info a:hover i {
+            color: white;
+            animation: none;
+            transform: scale(1.1);
+        }
+
+        .closed-message .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 24px;
+            padding: 10px 24px;
+            background: transparent;
+            color: #888;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1.5px solid #e0e0e0;
+            animation: fadeInUp 0.6s ease-out 0.5s both;
+        }
+
+        .closed-message .back-home-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+            border-color: #ccc;
+            transform: translateX(-3px);
+        }
+
+        .closed-message .back-home-btn i {
+            font-size: 13px;
+            transition: transform 0.3s ease;
+        }
+
+        .closed-message .back-home-btn:hover i {
+            transform: translateX(-4px);
+            animation: arrowBounce 0.6s ease infinite;
+        }
+
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateX(-4px); }
+            50% { transform: translateX(-8px); }
+        }
+
+        @media (max-width: 768px) {
+            .closed-message {
+                padding: 40px 30px;
+                max-width: 90%;
+            }
+
+            .closed-message h2 {
+                font-size: 21px;
+            }
+
+            .closed-message .contact-info a {
+                font-size: 16px;
+                padding: 9px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <!-- Magical floating particles -->
+        <div class="magic-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        
+        <div class="registration-content" id="registrationContent">
+            <!-- Magical sparkles -->
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            
+            <div class="logo">
+                <a href="index.html">NISRINE <span class="red-text">SCHOOL</span></a>
+            </div>
+            
+            <h1>Student Registration</h1>
+            <p>Fill out the form below to register for our courses</p>
+            
+            <!-- Registration Form -->
+            <form id="registrationForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="fullName"><i class="fas fa-user"></i> Nom et Prénom (Full Name) *</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateOfBirth"><i class="fas fa-calendar"></i> Date de naissance (Date of Birth) *</label>
+                    <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cin"><i class="fas fa-id-card"></i> CIN (ID Number) *</label>
+                    <input type="text" id="cin" name="cin" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="city"><i class="fas fa-city"></i> Ville / Cartier (City) *</label>
+                    <input type="text" id="city" name="city" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phoneNumber"><i class="fas fa-phone"></i> GSM (Phone Number) *</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
+                    <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="parentPhone"><i class="fas fa-phone-square"></i> GSM des Parents (Parent's Phone) *</label>
+                    <input type="tel" id="parentPhone" name="parentPhone" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
+                    <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studyLevel"><i class="fas fa-book"></i> Niveau d'étude (Study Level) *</label>
+                    <select id="studyLevel" name="studyLevel" required>
+                        <option value="">Select your study level...</option>
+                        <option value="Bac">Bac</option>
+                        <option value="Niveau Bac">Niveau Bac</option>
+                        <option value="Quatrieme année (3eme annee college)">Quatrieme année (3eme annee college)</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="otherStudyLevelGroup" style="display: none;">
+                    <label for="otherStudyLevel"><i class="fas fa-edit"></i> Specify your study level *</label>
+                    <input type="text" id="otherStudyLevel" name="otherStudyLevel" placeholder="Please specify your study level...">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-language"></i> Formation choisie (Languages) - Select all that apply *</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="formationChoisie" value="Allemand" class="formation-checkbox">
+                            <span>Allemand (German)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="formationChoisie" value="Anglais" class="formation-checkbox">
+                            <span>Anglais (English)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="formationChoisie" value="Français" class="formation-checkbox">
+                            <span>Français (French)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="formationChoisie" value="Ausbildung" class="formation-checkbox">
+                            <span>Ausbildung</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-briefcase"></i> Filière (Branches) - Select all that apply (Optional)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Gériatrie" class="filiere-checkbox">
+                            <span>Gériatrie</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Aide soignant" class="filiere-checkbox">
+                            <span>Aide soignant</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Agent socio éducatif" class="filiere-checkbox">
+                            <span>Agent socio éducatif</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Assistante sociale" class="filiere-checkbox">
+                            <span>Assistante sociale</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Restauration" class="filiere-checkbox">
+                            <span>Restauration</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Cuisine" class="filiere-checkbox">
+                            <span>Cuisine</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Informatique" class="filiere-checkbox">
+                            <span>Informatique</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="filiere" value="Gestion hôtelière" class="filiere-checkbox">
+                            <span>Gestion hôtelière</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="photo"><i class="fas fa-camera"></i> Upload Your Photo *</label>
+                    <input type="file" id="photo" name="photo" accept="image/*" required>
+                    <div id="photoPreview" class="photo-preview"></div>
+                </div>
+                
+                <!-- Instagram Follow Section -->
+                <div class="instagram-follow-section" id="instagramSection">
+                    <h3>Please follow us on Instagram before submitting your registration ❤️</h3>
+                    <p>Stay connected with us and get the latest updates about our courses and events!</p>
+                    <div class="instagram-buttons">
+                        <a href="https://www.instagram.com/nisrinegermanschool/" target="_blank" class="instagram-btn follow-btn" id="followBtn">
+                            <i class="fab fa-instagram"></i> Follow on Instagram
+                        </a>
+                        <button type="button" class="instagram-btn confirm-btn" id="confirmBtn" disabled>
+                            <i class="fas fa-check-circle"></i> I followed ✅
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn locked" id="submitBtn" disabled>
+                    <i class="fas fa-lock"></i> Submit Registration (Follow us first)
+                </button>
+                
+                <div id="message" class="message"></div>
+            </form>
+            
+            <div id="backButtonContainer">
+                <a href="index.html" class="back-home-btn" id="backButton">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Closed Message (shown when registration is closed) -->
+        <div class="closed-message" id="closedMessage">
+            <div class="logo-container">
+                <img src="Img/logo.png" alt="Nisrine School Logo">
+            </div>
+            <i class="fas fa-lock"></i>
+            <h2>Registration is Currently Closed</h2>
+            <p id="closedMessageText">We are not accepting new registrations at this time.</p>
+            <div class="contact-info">
+                <p>For more information, please contact us at:</p>
+                <a href="tel:" id="contactPhoneLink">
+                    <i class="fas fa-phone"></i> <span id="contactPhone">+212 6XX XXX XXX</span>
+                </a>
+            </div>
+            <a href="index.html" class="back-home-btn" style="margin-top: 30px; display: inline-block;">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Check if page was opened from modal
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromModal = urlParams.get('from') === 'modal';
+        const serviceParam = urlParams.get('service');
+        const statusParam = urlParams.get('status');
+        
+        // Check if this is a service closed page
+        if (serviceParam && statusParam === 'closed') {
+            const serviceNames = {
+                'cv': 'CV Service',
+                'bewerbung': 'Applying Service',
+                'translation': 'Translation Service'
+            };
+            
+            const serviceName = serviceNames[serviceParam] || 'Service';
+            
+            // Show closed message
+            document.getElementById('registrationContent').style.display = 'none';
+            document.getElementById('closedMessage').classList.add('active');
+            
+            // Update message for service
+            document.querySelector('#closedMessage h2').textContent = `${serviceName} is Currently Closed`;
+            document.getElementById('closedMessageText').textContent = `We are not accepting ${serviceName} requests at this time.`;
+            
+            // Load contact phone from settings
+            fetch(`${window.location.origin}/api/admin/settings`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.settings.contactPhone) {
+                        document.getElementById('contactPhone').textContent = data.settings.contactPhone;
+                        document.getElementById('contactPhoneLink').href = 'tel:' + data.settings.contactPhone.replace(/\s/g, '');
+                    }
+                })
+                .catch(err => console.error('Error loading settings:', err));
+        } else if (fromModal) {
+            // Update back button to go back to modal
+            const backButton = document.getElementById('backButton');
+            backButton.href = 'index.html#register-modal';
+            backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Services';
+            
+            // Add click handler to open modal instead of navigation
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'index.html';
+                // Store flag to reopen modal
+                sessionStorage.setItem('reopenModal', 'true');
+            });
+        }
+        
+        // API base URL - works for both local and production
+        const API_BASE_URL = window.location.origin;
+        
+        // Check registration status on page load (only if not a service closed page)
+        async function checkRegistrationStatus() {
+            // Skip if this is a service closed page
+            if (serviceParam && statusParam === 'closed') {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/registration-status`);
+                const data = await response.json();
+
+                if (data.isOpen) {
+                    // Show registration form
+                    document.getElementById('registrationContent').style.display = 'block';
+                    document.getElementById('closedMessage').classList.remove('active');
+                } else {
+                    // Show closed message
+                    document.getElementById('registrationContent').style.display = 'none';
+                    document.getElementById('closedMessage').classList.add('active');
+                    
+                    // Update contact info
+                    if (data.contactPhone) {
+                        document.getElementById('contactPhone').textContent = data.contactPhone;
+                        document.getElementById('contactPhoneLink').href = 'tel:' + data.contactPhone.replace(/\s/g, '');
+                    }
+                    
+                    if (data.closedMessage) {
+                        document.getElementById('closedMessageText').textContent = data.closedMessage;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking registration status:', error);
+                // Show form by default if there's an error
+                document.getElementById('registrationContent').style.display = 'block';
+            }
+        }
+
+        // Check status when page loads
+        checkRegistrationStatus();
+    </script>
+    
+    <script>
+        // Study Level dropdown - Show/hide "Autre" text field
+        document.getElementById('studyLevel').addEventListener('change', function(e) {
+            const otherGroup = document.getElementById('otherStudyLevelGroup');
+            const otherInput = document.getElementById('otherStudyLevel');
+            
+            if (e.target.value === 'Autre') {
+                otherGroup.style.display = 'block';
+                otherInput.required = true;
+            } else {
+                otherGroup.style.display = 'none';
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        });
+        
+        // Photo preview functionality
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('photoPreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Photo preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+            }
+        });
+        
+        // Instagram Follow Flow
+        let followClicked = false;
+        let confirmationAllowed = false;
+        
+        const followBtn = document.getElementById('followBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // When user clicks "Follow on Instagram"
+        followBtn.addEventListener('click', function() {
+            if (!followClicked) {
+                followClicked = true;
+                
+                // Add delay before enabling confirmation button (2-3 seconds)
+                setTimeout(function() {
+                    confirmationAllowed = true;
+                    confirmBtn.disabled = false;
+                    confirmBtn.classList.add('enabled');
+                    confirmBtn.style.animation = 'pulseGlow 2s ease-in-out infinite';
+                }, 2500); // 2.5 seconds delay
+            }
+        });
+        
+        // When user clicks "I followed"
+        confirmBtn.addEventListener('click', function() {
+            if (confirmationAllowed && !confirmBtn.classList.contains('confirmed')) {
+                // Mark as confirmed
+                confirmBtn.classList.remove('enabled');
+                confirmBtn.classList.add('confirmed');
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-heart"></i> Thank you! ❤️';
+                confirmBtn.style.animation = 'none';
+                
+                // Unlock submit button
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('locked');
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Registration';
+                
+                // Add success animation
+                submitBtn.style.animation = 'pulseGlow 1.5s ease-in-out 3';
+                setTimeout(function() {
+                    submitBtn.style.animation = 'none';
+                }, 4500);
+            }
+        });
+        
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const messageDiv = document.getElementById('message');
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            
+            // Clear previous messages
+            messageDiv.className = 'message';
+            messageDiv.style.display = 'none';
+            
+            try {
+                // Get selected checkbox values for formations (languages)
+                const formationCheckboxes = document.querySelectorAll('input[name="formationChoisie"]:checked');
+                const selectedFormations = Array.from(formationCheckboxes).map(cb => cb.value);
+                
+                // Get selected checkbox values for filieres (branches)
+                const filiereCheckboxes = document.querySelectorAll('input[name="filiere"]:checked');
+                const selectedFilieres = Array.from(filiereCheckboxes).map(cb => cb.value);
+                
+                if (selectedFormations.length === 0) {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = '❌ Please select at least one Formation choisie (Language)';
+                    messageDiv.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Registration';
+                    return;
+                }
+                
+                // Create FormData object
+                const formData = new FormData();
+                formData.append('fullName', document.getElementById('fullName').value);
+                formData.append('dateOfBirth', document.getElementById('dateOfBirth').value);
+                formData.append('phoneNumber', document.getElementById('phoneNumber').value);
+                formData.append('cin', document.getElementById('cin').value);
+                formData.append('city', document.getElementById('city').value);
+                formData.append('parentPhone', document.getElementById('parentPhone').value);
+                // Handle study level - if "Autre" is selected, use the custom text
+                const studyLevelValue = document.getElementById('studyLevel').value;
+                if (studyLevelValue === 'Autre') {
+                    const otherValue = document.getElementById('otherStudyLevel').value;
+                    formData.append('studyLevel', 'Autre: ' + otherValue);
+                } else {
+                    formData.append('studyLevel', studyLevelValue);
+                }
+                
+                // Send formations as JSON array
+                formData.append('formationChoisie', JSON.stringify(selectedFormations));
+                
+                // Send filieres as JSON array if any selected
+                if (selectedFilieres.length > 0) {
+                    formData.append('filiere', JSON.stringify(selectedFilieres));
+                }
+                
+                formData.append('photo', document.getElementById('photo').files[0]);
+                
+                // Debug: Log form data
+                console.log('Submitting form data:');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                
+                // Submit to API
+                const response = await fetch(`${API_BASE_URL}/api/register`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = '✅ ' + data.message;
+                    messageDiv.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('registrationForm').reset();
+                    document.getElementById('photoPreview').innerHTML = '';
+                    
+                    // Scroll to message
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = '❌ ' + data.message;
+                    messageDiv.style.display = 'block';
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                messageDiv.className = 'message error';
+                messageDiv.textContent = '❌ Network error. Please check if the server is running.';
+                messageDiv.style.display = 'block';
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Registration';
+            }
+        });
+    </script>
+    
+</body>
+</html>

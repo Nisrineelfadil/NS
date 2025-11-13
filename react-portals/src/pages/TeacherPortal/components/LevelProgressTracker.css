@@ -1,0 +1,469 @@
+/* ============================================
+   LEVEL PROGRESS TRACKER - APPLE GLASS STYLE
+   ============================================ */
+
+.level-progress-tracker {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(26, 26, 46, 0.4);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 204, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   PROGRESS HEADER
+   ============================================ */
+
+.progress-header {
+  margin-bottom: 25px;
+}
+
+.progress-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.progress-level {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+}
+
+.progress-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.progress-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.progress-count {
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFCC00;
+}
+
+.progress-percentage {
+  font-size: 16px;
+  color: rgba(255, 204, 0, 0.7);
+  font-weight: 600;
+}
+
+/* Overall Progress Bar */
+.progress-bar-container {
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.progress-bar-fill {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(90deg, #FFCC00, #FF9500);
+  border-radius: 10px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+}
+
+.progress-bar-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ============================================
+   PROGRESS CAPSULES
+   ============================================ */
+
+.progress-capsules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-capsule {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  min-height: 80px;
+}
+
+.progress-capsule:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 204, 0, 0.3);
+  box-shadow: 0 8px 30px rgba(255, 204, 0, 0.15);
+}
+
+.progress-capsule.expanded {
+  padding-bottom: 24px;
+}
+
+/* Capsule States */
+.progress-capsule.pending {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.progress-capsule.in-progress {
+  border-color: rgba(255, 204, 0, 0.3);
+  background: rgba(255, 204, 0, 0.05);
+}
+
+.progress-capsule.completed {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.progress-capsule.final-exam {
+  border: 2px solid rgba(255, 204, 0, 0.4);
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.08), rgba(255, 149, 0, 0.08));
+}
+
+/* Capsule Glow Effect */
+.capsule-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 204, 0, 0.15), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.progress-capsule:hover .capsule-glow {
+  opacity: 1;
+}
+
+.progress-capsule.completed .capsule-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.2), transparent 70%);
+}
+
+/* Capsule Fill Animation */
+.capsule-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(255, 204, 0, 0.1), rgba(255, 149, 0, 0.1));
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  border-radius: 16px 0 0 16px;
+}
+
+.progress-capsule.completed .capsule-fill {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(56, 239, 125, 0.15));
+}
+
+/* ============================================
+   CAPSULE CONTENT
+   ============================================ */
+
+.capsule-content {
+  position: relative;
+  z-index: 1;
+}
+
+.capsule-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.capsule-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s;
+}
+
+.capsule-icon i {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s;
+}
+
+.progress-capsule.in-progress .capsule-icon {
+  background: rgba(255, 204, 0, 0.15);
+  border-color: rgba(255, 204, 0, 0.3);
+}
+
+.progress-capsule.in-progress .capsule-icon i {
+  color: #FFCC00;
+  animation: pulse 2s infinite;
+}
+
+.progress-capsule.completed .capsule-icon {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.progress-capsule.completed .capsule-icon i {
+  color: #10b981;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.capsule-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.capsule-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.capsule-status {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.progress-capsule.in-progress .capsule-status {
+  color: #FFCC00;
+}
+
+.progress-capsule.completed .capsule-status {
+  color: #10b981;
+}
+
+/* Circular Progress Indicator */
+.capsule-progress-indicator {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.progress-circle {
+  transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFCC00;
+}
+
+/* ============================================
+   EXPANDED DETAILS
+   ============================================ */
+
+.capsule-details {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s;
+}
+
+.detail-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 204, 0, 0.2);
+}
+
+.detail-item.uploaded {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.detail-item.missing {
+  opacity: 0.5;
+}
+
+.detail-item i {
+  font-size: 16px;
+  color: #FFCC00;
+  margin-bottom: 4px;
+}
+
+.detail-item.uploaded i {
+  color: #10b981;
+}
+
+.detail-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.detail-score {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFCC00;
+}
+
+.detail-item.uploaded .detail-score {
+  color: #10b981;
+}
+
+.detail-date {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.detail-missing {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .level-progress-tracker {
+    padding: 15px;
+  }
+
+  .progress-level {
+    font-size: 24px;
+  }
+
+  .progress-count {
+    font-size: 20px;
+  }
+
+  .progress-capsule {
+    padding: 15px;
+  }
+
+  .capsule-header {
+    gap: 12px;
+  }
+
+  .capsule-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .capsule-icon i {
+    font-size: 18px;
+  }
+
+  .capsule-info h4 {
+    font-size: 15px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .detail-item {
+    padding: 10px 12px;
+  }
+}
+
+/* ============================================
+   ANIMATIONS & EFFECTS
+   ============================================ */
+
+.progress-capsule {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.progress-capsule:nth-child(1) { animation-delay: 0.1s; }
+.progress-capsule:nth-child(2) { animation-delay: 0.15s; }
+.progress-capsule:nth-child(3) { animation-delay: 0.2s; }
+.progress-capsule:nth-child(4) { animation-delay: 0.25s; }
+.progress-capsule:nth-child(5) { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

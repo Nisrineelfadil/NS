@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Registrations - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --sidebar-bg: #2c3e50;
+            --sidebar-hover: #34495e;
+            --primary-color: #FFCC00;
+            --secondary-color: #FF9500;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-light: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .sidebar-menu {
+            padding: 0 10px;
+        }
+        
+        .menu-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .menu-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+        
+        .menu-item.active {
+            background: var(--sidebar-hover);
+            color: var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-wrapper {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+        }
+        
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topbar h1 {
+            font-size: 24px;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .container {
+            padding: 20px 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #333;
+            box-shadow: 0 2px 4px rgba(255, 204, 0, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 204, 0, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card .icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card.credits .icon { color: var(--primary-color); }
+        .stat-card.total .icon { color: var(--secondary-color); }
+        .stat-card.monthly .icon { color: var(--info-color); }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            padding: 0 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab-btn {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: var(--secondary-color);
+            border-bottom-color: var(--secondary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #333;
+            font-weight: 600;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        
+        .credit-badge {
+            background: var(--primary-color);
+            color: #333;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .pagination {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pagination-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .pagination button {
+            padding: 8px 15px;
+            border: 2px solid var(--secondary-color);
+            background: white;
+            color: var(--secondary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .pagination button.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .leaderboard-table {
+            margin-top: 20px;
+        }
+        
+        .leaderboard-table tr.highlight {
+            background: #fff3cd;
+            font-weight: bold;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: #28a745;
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .super-admin-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .super-admin-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                width: 250px;
+                transition: left 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+                width: 100%;
+            }
+            
+            .mobile-menu-toggle {
+                display: block !important;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 999;
+                background: linear-gradient(135deg, #FFCC00, #FF9500);
+                border: none;
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+            
+            .container {
+                margin-top: 60px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+                gap: 5px;
+            }
+            
+            .tab-btn {
+                white-space: nowrap;
+                min-width: 120px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            table {
+                font-size: 0.75rem;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .pagination button {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mobile-menu-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-card h3 {
+                font-size: 1.8rem;
+            }
+            
+            .tab-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                min-width: 100px;
+            }
+            
+            table {
+                font-size: 0.7rem;
+            }
+            
+            th, td {
+                padding: 6px 3px;
+            }
+        }
+        
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .mobile-overlay.active {
+            display: block;
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 data-i18n="nisrineSchool">Nisrine School</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 14px;">Admin Panel</p>
+        </div>
+        <nav class="sidebar-menu">
+            <div class="menu-item" onclick="window.location.href='/admin'">
+                <i class="fas fa-home"></i>
+                <span data-i18n="dashboard">Dashboard</span>
+            </div>
+            <div class="menu-item active">
+                <i class="fas fa-user-plus"></i>
+                <span data-i18n="myRegistrations">My Registrations</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/admin'">
+                <i class="fas fa-user-graduate"></i>
+                <span data-i18n="allStudents">All Students</span>
+            </div>
+            <div class="menu-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span data-i18n="logout">Logout</span>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <div class="topbar">
+            <h1>
+                <i class="fas fa-user-graduate"></i>
+                <span data-i18n="myRegistrations">My Registrations</span>
+            </h1>
+            <div class="topbar-actions">
+                <button class="btn btn-primary" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> <span data-i18n="exportPDF">Export PDF</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card credits">
+                <div class="icon"><i class="fas fa-coins"></i></div>
+                <h3 data-i18n="totalCredits">Total Credits</h3>
+                <div class="value" id="totalCredits">0</div>
+            </div>
+            <div class="stat-card total">
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <h3 data-i18n="totalRegistrations">Total Registrations</h3>
+                <div class="value" id="totalRegistrations">0</div>
+            </div>
+            <div class="stat-card monthly">
+                <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                <h3 data-i18n="thisMonth">This Month</h3>
+                <div class="value" id="monthlyRegistrations">0</div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="registrations" data-i18n="myRegistrations">My Registrations</button>
+            <button class="tab-btn" data-tab="register" data-i18n="registerNewStudent">Register New Student</button>
+            <button class="tab-btn" data-tab="leaderboard" data-i18n="leaderboard">Leaderboard</button>
+        </div>
+        
+        <div class="tab-content active" id="registrationsTab">
+            <div class="filters">
+                <div class="filter-group">
+                    <label data-i18n="search">Search</label>
+                    <input type="text" id="searchInput" data-i18n-placeholder="search" placeholder="Name, CIN, Phone...">
+                </div>
+                <div class="filter-group">
+                    <label data-i18n="course">Course</label>
+                    <select id="courseFilter">
+                        <option value="all" data-i18n="allCourses">All Courses</option>
+                        <option value="Allemand">Allemand</option>
+                        <option value="Anglais">Anglais</option>
+                        <option value="Français">Français</option>
+                        <option value="Ausbildung">Ausbildung</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label data-i18n="fromDate">From Date</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div class="filter-group">
+                    <label data-i18n="toDate">To Date</label>
+                    <input type="date" id="dateTo">
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th data-i18n="studentName">Student Name</th>
+                        <th data-i18n="cin">CIN</th>
+                        <th data-i18n="courses">Courses</th>
+                        <th>Phone</th>
+                        <th data-i18n="date">Date</th>
+                        <th data-i18n="credits">Credits</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="registrationsTableBody">
+                    <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+            </table>
+            
+            <div class="pagination" id="pagination"></div>
+        </div>
+        
+        <div class="tab-content" id="registerTab">
+            <h2 style="margin-bottom: 20px;">Register New Student</h2>
+            <form id="adminRegForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth *</label>
+                        <input type="date" name="dateOfBirth" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" name="phoneNumber" placeholder="0612345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CIN *</label>
+                        <input type="text" name="cin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>City *</label>
+                        <input type="text" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Parent Name</label>
+                        <input type="text" name="parentName">
+                    </div>
+                    <div class="form-group">
+                        <label>Parent Phone *</label>
+                        <input type="tel" name="parentPhone" placeholder="0612345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Study Level *</label>
+                        <input type="text" name="studyLevel" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Photo *</label>
+                        <input type="file" name="photo" accept="image/*" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Formation Choisie * (Select at least one)</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="formationChoisie" value="Allemand"> Allemand</label>
+                        <label><input type="checkbox" name="formationChoisie" value="Anglais"> Anglais</label>
+                        <label><input type="checkbox" name="formationChoisie" value="Français"> Français</label>
+                        <label><input type="checkbox" name="formationChoisie" value="Ausbildung"> Ausbildung</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Filière (Optional)</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="filiere" value="Gériatrie"> Gériatrie</label>
+                        <label><input type="checkbox" name="filiere" value="Aide soignant"> Aide soignant</label>
+                        <label><input type="checkbox" name="filiere" value="Agent socio éducatif"> Agent socio éducatif</label>
+                        <label><input type="checkbox" name="filiere" value="Assistante sociale"> Assistante sociale</label>
+                        <label><input type="checkbox" name="filiere" value="Restauration"> Restauration</label>
+                        <label><input type="checkbox" name="filiere" value="Cuisine"> Cuisine</label>
+                        <label><input type="checkbox" name="filiere" value="Informatique"> Informatique</label>
+                        <label><input type="checkbox" name="filiere" value="Gestion hôtelière"> Gestion hôtelière</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 20px;">
+                    <i class="fas fa-user-plus"></i> Register Student
+                </button>
+            </form>
+        </div>
+        
+        <div class="tab-content" id="leaderboardTab">
+            <!-- Super Admin Section -->
+            <div class="super-admin-section" id="superAdminSection" style="display: none;">
+                <h3>
+                    <i class="fas fa-shield-alt"></i>
+                    Super Admin Controls
+                </h3>
+                <p style="margin-bottom: 15px; color: #856404;">
+                    <strong>Warning:</strong> This action will reset ALL admin credits and registrations to zero. This cannot be undone!
+                </p>
+                <button class="btn btn-danger" onclick="resetAllCredits()" id="resetAllBtn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Reset All Credits to Zero
+                </button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Admin Leaderboard</h2>
+                <select id="leaderboardPeriod" onchange="loadLeaderboard()" style="padding: 10px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                    <option value="all">All Time</option>
+                    <option value="month">This Month</option>
+                    <option value="week">This Week</option>
+                </select>
+            </div>
+            
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Admin Name</th>
+                        <th>Registrations</th>
+                        <th>Total Credits</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardTableBody">
+                    <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    
+    <script src="js/translations.js"></script>
+    <script src="js/admin-registrations.js"></script>
+</body>
+</html>

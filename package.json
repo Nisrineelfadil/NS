@@ -1,0 +1,44 @@
+{
+  "name": "nis",
+  "version": "1.0.0",
+  "description": "A modern, responsive website for Nisrine School, a German language center located in Fez, Morocco. This website showcases the school's services, about section, student testimonials, and contact information.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "build": "node build-pwa.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zayddahhaoui0609/nisrinesschool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zayddahhaoui0609/nisrinesschool/issues"
+  },
+  "homepage": "https://github.com/Zayddahhaoui0609/nisrinesschool#readme",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "dropbox": "^10.34.0",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "fs-extra": "^11.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.0",
+    "multer": "^2.0.2",
+    "node-cron": "^3.0.3",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.2",
+    "qrcode": "^1.5.3",
+    "sharp": "^0.33.5",
+    "uuid": "^9.0.1"
+  }
+}

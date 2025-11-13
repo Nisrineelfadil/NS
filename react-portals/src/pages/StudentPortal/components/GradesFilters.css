@@ -1,0 +1,80 @@
+.filters {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.filters h3 {
+  margin-bottom: 20px;
+  color: #FFCC00;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.filter-group select {
+  padding: 12px;
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  border-radius: 10px;
+  background: rgba(30, 30, 50, 0.9);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-group select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(255, 204, 0, 0.1);
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: #FFCC00;
+  background: rgba(40, 40, 60, 0.95);
+}
+
+.filter-group select option {
+  background: #1e1e32;
+  color: white;
+  padding: 10px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .filters {
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+
+  .filters h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .filter-group select {
+    padding: 10px;
+  }
+}

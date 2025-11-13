@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Nisrine School</title>
+    <!-- Version: 2.0 - System Capacity & Activity Tracking -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+    
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-container">
+            <div class="login-logo">
+                <h1>NISRINE SCHOOL</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <div class="error-message" id="loginError"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="dashboard-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <img src="Img/logo.png" alt="Logo" onerror="this.style.display='none'">
+                        <div class="sidebar-logo-text">
+                            <h2>Nisrine School</h2>
+                            <p id="adminUsername">Admin Panel</p>
+                        </div>
+                    </div>
+                </div>
+                <nav class="sidebar-menu">
+                    <div class="menu-section">
+                        <div class="menu-section-title">MAIN</div>
+                        <div class="menu-item active" data-tab="dashboard">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </div>
+                        <div class="menu-item" data-tab="registrations">
+                            <i class="fas fa-user-graduate"></i>
+                            <span>Registrations</span>
+                        </div>
+                        <div class="menu-item" id="myRegistrationsMenuItem" onclick="window.location.href='/my-registrations'">
+                            <i class="fas fa-user-plus"></i>
+                            <span>My Registrations</span>
+                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
+                        </div>
+                        <div class="menu-item" data-tab="appointments">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Rendez-vous</span>
+                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
+                        </div>
+                        <div class="menu-item" data-tab="messages">
+                            <i class="fas fa-envelope"></i>
+                            <span>Messages</span>
+                        </div>
+                        <div class="menu-item" data-tab="services">
+                            <i class="fas fa-briefcase"></i>
+                            <span data-i18n="admin.menu.services">Services</span>
+                        </div>
+                    </div>
+                    <div class="menu-section">
+                        <div class="menu-section-title">MANAGEMENT</div>
+                        <div class="menu-item" onclick="window.location.href='/student-management'">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Students</span>
+                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
+                        </div>
+                        <div class="menu-item hidden" id="employeesMenuItem" data-tab="employees">
+                            <i class="fas fa-users"></i>
+                            <span>Employees</span>
+                        </div>
+                        <div class="menu-item hidden" id="activityMenuItem" data-tab="activity">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Activity Log</span>
+                        </div>
+                        <div class="menu-item hidden" id="sessionsMenuItem" data-tab="sessions">
+                            <i class="fas fa-clock"></i>
+                            <span>Login Sessions</span>
+                        </div>
+                    </div>
+                    <div class="menu-section">
+                        <div class="menu-section-title">SETTINGS</div>
+                        <div class="menu-item hidden" id="settingsMenuItem" data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Top Bar -->
+                <div class="topbar">
+                    <div class="topbar-left">
+                        <h1 id="pageTitle">Dashboard</h1>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="language-dropdown">
+                            <button class="topbar-btn btn-primary" id="languageBtn">
+                                <i class="fas fa-globe"></i>
+                                <span id="currentLangText">EN</span>
+                                <i class="fas fa-chevron-down" id="langDropdownIcon"></i>
+                            </button>
+                            <div class="language-dropdown-menu" id="languageDropdownMenu">
+                                <div class="language-option" data-lang="en">
+                                    <i class="fas fa-flag-usa"></i>
+                                    <span>English</span>
+                                </div>
+                                <div class="language-option" data-lang="fr">
+                                    <i class="fas fa-flag"></i>
+                                    <span>Français</span>
+                                </div>
+                                <div class="language-option" data-lang="ar">
+                                    <i class="fas fa-flag"></i>
+                                    <span>العربية</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="topbar-btn btn-danger" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span data-i18n="admin.dashboard.logout">Logout</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="content-area">
+                    <!-- Dashboard Tab -->
+                    <div class="tab-content active" id="dashboardTab">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon orange">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.dashboard.total_registrations">Total Registrations</h3>
+                                    <div class="number" id="totalStudents">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.dashboard.pending">Pending</h3>
+                                    <div class="number" id="pendingStudents">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.dashboard.approved">Approved</h3>
+                                    <div class="number" id="approvedStudents">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon red">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.dashboard.rejected">Rejected</h3>
+                                    <div class="number" id="rejectedStudents">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registration Control -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-toggle-on"></i>
+                                    <span data-i18n="admin.dashboard.registration_control">Registration Control</span>
+                                </h2>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="registrationToggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: var(--text-light); margin-bottom: 20px;" data-i18n="admin.dashboard.enable_disable_text">
+                                    Enable or disable student registration on the website. When disabled, the registration form will show a closed message.
+                                </p>
+                                <form id="registrationSettingsForm" style="max-width: 600px;">
+                                    <div class="form-group">
+                                        <label for="contactPhone">
+                                            <i class="fas fa-phone"></i> <span data-i18n="admin.dashboard.contact_phone">Contact Phone Number</span>
+                                        </label>
+                                        <input type="tel" id="contactPhone" placeholder="+212 6XX XXX XXX" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem;">
+                                        <small style="color: var(--text-light); display: block; margin-top: 5px;" data-i18n="admin.dashboard.phone_help">
+                                            This phone number will be displayed when registration is closed
+                                        </small>
+                                    </div>
+                                    <button type="submit" class="action-btn btn-success" style="margin-top: 10px;">
+                                        <i class="fas fa-save"></i> <span data-i18n="admin.dashboard.save_settings">Save Settings</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Service Controls -->
+                        <!-- CV Service Control -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>CV Service Control</span>
+                                </h2>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="cvServiceToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                    Enable or disable CV service requests. When disabled, users won't be able to submit CV service requests.
+                                </p>
+                                <button class="action-btn btn-success" onclick="saveServiceSetting('cv')" style="margin-top: 10px;">
+                                    <i class="fas fa-save"></i> Save CV Service Settings
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Applying Service Control -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-briefcase"></i>
+                                    <span>Applying Service Control</span>
+                                </h2>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="applyingServiceToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                    Enable or disable job application assistance service. When disabled, users won't be able to submit applying service requests.
+                                </p>
+                                <button class="action-btn btn-success" onclick="saveServiceSetting('applying')" style="margin-top: 10px;">
+                                    <i class="fas fa-save"></i> Save Applying Service Settings
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Translation Service Control -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-language"></i>
+                                    <span>Translation Service Control</span>
+                                </h2>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="translationServiceToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                    Enable or disable translation service requests. When disabled, users won't be able to submit translation service requests.
+                                </p>
+                                <button class="action-btn btn-success" onclick="saveServiceSetting('translation')" style="margin-top: 10px;">
+                                    <i class="fas fa-save"></i> Save Translation Service Settings
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-bolt"></i>
+                                    <span data-i18n="admin.dashboard.quick_actions">Quick Actions</span>
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <button class="action-btn btn-info" onclick="document.querySelector('[data-tab=registrations]').click()">
+                                        <i class="fas fa-user-graduate"></i> <span data-i18n="admin.dashboard.view_all_students">View All Students</span>
+                                    </button>
+                                    <button class="action-btn btn-success" onclick="document.querySelector('[data-tab=messages]').click()">
+                                        <i class="fas fa-envelope"></i> <span data-i18n="admin.dashboard.view_messages">View Messages</span>
+                                    </button>
+                                    <button class="action-btn btn-warning" onclick="downloadAllApproved()">
+                                        <i class="fas fa-download"></i> <span data-i18n="admin.dashboard.download_approved">Download Approved PDFs</span>
+                                    </button>
+                                    <button class="action-btn btn-info" onclick="checkCloudStatus()">
+                                        <i class="fas fa-cloud"></i> <span data-i18n="admin.dashboard.check_cloud">Check Cloud Status</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registrations Tab -->
+                    <div class="tab-content" id="registrationsTab">
+                        <!-- Category Tabs -->
+                        <div class="category-tabs-container">
+                            <div class="category-tab active" data-category="all">
+                                <i class="fas fa-users"></i>
+                                <span data-i18n="admin.registrations.all_students">All Students</span>
+                                <span class="tab-count" id="allCount">0</span>
+                            </div>
+                            <div class="category-tab" data-category="pending">
+                                <i class="fas fa-clock"></i>
+                                <span data-i18n="admin.dashboard.pending">Pending</span>
+                                <span class="tab-count" id="pendingCount">0</span>
+                            </div>
+                            <div class="category-tab" data-category="approved">
+                                <i class="fas fa-check-circle"></i>
+                                <span data-i18n="admin.dashboard.approved">Approved</span>
+                                <span class="tab-count" id="approvedCount">0</span>
+                            </div>
+                            <div class="category-tab" data-category="rejected">
+                                <i class="fas fa-times-circle"></i>
+                                <span data-i18n="admin.dashboard.rejected">Rejected</span>
+                                <span class="tab-count" id="rejectedCount">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Students Grid -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-user-graduate"></i>
+                                    <span id="categoryTitle">All Students</span>
+                                </h2>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn btn-warning" onclick="downloadCategoryPDFs()">
+                                        <i class="fas fa-download"></i> <span data-i18n="admin.registrations.download_all">Download All</span>
+                                    </button>
+                                    <button class="action-btn btn-danger" onclick="clearCategory()">
+                                        <i class="fas fa-trash"></i> <span data-i18n="admin.registrations.clear_category">Clear Category</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="studentsLoading">Loading students...</div>
+                                <div id="studentsGridContainer" style="display: none;">
+                                    <div class="students-grid" id="studentsGrid">
+                                        <!-- Student cards will be inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services Tab -->
+                    <div class="tab-content" id="servicesTab">
+                        <!-- Service Requests Stats -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon orange">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.services.cv_service">CV Service</h3>
+                                    <div class="number" id="cvServiceCount">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.services.applying_service">Applying Service</h3>
+                                    <div class="number" id="applyingServiceCount">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-language"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.services.translation_service">Translation Service</h3>
+                                    <div class="number" id="translationServiceCount">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.services.pending_requests">Pending Requests</h3>
+                                    <div class="number" id="pendingServicesCount">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Category Tabs -->
+                        <div class="category-tabs-container">
+                            <div class="category-tab active" data-service-category="all">
+                                <i class="fas fa-list"></i>
+                                <span data-i18n="admin.services.all_services">All Services</span>
+                                <span class="tab-count" id="allServicesCount">0</span>
+                            </div>
+                            <div class="category-tab" data-service-category="cv">
+                                <i class="fas fa-file-alt"></i>
+                                <span data-i18n="admin.services.cv">CV Service</span>
+                                <span class="tab-count" id="cvTabCount">0</span>
+                            </div>
+                            <div class="category-tab" data-service-category="applying">
+                                <i class="fas fa-briefcase"></i>
+                                <span data-i18n="admin.services.applying">Applying</span>
+                                <span class="tab-count" id="applyingTabCount">0</span>
+                            </div>
+                            <div class="category-tab" data-service-category="translation">
+                                <i class="fas fa-language"></i>
+                                <span data-i18n="admin.services.translation">Translation</span>
+                                <span class="tab-count" id="translationTabCount">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Service Requests Table -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-briefcase"></i>
+                                    <span id="serviceCategoryTitle">All Service Requests</span>
+                                </h2>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn btn-info" onclick="refreshServices()">
+                                        <i class="fas fa-sync"></i> <span data-i18n="admin.services.refresh">Refresh</span>
+                                    </button>
+                                    <button class="action-btn btn-success" onclick="exportServicesData()">
+                                        <i class="fas fa-download"></i> <span data-i18n="admin.services.export_data">Export Data</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="servicesLoading" data-i18n="admin.services.loading">Loading service requests...</div>
+                                <div id="servicesTableContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th data-i18n="admin.services.service_type">Service Type</th>
+                                                <th data-i18n="admin.services.full_name">Full Name</th>
+                                                <th data-i18n="admin.services.phone">Phone</th>
+                                                <th data-i18n="admin.services.email">Email</th>
+                                                <th data-i18n="admin.services.status">Status</th>
+                                                <th data-i18n="admin.services.date">Date</th>
+                                                <th data-i18n="admin.services.actions">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="servicesTableBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Tab -->
+                    <div class="tab-content" id="messagesTab">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-envelope"></i>
+                                    <span data-i18n="admin.messages.title">Contact Messages</span>
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="messagesLoading" data-i18n="admin.messages.loading">Loading messages...</div>
+                                <div id="messagesTableContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th data-i18n="admin.messages.name">Name</th>
+                                                <th data-i18n="admin.messages.phone">Phone</th>
+                                                <th data-i18n="admin.messages.message">Message</th>
+                                                <th data-i18n="admin.messages.date">Date</th>
+                                                <th data-i18n="admin.messages.status">Status</th>
+                                                <th data-i18n="admin.messages.actions">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="messagesTableBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appointments Tab -->
+                    <div class="tab-content" id="appointmentsTab">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Today's Appointments</h3>
+                                    <div class="number" id="todayAppointments">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon orange">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Pending</h3>
+                                    <div class="number" id="pendingAppointments">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Completed</h3>
+                                    <div class="number" id="completedAppointments">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Total Appointments</h3>
+                                    <div class="number" id="totalAppointments">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Appointments Management -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-calendar-check"></i>
+                                    Rendez-vous Management
+                                </h2>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn btn-success" onclick="openAddAppointmentModal()">
+                                        <i class="fas fa-plus"></i> New Appointment
+                                    </button>
+                                    <button class="action-btn btn-primary" onclick="openPdfDatePicker()">
+                                        <i class="fas fa-file-pdf"></i> Download Daily PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <!-- Filters -->
+                                <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                                            <i class="fas fa-calendar"></i> Date
+                                        </label>
+                                        <input type="date" id="appointmentDateFilter" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                                    </div>
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                                            <i class="fas fa-filter"></i> Status
+                                        </label>
+                                        <select id="appointmentStatusFilter" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                                            <option value="">All Status</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                                            <i class="fas fa-flag"></i> Priority
+                                        </label>
+                                        <select id="appointmentPriorityFilter" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                                            <option value="">All Priorities</option>
+                                            <option value="high">High</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="low">Low</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                                            <i class="fas fa-search"></i> Search
+                                        </label>
+                                        <input type="text" id="appointmentSearchFilter" placeholder="Name, phone, or purpose..." style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                                    </div>
+                                </div>
+
+                                <!-- Appointments Table -->
+                                <div class="loading" id="appointmentsLoading">Loading appointments...</div>
+                                <div id="appointmentsTableContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Full Name</th>
+                                                <th>Phone Number</th>
+                                                <th>Purpose</th>
+                                                <th>Priority</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="appointmentsTableBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employees Tab -->
+                    <div class="tab-content" id="employeesTab">
+                        <!-- Employee Management -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-users"></i>
+                                    Employee Management
+                                </h2>
+                                <button class="action-btn btn-success" onclick="showCreateEmployeeForm()">
+                                    <i class="fas fa-plus"></i> Add Employee
+                                </button>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="employeesLoading">Loading employees...</div>
+                                <div id="employeesTableContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Username</th>
+                                                <th>Email</th>
+                                                <th>Status</th>
+                                                <th>Created</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="employeesTableBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employee Performance Metrics -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-chart-bar"></i>
+                                    Employee Performance
+                                </h2>
+                                <button class="action-btn btn-info" onclick="loadEmployeePerformance()">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                    Track employee login activity and performance metrics
+                                </p>
+                                <div class="loading" id="performanceLoading">Loading performance data...</div>
+                                <div id="performanceContainer" style="display: none;">
+                                    <div class="stats-grid" id="performanceGrid">
+                                        <!-- Performance cards will be inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employee Activity Dashboard -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-tasks"></i>
+                                    Employee Activity Dashboard
+                                </h2>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn btn-info" onclick="loadEmployeeActivity()">
+                                        <i class="fas fa-sync"></i> Refresh
+                                    </button>
+                                    <button class="action-btn btn-danger" onclick="clearEmployeeActivity()">
+                                        <i class="fas fa-trash"></i> Clear Activity
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                    View detailed employee actions and activity logs
+                                </p>
+                                <div class="loading" id="activityDashboardLoading">Loading activity dashboard...</div>
+                                <div id="activityDashboardContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee</th>
+                                                <th>Action</th>
+                                                <th>Details</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="activityDashboardBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Tab -->
+                    <div class="tab-content" id="activityTab">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-chart-line"></i>
+                                    Activity Log
+                                </h2>
+                                <button class="action-btn btn-danger" onclick="clearActivityLogs()">
+                                    <i class="fas fa-trash"></i> Clear Logs
+                                </button>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="activityLoading">Loading activity logs...</div>
+                                <div id="activityTableContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Action</th>
+                                                <th>Details</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="activityTableBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sessions Tab -->
+                    <div class="tab-content" id="sessionsTab">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-clock"></i>
+                                    Login Sessions
+                                </h2>
+                                <button class="action-btn btn-danger" onclick="clearLoginSessions()">
+                                    <i class="fas fa-trash"></i> Clear Sessions
+                                </button>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="sessionsLoading">Loading login sessions...</div>
+                                <div id="sessionsTableContainer" style="display: none; overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>IP Address</th>
+                                                <th>User Agent</th>
+                                                <th>Platform</th>
+                                                <th>Login Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sessionsTableBody">
+                                            <!-- Data will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="tab-content" id="settingsTab">
+                        <!-- System Monitoring Section (Apple Glass iOS Style) -->
+                        <div class="glass-card system-monitoring">
+                            <div class="glass-header">
+                                <div class="glass-title">
+                                    <i class="fas fa-chart-pie glass-icon"></i>
+                                    <h2>System Capacity</h2>
+                                </div>
+                                <button class="glass-btn refresh-btn" onclick="refreshSystemStats()">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Refresh</span>
+                                </button>
+                            </div>
+                            
+                            <div class="glass-body">
+                                <!-- Overall Database Usage -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fas fa-database capacity-icon"></i>
+                                            <span>Database Usage (MongoDB)</span>
+                                        </div>
+                                        <div class="capacity-value" id="dbUsageValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="dbUsageFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="dbUsageInfo">0 MB of 10 GB used</span>
+                                    </div>
+                                </div>
+
+                                <!-- Dropbox Storage -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fab fa-dropbox capacity-icon"></i>
+                                            <span>Dropbox Backup Storage</span>
+                                        </div>
+                                        <div class="capacity-value" id="dropboxUsageValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="dropboxUsageFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="dropboxUsageInfo">0 MB of 2 GB used</span>
+                                    </div>
+                                </div>
+
+                                <!-- Student Data Storage -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fas fa-user-graduate capacity-icon"></i>
+                                            <span>Student Data</span>
+                                        </div>
+                                        <div class="capacity-value" id="studentDataValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="studentDataFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="studentDataInfo">0 students</span>
+                                    </div>
+                                </div>
+
+                                <!-- Photos & Documents -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fas fa-images capacity-icon"></i>
+                                            <span>Photos & Documents</span>
+                                        </div>
+                                        <div class="capacity-value" id="photosDataValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="photosDataFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="photosDataInfo">0 files</span>
+                                    </div>
+                                </div>
+
+                                <!-- Grades & Records -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fas fa-chart-bar capacity-icon"></i>
+                                            <span>Grades & Records</span>
+                                        </div>
+                                        <div class="capacity-value" id="gradesDataValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="gradesDataFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="gradesDataInfo">0 records</span>
+                                    </div>
+                                </div>
+
+                                <!-- Attendance Records -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fas fa-calendar-check capacity-icon"></i>
+                                            <span>Attendance Records</span>
+                                        </div>
+                                        <div class="capacity-value" id="attendanceDataValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="attendanceDataFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="attendanceDataInfo">0 records</span>
+                                    </div>
+                                </div>
+
+                                <!-- Archived Seasons -->
+                                <div class="capacity-item">
+                                    <div class="capacity-header">
+                                        <div class="capacity-label">
+                                            <i class="fas fa-archive capacity-icon"></i>
+                                            <span>Archived Seasons</span>
+                                        </div>
+                                        <div class="capacity-value" id="seasonsDataValue">
+                                            <span class="value-number">0</span>
+                                            <span class="value-unit">MB</span>
+                                            <span class="value-percentage">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-progress-bar">
+                                        <div class="progress-fill" id="seasonsDataFill" data-percentage="0"></div>
+                                        <div class="progress-glow"></div>
+                                    </div>
+                                    <div class="capacity-info">
+                                        <span id="seasonsDataInfo">0 seasons</span>
+                                    </div>
+                                </div>
+
+                                <!-- Last Cleanup Info -->
+                                <div class="cleanup-info">
+                                    <div class="cleanup-label">
+                                        <i class="fas fa-broom"></i>
+                                        <span>Last Cleanup:</span>
+                                    </div>
+                                    <div class="cleanup-value" id="lastCleanupDate">Never</div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="glass-actions">
+                                    <button class="glass-btn primary-btn" onclick="manageStorage()">
+                                        <i class="fas fa-cog"></i>
+                                        <span>Manage Storage</span>
+                                    </button>
+                                    <button class="glass-btn secondary-btn" onclick="viewStorageHistory()">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>View History</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-user"></i>
+                                    Change Username
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <form id="changeUsernameForm" style="max-width: 500px;">
+                                    <div class="form-group">
+                                        <label>New Username</label>
+                                        <input type="text" id="newUsername" required>
+                                    </div>
+                                    <button type="submit" class="action-btn btn-success">
+                                        <i class="fas fa-save"></i> Update Username
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-lock"></i>
+                                    Change Password
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <form id="changePasswordForm" style="max-width: 500px;">
+                                    <div class="form-group">
+                                        <label>Current Password</label>
+                                        <input type="password" id="currentPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>New Password</label>
+                                        <input type="password" id="newPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm New Password</label>
+                                        <input type="password" id="confirmPassword" required>
+                                    </div>
+                                    <button type="submit" class="action-btn btn-success">
+                                        <i class="fas fa-save"></i> Update Password
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Employee Modal -->
+    <div class="modal-overlay" id="addEmployeeModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Add New Employee</h2>
+                <button class="modal-close" onclick="closeEmployeeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addEmployeeForm">
+                    <div class="form-group">
+                        <label for="empUsername"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="empUsername" required placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="empEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="empEmail" required placeholder="employee@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="empPassword"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="empPassword" required placeholder="Enter password">
+                    </div>
+                    <div class="form-group">
+                        <label for="empConfirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                        <input type="password" id="empConfirmPassword" required placeholder="Confirm password">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="action-btn btn-success" style="flex: 1;">
+                            <i class="fas fa-save"></i> Create Employee
+                        </button>
+                        <button type="button" class="action-btn btn-danger" onclick="closeEmployeeModal()" style="flex: 1;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div class="modal-overlay" id="appointmentModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-plus"></i> <span id="appointmentModalTitle">New Appointment</span></h2>
+                <button class="modal-close" onclick="closeAppointmentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <input type="hidden" id="appointmentId">
+                    <div class="form-group">
+                        <label for="appointmentFullName"><i class="fas fa-user"></i> Full Name</label>
+                        <input type="text" id="appointmentFullName" required placeholder="Enter client's full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentPhone"><i class="fas fa-phone"></i> Phone Number</label>
+                        <input type="tel" id="appointmentPhone" required placeholder="+212 6XX XXX XXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentPurpose"><i class="fas fa-clipboard"></i> Purpose / Notes</label>
+                        <textarea id="appointmentPurpose" required placeholder="Reason for the meeting..." rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentDate"><i class="fas fa-calendar"></i> Appointment Date</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentPriority"><i class="fas fa-flag"></i> Priority</label>
+                        <select id="appointmentPriority">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentNotes"><i class="fas fa-sticky-note"></i> Additional Notes</label>
+                        <textarea id="appointmentNotes" placeholder="Any additional information..." rows="2"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="action-btn btn-success" style="flex: 1;">
+                            <i class="fas fa-save"></i> <span id="appointmentSubmitBtn">Save Appointment</span>
+                        </button>
+                        <button type="button" class="action-btn btn-danger" onclick="closeAppointmentModal()" style="flex: 1;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Date Picker Modal -->
+    <div class="modal-overlay" id="pdfDatePickerModal">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-alt"></i> Select Date for PDF</h2>
+                <button class="modal-close" onclick="closePdfDatePicker()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #64748b; margin-bottom: 20px; font-size: 0.9rem;">
+                    Choose the date for which you want to download the appointments PDF.
+                </p>
+                <div class="form-group">
+                    <label for="pdfExportDate">
+                        <i class="fas fa-calendar"></i> Appointment Date
+                    </label>
+                    <input type="date" id="pdfExportDate" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 24px;">
+                    <button class="action-btn btn-success" onclick="confirmPdfDownload()" style="flex: 1;">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                    <button class="action-btn btn-danger" onclick="closePdfDatePicker()" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/system-stats.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+    <script src="js/appointments.js"></script>
+</body>
+</html>

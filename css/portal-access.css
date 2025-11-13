@@ -1,0 +1,218 @@
+/* Portal Access Dropdown */
+.portal-access-container {
+    position: relative;
+    margin-left: 15px;
+}
+
+.portal-selector {
+    position: relative;
+}
+
+.portal-button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.portal-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.portal-button:hover::before {
+    left: 100%;
+}
+
+.portal-button:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.portal-button i:first-child {
+    font-size: 20px;
+    transition: transform 0.4s ease;
+}
+
+.portal-button:hover i:first-child {
+    animation: user-pulse 1s ease-in-out infinite;
+}
+
+.portal-button i:last-child {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-size: 14px;
+}
+
+.portal-button.active i:last-child {
+    transform: rotate(180deg);
+}
+
+@keyframes user-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.portal-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #ffffff !important;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    z-index: 99999;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    list-style: none;
+    padding: 12px 0;
+    margin: 0;
+}
+
+.portal-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-bottom: none;
+    border-right: none;
+    transform: rotate(45deg);
+    border-radius: 2px;
+}
+
+.portal-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.portal-section-title {
+    padding: 8px 20px;
+    color: #999;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 8px;
+}
+
+.portal-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #333 !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    font-weight: 500;
+}
+
+.portal-option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.portal-option.student-portal::before {
+    background: linear-gradient(135deg, #FFCC00, #FF9500);
+}
+
+.portal-option.teacher-portal::before {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.portal-option:hover::before {
+    transform: scaleY(1);
+}
+
+.portal-option:hover {
+    color: #333 !important;
+    text-decoration: none;
+    transform: translateX(8px);
+}
+
+.portal-option.student-portal:hover {
+    background: linear-gradient(135deg, rgba(255, 204, 0, 0.1), rgba(255, 149, 0, 0.1));
+}
+
+.portal-option.teacher-portal:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+}
+
+.portal-option i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.portal-option.student-portal i {
+    color: #FFCC00;
+}
+
+.portal-option.teacher-portal i {
+    color: #667eea;
+}
+
+.portal-option:hover i {
+    transform: scale(1.2);
+}
+
+/* Mobile-specific positioning */
+@media (max-width: 768px) {
+    .portal-access-container {
+        margin-left: 0;
+    }
+
+    .portal-dropdown {
+        top: auto;
+        bottom: calc(100% + 10px);
+        right: auto;
+        left: -80px;
+        transform: translateY(20px) scale(0.95);
+        z-index: 100000;
+    }
+    
+    .portal-dropdown.show {
+        transform: translateY(0) scale(1);
+    }
+    
+    .portal-dropdown::before {
+        top: auto;
+        bottom: -8px;
+        right: auto;
+        left: 100px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-top: none;
+        border-left: none;
+    }
+}

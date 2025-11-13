@@ -1,0 +1,961 @@
+// Global Variables
+let currentUser = null;
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth() + 1;
+let currentChart = null;
+let currentChartType = 'pie';
+let yearlyChart = null;
+let allTransactions = [];
+let allCategories = [];
+
+// Predefined Categories
+const INCOME_CATEGORIES = [
+    'Tuition Fees',
+    'Registration Fees',
+    'Late Fees',
+    'Exam Fees',
+    'Certificate Fees',
+    'Other Income'
+];
+
+const EXPENSE_CATEGORIES = [
+    'Salaries',
+    'Teacher Payments',
+    'Rent',
+    'Utilities',
+    'Supplies',
+    'Equipment',
+    'Marketing',
+    'Maintenance',
+    'Transportation',
+    'Other Expenses'
+];
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    initializeTabs();
+    initializeYearSelectors();
+    initializeChartTypeButtons();
+    loadCategories();
+});
+
+// Authentication
+async function checkAuth() {
+    const token = localStorage.getItem('adminToken');
+    
+    if (!token) {
+        window.location.href = '/admin';
+        return;
+    }
+
+    // Verify token and get user info from server
+    try {
+        const response = await fetch('/api/admin/verify', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin';
+            return;
+        }
+        
+        // Store user info
+        currentUser = {
+            id: data.id,
+            username: data.username,
+            email: data.email,
+            role: data.role
+        };
+        
+        document.getElementById('userName').textContent = currentUser.username || 'Admin';
+
+        // Show/hide tabs based on role
+        if (currentUser.role === 'super_admin' || currentUser.role === 'superadmin') {
+            // Super admin sees everything
+            document.getElementById('yearlyTab').style.display = 'flex';
+            document.getElementById('exportSection').style.display = 'block';
+            loadMonthData();
+        } else {
+            // Normal admin only sees transactions tab
+            document.querySelector('[data-tab="dashboard"]').style.display = 'none';
+            document.querySelector('[data-tab="yearly"]').style.display = 'none';
+            // Switch to transactions tab automatically
+            switchTab('transactions');
+        }
+    } catch (error) {
+        console.error('Auth error:', error);
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin';
+    }
+}
+
+function logout() {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    window.location.href = '/admin';
+}
+
+// Tab Management
+function initializeTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            switchTab(tabName);
+        });
+    });
+}
+
+function switchTab(tabName) {
+    // Update buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    // Update content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === tabName);
+    });
+
+    // Load data for the tab
+    if (tabName === 'transactions') {
+        loadTransactions();
+    } else if (tabName === 'yearly') {
+        loadYearlyData();
+    }
+}
+
+// Year Selectors
+function initializeYearSelectors() {
+    const startYear = 2020;
+    const endYear = currentYear + 1;
+    
+    const yearSelect = document.getElementById('yearSelect');
+    const yearlyYearSelect = document.getElementById('yearlyYearSelect');
+    
+    for (let year = endYear; year >= startYear; year--) {
+        const option1 = new Option(year, year);
+        const option2 = new Option(year, year);
+        yearSelect.add(option1);
+        yearlyYearSelect.add(option2);
+    }
+    
+    yearSelect.value = currentYear;
+    yearlyYearSelect.value = currentYear;
+    document.getElementById('monthSelect').value = currentMonth;
+}
+
+// Month Navigation
+function changeMonth(delta) {
+    currentMonth += delta;
+    
+    if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+    } else if (currentMonth < 1) {
+        currentMonth = 12;
+        currentYear--;
+    }
+    
+    document.getElementById('monthSelect').value = currentMonth;
+    document.getElementById('yearSelect').value = currentYear;
+    
+    loadMonthData();
+}
+
+// Load Month Data
+async function loadMonthData() {
+    currentYear = parseInt(document.getElementById('yearSelect').value);
+    currentMonth = parseInt(document.getElementById('monthSelect').value);
+    
+    try {
+        // Load transactions
+        const response = await fetch(
+            `/api/cash-register/transactions?year=${currentYear}&month=${currentMonth}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            }
+        );
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            allTransactions = data.transactions;
+            
+            // Load summary
+            await loadMonthlySummary();
+            
+            // Load notes
+            await loadMonthlyNotes();
+            
+            // Update chart
+            updateChart();
+            
+            // Check if empty
+            if (allTransactions.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.querySelector('.chart-container').style.display = 'none';
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+                document.querySelector('.chart-container').style.display = 'flex';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading month data:', error);
+        showNotification('Failed to load data', 'error');
+    }
+}
+
+// Load Monthly Summary
+async function loadMonthlySummary() {
+    try {
+        const response = await fetch(
+            `/api/cash-register/summary/monthly?year=${currentYear}&month=${currentMonth}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            }
+        );
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const { summary, insights } = data;
+            
+            // Update summary cards
+            document.getElementById('totalIncome').textContent = 
+                `${summary.totalIncome.toFixed(2)} MAD`;
+            document.getElementById('totalExpenses').textContent = 
+                `${summary.totalExpenses.toFixed(2)} MAD`;
+            
+            const netResult = document.getElementById('netResult');
+            netResult.textContent = `${summary.netResult >= 0 ? '+' : ''}${summary.netResult.toFixed(2)} MAD`;
+            netResult.style.color = summary.isProfitable ? '#10b981' : '#ef4444';
+            
+            // Update top categories
+            document.getElementById('topIncome').textContent = 
+                summary.topIncomeSource 
+                    ? `${summary.topIncomeSource.name} (${summary.topIncomeSource.amount.toFixed(2)} MAD)`
+                    : 'No income recorded';
+            
+            document.getElementById('topExpense').textContent = 
+                summary.topExpenseCategory 
+                    ? `${summary.topExpenseCategory.name} (${summary.topExpenseCategory.amount.toFixed(2)} MAD)`
+                    : 'No expenses recorded';
+            
+            // Update insights
+            displayInsights(insights);
+        }
+    } catch (error) {
+        console.error('Error loading summary:', error);
+    }
+}
+
+// Display Insights
+function displayInsights(insights) {
+    const insightsList = document.getElementById('insightsList');
+    
+    if (!insights || insights.length === 0) {
+        insightsList.innerHTML = '<p style="color: rgba(255,255,255,0.6);">No insights available for this month.</p>';
+        return;
+    }
+    
+    insightsList.innerHTML = insights.map(insight => {
+        const icon = insight.type === 'positive' ? '📈' : insight.type === 'negative' ? '📉' : '📊';
+        return `
+            <div class="insight-item ${insight.type}">
+                <span style="font-size: 1.5rem;">${icon}</span>
+                <span>${insight.message}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Chart Management
+function initializeChartTypeButtons() {
+    const chartTypeBtns = document.querySelectorAll('.chart-type-btn');
+    chartTypeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            chartTypeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentChartType = btn.dataset.type;
+            updateChart();
+        });
+    });
+}
+
+function updateChart() {
+    const filter = document.getElementById('chartFilter').value;
+    
+    let filteredTransactions = allTransactions;
+    if (filter === 'income') {
+        filteredTransactions = allTransactions.filter(t => t.type === 'income');
+    } else if (filter === 'expense') {
+        filteredTransactions = allTransactions.filter(t => t.type === 'expense');
+    }
+    
+    if (filteredTransactions.length === 0) {
+        if (currentChart) {
+            currentChart.destroy();
+            currentChart = null;
+        }
+        return;
+    }
+    
+    // Group by category
+    const categoryData = {};
+    filteredTransactions.forEach(t => {
+        if (!categoryData[t.category]) {
+            categoryData[t.category] = { amount: 0, type: t.type };
+        }
+        categoryData[t.category].amount += t.amount;
+    });
+    
+    const labels = Object.keys(categoryData);
+    const amounts = Object.values(categoryData).map(d => d.amount);
+    const colors = Object.values(categoryData).map(d => 
+        d.type === 'income' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+    );
+    
+    const ctx = document.getElementById('mainChart');
+    
+    if (currentChart) {
+        currentChart.destroy();
+    }
+    
+    const chartConfig = {
+        type: currentChartType,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Amount (MAD)',
+                data: amounts,
+                backgroundColor: colors,
+                borderColor: colors.map(c => c.replace('0.8', '1')),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff',
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.parsed.toFixed(2)} MAD`;
+                        }
+                    }
+                }
+            },
+            scales: currentChartType !== 'pie' ? {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#ffffff' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                },
+                x: {
+                    ticks: { color: '#ffffff' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                }
+            } : {}
+        }
+    };
+    
+    currentChart = new Chart(ctx, chartConfig);
+}
+
+// Monthly Notes
+async function loadMonthlyNotes() {
+    try {
+        const response = await fetch(
+            `/api/cash-register/notes/${currentYear}/${currentMonth}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            }
+        );
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('monthlyNotes').value = data.note.note || '';
+        }
+    } catch (error) {
+        console.error('Error loading notes:', error);
+    }
+}
+
+async function saveNotes() {
+    const note = document.getElementById('monthlyNotes').value;
+    
+    try {
+        const response = await fetch('/api/cash-register/notes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({
+                year: currentYear,
+                month: currentMonth,
+                note
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Notes saved successfully', 'success');
+        } else {
+            showNotification(data.message || 'Failed to save notes', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving notes:', error);
+        showNotification('Failed to save notes', 'error');
+    }
+}
+
+// Transactions Management
+async function loadTransactions() {
+    const year = currentYear;
+    const month = currentMonth;
+    const type = document.getElementById('typeFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    
+    let url = `/api/cash-register/transactions?year=${year}&month=${month}`;
+    if (type) url += `&type=${type}`;
+    if (category) url += `&category=${encodeURIComponent(category)}`;
+    if (status) url += `&status=${status}`;
+    
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayTransactions(data.transactions);
+        }
+    } catch (error) {
+        console.error('Error loading transactions:', error);
+        showNotification('Failed to load transactions', 'error');
+    }
+}
+
+function displayTransactions(transactions) {
+    const tbody = document.getElementById('transactionsTableBody');
+    
+    if (transactions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading">No transactions found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = transactions.map(t => {
+        const typeIcon = t.type === 'income' ? '🟢' : '🔴';
+        const statusClass = t.status === 'completed' ? 'completed' : 'pending';
+        
+        return `
+            <tr>
+                <td>${new Date(t.date).toLocaleDateString()}</td>
+                <td>
+                    <span class="type-badge ${t.type}">
+                        ${typeIcon} ${t.type.charAt(0).toUpperCase() + t.type.slice(1)}
+                    </span>
+                </td>
+                <td>${t.title}</td>
+                <td>${t.category}</td>
+                <td><strong>${t.amount.toFixed(2)} MAD</strong></td>
+                <td>
+                    <span class="status-badge ${statusClass}">
+                        ${t.status === 'completed' ? '✓' : '⏳'} ${t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                    </span>
+                </td>
+                <td>${t.remarks || '-'}</td>
+                <td>
+                    <div class="action-btns">
+                        <button onclick="editTransaction('${t._id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" onclick="deleteTransaction('${t._id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Categories
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/cash-register/categories', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            allCategories = data.categories;
+            updateCategoryFilter();
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+function updateCategoryFilter() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    categoryFilter.innerHTML = '<option value="">All Categories</option>';
+    
+    allCategories.forEach(cat => {
+        const option = new Option(cat, cat);
+        categoryFilter.add(option);
+    });
+}
+
+function updateCategoryOptions() {
+    const type = document.getElementById('transactionType').value;
+    const categorySelect = document.getElementById('transactionCategory');
+    
+    categorySelect.innerHTML = '<option value="">Select Category</option>';
+    
+    const categories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    
+    categories.forEach(cat => {
+        const option = new Option(cat, cat);
+        categorySelect.add(option);
+    });
+    
+    // Add custom option
+    const customOption = new Option('+ Add Custom Category', 'custom');
+    categorySelect.add(customOption);
+    
+    categorySelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            const customCategory = prompt('Enter custom category name:');
+            if (customCategory) {
+                const newOption = new Option(customCategory, customCategory);
+                categorySelect.insertBefore(newOption, categorySelect.lastChild);
+                categorySelect.value = customCategory;
+            } else {
+                categorySelect.value = '';
+            }
+        }
+    });
+}
+
+// Modal Management
+function openAddModal() {
+    document.getElementById('modalTitle').textContent = translate('addTransactionTitle');
+    document.getElementById('transactionForm').reset();
+    document.getElementById('transactionId').value = '';
+    document.getElementById('transactionDate').valueAsDate = new Date();
+    document.getElementById('transactionModal').classList.add('active');
+}
+
+async function editTransaction(id) {
+    try {
+        const response = await fetch(`/api/cash-register/transactions/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const t = data.transaction;
+            
+            document.getElementById('modalTitle').textContent = translate('editTransactionTitle');
+            document.getElementById('transactionId').value = t._id;
+            document.getElementById('transactionTitle').value = t.title;
+            document.getElementById('transactionType').value = t.type;
+            updateCategoryOptions();
+            document.getElementById('transactionCategory').value = t.category;
+            document.getElementById('transactionAmount').value = t.amount;
+            document.getElementById('transactionDate').valueAsDate = new Date(t.date);
+            document.getElementById('transactionStatus').value = t.status;
+            document.getElementById('transactionRemarks').value = t.remarks || '';
+            
+            document.getElementById('transactionModal').classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error loading transaction:', error);
+        showNotification('Failed to load transaction', 'error');
+    }
+}
+
+function closeModal() {
+    document.getElementById('transactionModal').classList.remove('active');
+}
+
+async function saveTransaction(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('transactionId').value;
+    const formData = {
+        title: document.getElementById('transactionTitle').value,
+        type: document.getElementById('transactionType').value,
+        category: document.getElementById('transactionCategory').value,
+        amount: parseFloat(document.getElementById('transactionAmount').value),
+        date: document.getElementById('transactionDate').value,
+        status: document.getElementById('transactionStatus').value,
+        remarks: document.getElementById('transactionRemarks').value
+    };
+    
+    try {
+        const url = id 
+            ? `/api/cash-register/transactions/${id}`
+            : '/api/cash-register/transactions';
+        
+        const method = id ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(
+                id ? 'Transaction updated successfully' : 'Transaction added successfully',
+                'success'
+            );
+            closeModal();
+            loadMonthData();
+            loadTransactions();
+        } else {
+            showNotification(data.message || 'Failed to save transaction', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving transaction:', error);
+        showNotification('Failed to save transaction', 'error');
+    }
+}
+
+async function deleteTransaction(id) {
+    if (!confirm('Are you sure you want to delete this transaction?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/cash-register/transactions/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Transaction deleted successfully', 'success');
+            loadMonthData();
+            loadTransactions();
+        } else {
+            showNotification(data.message || 'Failed to delete transaction', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting transaction:', error);
+        showNotification('Failed to delete transaction', 'error');
+    }
+}
+
+// Yearly Overview
+async function loadYearlyData() {
+    const year = parseInt(document.getElementById('yearlyYearSelect').value);
+    const startMonth = parseInt(document.getElementById('startMonthSelect').value);
+    const endMonth = parseInt(document.getElementById('endMonthSelect').value);
+    
+    // Validate month range
+    if (startMonth > endMonth) {
+        showNotification('Start month must be before or equal to end month', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(
+            `/api/cash-register/summary/yearly?year=${year}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            }
+        );
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Filter overview by month range
+            const filteredOverview = data.overview.filter(m => 
+                m.month >= startMonth && m.month <= endMonth
+            );
+            displayYearlyOverview(filteredOverview, startMonth, endMonth);
+        }
+    } catch (error) {
+        console.error('Error loading yearly data:', error);
+        showNotification('Failed to load yearly data', 'error');
+    }
+}
+
+function resetYearlyFilter() {
+    document.getElementById('startMonthSelect').value = '1';
+    document.getElementById('endMonthSelect').value = '12';
+    loadYearlyData();
+}
+
+function displayYearlyOverview(overview, startMonth = 1, endMonth = 12) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    // Update titles to show selected range
+    const rangeText = startMonth === 1 && endMonth === 12 
+        ? translate('totalAnnualIncome').replace(' Income', '').replace(' Revenu', '').replace(' الدخل', '').replace('einnahmen', '')
+        : `${monthNames[startMonth - 1]} - ${monthNames[endMonth - 1]}`;
+    
+    document.getElementById('incomeTitle').textContent = startMonth === 1 && endMonth === 12 
+        ? translate('totalAnnualIncome') 
+        : `${rangeText} ${translate('income')}`;
+    document.getElementById('expensesTitle').textContent = startMonth === 1 && endMonth === 12 
+        ? translate('totalAnnualExpenses') 
+        : `${rangeText} ${translate('expense')}`;
+    document.getElementById('netTitle').textContent = startMonth === 1 && endMonth === 12 
+        ? translate('annualNetResult') 
+        : `${rangeText} ${translate('netResult')}`;
+    
+    // Calculate totals for the selected range
+    const totalIncome = overview.reduce((sum, m) => sum + m.totalIncome, 0);
+    const totalExpenses = overview.reduce((sum, m) => sum + m.totalExpenses, 0);
+    const netResult = totalIncome - totalExpenses;
+    
+    document.getElementById('yearlyIncome').textContent = `${totalIncome.toFixed(2)} MAD`;
+    document.getElementById('yearlyExpenses').textContent = `${totalExpenses.toFixed(2)} MAD`;
+    
+    const yearlyNet = document.getElementById('yearlyNet');
+    yearlyNet.textContent = `${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)} MAD`;
+    yearlyNet.style.color = netResult >= 0 ? '#10b981' : '#ef4444';
+    
+    // Update chart
+    updateYearlyChart(overview);
+    
+    // Update timeline
+    updateCashFlowTimeline(overview);
+}
+
+function updateYearlyChart(overview) {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const labels = overview.map(m => monthNames[m.month - 1]);
+    const incomeData = overview.map(m => m.totalIncome);
+    const expenseData = overview.map(m => m.totalExpenses);
+    const netData = overview.map(m => m.netResult);
+    
+    const ctx = document.getElementById('yearlyChart');
+    
+    if (yearlyChart) {
+        yearlyChart.destroy();
+    }
+    
+    yearlyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: incomeData,
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Expenses',
+                    data: expenseData,
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Net Result',
+                    data: netData,
+                    borderColor: 'rgba(255, 204, 0, 1)',
+                    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff',
+                        font: { size: 12 }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#ffffff' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                },
+                x: {
+                    ticks: { color: '#ffffff' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                }
+            }
+        }
+    });
+}
+
+function updateCashFlowTimeline(overview) {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const timeline = document.getElementById('cashFlowTimeline');
+    
+    timeline.innerHTML = overview.map((m, index) => {
+        let trend = '';
+        if (index > 0) {
+            const prevNet = overview[index - 1].netResult;
+            const currentNet = m.netResult;
+            const change = ((currentNet - prevNet) / Math.abs(prevNet || 1)) * 100;
+            
+            if (Math.abs(change) > 5) {
+                const arrow = change > 0 ? '↑' : '↓';
+                const trendClass = change > 0 ? 'up' : 'down';
+                trend = `<div class="trend ${trendClass}">${arrow} ${Math.abs(change).toFixed(1)}%</div>`;
+            }
+        }
+        
+        return `
+            <div class="timeline-item">
+                <h4>${monthNames[m.month - 1]}</h4>
+                <div class="flow-income">🟢 +${m.totalIncome.toFixed(0)} MAD</div>
+                <div class="flow-expense">🔴 -${m.totalExpenses.toFixed(0)} MAD</div>
+                ${trend}
+            </div>
+        `;
+    }).join('');
+}
+
+// PDF Export
+async function exportPDF() {
+    if (currentUser.role !== 'super_admin' && currentUser.role !== 'superadmin') {
+        showNotification('Only super admin can export PDF', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(
+            `/api/cash-register/export/pdf?year=${currentYear}&month=${currentMonth}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            }
+        );
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Cash_Register_${currentYear}_${currentMonth}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showNotification('PDF exported successfully', 'success');
+        } else {
+            showNotification('Failed to export PDF', 'error');
+        }
+    } catch (error) {
+        console.error('Error exporting PDF:', error);
+        showNotification('Failed to export PDF', 'error');
+    }
+}
+
+// Notifications
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#FFCC00'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);

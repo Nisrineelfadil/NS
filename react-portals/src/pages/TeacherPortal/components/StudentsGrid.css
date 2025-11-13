@@ -1,0 +1,274 @@
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.student-card {
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
+  border: 2px solid rgba(255, 204, 0, 0.2);
+}
+
+.student-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+  border-color: #FFCC00;
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(255, 204, 0, 0.2);
+}
+
+.student-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a2e;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(255, 204, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.student-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.student-info h3 {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.student-info p {
+  color: #999;
+  font-size: 14px;
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.module-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.module-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 204, 0, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.module-box:hover::before {
+  left: 100%;
+}
+
+.module-box:hover {
+  transform: scale(1.05);
+  border-color: #FFCC00;
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2);
+}
+
+.module-box.completed {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(56, 239, 125, 0.1));
+  border-color: #28a745;
+}
+
+.module-box.completed:hover {
+  border-color: #218838;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.module-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #FFCC00;
+}
+
+.module-box.completed .module-icon {
+  color: #28a745;
+}
+
+.module-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.module-grade {
+  font-size: 20px;
+  font-weight: bold;
+  color: #28a745;
+}
+
+.module-grade span {
+  font-size: 14px;
+  color: #666;
+}
+
+.module-empty {
+  color: #999;
+  font-size: 13px;
+}
+
+.student-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-enter-grades {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+  color: #1a1a2e;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+}
+
+.btn-enter-grades:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+}
+
+.btn-enter-grades:active {
+  transform: translateY(0);
+}
+
+.btn-enter-grades i {
+  font-size: 18px;
+}
+
+.grade-summary {
+  text-align: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+.grades-count {
+  color: #28a745;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.grades-count i {
+  font-size: 16px;
+}
+
+.no-grades {
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.no-grades i {
+  font-size: 16px;
+}
+
+.loading-students {
+  text-align: center;
+  padding: 40px;
+  color: #FFCC00;
+  font-size: 16px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .students-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .student-card {
+    padding: 20px 15px;
+  }
+
+  .student-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .student-avatar {
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .module-box {
+    padding: 20px 15px;
+    min-height: 120px;
+  }
+
+  .module-icon {
+    font-size: 28px;
+  }
+
+  .module-name {
+    font-size: 15px;
+  }
+
+  .module-grade {
+    font-size: 18px;
+  }
+}

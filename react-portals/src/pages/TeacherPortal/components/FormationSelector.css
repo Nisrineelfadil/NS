@@ -1,0 +1,72 @@
+.formation-selector {
+  margin-bottom: 30px;
+}
+
+.formation-selector h3 {
+  color: #FFCC00;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.auto-assigned-badge {
+  background: rgba(255, 204, 0, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFCC00;
+}
+
+.formation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.formation-btn {
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.formation-btn:hover:not(:disabled) {
+  border-color: #FFCC00;
+  background: rgba(255, 204, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+}
+
+.formation-btn.active {
+  border-color: #FFCC00;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.2), rgba(255, 149, 0, 0.2));
+  box-shadow: 0 5px 20px rgba(255, 204, 0, 0.4);
+  transform: scale(1.05);
+}
+
+.formation-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .formation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .formation-btn {
+    padding: 12px 15px;
+  }
+}

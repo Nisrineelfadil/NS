@@ -1,0 +1,530 @@
+{
+    "en": {
+        "code": "en",
+        "name": "English",
+        "flag": "🇬🇧",
+        "dir": "ltr",
+        "translations": {
+            "nav": {
+                "home": "Home",
+                "services": "Services",
+                "about": "About Us",
+                "students": "For Students",
+                "contact": "Contact"
+            },
+            "portal": {
+                "student": "Student Portal",
+                "teacher": "Teacher Portal"
+            },
+            "hero": {
+                "title": "Your Passport to Germany",
+                "subtitle": "Nisrine School",
+                "slogan": "Your Gateway to the Future with Nisrine School",
+                "description": "Professional German language education and support services in Fez, Morocco",
+                "cta_primary": "Register Now!",
+                "cta_secondary": "Our Services",
+                "cta_contact": "Contact Us"
+            },
+            "services": {
+                "title": "Our Services",
+                "subtitle": "Comprehensive German language and support services tailored to your needs",
+                "language_courses": {
+                    "title": "German Language Courses",
+                    "description": "Comprehensive German language training from beginner to advanced levels with certified instructors."
+                },
+                "visa_support": {
+                    "title": "Student Visa Support",
+                    "description": "Expert guidance through the entire student visa application process for Germany."
+                },
+                "cultural_integration": {
+                    "title": "Cultural Integration",
+                    "description": "Support and resources to help you adapt to German culture and society."
+                },
+                "nursing_preparation": {
+                    "title": "Nursing Preparation",
+                    "description": "Specialized training for nursing careers in both Morocco and Germany."
+                },
+                "hotel_training": {
+                    "title": "Hotel Service Training",
+                    "description": "Professional hospitality and hotel service training programs."
+                },
+                "educational_services": {
+                    "title": "Educational Services",
+                    "description": "Additional educational programs and support services for students."
+                }
+            },
+            "about": {
+                "title": "Who Are We",
+                "subtitle": "Your trusted partner in German language education",
+                "content": "Nisrine School is a premier German language center located in the heart of Fez, Morocco. With years of experience in language education, we are committed to providing high-quality German language instruction and comprehensive support services to help our students achieve their academic and professional goals.",
+                "content2": "Our team of dedicated and certified instructors brings a wealth of knowledge and expertise to create an engaging and effective learning environment. We pride ourselves on our student-centered approach, ensuring that each learner receives personalized attention and support throughout their language journey.",
+                "feature1": "Certified Instructors",
+                "feature2": "Small Class Sizes", 
+                "feature3": "Modern Teaching Methods",
+                "badge": "Dreams Achieved"
+            },
+            "students": {
+                "title": "Student Life",
+                "subtitle": "Experience the vibrant life at Nisrine School through photos and videos",
+                "photos_tab": "Photos",
+                "videos_tab": "Videos"
+            },
+            "contact": {
+                "title": "Contact Us",
+                "subtitle": "Get in touch with our team",
+                "form_title": "Send Us a Message",
+                "full_name": "Full Name",
+                "phone_number": "Phone Number",
+                "message": "What do you want to know?",
+                "send_button": "Send Message",
+                "success_message": "Message sent successfully! We'll get back to you soon.",
+                "error_message": "Something went wrong. Please try again.",
+                "name": "Your Name",
+                "email": "Your Email",
+                "phone": "Your Phone",
+                "select_service": "Select a Service",
+                "submit": "Send Message",
+                "find_us": "Find Us on Map"
+            },
+            "footer": {
+                "about_title": "NISRINE SCHOOL",
+                "about_text": "Your trusted partner for German language learning and cultural integration in Morocco.",
+                "quick_links": "Quick Links",
+                "contact_info": "Contact Info",
+                "address": "Fez, Morocco",
+                "phone": "+212 123 456 789",
+                "email": "info@nisrineschool.com",
+                "privacy": "Privacy Policy",
+                "terms": "Terms & Conditions",
+                "copyright": "© 2024 Nisrine School. All rights reserved."
+            },
+            "admin": {
+                "menu": {
+                    "dashboard": "Dashboard",
+                    "registrations": "Registrations",
+                    "messages": "Messages",
+                    "services": "Services",
+                    "employees": "Employees",
+                    "activity": "Activity Log",
+                    "sessions": "Login Sessions",
+                    "settings": "Settings"
+                },
+                "dashboard": {
+                    "total_registrations": "Total Registrations",
+                    "pending": "Pending",
+                    "approved": "Approved",
+                    "rejected": "Rejected",
+                    "registration_control": "Registration Control",
+                    "enable_disable_text": "Enable or disable student registration on the website. When disabled, the registration form will show a closed message.",
+                    "contact_phone": "Contact Phone Number",
+                    "phone_placeholder": "+212 6XX XXX XXX",
+                    "phone_help": "This phone number will be displayed when registration is closed",
+                    "save_settings": "Save Settings",
+                    "quick_actions": "Quick Actions",
+                    "view_all_students": "View All Students",
+                    "view_messages": "View Messages",
+                    "download_approved": "Download Approved PDFs",
+                    "check_cloud": "Check Cloud Status",
+                    "logout": "Logout"
+                },
+                "registrations": {
+                    "all_students": "All Students",
+                    "download_all": "Download All",
+                    "clear_category": "Clear Category"
+                },
+                "messages": {
+                    "title": "Contact Messages",
+                    "name": "Name",
+                    "phone": "Phone",
+                    "message": "Message",
+                    "date": "Date",
+                    "status": "Status",
+                    "actions": "Actions",
+                    "loading": "Loading messages..."
+                },
+                "services": {
+                    "title": "Service Requests",
+                    "cv_service": "CV Service",
+                    "applying_service": "Applying Service",
+                    "translation_service": "Translation Service",
+                    "pending_requests": "Pending Requests",
+                    "all_services": "All Services",
+                    "cv": "CV Service",
+                    "applying": "Applying",
+                    "translation": "Translation",
+                    "service_type": "Service Type",
+                    "full_name": "Full Name",
+                    "phone": "Phone",
+                    "email": "Email",
+                    "status": "Status",
+                    "date": "Date",
+                    "actions": "Actions",
+                    "pending": "Pending",
+                    "in_progress": "In Progress",
+                    "completed": "Completed",
+                    "cancelled": "Cancelled",
+                    "refresh": "Refresh",
+                    "export_data": "Export Data",
+                    "view_details": "View Details",
+                    "mark_in_progress": "Mark In Progress",
+                    "mark_completed": "Mark Completed",
+                    "delete": "Delete",
+                    "no_requests": "No service requests found",
+                    "loading": "Loading service requests..."
+                }
+            }
+        }
+    },
+    "fr": {
+        "code": "fr",
+        "name": "Français",
+        "flag": "🇫🇷",
+        "dir": "ltr",
+        "translations": {
+            "nav": {
+                "home": "Accueil",
+                "services": "Services",
+                "about": "À propos",
+                "students": "Étudiants",
+                "contact": "Contact"
+            },
+            "portal": {
+                "student": "Portail Étudiant",
+                "teacher": "Portail Enseignant"
+            },
+            "hero": {
+                "title": "Votre passeport vers l'allemagne",
+                "subtitle": "Nisrine School",
+                "slogan": "Votre Pas Vers l'Avenir avec Nisrine School",
+                "description": "Éducation professionnelle en langue allemande et services de soutien à Fès, Maroc",
+                "cta_primary": "S'inscrire Maintenant!",
+                "cta_secondary": "Nos Services",
+                "cta_contact": "Contactez-nous"
+            },
+            "services": {
+                "title": "Nos Services",
+                "subtitle": "Services complets de langue allemande et de soutien adaptés à vos besoins",
+                "language_courses": {
+                    "title": "Cours de Langue Allemande",
+                    "description": "Formation complète en langue allemande du niveau débutant au niveau avancé avec des instructeurs certifiés."
+                },
+                "visa_support": {
+                    "title": "Soutien pour Visa Étudiant",
+                    "description": "Conseils d'experts tout au long du processus de demande de visa étudiant pour l'Allemagne."
+                },
+                "cultural_integration": {
+                    "title": "Intégration Culturelle",
+                    "description": "Soutien et ressources pour vous aider à vous adapter à la culture et à la société allemandes."
+                },
+                "nursing_preparation": {
+                    "title": "Préparation aux Soins Infirmiers",
+                    "description": "Formation spécialisée pour les carrières d'infirmière au Maroc et en Allemagne."
+                },
+                "hotel_training": {
+                    "title": "Formation Hôtelière",
+                    "description": "Programmes de formation professionnelle en hôtellerie et services hôteliers."
+                },
+                "educational_services": {
+                    "title": "Services Éducatifs",
+                    "description": "Programmes éducatifs supplémentaires et services de soutien pour les étudiants."
+                }
+            },
+            "about": {
+                "title": "Qui sommes-nous",
+                "subtitle": "Votre partenaire de confiance en éducation allemande",
+                "content": "L'École Nisrine est un centre de langue allemande de premier plan situé au cœur de Fès, au Maroc. Avec des années d'expérience dans l'éducation linguistique, nous nous engageons à fournir un enseignement de langue allemande de haute qualité et des services de soutien complets pour aider nos étudiants à atteindre leurs objectifs académiques et professionnels.",
+                "content2": "Notre équipe d'instructeurs dévoués et certifiés apporte une richesse de connaissances et d'expertise pour créer un environnement d'apprentissage engageant et efficace. Nous sommes fiers de notre approche centrée sur l'étudiant, garantissant que chaque apprenant reçoit une attention personnalisée et un soutien tout au long de son parcours linguistique.",
+                "feature1": "Instructeurs Certifiés",
+                "feature2": "Petites Classes",
+                "feature3": "Méthodes d'Enseignement Modernes",
+                "badge": "Rêves Réalisés"
+            },
+            "students": {
+                "title": "Vie Étudiante",
+                "subtitle": "Découvrez la vie dynamique à l'École Nisrine à travers des photos et des vidéos",
+                "photos_tab": "Photos",
+                "videos_tab": "Vidéos"
+            },
+            "contact": {
+                "title": "Contactez-nous",
+                "subtitle": "Contactez notre équipe",
+                "form_title": "Envoyez-nous un message",
+                "full_name": "Nom complet",
+                "phone_number": "Numéro de téléphone",
+                "message": "Que voulez-vous savoir?",
+                "send_button": "Envoyer le message",
+                "success_message": "Message envoyé avec succès! Nous vous répondrons bientôt.",
+                "error_message": "Quelque chose s'est mal passé. Veuillez réessayer.",
+                "name": "Votre Nom",
+                "email": "Votre Email",
+                "phone": "Votre Téléphone",
+                "select_service": "Sélectionnez un Service",
+                "submit": "Envoyer le Message",
+                "find_us": "Trouvez-nous sur la Carte"
+            },
+            "footer": {
+                "about_title": "ÉCOLE NISRINE",
+                "about_text": "Votre partenaire de confiance pour l'apprentissage de la langue allemande et l'intégration culturelle au Maroc.",
+                "quick_links": "Liens Rapides",
+                "contact_info": "Informations de Contact",
+                "address": "Fès, Maroc",
+                "phone": "+212 123 456 789",
+                "email": "info@nisrineschool.com",
+                "privacy": "Politique de Confidentialité",
+                "terms": "Conditions Générales",
+                "copyright": "© 2024 École Nisrine. Tous droits réservés."
+            },
+            "admin": {
+                "menu": {
+                    "dashboard": "Tableau de bord",
+                    "registrations": "Inscriptions",
+                    "messages": "Messages",
+                    "services": "Services",
+                    "employees": "Employés",
+                    "activity": "Journal d'activité",
+                    "sessions": "Sessions de connexion",
+                    "settings": "Paramètres"
+                },
+                "dashboard": {
+                    "total_registrations": "Total des Inscriptions",
+                    "pending": "En attente",
+                    "approved": "Approuvé",
+                    "rejected": "Rejeté",
+                    "registration_control": "Contrôle d'Inscription",
+                    "enable_disable_text": "Activer ou désactiver l'inscription des étudiants sur le site Web. Lorsqu'elle est désactivée, le formulaire d'inscription affichera un message de fermeture.",
+                    "contact_phone": "Numéro de Téléphone de Contact",
+                    "phone_placeholder": "+212 6XX XXX XXX",
+                    "phone_help": "Ce numéro de téléphone sera affiché lorsque l'inscription est fermée",
+                    "save_settings": "Enregistrer les Paramètres",
+                    "quick_actions": "Actions Rapides",
+                    "view_all_students": "Voir Tous les Étudiants",
+                    "view_messages": "Voir les Messages",
+                    "download_approved": "Télécharger les PDF Approuvés",
+                    "check_cloud": "Vérifier l'État du Cloud",
+                    "logout": "Déconnexion"
+                },
+                "registrations": {
+                    "all_students": "Tous les Étudiants",
+                    "download_all": "Tout Télécharger",
+                    "clear_category": "Effacer la Catégorie"
+                },
+                "messages": {
+                    "title": "Messages de Contact",
+                    "name": "Nom",
+                    "phone": "Téléphone",
+                    "message": "Message",
+                    "date": "Date",
+                    "status": "Statut",
+                    "actions": "Actions",
+                    "loading": "Chargement des messages..."
+                },
+                "services": {
+                    "title": "Demandes de Service",
+                    "cv_service": "Service CV",
+                    "applying_service": "Service de Candidature",
+                    "translation_service": "Service de Traduction",
+                    "pending_requests": "Demandes en attente",
+                    "all_services": "Tous les Services",
+                    "cv": "Service CV",
+                    "applying": "Candidature",
+                    "translation": "Traduction",
+                    "service_type": "Type de Service",
+                    "full_name": "Nom Complet",
+                    "phone": "Téléphone",
+                    "email": "Email",
+                    "status": "Statut",
+                    "date": "Date",
+                    "actions": "Actions",
+                    "pending": "En attente",
+                    "in_progress": "En cours",
+                    "completed": "Terminé",
+                    "cancelled": "Annulé",
+                    "refresh": "Actualiser",
+                    "export_data": "Exporter les données",
+                    "view_details": "Voir les détails",
+                    "mark_in_progress": "Marquer en cours",
+                    "mark_completed": "Marquer terminé",
+                    "delete": "Supprimer",
+                    "no_requests": "Aucune demande de service trouvée",
+                    "loading": "Chargement des demandes de service..."
+                }
+            }
+        }
+    },
+    "ar": {
+        "code": "ar",
+        "name": "العربية",
+        "flag": "🇲🇦",
+        "dir": "rtl",
+        "translations": {
+            "nav": {
+                "home": "الرئيسية",
+                "services": "خدماتنا",
+                "about": "من نحن",
+                "students": "للطلاب",
+                "contact": "اتصل بنا"
+            },
+            "portal": {
+                "student": "بوابة الطالب",
+                "teacher": "بوابة المعلم"
+            },
+            "hero": {
+                "title": "جواز سفرك إلى ألمانيا",
+                "subtitle": "Nisrine School",
+                "slogan": "خطوتك نحو المستقبل مع Nisrine School",
+                "description": "تعليم مهني للغة الألمانية وخدمات الدعم في فاس، المغرب",
+                "cta_primary": "سجل الآن!",
+                "cta_secondary": "خدماتنا",
+                "cta_contact": "اتصل بنا"
+            },
+            "services": {
+                "title": "خدماتنا",
+                "subtitle": "خدمات شاملة للغة الألمانية والدعم مصممة خصيصاً لاحتياجاتك",
+                "language_courses": {
+                    "title": "دورات اللغة الألمانية",
+                    "description": "تدريب شامل في اللغة الألمانية من المستوى المبتدئ إلى المتقدم مع مدربين معتمدين."
+                },
+                "visa_support": {
+                    "title": "دعم تأشيرة الطالب",
+                    "description": "إرشاد خبير خلال عملية طلب تأشيرة الطالب لألمانيا بالكامل."
+                },
+                "cultural_integration": {
+                    "title": "التكامل الثقافي",
+                    "description": "الدعم والموارد لمساعدتك على التكيف مع الثقافة والمجتمع الألماني."
+                },
+                "nursing_preparation": {
+                    "title": "إعداد التمريض",
+                    "description": "تدريب متخصص لمهن التمريض في المغرب وألمانيا."
+                },
+                "hotel_training": {
+                    "title": "تدريب الخدمات الفندقية",
+                    "description": "برامج تدريب مهنية في الضيافة والخدمات الفندقية."
+                },
+                "educational_services": {
+                    "title": "الخدمات التعليمية",
+                    "description": "برامج تعليمية إضافية وخدمات دعم للطلاب."
+                }
+            },
+            "about": {
+                "title": "من نحن",
+                "subtitle": "شريكك الموثوق في تعليم اللغة الألمانية",
+                "content": "مدرسة نسرين هي مركز رائد لتعليم اللغة الألمانية يقع في قلب مدينة فاس، المغرب. مع سنوات من الخبرة في التعليم اللغوي، نحن ملتزمون بتقديم تعليم عالي الجودة للغة الألمانية وخدمات دعم شاملة لمساعدة طلابنا على تحقيق أهدافهم الأكاديمية والمهنية.",
+                "content2": "يجلب فريقنا من المدربين المتفانين والمعتمدين ثروة من المعرفة والخبرة لخلق بيئة تعليمية جذابة وفعالة. نحن نفخر بنهجنا المتمحور حول الطالب، مما يضمن حصول كل متعلم على اهتمام شخصي ودعم طوال رحلته اللغوية.",
+                "feature1": "مدربون معتمدون",
+                "feature2": "فصول صغيرة الحجم",
+                "feature3": "طرق تدريس حديثة",
+                "badge": "أحلام تحققت"
+            },
+            "students": {
+                "title": "حياة الطلاب",
+                "subtitle": "اكتشف الحياة النابضة في مدرسة نسرين من خلال الصور ومقاطع الفيديو",
+                "photos_tab": "صور",
+                "videos_tab": "فيديوهات"
+            },
+            "contact": {
+                "title": "اتصل بنا",
+                "subtitle": "تواصل مع فريقنا",
+                "form_title": "أرسل لنا رسالة",
+                "full_name": "الاسم الكامل",
+                "phone_number": "رقم الهاتف",
+                "message": "ماذا تريد أن تعرف؟",
+                "send_button": "إرسال الرسالة",
+                "success_message": "تم إرسال الرسالة بنجاح! سنعود إليك قريباً.",
+                "error_message": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                "name": "الاسم الكامل",
+                "email": "البريد الإلكتروني",
+                "phone": "رقم الهاتف",
+                "select_service": "اختر خدمة",
+                "submit": "إرسال الرسالة",
+                "find_us": "اعثر علينا على الخريطة"
+            },
+            "footer": {
+                "about_title": "مدرسة نسرين",
+                "about_text": "شريكك الموثوق لتعلم اللغة الألمانية والتكامل الثقافي في المغرب.",
+                "quick_links": "روابط سريعة",
+                "contact_info": "معلومات الاتصال",
+                "address": "فاس، المغرب",
+                "phone": "+212 123 456 789",
+                "email": "info@nisrineschool.com",
+                "privacy": "سياسة الخصوصية",
+                "terms": "الشروط والأحكام",
+                "copyright": "© 2024 مدرسة نسرين. جميع الحقوق محفوظة."
+            },
+            "admin": {
+                "menu": {
+                    "dashboard": "لوحة التحكم",
+                    "registrations": "التسجيلات",
+                    "messages": "الرسائل",
+                    "services": "الخدمات",
+                    "employees": "الموظفون",
+                    "activity": "سجل النشاط",
+                    "sessions": "جلسات تسجيل الدخول",
+                    "settings": "الإعدادات"
+                },
+                "dashboard": {
+                    "total_registrations": "إجمالي التسجيلات",
+                    "pending": "قيد الانتظار",
+                    "approved": "موافق عليه",
+                    "rejected": "مرفوض",
+                    "registration_control": "التحكم في التسجيل",
+                    "enable_disable_text": "تفعيل أو تعطيل تسجيل الطلاب على الموقع. عند التعطيل، سيعرض نموذج التسجيل رسالة إغلاق.",
+                    "contact_phone": "رقم هاتف الاتصال",
+                    "phone_placeholder": "+212 6XX XXX XXX",
+                    "phone_help": "سيتم عرض رقم الهاتف هذا عند إغلاق التسجيل",
+                    "save_settings": "حفظ الإعدادات",
+                    "quick_actions": "إجراءات سريعة",
+                    "view_all_students": "عرض جميع الطلاب",
+                    "view_messages": "عرض الرسائل",
+                    "download_approved": "تنزيل ملفات PDF الموافق عليها",
+                    "check_cloud": "التحقق من حالة السحابة",
+                    "logout": "تسجيل الخروج"
+                },
+                "registrations": {
+                    "all_students": "جميع الطلاب",
+                    "download_all": "تنزيل الكل",
+                    "clear_category": "مسح الفئة"
+                },
+                "messages": {
+                    "title": "رسائل الاتصال",
+                    "name": "الاسم",
+                    "phone": "الهاتف",
+                    "message": "الرسالة",
+                    "date": "التاريخ",
+                    "status": "الحالة",
+                    "actions": "الإجراءات",
+                    "loading": "جاري تحميل الرسائل..."
+                },
+                "services": {
+                    "title": "طلبات الخدمة",
+                    "cv_service": "خدمة السيرة الذاتية",
+                    "applying_service": "خدمة التقديم",
+                    "translation_service": "خدمة الترجمة",
+                    "pending_requests": "الطلبات المعلقة",
+                    "all_services": "جميع الخدمات",
+                    "cv": "خدمة السيرة الذاتية",
+                    "applying": "التقديم",
+                    "translation": "الترجمة",
+                    "service_type": "نوع الخدمة",
+                    "full_name": "الاسم الكامل",
+                    "phone": "الهاتف",
+                    "email": "البريد الإلكتروني",
+                    "status": "الحالة",
+                    "date": "التاريخ",
+                    "actions": "الإجراءات",
+                    "pending": "معلق",
+                    "in_progress": "قيد التنفيذ",
+                    "completed": "مكتمل",
+                    "cancelled": "ملغى",
+                    "refresh": "تحديث",
+                    "export_data": "تصدير البيانات",
+                    "view_details": "عرض التفاصيل",
+                    "mark_in_progress": "وضع علامة قيد التنفيذ",
+                    "mark_completed": "وضع علامة مكتمل",
+                    "delete": "حذف",
+                    "no_requests": "لم يتم العثور على طلبات خدمة",
+                    "loading": "جاري تحميل طلبات الخدمة..."
+                }
+            }
+        }
+    }
+}

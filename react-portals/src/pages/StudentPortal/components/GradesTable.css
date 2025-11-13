@@ -1,0 +1,169 @@
+.grades-table-container {
+  overflow-x: auto;
+}
+
+.grades-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grades-table thead {
+  background: rgba(255, 204, 0, 0.1);
+}
+
+.grades-table th {
+  padding: 15px;
+  text-align: left;
+  color: #FFCC00;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+}
+
+.grades-table td {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.grades-table tbody tr {
+  transition: background 0.3s;
+}
+
+.grades-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.grade-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.grade-badge.excellent {
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+}
+
+.grade-badge.good {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+}
+
+.grade-badge.average {
+  background: linear-gradient(135deg, #FFCC00, #FF9500);
+}
+
+.grade-badge.poor {
+  background: linear-gradient(135deg, #ff4757, #ff6348);
+}
+
+.exam-type-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Visual Evaluation Badges for A1-B2 System */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.status-badge.approved {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.status-badge.mid {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.status-badge.failed {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+/* Grade Group Styling */
+.grade-group {
+  margin-bottom: 40px;
+}
+
+.group-title {
+  color: #FFCC00;
+  margin-bottom: 20px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.group-title i {
+  font-size: 24px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .grades-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 13px;
+  }
+
+  .grades-table thead {
+    display: none;
+  }
+
+  .grades-table tbody {
+    display: block;
+  }
+
+  .grades-table tr {
+    display: block;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(255, 204, 0, 0.2);
+  }
+
+  .grades-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: right;
+  }
+
+  .grades-table td:last-child {
+    border-bottom: none;
+  }
+
+  .grades-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #FFCC00;
+    text-align: left;
+    flex: 1;
+  }
+
+  .grade-badge {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .exam-type-badge {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+}
