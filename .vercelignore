@@ -81,3 +81,25 @@ deploy-*.bat
 fix-*.js
 option*.js
 cleanup-*.ps1
+
+# Large media files (videos)
+Img/Video
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Uploaded files (not needed for deployment)
+uploads/photos
+uploads/managed-students
+uploads/pdfs
+
+# Large documentation files
+DONT TOUCH THIS FOLDER
+Formular
+
+# React portals build artifacts (keep only dist)
+react-portals/node_modules
+
+# PWA files
+pwa/node_modules
