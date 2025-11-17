@@ -21,15 +21,11 @@ const groupSchema = new mongoose.Schema({
     season: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Season',
-        required: function() {
-            return this.groupType === 'language';
-        }
+        required: true  // Now required for both language and branch groups
     },
     seasonName: {
         type: String,
-        required: function() {
-            return this.groupType === 'language';
-        }
+        required: true  // Now required for both language and branch groups
     },
     branchGroup: {
         type: mongoose.Schema.Types.ObjectId,

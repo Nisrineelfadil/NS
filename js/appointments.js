@@ -1,6 +1,17 @@
 // Appointments Management JavaScript
 // Handles all appointment-related functionality
 
+// Translation helper (uses global translations from admin-dashboard.js)
+function t(key) {
+    if (!window.translations || !window.currentLanguage) return key;
+    const keys = key.split('.');
+    let value = window.translations[window.currentLanguage]?.translations;
+    for (const k of keys) {
+        value = value?.[k];
+    }
+    return value || key;
+}
+
 let currentAppointments = [];
 let currentFilters = {
     date: '',
@@ -79,9 +90,17 @@ async function loadAppointments() {
             throw new Error('Not authenticated');
         }
 
-        // Build query string
+        // Ensure date filter is set (required)
+        if (!currentFilters.date) {
+            const today = new Date().toISOString().split('T')[0];
+            currentFilters.date = today;
+            const dateFilter = document.getElementById('appointmentDateFilter');
+            if (dateFilter) dateFilter.value = today;
+        }
+
+        // Build query string - date is always required
         const params = new URLSearchParams();
-        if (currentFilters.date) params.append('date', currentFilters.date);
+        params.append('date', currentFilters.date);
         if (currentFilters.status) params.append('status', currentFilters.status);
         if (currentFilters.priority) params.append('priority', currentFilters.priority);
         if (currentFilters.search) params.append('search', currentFilters.search);
@@ -108,7 +127,7 @@ async function loadAppointments() {
                     <tr>
                         <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-light);">
                             <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>No appointments found for the selected filters.</p>
+                            <p>${t('admin.appointments.no_appointments')}</p>
                         </td>
                     </tr>
                 `;
@@ -143,7 +162,14 @@ async function loadAppointments() {
 async function loadAppointmentStats() {
     try {
         const token = localStorage.getItem('adminToken');
-        const response = await fetch('/api/appointments/stats', {
+        
+        // Build query string with date filter
+        const params = new URLSearchParams();
+        if (currentFilters.date) {
+            params.append('date', currentFilters.date);
+        }
+        
+        const response = await fetch(`/api/appointments/stats?${params.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -206,25 +232,25 @@ function createAppointmentRow(appointment) {
         </td>
         <td>
             <span class="badge ${priorityClass}">
-                <i class="fas ${priorityIcon}"></i> ${appointment.priority}
+                <i class="fas ${priorityIcon}"></i> ${t('admin.appointments.' + appointment.priority)}
             </span>
         </td>
         <td>
             <span class="badge ${statusClass}">
-                ${appointment.status}
+                ${t('admin.appointments.' + appointment.status)}
             </span>
         </td>
         <td>
             <div style="display: flex; gap: 5px;">
                 ${appointment.status === 'pending' ? `
-                    <button class="action-btn btn-success btn-sm" onclick="markAppointmentComplete('${appointment._id}')" title="Mark as Completed">
+                    <button class="action-btn btn-success btn-sm" onclick="markAppointmentComplete('${appointment._id}')" title="${t('admin.appointments.mark_completed')}">
                         <i class="fas fa-check"></i>
                     </button>
                 ` : ''}
-                <button class="action-btn btn-primary btn-sm" onclick="editAppointment('${appointment._id}')" title="Edit">
+                <button class="action-btn btn-primary btn-sm" onclick="editAppointment('${appointment._id}')" title="${t('admin.appointments.edit')}">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-btn btn-danger btn-sm" onclick="deleteAppointment('${appointment._id}')" title="Delete">
+                <button class="action-btn btn-danger btn-sm" onclick="deleteAppointment('${appointment._id}')" title="${t('admin.appointments.delete')}">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -272,7 +298,6 @@ async function handleAppointmentSubmit(e) {
     const purpose = document.getElementById('appointmentPurpose').value.trim();
     const appointmentDate = document.getElementById('appointmentDate').value;
     const priority = document.getElementById('appointmentPriority').value;
-    const notes = document.getElementById('appointmentNotes').value.trim();
 
     if (!fullName || !phoneNumber || !purpose || !appointmentDate) {
         alert('Please fill in all required fields');
@@ -298,8 +323,7 @@ async function handleAppointmentSubmit(e) {
                 phoneNumber,
                 purpose,
                 appointmentDate,
-                priority,
-                notes
+                priority
             })
         });
 
@@ -347,7 +371,6 @@ async function editAppointment(appointmentId) {
         document.getElementById('appointmentPurpose').value = appointment.purpose;
         document.getElementById('appointmentDate').value = appointment.appointmentDate.split('T')[0];
         document.getElementById('appointmentPriority').value = appointment.priority;
-        document.getElementById('appointmentNotes').value = appointment.notes || '';
 
         // Update modal title
         const title = document.getElementById('appointmentModalTitle');

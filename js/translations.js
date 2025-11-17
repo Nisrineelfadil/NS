@@ -1,5 +1,335 @@
 // Multi-language translations for Student Management System
 const translations = {
+    de: {
+        // Sidebar Menu
+        dashboard: "Dashboard",
+        groups: "Gruppen",
+        students: "Schüler",
+        paymentReminders: "Zahlungserinnerungen",
+        grades: "Noten",
+        backToAdmin: "Zurück zum Admin",
+        logout: "Abmelden",
+        
+        // Dashboard
+        totalGroups: "Gesamtgruppen",
+        totalStudents: "Gesamtschüler",
+        upcomingPayments: "Anstehende Zahlungen",
+        overduePayments: "Überfällige Zahlungen",
+        overview: "Übersicht",
+        welcomeMessage: "Willkommen im Schülerverwaltungssystem. Verwenden Sie die Registerkarten oben, um Gruppen, Schüler und Zahlungserinnerungen zu verwalten.",
+        
+        // Groups
+        groupsManagement: "Gruppenverwaltung",
+        createGroup: "Gruppe erstellen",
+        groupName: "Gruppenname",
+        maxStudents: "Max. Schüler",
+        formation: "Formation",
+        description: "Beschreibung",
+        status: "Status",
+        active: "Aktiv",
+        inactive: "Inaktiv",
+        graduated: "Abgeschlossen",
+        dropped: "Abgebrochen",
+        
+        // Students
+        studentsManagement: "Schülerverwaltung",
+        addStudent: "Schüler hinzufügen",
+        exportCSV: "Excel exportieren",
+        searchStudents: "Schüler suchen...",
+        allGroups: "Alle Gruppen",
+        allFormations: "Alle Formationen",
+        allPaymentStatus: "Alle Zahlungsstatus",
+        noStudentsFound: "Keine Schüler gefunden",
+        
+        // Student Form
+        fullName: "Vollständiger Name",
+        group: "Gruppe",
+        phone: "Telefon",
+        parentPhone: "Elterntelefon",
+        schoolEmail: "Schul-E-Mail",
+        emailPassword: "E-Mail-Passwort",
+        formationChoisie: "Formation (Sprachen) - Alle zutreffenden auswählen",
+        filiere: "Filière (Zweige) - Alle zutreffenden auswählen",
+        paymentDate: "Zahlungsdatum",
+        amount: "Betrag (MAD)",
+        paymentStatus: "Zahlungsstatus",
+        photo: "Foto",
+        notes: "Notizen",
+        
+        // Formation Options
+        allemand: "Deutsch (German)",
+        anglais: "Englisch (English)",
+        francais: "Französisch (French)",
+        ausbildung: "Ausbildung",
+        
+        // Filière Options
+        geriatrie: "Geriatrie",
+        aideSoignant: "Pflegehelfer",
+        agentSocioEducatif: "Sozial-pädagogischer Agent",
+        assistanteSociale: "Sozialassistent",
+        restauration: "Gastronomie",
+        cuisine: "Küche",
+        informatique: "Informatik",
+        gestionHoteliere: "Hotelmanagement",
+        
+        // Payment Status
+        paid: "Bezahlt",
+        pending: "Ausstehend",
+        overdue: "Überfällig",
+        
+        // Actions
+        view: "Ansehen",
+        edit: "Bearbeiten",
+        delete: "Löschen",
+        save: "Speichern",
+        update: "Aktualisieren",
+        cancel: "Abbrechen",
+        add: "Hinzufügen",
+        create: "Erstellen",
+        generate: "Generieren",
+        markAsPaid: "Als bezahlt markieren",
+        sendReminder: "Erinnerung senden",
+        
+        // Messages
+        confirmDelete: "Sind Sie sicher, dass Sie löschen möchten",
+        successAdded: "Erfolgreich hinzugefügt!",
+        successUpdated: "Erfolgreich aktualisiert!",
+        successDeleted: "Erfolgreich gelöscht!",
+        errorOccurred: "Ein Fehler ist aufgetreten",
+        
+        // Payment Reminders
+        paymentRemindersTitle: "Zahlungserinnerungen",
+        dueIn15Days: "Fällig in 15 Tagen",
+        dueIn7Days: "Fällig in 7 Tagen",
+        dueTomorrow: "Fällig morgen",
+        student: "Schüler",
+        paymentAmount: "Zahlungsbetrag",
+        actions: "Aktionen",
+        
+        // Grades
+        studentGrades: "Schülernoten",
+        gradesManagement: "Notenverwaltung",
+        comingSoon: "Demnächst verfügbar!",
+        gradesDescription: "Dieser Bereich ermöglicht es Ihnen, Schülernoten nach Gruppen zu verwalten. Sie können Noten für jeden Schüler in ihren jeweiligen Kursen anzeigen, hinzufügen und bearbeiten.",
+        
+        // Attendance
+        attendance: "Anwesenheit",
+        attendanceMonitoring: "Anwesenheitsüberwachung",
+        plannedFeatures: "Geplante Funktionen:",
+        viewGradesByGroup: "Noten nach Gruppe anzeigen",
+        addGradesForStudents: "Noten für jeden Schüler hinzufügen",
+        trackPerformance: "Leistung im Zeitverlauf verfolgen",
+        exportGradeReports: "Notenberichte exportieren",
+        gradeStatistics: "Notenstatistiken und Analysen",
+        
+        // My Registrations
+        myRegistrations: "Meine Registrierungen",
+        totalCredits: "Gesamtguthaben",
+        totalRegistrations: "Gesamtregistrierungen",
+        thisMonth: "Diesen Monat",
+        registerNewStudent: "Neuen Schüler registrieren",
+        leaderboard: "Bestenliste",
+        search: "Suchen",
+        course: "Kurs",
+        fromDate: "Von Datum",
+        toDate: "Bis Datum",
+        allCourses: "Alle Kurse",
+        studentName: "Schülername",
+        cin: "CIN",
+        courses: "Kurse",
+        date: "Datum",
+        credits: "Guthaben",
+        approved: "Genehmigt",
+        pending: "Ausstehend",
+        rejected: "Abgelehnt",
+        exportPDF: "PDF exportieren",
+        
+        // Academic Seasons
+        academicSeasons: "Akademische Saisons",
+        manageAcademicYears: "Verwalten Sie akademische Jahre und ihre zugehörigen Gruppen",
+        quickCreateGroup: "Schnell Gruppe erstellen",
+        createSeason: "Saison erstellen",
+        start: "Start",
+        end: "Ende",
+        groups: "Gruppen",
+        manageGroups: "Gruppen verwalten",
+        editSeason: "Saison bearbeiten",
+        activate: "Aktivieren",
+        archive: "Archivieren",
+        deleteSeason: "Löschen",
+        seasonsManagement: "Saisons-Verwaltung",
+        branchGroupsManagement: "Zweiggruppen-Verwaltung",
+        seasonsAndGroups: "Saisons & Gruppen",
+        upcoming: "Bevorstehend",
+        archived: "Archiviert",
+        totalGroups: "Gesamtgruppen",
+        totalStudents: "Gesamtschüler",
+        upcomingPayments: "Anstehende Zahlungen",
+        cashRegister: "Kasse",
+        backToAdmin: "Zurück zum Admin",
+        backToSeasons: "Zurück zu Saisons",
+        languageGroups: "Sprachgruppen",
+        branchManagement: "Zweigverwaltung",
+        primaryGroupsDescription: "Hauptgruppen für das Sprachenlernen (Gruppe A, B, C, usw.)",
+        
+        // Branch Formations
+        branchFormations: "Zweigformationen (Global)",
+        defaultBranchGroups: "Standard-Zweiggruppen verfügbar für alle Saisons",
+        createBranchGroup: "Zweiggruppe erstellen",
+        culinaryArts: "Kochkunst",
+        healthcareAssistant: "Gesundheitsassistent",
+        restaurantHospitality: "Restaurant & Gastgewerbe",
+        default: "Standard",
+        subgroups: "Untergruppen",
+        professionalCooking: "Professionelles Kochen und kulinarische Programme",
+        nursingAssistant: "Pflegeassistent und Pflegeprogramme",
+        restaurantManagement: "Restaurantmanagement und Service",
+        branchSubjectGroups: "Zweig-/Fachgruppen",
+        branchSubjectGroupsDescription: "Optionale Fachgruppen (IT, Kochen, etc.) - Schüler wählen diese zusätzlich zu ihrer Sprachgruppe",
+        pendingBranchAssignments: "Ausstehende Zweigzuweisungen",
+        pendingBranchAssignmentsDescription: "Schüler, die ein Fach gewählt haben, aber noch keiner Untergruppe zugewiesen wurden",
+        allStudentsAssigned: "Alle Schüler mit Fächern wurden Untergruppen zugewiesen!",
+        
+        // Student Profile
+        studentProfile: "Schülerprofil",
+        registrationForm: "Registrierungsformular",
+        activeApproved: "Aktiv & Genehmigt",
+        contactInformation: "Kontaktinformationen",
+        noPersonalEmail: "Keine persönliche E-Mail",
+        downloadCINCard: "CIN-Karte herunterladen",
+        notUploaded: "Nicht hochgeladen",
+        academicSummary: "Akademische Zusammenfassung",
+        noSession: "Keine Sitzung",
+        editStudent: "Schüler bearbeiten",
+        close: "Schließen",
+        registrationDate: "Registrierungsdatum",
+        nameAndSurname: "Name und Vorname",
+        dateOfBirth: "Geburtsdatum",
+        address: "Adresse",
+        cityQuarter: "Stadt / Viertel",
+        gsmStudent: "GSM Schüler",
+        
+        // Payment Reminders
+        overduePayments: "Überfällige Zahlungen",
+        studentsWithOverdue: "Schüler mit überfälligen Zahlungen, die sofortige Aufmerksamkeit erfordern",
+        noOverduePayments: "Keine überfälligen Zahlungen gefunden!",
+        upcomingPaymentReminders: "Anstehende Zahlungserinnerungen",
+        dueIn15Days: "Fällig in 15 Tagen",
+        dueIn7Days: "Fällig in 7 Tagen",
+        dueTomorrow: "Fällig morgen",
+        students: "Schüler",
+        
+        // Student Grades
+        studentGrades: "Schülernoten",
+        searchStudent: "Schüler suchen",
+        searchByNameEmail: "Nach Name, E-Mail oder Telefon suchen...",
+        selectStudent: "Schüler auswählen",
+        student: "Schüler",
+        formationLanguage: "Formation (Sprache)",
+        allFormations: "Alle Formationen",
+        branchFiliere: "Zweig (Filière)",
+        allBranches: "Alle Zweige",
+        semester: "Semester",
+        allSemesters: "Alle Semester",
+        examNumber: "Prüfungsnummer",
+        allExams: "Alle Prüfungen",
+        languageLevel: "Sprachniveau",
+        testType: "Testtyp",
+        selectStudentToView: "Wählen Sie einen Schüler aus, um seine Noten anzuzeigen",
+        examType: "Prüfungstyp",
+        score: "Punktzahl",
+        percentage: "Prozentsatz",
+        examDate: "Prüfungsdatum",
+        teacher: "Lehrer",
+        comments: "Kommentare",
+        mid: "Mittel",
+        approved: "Genehmigt",
+        language: "Sprache",
+        branch: "Zweig",
+        
+        // Attendance
+        attendanceMonitoring: "Anwesenheitsüberwachung",
+        trackManageAttendance: "Verfolgen und verwalten Sie die Anwesenheit der Schüler in allen Sitzungen",
+        downloadExcelReport: "Excel-Bericht herunterladen",
+        totalRecords: "Gesamtaufzeichnungen",
+        allAttendanceSessions: "Alle Anwesenheitssitzungen",
+        present: "Anwesend",
+        ofTotalRecords: "der Gesamtaufzeichnungen",
+        late: "Verspätet",
+        absent: "Abwesend",
+        attendanceRate: "Anwesenheitsquote",
+        presentLateCombined: "Anwesend + Verspätet kombiniert",
+        filterAttendanceRecords: "Anwesenheitsaufzeichnungen filtern",
+        allGroups: "Alle Gruppen",
+        allFormations: "Alle Formationen",
+        allStatus: "Alle Status",
+        startDate: "Startdatum",
+        endDate: "Enddatum",
+        searchStudent: "Schüler suchen",
+        searchByNameOrEmail: "Nach Name oder E-Mail suchen...",
+        attendanceRecords: "Anwesenheitsaufzeichnungen",
+        exportGroupExcel: "Gruppen-Excel exportieren",
+        clearPresences: "Anwesenheiten löschen",
+        clearAbsences: "Abwesenheiten löschen",
+        scanTime: "Scan-Zeit",
+        clearAllFilters: "Alle Filter löschen",
+        phone: "Telefon",
+        date: "Datum",
+        ofTotalRecords: "der Gesamtaufzeichnungen",
+        paymentDate: "Zahlungsdatum",
+        amount: "Betrag",
+        recentAttendanceSessions: "Aktuelle Anwesenheitssitzungen",
+        refreshSessions: "Sitzungen aktualisieren",
+        noRecentSessions: "Keine aktuellen Sitzungen",
+        
+        // Export Modal
+        exportMonthlyAttendance: "Monatliche Anwesenheit exportieren",
+        selectGroupSessionMonth: "Wählen Sie eine Gruppe, Sitzung und Monat aus, um das Anwesenheitsblatt zu exportieren",
+        selectGroup: "Gruppe auswählen",
+        selectSeason: "Saison auswählen",
+        selectMonthYear: "Monat & Jahr auswählen",
+        selectMonth: "Monat auswählen",
+        exportExcel: "Excel exportieren",
+        
+        // Teacher Management
+        teacherManagement: "Lehrerverwaltung",
+        addTeacher: "Lehrer hinzufügen",
+        loadingTeachers: "Lehrer werden geladen...",
+        noTeachersFound: "Keine Lehrer gefunden",
+        name: "Name",
+        email: "E-Mail",
+        formations: "Formationen",
+        assignedGroups: "Zugewiesene Gruppen",
+        group: "Gruppe",
+        formation: "Formation",
+        noBranch: "Kein Zweig",
+        
+        // Admin Dashboard
+        pendingReviews: "Ausstehende Bewertungen",
+        averageRating: "Durchschnittsbewertung",
+        totalReviews: "Gesamtbewertungen",
+        refresh: "Aktualisieren",
+        accept: "Akzeptieren",
+        reject: "Ablehnen",
+        approvedReviews: "Genehmigte Bewertungen",
+        
+        // Messages
+        telefon: "Telefon",
+        nachricht: "Nachricht",
+        datum: "Datum",
+        aktionen: "Aktionen",
+        unread: "Ungelesen",
+        markRead: "Als gelesen markieren",
+        
+        // Registration Cards
+        allStudents: "Alle Schüler",
+        aktualisieren: "Aktualisieren",
+        alleHerunterladen: "Alle herunterladen",
+        kategorieLöschen: "Kategorie löschen",
+        backup: "Sichern",
+        invalidDate: "Ungültiges Datum"
+    },
+    
     en: {
         // Sidebar Menu
         dashboard: "Dashboard",
@@ -436,10 +766,10 @@ const translations = {
     }
 };
 
-// Get current language from localStorage or default to English
+// Get current language from localStorage or default to German
 // Check both adminLanguage (from admin panel) and selectedLanguage (from student management)
 function getCurrentLanguage() {
-    return localStorage.getItem('adminLanguage') || localStorage.getItem('selectedLanguage') || 'en';
+    return localStorage.getItem('adminLanguage') || localStorage.getItem('selectedLanguage') || 'de';
 }
 
 // Set current language in both keys for cross-page sync

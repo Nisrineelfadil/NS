@@ -15,7 +15,7 @@ const Student = require('../models/Student');
 const Settings = require('../models/Settings');
 const { authenticateAdmin, requireSuperAdmin, checkActiveStatus } = require('../middleware/authMiddleware');
 const { createBulkDownloadZip, getDownloadStatistics } = require('../services/bulkDownload');
-const dropboxService = require('../services/dropboxService');
+const megaService = require('../services/megaService');
 
 // Helper functions
 function getClientIp(req) {
@@ -584,17 +584,18 @@ router.put('/students/:id/status', authenticateAdmin, async (req, res) => {
                     const pdfBuffer = await generateRegistrationPDF(student.toObject());
                     console.log(`✅ PDF generated (${pdfBuffer.length} bytes)`);
                     
-                    // Backup to Dropbox (pass buffer directly - Vercel filesystem is read-only)
-                    console.log(`☁️ Uploading to Dropbox...`);
-                    const result = await dropboxService.uploadStudentPDF(pdfBuffer, {
+                    // Backup to Mega.nz (pass buffer directly - Vercel filesystem is read-only)
+                    console.log(`☁️ Uploading to Mega.nz...`);
+                    const result = await megaService.uploadStudentPDF(pdfBuffer, {
                         fullName: student.fullName,
                         cin: student.cin
                     });
                     
                     if (result.success) {
-                        console.log(`✅ Dropbox upload successful!`);
+                        console.log(`✅ Mega upload successful!`);
                         console.log(`   File ID: ${result.fileId}`);
                         console.log(`   File Name: ${result.fileName}`);
+                        console.log(`   File Path: ${result.filePath}`);
                         
                         // Update student record with backup info
                         await Student.findByIdAndUpdate(student._id, {
@@ -608,9 +609,9 @@ router.put('/students/:id/status', authenticateAdmin, async (req, res) => {
                             }
                         });
                         
-                        console.log(`✅ Auto-backed up ${student.fullName} to Dropbox - COMPLETE`);
+                        console.log(`✅ Auto-backed up ${student.fullName} to Mega.nz - COMPLETE`);
                     } else {
-                        console.error(`❌ Dropbox upload failed for ${student.fullName}:`, result.message);
+                        console.error(`❌ Mega upload failed for ${student.fullName}:`, result.message);
                         console.error(`   Error:`, result.error);
                     }
                 } catch (err) {
@@ -638,7 +639,7 @@ router.put('/students/:id/status', authenticateAdmin, async (req, res) => {
         res.json({ 
             success: true, 
             message: status === 'approved' ? 
-                'Status updated successfully. PDF will be backed up to Dropbox automatically.' : 
+                'Status updated successfully. PDF will be backed up to Mega.nz automatically.' : 
                 'Status updated successfully',
             student 
         });
@@ -652,7 +653,7 @@ router.put('/students/:id/status', authenticateAdmin, async (req, res) => {
     }
 });
 
-// POST /api/admin/students/:id/backup-dropbox - Manual backup to Dropbox
+// POST /api/admin/students/:id/backup-dropbox - Manual backup to Mega.nz
 router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) => {
     try {
         const student = await Student.findById(req.params.id);
@@ -672,15 +673,15 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
         const pdfBuffer = await generateRegistrationPDF(student.toObject());
         console.log(`✅ PDF generated (${pdfBuffer.length} bytes)`);
         
-        // Backup to Dropbox (pass buffer directly - Vercel filesystem is read-only)
-        console.log(`☁️ Uploading to Dropbox...`);
-        const result = await dropboxService.uploadStudentPDF(pdfBuffer, {
+        // Backup to Mega.nz (pass buffer directly - Vercel filesystem is read-only)
+        console.log(`☁️ Uploading to Mega.nz...`);
+        const result = await megaService.uploadStudentPDF(pdfBuffer, {
             fullName: student.fullName,
             cin: student.cin
         });
         
         if (result.success) {
-            console.log(`✅ Dropbox upload successful!`);
+            console.log(`✅ Mega upload successful!`);
             
             // Update student record with backup info
             await Student.findByIdAndUpdate(student._id, {
@@ -694,25 +695,25 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
                 }
             });
             
-            console.log(`✅ Backed up ${student.fullName} to Dropbox`);
+            console.log(`✅ Backed up ${student.fullName} to Mega.nz`);
             
             // Log activity
             await logActivity({
                 adminId: req.admin.id,
                 adminName: req.admin.username,
                 adminRole: req.admin.role,
-                action: 'backup_to_dropbox',
+                action: 'backup_to_mega',
                 targetType: 'student',
                 targetId: student._id.toString(),
                 targetName: student.fullName,
-                details: `Manually backed up PDF to Dropbox`,
+                details: `Manually backed up PDF to Mega.nz`,
                 ipAddress: getClientIp(req),
                 userAgent: req.headers['user-agent']
             });
             
             res.json({ 
                 success: true, 
-                message: `✅ ${student.fullName} backed up to Dropbox successfully!`,
+                message: `✅ ${student.fullName} backed up to Mega.nz successfully!`,
                 backup: {
                     fileName: result.fileName,
                     fileId: result.fileId,
@@ -720,14 +721,12 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
                 }
             });
         } else {
-            console.error(`❌ Dropbox upload failed:`, result.message);
+            console.error(`❌ Mega upload failed:`, result.message);
             res.status(500).json({ 
                 success: false, 
                 message: result.message,
                 error: result.error,
-                errorCode: result.errorCode,
-                fix: result.fix,
-                details: 'See FIX-DROPBOX-401-ERROR.md for detailed troubleshooting'
+                fix: result.fix
             });
         }
 
@@ -740,11 +739,11 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
     }
 });
 
-// GET /api/admin/cloud-status - Get Dropbox backup status
+// GET /api/admin/cloud-status - Get Mega.nz backup status
 router.get('/cloud-status', authenticateAdmin, async (req, res) => {
     try {
-        // Test Dropbox connection
-        const connectionTest = await dropboxService.testConnection();
+        // Test Mega connection
+        const connectionTest = await megaService.testConnection();
         
         // Get backup statistics
         const totalStudents = await Student.countDocuments();
@@ -762,13 +761,14 @@ router.get('/cloud-status', authenticateAdmin, async (req, res) => {
 
         res.json({
             success: true,
-            dropbox: {
+            mega: {
                 connected: connectionTest.success,
-                accountName: connectionTest.accountName || null,
                 accountEmail: connectionTest.accountEmail || null,
-                message: connectionTest.success ? 'Connected to Dropbox' : connectionTest.message,
+                storageUsed: connectionTest.storageUsed || null,
+                storageTotal: connectionTest.storageTotal || null,
+                storageAvailable: connectionTest.storageAvailable || null,
+                message: connectionTest.success ? 'Connected to Mega.nz' : connectionTest.message,
                 error: connectionTest.error || null,
-                errorCode: connectionTest.errorCode || null,
                 fix: connectionTest.fix || null
             },
             statistics: {
@@ -1897,6 +1897,34 @@ router.get('/drive-status', authenticateAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to check Google Drive status',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/admin/test-mega - Test Mega.nz connection
+router.get('/test-mega', authenticateAdmin, async (req, res) => {
+    try {
+        console.log('🧪 Testing Mega.nz connection...');
+        
+        const result = await megaService.testConnection();
+        
+        if (result.success) {
+            console.log('✅ Mega connection successful!');
+            console.log(`   Email: ${result.accountEmail}`);
+            console.log(`   Storage Used: ${result.storageUsed}`);
+            console.log(`   Storage Total: ${result.storageTotal}`);
+            console.log(`   Storage Available: ${result.storageAvailable}`);
+        } else {
+            console.error('❌ Mega connection failed:', result.message);
+        }
+        
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Mega test error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to test Mega connection',
             error: error.message
         });
     }

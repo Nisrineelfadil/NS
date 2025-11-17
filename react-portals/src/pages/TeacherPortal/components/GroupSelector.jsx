@@ -1,6 +1,8 @@
+import { useLanguage } from '../../../context/LanguageContext';
 import './GroupSelector.css';
 
 const GroupSelector = ({ groups, selectedGroup, onSelect, formation }) => {
+  const { t } = useLanguage();
   console.log('GroupSelector - Received groups:', groups);
   console.log('GroupSelector - Formation:', formation);
   
@@ -26,7 +28,7 @@ const GroupSelector = ({ groups, selectedGroup, onSelect, formation }) => {
     <div className="group-selector">
       <h3>
         <i className="fas fa-users"></i>
-        Select Group
+        {t('selectGroup')}
       </h3>
       <div className="group-grid">
         {filteredGroups.length > 0 ? (
@@ -40,7 +42,7 @@ const GroupSelector = ({ groups, selectedGroup, onSelect, formation }) => {
               <div className="group-info">
                 <span>
                   <i className="fas fa-user-graduate"></i>
-                  {group.studentCount || 0} students
+                  {group.studentCount || 0} {t('students')}
                 </span>
                 <span>
                   <i className="fas fa-language"></i>
@@ -52,7 +54,7 @@ const GroupSelector = ({ groups, selectedGroup, onSelect, formation }) => {
         ) : (
           <div className="no-groups">
             <i className="fas fa-info-circle"></i>
-            <p>No groups available for this formation</p>
+            <p>{t('noGroupsAvailable')}</p>
           </div>
         )}
       </div>

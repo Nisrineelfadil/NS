@@ -9,6 +9,7 @@ let grades = {};
 let allGrades = [];
 let currentLanguage = localStorage.getItem('teacherLanguage') || 'de';
 let currentTheme = localStorage.getItem('teacherTheme') || 'dark';
+let currentSeasonId = null; // Track selected season
 
 // Translations
 const translations = {
@@ -447,6 +448,9 @@ async function loadTeacherProfile() {
             // Populate formations
             populateFormations();
             
+            // Load seasons first
+            await loadSeasons();
+            
             // Load groups
             await loadGroups();
             
@@ -505,6 +509,60 @@ function populateFormations() {
             formationSelect.style.cursor = 'pointer';
         }
     }
+}
+
+// Load Active Season (auto-assign, no dropdown)
+async function loadSeasons() {
+    try {
+        const response = await fetch(`${API_URL}/teacher/seasons`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const seasons = await response.json();
+            
+            // Find and auto-assign active season
+            const activeSeason = seasons.find(s => s.status === 'active');
+            if (activeSeason) {
+                currentSeasonId = activeSeason._id;
+                console.log('✅ Teacher portal auto-assigned to active season:', activeSeason.name);
+                
+                // Display season indicator
+                displaySeasonIndicator(activeSeason.name);
+            } else {
+                console.warn('⚠️ No active season found');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading active season:', error);
+    }
+}
+
+// Display season indicator below Formation selector
+function displaySeasonIndicator(seasonName) {
+    const formationSelect = document.getElementById('formationSelect');
+    if (!formationSelect) return;
+    
+    // Find or create season indicator
+    let seasonIndicator = document.getElementById('seasonIndicator');
+    if (!seasonIndicator) {
+        seasonIndicator = document.createElement('div');
+        seasonIndicator.id = 'seasonIndicator';
+        seasonIndicator.style.cssText = `
+            font-size: 0.85rem;
+            color: #10b981;
+            margin-top: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #10b981;
+            display: inline-block;
+            font-weight: 500;
+        `;
+        
+        // Insert after formation select
+        formationSelect.parentElement.appendChild(seasonIndicator);
+    }
+    
+    seasonIndicator.innerHTML = `<i class="fas fa-calendar-check" style="margin-right: 6px;"></i>${seasonName}`;
 }
 
 // Load Groups
@@ -583,9 +641,10 @@ async function loadStudentsCards() {
     }
     
     try {
-        // Load students
+        // Load students (with season filter)
+        const seasonParam = currentSeasonId ? `&season=${currentSeasonId}` : '';
         const studentsResponse = await fetch(
-            `${API_URL}/teacher/students?formation=${formation}&groupId=${groupId}`,
+            `${API_URL}/teacher/students?formation=${formation}&groupId=${groupId}${seasonParam}`,
             { headers: { 'Authorization': `Bearer ${token}` } }
         );
         

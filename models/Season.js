@@ -58,8 +58,38 @@ const seasonSchema = new mongoose.Schema({
 });
 
 // Update timestamp before saving
-seasonSchema.pre('save', function(next) {
+seasonSchema.pre('save', async function(next) {
     this.updatedAt = Date.now();
+    
+    // If setting this season to active, deactivate all other seasons
+    if (this.status === 'active' && this.isModified('status')) {
+        await this.constructor.updateMany(
+            { _id: { $ne: this._id }, status: 'active' },
+            { $set: { status: 'archived' } }
+        );
+    }
+    
+    // Validate no date overlap with other seasons
+    if (this.isNew || this.isModified('startDate') || this.isModified('endDate')) {
+        const overlapping = await this.constructor.findOne({
+            _id: { $ne: this._id },
+            $or: [
+                // New season starts during existing season
+                { startDate: { $lte: this.startDate }, endDate: { $gte: this.startDate } },
+                // New season ends during existing season
+                { startDate: { $lte: this.endDate }, endDate: { $gte: this.endDate } },
+                // New season completely contains existing season
+                { startDate: { $gte: this.startDate }, endDate: { $lte: this.endDate } }
+            ]
+        });
+        
+        if (overlapping) {
+            const error = new Error(`Season dates overlap with existing season: ${overlapping.name}`);
+            error.name = 'ValidationError';
+            return next(error);
+        }
+    }
+    
     next();
 });
 
@@ -71,12 +101,37 @@ seasonSchema.virtual('isCurrent').get(function() {
 
 // Static method to get current active season
 seasonSchema.statics.getCurrentSeason = async function() {
-    const now = new Date();
-    return await this.findOne({
-        status: 'active',
-        startDate: { $lte: now },
-        endDate: { $gte: now }
-    });
+    // First try to find active season
+    let season = await this.findOne({ status: 'active' });
+    
+    // If no active season, find by current date
+    if (!season) {
+        const now = new Date();
+        season = await this.findOne({
+            startDate: { $lte: now },
+            endDate: { $gte: now }
+        });
+    }
+    
+    return season;
+};
+
+// Static method to activate a season (ensures only one active)
+seasonSchema.statics.activateSeason = async function(seasonId) {
+    // Deactivate all seasons
+    await this.updateMany(
+        { status: 'active' },
+        { $set: { status: 'archived' } }
+    );
+    
+    // Activate the target season
+    const season = await this.findByIdAndUpdate(
+        seasonId,
+        { $set: { status: 'active' } },
+        { new: true }
+    );
+    
+    return season;
 };
 
 // Static method to create season from year

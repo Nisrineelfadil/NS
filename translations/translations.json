@@ -123,8 +123,11 @@
   "de": {
     "login": {
       "title": "Schülerportal",
+      "studentPortal": "Schülerportal",
+      "teacherPortal": "Lehrerportal",
       "subtitle": "Melden Sie sich an, um Ihre Noten und Fortschritte anzuzeigen",
-      "email": "Schul-E-Mail",
+      "email": "E-Mail",
+      "schoolEmail": "Schul-E-Mail",
       "password": "Passwort",
       "emailPlaceholder": "ihr.name@nisrineschool.com",
       "passwordPlaceholder": "Geben Sie Ihr Passwort ein",

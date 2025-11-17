@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="de" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="css/portal-access.css">
     <link rel="stylesheet" href="css/student-life.css">
     <link rel="stylesheet" href="css/registration-modal.css">
+    <link rel="stylesheet" href="css/ratings.css">
+    <link rel="stylesheet" href="css/moroccan-zelij.css">
 </head>
 <body>
 
@@ -70,6 +72,9 @@
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <ul class="language-dropdown">
+                                <li><a href="#" data-lang="de" class="language-option">
+                                    <span class="flag-icon">🇩🇪</span> Deutsch
+                                </a></li>
                                 <li><a href="#" data-lang="en" class="language-option">
                                     <span class="flag-icon">🇬🇧</span> English
                                 </a></li>
@@ -143,7 +148,7 @@
                 <!-- Service Box 1 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <i class="fas fa-language"></i>
+                        <img src="Img/service-language.jpg" alt="German Language Courses" class="service-image">
                     </div>
                     <h3 data-i18n="services.language_courses.title">German Language Courses</h3>
                     <p data-i18n="services.language_courses.description">Comprehensive German language training from beginner to advanced levels with certified instructors.</p>
@@ -159,7 +164,7 @@
                 <!-- Service Box 2 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <i class="fas fa-passport"></i>
+                        <img src="Img/service-visa.jpg" alt="Student Visa Support" class="service-image">
                     </div>
                     <h3 data-i18n="services.visa_support.title">Student Visa Support</h3>
                     <p data-i18n="services.visa_support.description">Expert guidance through the entire student visa application process for Germany.</p>
@@ -168,7 +173,7 @@
                 <!-- Service Box 3 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <i class="fas fa-hands-helping"></i>
+                        <img src="Img/service-culture.jpg" alt="Cultural Integration" class="service-image">
                     </div>
                     <h3 data-i18n="services.cultural_integration.title">Cultural Integration</h3>
                     <p data-i18n="services.cultural_integration.description">Support and resources to help you adapt to German culture and society.</p>
@@ -177,7 +182,7 @@
                 <!-- Service Box 4 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <i class="fas fa-user-nurse"></i>
+                        <img src="Img/service-nursing.jpg" alt="Nursing Preparation" class="service-image">
                     </div>
                     <h3 data-i18n="services.nursing_preparation.title">Nursing Preparation</h3>
                     <p data-i18n="services.nursing_preparation.description">Specialized training for nursing careers in both Morocco and Germany.</p>
@@ -186,7 +191,7 @@
                 <!-- Service Box 5 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <i class="fas fa-hotel"></i>
+                        <img src="Img/service-hotel.jpg" alt="Hotel Service Training" class="service-image">
                     </div>
                     <h3 data-i18n="services.hotel_training.title">Hotel Service Training</h3>
                     <p data-i18n="services.hotel_training.description">Professional hospitality and hotel service training programs.</p>
@@ -195,7 +200,7 @@
                 <!-- Service Box 6 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <i class="fas fa-graduation-cap"></i>
+                        <img src="Img/service-education.jpg" alt="Educational Services" class="service-image">
                     </div>
                     <h3 data-i18n="services.educational_services.title">Educational Services</h3>
                     <p data-i18n="services.educational_services.description">Additional educational programs and support services for students.</p>
@@ -641,6 +646,84 @@
         </div>
     </section>
 
+    <!-- Ratings Section -->
+    <section id="ratings" class="ratings-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="ratings.title">Rate Us</h2>
+                <p data-i18n="ratings.subtitle">Share your experience with Nisrine School</p>
+            </div>
+
+            <!-- Rating Submission Form -->
+            <div class="rating-form-container">
+                <h3 data-i18n="ratings.form_title">Leave Your Feedback</h3>
+                <form id="ratingForm" class="rating-form">
+                    <div class="form-group">
+                        <label for="ratingName">
+                            <i class="fas fa-user"></i> Your Name *
+                        </label>
+                        <input type="text" id="ratingName" name="name" placeholder="Enter your name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ratingStars">
+                            <i class="fas fa-star"></i> Your Rating *
+                        </label>
+                        <div class="star-rating">
+                            <input type="radio" id="star1" name="stars" value="1" required>
+                            <label for="star1" class="star"><i class="far fa-star"></i></label>
+                            
+                            <input type="radio" id="star2" name="stars" value="2">
+                            <label for="star2" class="star"><i class="far fa-star"></i></label>
+                            
+                            <input type="radio" id="star3" name="stars" value="3">
+                            <label for="star3" class="star"><i class="far fa-star"></i></label>
+                            
+                            <input type="radio" id="star4" name="stars" value="4">
+                            <label for="star4" class="star"><i class="far fa-star"></i></label>
+                            
+                            <input type="radio" id="star5" name="stars" value="5">
+                            <label for="star5" class="star"><i class="far fa-star"></i></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ratingComment">
+                            <i class="fas fa-comment"></i> Your Feedback *
+                        </label>
+                        <textarea id="ratingComment" name="comment" rows="4" placeholder="Tell us about your experience..." required minlength="10"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit-rating">
+                        <span data-i18n="ratings.submit_button">Submit Rating</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+
+                <div id="ratingSuccess" class="rating-message success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span data-i18n="ratings.success_message">Thank you for your feedback! Your rating is pending approval.</span>
+                </div>
+                <div id="ratingError" class="rating-message error" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="ratingErrorText">Something went wrong. Please try again.</span>
+                </div>
+            </div>
+
+            <!-- Approved Ratings Display -->
+            <div class="approved-ratings-container">
+                <h3 data-i18n="ratings.reviews_title">What Our Students Say</h3>
+                <div id="approvedRatingsGrid" class="ratings-grid">
+                    <!-- Ratings will be loaded here dynamically -->
+                    <div class="loading-ratings">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading reviews...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -724,6 +807,9 @@
 
     <!-- Registration Modal JavaScript -->
     <script src="js/registration-modal.js"></script>
+
+    <!-- Ratings JavaScript -->
+    <script src="js/ratings.js"></script>
 
     <!-- JavaScript -->
     <script src="js/main.js"></script>

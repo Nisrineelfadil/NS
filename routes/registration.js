@@ -6,6 +6,7 @@ const fs = require('fs');
 const Student = require('../models/Student');
 const Settings = require('../models/Settings');
 const { generateRegistrationPDF } = require('../services/pdfGenerator');
+const notificationService = require('../services/notificationService');
 
 // Configure multer for photo uploads (using memory storage for Vercel compatibility)
 const storage = multer.memoryStorage();
@@ -146,6 +147,11 @@ router.post('/register', upload.single('photo'), async (req, res) => {
         // Generate PDF (skip on Vercel due to filesystem limitations)
         // PDF will be generated on-demand when admin downloads it
         console.log('✅ Student registered successfully. PDF will be generated on-demand.');
+
+        // Send real-time notification to admins
+        notificationService.notifyNewRegistration(student).catch(err => {
+            console.error('Failed to send notification:', err);
+        });
 
         res.status(201).json({ 
             success: true, 

@@ -841,7 +841,7 @@ window.handleCINUpload = function(event, side) {
     // Validate file size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
         alert('File size must be less than 2MB');
-        event.target.value = '';
+        event.target.value= '';
         return;
     }
     
@@ -849,7 +849,7 @@ window.handleCINUpload = function(event, side) {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
     if (!validTypes.includes(file.type)) {
         alert('Please upload a JPEG, PNG, or PDF file');
-        event.target.value = '';
+        event.target.value= '';
         return;
     }
     

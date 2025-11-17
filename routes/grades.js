@@ -136,7 +136,18 @@ router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
             return res.status(404).json({ message: 'Teacher not found' });
         }
         
-        const { formation, groupId } = req.query;
+        const { formation, groupId, season } = req.query;
+        
+        // Get active season or use provided season
+        const Season = require('../models/Season');
+        const Group = require('../models/Group');
+        
+        let targetSeason;
+        if (season) {
+            targetSeason = await Season.findById(season);
+        } else {
+            targetSeason = await Season.findOne({ status: 'active' });
+        }
         
         // Check if the formation is a branch or language
         const branchFormations = ['Gériatrie', 'Aide soignant', 'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Cuisine', 'Informatique', 'Gestion hôtelière'];
@@ -144,9 +155,30 @@ router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
         
         let studentQuery = { status: 'active' };
         
-        // Filter by teacher's assigned groups
-        if (groupId) {
-            studentQuery.group = groupId;
+        // Filter by season's groups
+        if (targetSeason) {
+            const seasonGroups = await Group.find({ season: targetSeason._id }).select('_id');
+            const seasonGroupIds = seasonGroups.map(g => g._id);
+            
+            // Filter by teacher's assigned groups AND season groups
+            if (groupId) {
+                // Check if groupId is in season's groups
+                if (seasonGroupIds.some(id => id.toString() === groupId)) {
+                    studentQuery.group = groupId;
+                } else {
+                    // Group not in this season, return empty
+                    return res.json([]);
+                }
+            } else if (teacher.groups.length > 0) {
+                // Intersect teacher's groups with season's groups
+                const teacherGroupIds = teacher.groups.map(g => g.toString());
+                const validGroupIds = seasonGroupIds.filter(id => 
+                    teacherGroupIds.includes(id.toString())
+                );
+                studentQuery.group = { $in: validGroupIds };
+            } else {
+                studentQuery.group = { $in: seasonGroupIds };
+            }
         } else if (teacher.groups.length > 0) {
             studentQuery.group = { $in: teacher.groups };
         }
@@ -170,6 +202,21 @@ router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
         res.json(students);
     } catch (error) {
         console.error('Get students error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get seasons for teacher
+router.get('/teacher/seasons', verifyTeacherToken, async (req, res) => {
+    try {
+        const Season = require('../models/Season');
+        const seasons = await Season.find()
+            .sort({ startDate: -1 })
+            .select('name startDate endDate status');
+        
+        res.json(seasons);
+    } catch (error) {
+        console.error('Get seasons error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

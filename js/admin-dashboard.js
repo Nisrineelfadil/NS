@@ -26,8 +26,22 @@ window.toggleMobileMenu = function() {
 const API_BASE_URL = window.location.origin;
 let authToken = localStorage.getItem('adminToken');
 let allStudents = [];
-let currentLanguage = localStorage.getItem('adminLanguage') || 'en';
+let currentLanguage = localStorage.getItem('adminLanguage') || 'de';
 let translations = {};
+
+// Global function to handle 401 Unauthorized errors
+function handleUnauthorized() {
+    console.warn('⚠️ Session expired or invalid token');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('isSuperAdmin');
+    authToken = null;
+    
+    // Hide dashboard, show login
+    document.getElementById('loginContainer').style.display = 'flex';
+    document.getElementById('dashboardContainer').style.display = 'none';
+    
+    alert('⚠️ Session expired. Please login again.');
+}
 
 // Check if already logged in
 if (authToken) {
@@ -80,6 +94,20 @@ async function showDashboard() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     
+    // Ensure dashboard tab is active by default
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    const dashboardTab = document.getElementById('dashboardTab');
+    if (dashboardTab) {
+        dashboardTab.classList.add('active');
+    }
+    
+    // Ensure dashboard menu item is active
+    document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
+    const dashboardMenuItem = document.querySelector('.menu-item[data-tab="dashboard"]');
+    if (dashboardMenuItem) {
+        dashboardMenuItem.classList.add('active');
+    }
+    
     // Load translations first
     await loadTranslations();
     
@@ -126,6 +154,12 @@ async function loadStats() {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
+        // Check for 401 Unauthorized
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
+
         const data = await response.json();
 
         if (data.success) {
@@ -145,6 +179,12 @@ async function loadSettings() {
         const response = await fetch(`${API_BASE_URL}/api/admin/settings`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
+
+        // Check for 401 Unauthorized
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
 
         const data = await response.json();
 
@@ -323,6 +363,12 @@ async function loadStudents(forceRefresh = false) {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
+        // Check for 401 Unauthorized
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
+
         const data = await response.json();
 
         if (data.success) {
@@ -337,6 +383,64 @@ async function loadStudents(forceRefresh = false) {
     } catch (error) {
         console.error('Error loading students:', error);
     }
+}
+
+// Refresh Registrations (without page reload)
+async function refreshRegistrations() {
+    const refreshBtn = document.getElementById('refreshRegistrationsBtn');
+    const icon = refreshBtn?.querySelector('i');
+    
+    try {
+        // Add spinning animation to icon
+        if (icon) {
+            icon.classList.add('fa-spin');
+        }
+        
+        // Disable button during refresh
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+        }
+        
+        console.log('🔄 Refreshing registrations...');
+        
+        // Force refresh students data
+        await loadStudents(true);
+        
+        // Also refresh stats
+        await loadStats();
+        
+        console.log('✅ Registrations refreshed successfully');
+        
+        // Show success feedback
+        showRefreshSuccess();
+        
+    } catch (error) {
+        console.error('❌ Error refreshing registrations:', error);
+        alert('Failed to refresh registrations. Please try again.');
+    } finally {
+        // Remove spinning animation and re-enable button
+        if (icon) {
+            icon.classList.remove('fa-spin');
+        }
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+        }
+    }
+}
+
+// Show refresh success feedback
+function showRefreshSuccess() {
+    const refreshBtn = document.getElementById('refreshRegistrationsBtn');
+    if (!refreshBtn) return;
+    
+    const originalHTML = refreshBtn.innerHTML;
+    refreshBtn.innerHTML = '<i class="fas fa-check"></i> <span>Refreshed!</span>';
+    refreshBtn.style.background = 'var(--success-color)';
+    
+    setTimeout(() => {
+        refreshBtn.innerHTML = originalHTML;
+        refreshBtn.style.background = '';
+    }, 2000);
 }
 
 // Update Category Counts
@@ -446,7 +550,7 @@ function displayStudentsCards(students) {
                     </button>
                 ` : ''}
                 ${student.status === 'approved' ? `
-                    <button class="action-btn btn-info" onclick="backupToDropbox('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')">
+                    <button class="action-btn btn-info" onclick="backupToMega('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')">
                         <i class="fas fa-cloud"></i> Backup
                     </button>
                 ` : ''}
@@ -560,7 +664,7 @@ async function updateStatus(studentId, status) {
 
         if (data.success) {
             if (status === 'approved') {
-                alert(`✅ Student approved successfully!\n\n☁️ PDF will be automatically backed up to Dropbox.`);
+                alert(`✅ Student approved successfully!\n\n☁️ PDF will be automatically backed up to Mega.nz (20GB FREE).`);
             } else {
                 alert(`✅ Student ${status} successfully!`);
             }
@@ -960,15 +1064,23 @@ async function loadMessages() {
             tbody.innerHTML = '';
             data.messages.forEach(msg => {
                 const row = document.createElement('tr');
+                // Add click handler to mark message as read when clicked
+                row.style.cursor = 'pointer';
+                row.onclick = () => {
+                    if (!msg.isRead) {
+                        markAsRead(msg._id);
+                    }
+                };
+                
                 row.innerHTML = `
                     <td>${msg.fullName}</td>
                     <td>${msg.phoneNumber}</td>
                     <td style="max-width: 400px; white-space: normal; word-wrap: break-word; line-height: 1.5;">${msg.message}</td>
                     <td>${new Date(msg.createdAt).toLocaleDateString()}</td>
-                    <td><span class="badge ${msg.read ? 'badge-approved' : 'badge-pending'}">${msg.read ? 'Read' : 'Unread'}</span></td>
+                    <td><span class="badge ${msg.isRead ? 'badge-approved' : 'badge-pending'}">${msg.isRead ? 'Read' : 'Unread'}</span></td>
                     <td>
-                        ${!msg.read ? `<button class="action-btn btn-info" onclick="markAsRead('${msg._id}')"><i class="fas fa-check"></i> Mark Read</button>` : ''}
-                        <button class="action-btn btn-danger" onclick="deleteMessage('${msg._id}')"><i class="fas fa-trash"></i> Delete</button>
+                        ${!msg.isRead ? `<button class="action-btn btn-info" onclick="event.stopPropagation(); markAsRead('${msg._id}')"><i class="fas fa-check"></i> Mark Read</button>` : ''}
+                        <button class="action-btn btn-danger" onclick="event.stopPropagation(); deleteMessage('${msg._id}')"><i class="fas fa-trash"></i> Delete</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1496,14 +1608,14 @@ async function clearEmployeeActivity() {
     }
 }
 
-// Manual Backup to Dropbox
-async function backupToDropbox(studentId, studentName) {
-    if (!confirm(`☁️ Backup ${studentName} to Dropbox?\n\nThis will generate the PDF and upload it to your Dropbox.`)) {
+// Manual Backup to Mega.nz
+async function backupToMega(studentId, studentName) {
+    if (!confirm(`☁️ Backup ${studentName} to Mega.nz?\n\nThis will generate the PDF and upload it to your Mega cloud (20GB FREE).`)) {
         return;
     }
     
     try {
-        alert(`☁️ Backing up ${studentName} to Dropbox...\n\nThis may take a moment.`);
+        alert(`☁️ Backing up ${studentName} to Mega.nz...\n\nThis may take a moment.`);
         
         const response = await fetch(`${API_BASE_URL}/api/admin/students/${studentId}/backup-dropbox`, {
             method: 'POST',
@@ -1515,45 +1627,50 @@ async function backupToDropbox(studentId, studentName) {
         if (data.success) {
             alert(`✅ ${studentName} backed up successfully!\n\n☁️ File: ${data.backup.fileName}\n📅 Uploaded: ${new Date(data.backup.uploadedAt).toLocaleString()}`);
         } else {
-            let errorMsg = '❌ Dropbox Backup Failed\n\n';
-            errorMsg += data.message || 'Error backing up to Dropbox';
+            let errorMsg = '❌ Mega Backup Failed\n\n';
+            errorMsg += data.message || 'Error backing up to Mega.nz';
             
             if (data.message && data.message.includes('not configured')) {
                 errorMsg += '\n\n💡 Solution:\n';
-                errorMsg += '1. Get Dropbox Access Token from:\n';
-                errorMsg += '   https://www.dropbox.com/developers/apps\n';
-                errorMsg += '2. Add to .env file:\n';
-                errorMsg += '   DROPBOX_ACCESS_TOKEN=your_token\n';
-                errorMsg += '3. Restart server\n\n';
-                errorMsg += 'See CHECK-DROPBOX-CONFIG.md for details';
+                errorMsg += '1. Check Mega credentials in .env:\n';
+                errorMsg += '   MEGA_EMAIL=your@email.com\n';
+                errorMsg += '   MEGA_PASSWORD=your_password\n';
+                errorMsg += '2. Restart server\n';
             }
             
             alert(errorMsg);
         }
     } catch (error) {
-        console.error('Error backing up to Dropbox:', error);
-        alert('❌ Error backing up to Dropbox');
+        console.error('Error backing up to Mega:', error);
+        alert('❌ Error backing up to Mega.nz');
     }
 }
 
-// Check Cloud Status (Dropbox)
+// Check Cloud Status (Mega.nz)
 async function checkCloudStatus() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/admin/cloud-status`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
+        // Check for 401 Unauthorized
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
+
         const data = await response.json();
 
         if (data.success) {
             const stats = data.statistics;
-            const dropbox = data.dropbox;
-            const cloudStatus = dropbox.connected ? '✅ Connected' : '❌ Not Connected';
+            const mega = data.mega;
+            const cloudStatus = mega.connected ? '✅ Connected' : '❌ Not Connected';
             
             let message = `☁️ CLOUD BACKUP STATUS\n\n`;
-            message += `Dropbox: ${cloudStatus}\n`;
-            if (dropbox.connected && dropbox.accountEmail) {
-                message += `Account: ${dropbox.accountEmail}\n`;
+            message += `Mega.nz: ${cloudStatus}\n`;
+            if (mega.connected && mega.accountEmail) {
+                message += `Account: ${mega.accountEmail}\n`;
+                message += `Storage: ${mega.storageUsed} / ${mega.storageTotal} (${mega.storageAvailable} available)\n`;
             }
             message += `\n📊 Backup Statistics:\n`;
             message += `• Total Students: ${stats.totalStudents}\n`;
@@ -2037,7 +2154,7 @@ window.closeEmployeeModal = closeEmployeeModal;
 window.loadEmployeePerformance = loadEmployeePerformance;
 window.loadEmployeeActivity = loadEmployeeActivity;
 window.clearEmployeeActivity = clearEmployeeActivity;
-window.backupToDropbox = backupToDropbox;
+window.backupToMega = backupToMega;
 window.checkCloudStatus = checkCloudStatus;
 window.saveServiceSetting = saveServiceSetting;
 window.loadServices = loadServices;

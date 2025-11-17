@@ -482,11 +482,57 @@ router.get('/admin/seasons', authenticateAdmin, async (req, res) => {
 // Get all attendance records with filters
 router.get('/admin/records', authenticateAdmin, async (req, res) => {
     try {
-        const { groupId, teacherId, studentId, formation, status, startDate, endDate, page = 1, limit = 50 } = req.query;
+        const { groupId, teacherId, studentId, formation, status, startDate, endDate, season, page = 1, limit = 50 } = req.query;
 
         let query = {};
 
-        if (groupId) query.groupId = groupId;
+        // Filter by season (default to active season)
+        if (season) {
+            // If season specified, filter by that season's groups
+            const seasonGroups = await Group.find({ season: season }).select('_id');
+            const seasonGroupIds = seasonGroups.map(g => g._id.toString());
+            
+            if (groupId) {
+                // If specific group requested, check if it's in the season
+                if (seasonGroupIds.includes(groupId)) {
+                    query.groupId = groupId;
+                } else {
+                    // Group not in this season, return empty
+                    return res.json({
+                        success: true,
+                        records: [],
+                        pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 }
+                    });
+                }
+            } else {
+                // Filter by all groups in the season
+                query.groupId = { $in: seasonGroupIds };
+            }
+        } else {
+            // Default: filter by active season
+            const activeSeason = await Season.findOne({ status: 'active' });
+            if (activeSeason) {
+                const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
+                const activeSeasonGroupIds = activeSeasonGroups.map(g => g._id.toString());
+                
+                if (groupId) {
+                    if (activeSeasonGroupIds.includes(groupId)) {
+                        query.groupId = groupId;
+                    } else {
+                        return res.json({
+                            success: true,
+                            records: [],
+                            pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 }
+                        });
+                    }
+                } else {
+                    query.groupId = { $in: activeSeasonGroupIds };
+                }
+            } else if (groupId) {
+                query.groupId = groupId;
+            }
+        }
+
         if (teacherId) query.teacherId = teacherId;
         if (studentId) query.studentId = studentId;
         if (formation) query.formation = formation;
@@ -532,11 +578,44 @@ router.get('/admin/records', authenticateAdmin, async (req, res) => {
 // Get attendance statistics
 router.get('/admin/stats', authenticateAdmin, async (req, res) => {
     try {
-        const { groupId, teacherId, studentId, formation, startDate, endDate } = req.query;
+        const { groupId, teacherId, studentId, formation, startDate, endDate, season } = req.query;
 
         let query = {};
 
-        if (groupId) query.groupId = groupId;
+        // Filter by season (default to active season)
+        if (season) {
+            const seasonGroups = await Group.find({ season: season }).select('_id');
+            const seasonGroupIds = seasonGroups.map(g => g._id.toString());
+            
+            if (groupId) {
+                if (seasonGroupIds.includes(groupId)) {
+                    query.groupId = groupId;
+                } else {
+                    return res.json({ success: true, stats: { total: 0, present: 0, late: 0, absent: 0 } });
+                }
+            } else {
+                query.groupId = { $in: seasonGroupIds };
+            }
+        } else {
+            const activeSeason = await Season.findOne({ status: 'active' });
+            if (activeSeason) {
+                const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
+                const activeSeasonGroupIds = activeSeasonGroups.map(g => g._id.toString());
+                
+                if (groupId) {
+                    if (activeSeasonGroupIds.includes(groupId)) {
+                        query.groupId = groupId;
+                    } else {
+                        return res.json({ success: true, stats: { total: 0, present: 0, late: 0, absent: 0 } });
+                    }
+                } else {
+                    query.groupId = { $in: activeSeasonGroupIds };
+                }
+            } else if (groupId) {
+                query.groupId = groupId;
+            }
+        }
+
         if (teacherId) query.teacherId = teacherId;
         if (studentId) query.studentId = studentId;
         if (formation) query.formation = formation;

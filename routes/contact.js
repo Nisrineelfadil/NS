@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Message = require('../models/Message');
+const notificationService = require('../services/notificationService');
 
 // POST /api/contact - Submit a new contact message
 router.post('/', async (req, res) => {
@@ -21,6 +22,9 @@ router.post('/', async (req, res) => {
         });
 
         await newMessage.save();
+
+        // Send real-time notification to admin
+        await notificationService.notifyNewMessage(newMessage);
 
         res.status(201).json({ 
             success: true, 

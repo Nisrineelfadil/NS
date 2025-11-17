@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,25 +13,25 @@
         <div class="login-box">
             <div class="logo" style="justify-content: center; margin-bottom: 20px;">
                 <i class="fas fa-graduation-cap"></i>
-                <h2>Student Portal</h2>
+                <h2 data-i18n="login.studentPortal">Student Portal</h2>
             </div>
-            <p>Login to view your grades and progress</p>
+            <p data-i18n="login.subtitle">Login to view your grades and progress</p>
             
             <div id="loginError" class="error-message"></div>
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="loginEmail">School Email</label>
+                    <label for="loginEmail" data-i18n="login.schoolEmail">School Email</label>
                     <input type="email" id="loginEmail" required placeholder="your.name@nisrineschool.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="loginPassword">Password</label>
+                    <label for="loginPassword" data-i18n="login.password">Password</label>
                     <input type="password" id="loginPassword" required placeholder="Enter your password">
                 </div>
                 
                 <button type="submit" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
+                    <i class="fas fa-sign-in-alt"></i> <span data-i18n="login.loginButton">Login</span>
                 </button>
             </form>
         </div>

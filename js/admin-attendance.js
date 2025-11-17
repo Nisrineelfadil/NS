@@ -36,8 +36,14 @@ const AdminAttendance = {
     // Load Filters
     async loadFilters() {
         try {
-            // Load groups
-            const groupsResponse = await fetch('/api/student-management/groups', {
+            // Get active season first
+            const seasonsResponse = await fetch('/api/seasons/current', {
+                headers: { 'Authorization': `Bearer ${this.getToken()}` }
+            });
+            const activeSeason = await seasonsResponse.json();
+            
+            // Load groups filtered by active season
+            const groupsResponse = await fetch(`/api/student-management/groups?season=${activeSeason._id}`, {
                 headers: { 'Authorization': `Bearer ${this.getToken()}` }
             });
             const groupsData = await groupsResponse.json();
@@ -133,11 +139,11 @@ const AdminAttendance = {
                             <i class="fas fa-clipboard-list" style="font-size: 2rem;"></i>
                         </div>
                         <div>
-                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Total Records</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">${t('totalRecords')}</div>
                             <div style="font-size: 2.2rem; font-weight: 700;">${stats.total}</div>
                         </div>
                     </div>
-                    <div style="opacity: 0.9; font-size: 0.9rem;">All attendance sessions</div>
+                    <div style="opacity: 0.9; font-size: 0.9rem;">${t('allAttendanceSessions')}</div>
                 </div>
                 
                 <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 25px;">
@@ -146,11 +152,11 @@ const AdminAttendance = {
                             <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
                         </div>
                         <div>
-                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Present</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">${t('present')}</div>
                             <div style="font-size: 2.2rem; font-weight: 700;">${stats.present}</div>
                         </div>
                     </div>
-                    <div style="opacity: 0.9; font-size: 0.9rem;">${stats.total > 0 ? ((stats.present / stats.total) * 100).toFixed(1) : 0}% of total records</div>
+                    <div style="opacity: 0.9; font-size: 0.9rem;">${stats.total > 0 ? ((stats.present / stats.total) * 100).toFixed(1) : 0}% ${t('ofTotalRecords')}</div>
                 </div>
                 
                 <div class="card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 25px;">
@@ -159,11 +165,11 @@ const AdminAttendance = {
                             <i class="fas fa-clock" style="font-size: 2rem;"></i>
                         </div>
                         <div>
-                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Late</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">${t('late')}</div>
                             <div style="font-size: 2.2rem; font-weight: 700;">${stats.late}</div>
                         </div>
                     </div>
-                    <div style="opacity: 0.9; font-size: 0.9rem;">${stats.total > 0 ? ((stats.late / stats.total) * 100).toFixed(1) : 0}% of total records</div>
+                    <div style="opacity: 0.9; font-size: 0.9rem;">${stats.total > 0 ? ((stats.late / stats.total) * 100).toFixed(1) : 0}% ${t('ofTotalRecords')}</div>
                 </div>
                 
                 <div class="card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 25px;">
@@ -172,11 +178,11 @@ const AdminAttendance = {
                             <i class="fas fa-times-circle" style="font-size: 2rem;"></i>
                         </div>
                         <div>
-                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Absent</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">${t('absent')}</div>
                             <div style="font-size: 2.2rem; font-weight: 700;">${stats.absent}</div>
                         </div>
                     </div>
-                    <div style="opacity: 0.9; font-size: 0.9rem;">${stats.total > 0 ? ((stats.absent / stats.total) * 100).toFixed(1) : 0}% of total records</div>
+                    <div style="opacity: 0.9; font-size: 0.9rem;">${stats.total > 0 ? ((stats.absent / stats.total) * 100).toFixed(1) : 0}% ${t('ofTotalRecords')}</div>
                 </div>
                 
                 <div class="card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 25px;">
@@ -185,11 +191,11 @@ const AdminAttendance = {
                             <i class="fas fa-chart-line" style="font-size: 2rem;"></i>
                         </div>
                         <div>
-                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">Attendance Rate</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px;">${t('attendanceRate')}</div>
                             <div style="font-size: 2.2rem; font-weight: 700;">${attendanceRate}%</div>
                         </div>
                     </div>
-                    <div style="opacity: 0.9; font-size: 0.9rem;">Present + Late combined</div>
+                    <div style="opacity: 0.9; font-size: 0.9rem;">${t('presentLateCombined')}</div>
                 </div>
             </div>
         `;
@@ -251,25 +257,25 @@ const AdminAttendance = {
                         <thead>
                             <tr style="background: linear-gradient(135deg, #FFCC00 0%, #FF9500 100%);">
                                 <th style="padding: 16px; text-align: left; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap; border-top-left-radius: 12px;">
-                                    <i class="fas fa-calendar" style="margin-right: 8px;"></i>Date
+                                    <i class="fas fa-calendar" style="margin-right: 8px;"></i>${t('date')}
                                 </th>
                                 <th style="padding: 16px; text-align: left; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap;">
-                                    <i class="fas fa-user" style="margin-right: 8px;"></i>Student
+                                    <i class="fas fa-user" style="margin-right: 8px;"></i>${t('student')}
                                 </th>
                                 <th style="padding: 16px; text-align: left; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap;">
-                                    <i class="fas fa-users" style="margin-right: 8px;"></i>Group
+                                    <i class="fas fa-users" style="margin-right: 8px;"></i>${t('group')}
                                 </th>
                                 <th style="padding: 16px; text-align: left; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap;">
-                                    <i class="fas fa-graduation-cap" style="margin-right: 8px;"></i>Formation
+                                    <i class="fas fa-graduation-cap" style="margin-right: 8px;"></i>${t('formation')}
                                 </th>
                                 <th style="padding: 16px; text-align: left; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap;">
-                                    <i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>Teacher
+                                    <i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>${t('teacher')}
                                 </th>
                                 <th style="padding: 16px; text-align: center; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap;">
-                                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>Status
+                                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>${t('status')}
                                 </th>
                                 <th style="padding: 16px; text-align: left; font-weight: 700; color: #1f2937; border-bottom: 3px solid #FF9500; white-space: nowrap; border-top-right-radius: 12px;">
-                                    <i class="fas fa-clock" style="margin-right: 8px;"></i>Scan Time
+                                    <i class="fas fa-clock" style="margin-right: 8px;"></i>${t('scanTime')}
                                 </th>
                             </tr>
                         </thead>
@@ -283,7 +289,7 @@ const AdminAttendance = {
                                     <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; color: #6b7280;">${record.teacherName}</td>
                                     <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; text-align: center;">
                                         <span style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 25px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; ${record.status === 'present' ? 'background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);' : record.status === 'late' ? 'background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);' : 'background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);'}">
-                                            ${record.status === 'present' ? '<i class="fas fa-check-circle"></i> Present' : record.status === 'late' ? '<i class="fas fa-clock"></i> Late' : '<i class="fas fa-times-circle"></i> Absent'}
+                                            ${record.status === 'present' ? `<i class="fas fa-check-circle"></i> ${t('present')}` : record.status === 'late' ? `<i class="fas fa-clock"></i> ${t('late')}` : `<i class="fas fa-times-circle"></i> ${t('absent')}`}
                                         </span>
                                     </td>
                                     <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; color: #6b7280; font-family: 'Courier New', monospace;">${record.scanTime ? new Date(record.scanTime).toLocaleTimeString() : '-'}</td>
@@ -515,7 +521,7 @@ const AdminAttendance = {
             sessionsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #6b7280;">
                     <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                    <p>No recent sessions</p>
+                    <p>${t('noRecentSessions')}</p>
                 </div>
             `;
             return;
@@ -772,26 +778,7 @@ async function showExportModal() {
         yearSelect.appendChild(option);
     }
     
-    // Load groups
-    try {
-        const response = await fetch('/api/student-management/groups', {
-            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
-        });
-        const data = await response.json();
-        
-        const groupSelect = document.getElementById('exportGroupSelect');
-        groupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
-        data.groups.forEach(group => {
-            const option = document.createElement('option');
-            option.value = group._id;
-            option.textContent = group.name;
-            groupSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error loading groups:', error);
-    }
-    
-    // Load seasons
+    // Load seasons first
     try {
         const response = await fetch('/api/attendance/admin/seasons', {
             headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
@@ -800,13 +787,32 @@ async function showExportModal() {
         
         const seasonSelect = document.getElementById('exportSeasonSelect');
         seasonSelect.innerHTML = '<option value="">-- Select a Season --</option>';
+        
+        let activeSeasonId = null;
         if (data.seasons && data.seasons.length > 0) {
             data.seasons.forEach(season => {
                 const option = document.createElement('option');
-                option.value = season.name; // Use season name (e.g., "2025-2026")
+                option.value = season._id; // Use season ID for filtering
                 option.textContent = `${season.name} (${season.status})`;
+                
+                // Pre-select active season
+                if (season.status === 'active') {
+                    option.selected = true;
+                    activeSeasonId = season._id;
+                }
+                
                 seasonSelect.appendChild(option);
             });
+        }
+        
+        // Add event listener to reload groups when season changes
+        seasonSelect.addEventListener('change', async () => {
+            await loadExportGroups(seasonSelect.value);
+        });
+        
+        // Load groups for active season initially
+        if (activeSeasonId) {
+            await loadExportGroups(activeSeasonId);
         }
     } catch (error) {
         console.error('Error loading seasons:', error);
@@ -814,6 +820,42 @@ async function showExportModal() {
     
     // Hide warning initially
     document.getElementById('exportWarning').style.display = 'none';
+}
+
+// Load groups filtered by season for export modal
+async function loadExportGroups(seasonId) {
+    try {
+        if (!seasonId) {
+            // No season selected, clear groups
+            const groupSelect = document.getElementById('exportGroupSelect');
+            groupSelect.innerHTML = '<option value="">-- Select a Season First --</option>';
+            return;
+        }
+        
+        // Fetch groups filtered by season
+        const response = await fetch(`/api/student-management/groups?season=${seasonId}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        const data = await response.json();
+        
+        const groupSelect = document.getElementById('exportGroupSelect');
+        groupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
+        
+        if (data.groups && data.groups.length > 0) {
+            data.groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group._id;
+                option.textContent = group.name;
+                groupSelect.appendChild(option);
+            });
+        } else {
+            groupSelect.innerHTML = '<option value="">No groups in this season</option>';
+        }
+    } catch (error) {
+        console.error('Error loading export groups:', error);
+        const groupSelect = document.getElementById('exportGroupSelect');
+        groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+    }
 }
 
 function closeExportModal() {

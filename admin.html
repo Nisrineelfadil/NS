@@ -50,7 +50,7 @@
                     <div class="sidebar-logo">
                         <img src="Img/logo.png" alt="Logo" onerror="this.style.display='none'">
                         <div class="sidebar-logo-text">
-                            <h2>Nisrine School</h2>
+                            <h2>Nisrine <span class="school-text">School</span></h2>
                             <p id="adminUsername">Admin Panel</p>
                         </div>
                     </div>
@@ -60,25 +60,30 @@
                         <div class="menu-section-title">MAIN</div>
                         <div class="menu-item active" data-tab="dashboard">
                             <i class="fas fa-home"></i>
-                            <span>Dashboard</span>
+                            <span data-i18n="admin.menu.dashboard">Dashboard</span>
                         </div>
                         <div class="menu-item" data-tab="registrations">
                             <i class="fas fa-user-graduate"></i>
-                            <span>Registrations</span>
+                            <span data-i18n="admin.menu.registrations">Registrations</span>
                         </div>
                         <div class="menu-item" id="myRegistrationsMenuItem" onclick="window.location.href='/my-registrations'">
                             <i class="fas fa-user-plus"></i>
-                            <span>My Registrations</span>
+                            <span data-i18n="admin.menu.myRegistrations">My Registrations</span>
                             <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item" data-tab="appointments">
                             <i class="fas fa-calendar-check"></i>
-                            <span>Rendez-vous</span>
+                            <span data-i18n="admin.menu.appointments">Rendez-vous</span>
+                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
+                        </div>
+                        <div class="menu-item" data-tab="ratings">
+                            <i class="fas fa-star"></i>
+                            <span data-i18n="admin.menu.ratings">Ratings</span>
                             <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item" data-tab="messages">
                             <i class="fas fa-envelope"></i>
-                            <span>Messages</span>
+                            <span data-i18n="admin.menu.messages">Messages</span>
                         </div>
                         <div class="menu-item" data-tab="services">
                             <i class="fas fa-briefcase"></i>
@@ -89,7 +94,7 @@
                         <div class="menu-section-title">MANAGEMENT</div>
                         <div class="menu-item" onclick="window.location.href='/student-management'">
                             <i class="fas fa-users-cog"></i>
-                            <span>Students</span>
+                            <span data-i18n="admin.menu.students">Students</span>
                             <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item hidden" id="employeesMenuItem" data-tab="employees">
@@ -123,13 +128,44 @@
                         <h1 id="pageTitle">Dashboard</h1>
                     </div>
                     <div class="topbar-right">
+                        <!-- Notification Bell -->
+                        <div class="notification-container">
+                            <button class="topbar-btn btn-icon" id="notificationBtn">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                            </button>
+                            <div class="notification-dropdown" id="notificationDropdown">
+                                <div class="notification-header">
+                                    <h3 data-i18n="admin.notifications.title">Notifications</h3>
+                                    <button class="mark-all-read-btn" id="markAllReadBtn">
+                                        <i class="fas fa-check-double"></i> <span data-i18n="admin.notifications.mark_all_read">Mark all read</span>
+                                    </button>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <div class="notification-empty">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p data-i18n="admin.notifications.no_notifications">No notifications</p>
+                                    </div>
+                                </div>
+                                <div class="notification-footer">
+                                    <button class="clear-all-btn" id="clearAllBtn">
+                                        <i class="fas fa-trash"></i> <span data-i18n="admin.notifications.clear_all">Clear all</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="language-dropdown">
                             <button class="topbar-btn btn-primary" id="languageBtn">
                                 <i class="fas fa-globe"></i>
-                                <span id="currentLangText">EN</span>
+                                <span id="currentLangText">DE</span>
                                 <i class="fas fa-chevron-down" id="langDropdownIcon"></i>
                             </button>
                             <div class="language-dropdown-menu" id="languageDropdownMenu">
+                                <div class="language-option" data-lang="de">
+                                    <i class="fas fa-flag"></i>
+                                    <span>Deutsch</span>
+                                </div>
                                 <div class="language-option" data-lang="en">
                                     <i class="fas fa-flag-usa"></i>
                                     <span>English</span>
@@ -234,7 +270,7 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-file-alt"></i>
-                                    <span>CV Service Control</span>
+                                    <span data-i18n="admin.dashboard.cv_service_control">CV Service Control</span>
                                 </h2>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="cvServiceToggle" checked>
@@ -242,11 +278,11 @@
                                 </label>
                             </div>
                             <div class="section-body">
-                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                <p style="color: var(--text-light); margin-bottom: 20px;" data-i18n="admin.dashboard.cv_service_description">
                                     Enable or disable CV service requests. When disabled, users won't be able to submit CV service requests.
                                 </p>
                                 <button class="action-btn btn-success" onclick="saveServiceSetting('cv')" style="margin-top: 10px;">
-                                    <i class="fas fa-save"></i> Save CV Service Settings
+                                    <i class="fas fa-save"></i> <span data-i18n="admin.dashboard.save_cv_settings">Save CV Service Settings</span>
                                 </button>
                             </div>
                         </div>
@@ -256,7 +292,7 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-briefcase"></i>
-                                    <span>Applying Service Control</span>
+                                    <span data-i18n="admin.dashboard.applying_service_control">Applying Service Control</span>
                                 </h2>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="applyingServiceToggle" checked>
@@ -264,11 +300,11 @@
                                 </label>
                             </div>
                             <div class="section-body">
-                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                <p style="color: var(--text-light); margin-bottom: 20px;" data-i18n="admin.dashboard.applying_service_description">
                                     Enable or disable job application assistance service. When disabled, users won't be able to submit applying service requests.
                                 </p>
                                 <button class="action-btn btn-success" onclick="saveServiceSetting('applying')" style="margin-top: 10px;">
-                                    <i class="fas fa-save"></i> Save Applying Service Settings
+                                    <i class="fas fa-save"></i> <span data-i18n="admin.dashboard.save_applying_settings">Save Applying Service Settings</span>
                                 </button>
                             </div>
                         </div>
@@ -278,7 +314,7 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-language"></i>
-                                    <span>Translation Service Control</span>
+                                    <span data-i18n="admin.dashboard.translation_service_control">Translation Service Control</span>
                                 </h2>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="translationServiceToggle" checked>
@@ -286,11 +322,11 @@
                                 </label>
                             </div>
                             <div class="section-body">
-                                <p style="color: var(--text-light); margin-bottom: 20px;">
+                                <p style="color: var(--text-light); margin-bottom: 20px;" data-i18n="admin.dashboard.translation_service_description">
                                     Enable or disable translation service requests. When disabled, users won't be able to submit translation service requests.
                                 </p>
                                 <button class="action-btn btn-success" onclick="saveServiceSetting('translation')" style="margin-top: 10px;">
-                                    <i class="fas fa-save"></i> Save Translation Service Settings
+                                    <i class="fas fa-save"></i> <span data-i18n="admin.dashboard.save_translation_settings">Save Translation Service Settings</span>
                                 </button>
                             </div>
                         </div>
@@ -356,6 +392,9 @@
                                     <span id="categoryTitle">All Students</span>
                                 </h2>
                                 <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn btn-info" onclick="refreshRegistrations()" id="refreshRegistrationsBtn">
+                                        <i class="fas fa-sync-alt"></i> <span data-i18n="admin.registrations.refresh">Refresh</span>
+                                    </button>
                                     <button class="action-btn btn-warning" onclick="downloadCategoryPDFs()">
                                         <i class="fas fa-download"></i> <span data-i18n="admin.registrations.download_all">Download All</span>
                                     </button>
@@ -522,7 +561,7 @@
                                     <i class="fas fa-calendar-day"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h3>Today's Appointments</h3>
+                                    <h3 data-i18n="admin.appointments.todays_appointments">Today's Appointments</h3>
                                     <div class="number" id="todayAppointments">0</div>
                                 </div>
                             </div>
@@ -531,7 +570,7 @@
                                     <i class="fas fa-clock"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h3>Pending</h3>
+                                    <h3 data-i18n="admin.appointments.pending">Pending</h3>
                                     <div class="number" id="pendingAppointments">0</div>
                                 </div>
                             </div>
@@ -540,7 +579,7 @@
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h3>Completed</h3>
+                                    <h3 data-i18n="admin.appointments.completed">Completed</h3>
                                     <div class="number" id="completedAppointments">0</div>
                                 </div>
                             </div>
@@ -549,7 +588,7 @@
                                     <i class="fas fa-calendar-alt"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h3>Total Appointments</h3>
+                                    <h3 data-i18n="admin.appointments.total_appointments">Total Appointments</h3>
                                     <div class="number" id="totalAppointments">0</div>
                                 </div>
                             </div>
@@ -560,14 +599,14 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-calendar-check"></i>
-                                    Rendez-vous Management
+                                    <span data-i18n="admin.appointments.title">Rendez-vous Management</span>
                                 </h2>
                                 <div style="display: flex; gap: 10px;">
                                     <button class="action-btn btn-success" onclick="openAddAppointmentModal()">
-                                        <i class="fas fa-plus"></i> New Appointment
+                                        <i class="fas fa-plus"></i> <span data-i18n="admin.appointments.new_appointment">New Appointment</span>
                                     </button>
                                     <button class="action-btn btn-primary" onclick="openPdfDatePicker()">
-                                        <i class="fas fa-file-pdf"></i> Download Daily PDF
+                                        <i class="fas fa-file-pdf"></i> <span data-i18n="admin.appointments.download_daily_pdf">Download Daily PDF</span>
                                     </button>
                                 </div>
                             </div>
@@ -576,37 +615,37 @@
                                 <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
                                     <div style="flex: 1; min-width: 200px;">
                                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                                            <i class="fas fa-calendar"></i> Date
+                                            <i class="fas fa-calendar"></i> <span data-i18n="admin.appointments.date">Date</span>
                                         </label>
                                         <input type="date" id="appointmentDateFilter" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
                                     </div>
                                     <div style="flex: 1; min-width: 200px;">
                                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                                            <i class="fas fa-filter"></i> Status
+                                            <i class="fas fa-filter"></i> <span data-i18n="admin.appointments.status">Status</span>
                                         </label>
                                         <select id="appointmentStatusFilter" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
-                                            <option value="">All Status</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="completed">Completed</option>
-                                            <option value="cancelled">Cancelled</option>
+                                            <option value="" data-i18n="admin.appointments.all_status">All Status</option>
+                                            <option value="pending" data-i18n="admin.appointments.pending">Pending</option>
+                                            <option value="completed" data-i18n="admin.appointments.completed">Completed</option>
+                                            <option value="cancelled" data-i18n="admin.appointments.cancelled">Cancelled</option>
                                         </select>
                                     </div>
                                     <div style="flex: 1; min-width: 200px;">
                                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                                            <i class="fas fa-flag"></i> Priority
+                                            <i class="fas fa-flag"></i> <span data-i18n="admin.appointments.priority">Priority</span>
                                         </label>
                                         <select id="appointmentPriorityFilter" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
-                                            <option value="">All Priorities</option>
-                                            <option value="high">High</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="low">Low</option>
+                                            <option value="" data-i18n="admin.appointments.all_priorities">All Priorities</option>
+                                            <option value="high" data-i18n="admin.appointments.high">High</option>
+                                            <option value="medium" data-i18n="admin.appointments.medium">Medium</option>
+                                            <option value="low" data-i18n="admin.appointments.low">Low</option>
                                         </select>
                                     </div>
                                     <div style="flex: 1; min-width: 200px;">
                                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                                            <i class="fas fa-search"></i> Search
+                                            <i class="fas fa-search"></i> <span data-i18n="admin.appointments.search">Search</span>
                                         </label>
-                                        <input type="text" id="appointmentSearchFilter" placeholder="Name, phone, or purpose..." style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                                        <input type="text" id="appointmentSearchFilter" data-i18n-placeholder="admin.appointments.name_phone_purpose" placeholder="Name, phone, or purpose..." style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
                                     </div>
                                 </div>
 
@@ -616,19 +655,105 @@
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>Date</th>
-                                                <th>Full Name</th>
-                                                <th>Phone Number</th>
-                                                <th>Purpose</th>
-                                                <th>Priority</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
+                                                <th data-i18n="admin.appointments.date">Date</th>
+                                                <th data-i18n="admin.appointments.full_name">Full Name</th>
+                                                <th data-i18n="admin.appointments.phone_number">Phone Number</th>
+                                                <th data-i18n="admin.appointments.purpose">Purpose</th>
+                                                <th data-i18n="admin.appointments.priority">Priority</th>
+                                                <th data-i18n="admin.appointments.status">Status</th>
+                                                <th data-i18n="admin.appointments.actions">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="appointmentsTableBody">
                                             <!-- Data will be inserted here -->
                                         </tbody>
                                     </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ratings Tab -->
+                    <div class="tab-content" id="ratingsTab">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon orange">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.ratings.pendingReviews">Pending Reviews</h3>
+                                    <div class="number" id="pendingRatings">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.ratings.approved">Approved</h3>
+                                    <div class="number" id="approvedRatings">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.ratings.averageRating">Average Rating</h3>
+                                    <div class="number" id="averageRating">0.0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3 data-i18n="admin.ratings.totalReviews">Total Reviews</h3>
+                                    <div class="number" id="totalRatings">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Ratings Section -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-clock"></i>
+                                    <span data-i18n="admin.ratings.pendingReviews">Pending Reviews</span>
+                                </h2>
+                                <button class="action-btn btn-primary" onclick="loadRatings()">
+                                    <i class="fas fa-sync-alt"></i> <span data-i18n="admin.ratings.refresh">Refresh</span>
+                                </button>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="pendingRatingsLoading">Loading pending reviews...</div>
+                                <div id="pendingRatingsContainer" style="display: none;">
+                                    <!-- Pending ratings will be inserted here -->
+                                </div>
+                                <div id="noPendingRatings" class="no-data" style="display: none;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <p>No pending reviews at the moment</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Approved Ratings Section -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h2>
+                                    <i class="fas fa-check-circle"></i>
+                                    <span data-i18n="admin.ratings.approvedReviews">Approved Reviews</span>
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <div class="loading" id="approvedRatingsLoading">Loading approved reviews...</div>
+                                <div id="approvedRatingsContainer" style="display: none;">
+                                    <!-- Approved ratings will be inserted here -->
+                                </div>
+                                <div id="noApprovedRatings" class="no-data" style="display: none;">
+                                    <i class="fas fa-star"></i>
+                                    <p>No approved reviews yet</p>
                                 </div>
                             </div>
                         </div>
@@ -1121,10 +1246,6 @@
                             <option value="high">High Priority</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="appointmentNotes"><i class="fas fa-sticky-note"></i> Additional Notes</label>
-                        <textarea id="appointmentNotes" placeholder="Any additional information..." rows="2"></textarea>
-                    </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="action-btn btn-success" style="flex: 1;">
                             <i class="fas fa-save"></i> <span id="appointmentSubmitBtn">Save Appointment</span>
@@ -1169,8 +1290,11 @@
         </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="js/system-stats.js"></script>
     <script src="js/admin-dashboard.js"></script>
     <script src="js/appointments.js"></script>
+    <script src="js/admin-ratings.js"></script>
+    <script src="js/notifications.js"></script>
 </body>
 </html>

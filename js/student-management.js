@@ -7,6 +7,132 @@ let allStudents = [];
 let cachedBranchSubgroups = null; // Cache for branch subgroups
 let branchSubgroupsLoadTime = null; // Track when cache was loaded
 
+// Helper function to validate photo path
+function isValidPhotoPath(photoPath) {
+    if (!photoPath) return false;
+    if (photoPath.includes('undefined') || photoPath.includes('null')) return false;
+    return true;
+}
+
+// Season context - synced with Phase 2 (using legacy prefix to avoid conflicts)
+let legacyCurrentSeasonId = null;
+let legacyCurrentSeasonName = null;
+
+// Initialize season context from Phase 2 on page load
+async function initializeSeasonContext() {
+    try {
+        // Try to get the active season from backend
+        const response = await fetch('/api/seasons/current', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (response.ok) {
+            const season = await response.json();
+            legacyCurrentSeasonId = season._id;
+            legacyCurrentSeasonName = season.name;
+            console.log('✅ Legacy system initialized with active season:', season.name);
+        } else {
+            console.log('ℹ️ No active season found - will show all groups');
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not initialize season context:', error);
+    }
+}
+
+// Load season filter dropdown
+async function loadSeasonFilter() {
+    const seasonFilter = document.getElementById('seasonFilter');
+    
+    // If element doesn't exist, skip silently
+    if (!seasonFilter) {
+        console.log('ℹ️ Season filter element not found - skipping');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/seasons', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (!response.ok) {
+            console.warn('Could not load seasons for filter - status:', response.status);
+            return;
+        }
+        
+        const seasons = await response.json();
+        
+        if (!Array.isArray(seasons) || seasons.length === 0) {
+            console.warn('No seasons available');
+            return;
+        }
+        
+        // Clear existing options (no "All Seasons" option)
+        seasonFilter.innerHTML = '';
+        
+        // Add seasons (active first, then upcoming, then archived)
+        const sortedSeasons = seasons.sort((a, b) => {
+            const order = { 'active': 0, 'upcoming': 1, 'archived': 2 };
+            return order[a.status] - order[b.status];
+        });
+        
+        let activeSeasonFound = false;
+        
+        sortedSeasons.forEach(season => {
+            const option = document.createElement('option');
+            option.value = season._id;
+            option.textContent = `${season.name} ${season.status === 'active' ? '(Active)' : season.status === 'archived' ? '(Archived)' : '(Upcoming)'}`;
+            
+            // Pre-select active season
+            if (season.status === 'active') {
+                option.selected = true;
+                legacyCurrentSeasonId = season._id;
+                legacyCurrentSeasonName = season.name;
+                activeSeasonFound = true;
+            }
+            
+            seasonFilter.appendChild(option);
+        });
+        
+        // If no active season, select the first one
+        if (!activeSeasonFound && sortedSeasons.length > 0) {
+            seasonFilter.selectedIndex = 0;
+            legacyCurrentSeasonId = sortedSeasons[0]._id;
+            legacyCurrentSeasonName = sortedSeasons[0].name;
+        }
+        
+        console.log('✅ Season filter loaded with', seasons.length, 'seasons');
+    } catch (error) {
+        console.error('Error loading season filter:', error);
+        // Don't throw - just log and continue
+    }
+}
+
+// Listen for season changes from Phase 2 system
+document.addEventListener('seasonSelected', (event) => {
+    console.log('🔄 Legacy system: Season changed to', event.detail);
+    legacyCurrentSeasonId = event.detail.seasonId;
+    legacyCurrentSeasonName = event.detail.seasonName;
+    
+    // Update season dropdown to match
+    const seasonFilter = document.getElementById('seasonFilter');
+    if (seasonFilter) {
+        seasonFilter.value = event.detail.seasonId;
+        console.log('🔄 Season dropdown updated to:', event.detail.seasonName);
+    }
+    
+    // Reload data if on students tab
+    const studentsTab = document.getElementById('studentsTab');
+    if (studentsTab && studentsTab.classList.contains('active')) {
+        console.log('🔄 Reloading students for new season');
+        loadStudents();
+        updateGroupFilters();
+    }
+    
+    // Clear branch subgroups cache when season changes
+    cachedBranchSubgroups = null;
+    branchSubgroupsLoadTime = null;
+});
+
 // Language Management
 function toggleLanguageMenu() {
     const menu = document.getElementById('langMenu');
@@ -28,8 +154,8 @@ function changeLanguage(lang) {
 
 function updateLanguageDisplay() {
     const lang = getCurrentLanguage();
-    const langMap = { en: 'EN', fr: 'FR', ar: 'AR' };
-    document.getElementById('currentLang').textContent = langMap[lang] || 'EN';
+    const langMap = { de: 'DE', en: 'EN', fr: 'FR', ar: 'AR' };
+    document.getElementById('currentLang').textContent = langMap[lang] || 'DE';
 }
 
 function translatePage() {
@@ -93,6 +219,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize language
         updateLanguageDisplay();
         translatePage();
+        
+        // Initialize season context from Phase 2 (if available)
+        await initializeSeasonContext();
+        
+        // Load season dropdown (non-critical - don't fail if it errors)
+        try {
+            await loadSeasonFilter();
+        } catch (err) {
+            console.warn('Could not load season filter:', err);
+        }
         
         await loadDashboardStats();
         await loadGroups();
@@ -240,8 +376,8 @@ function switchTab(tabName) {
     const titleKeys = {
         'dashboard': 'dashboard',
         'groups': 'groupsManagement',
-        'seasons': 'Seasons Management',
-        'branchGroups': 'Branch Groups Management',
+        'seasons': 'seasonsManagement',
+        'branchGroups': 'branchGroupsManagement',
         'students': 'studentsManagement',
         'reminders': 'paymentRemindersTitle',
         'overdue': 'overduePaymentsTitle',
@@ -257,6 +393,7 @@ function switchTab(tabName) {
     
     // Load data for specific tabs
     if (tabName === 'grades') {
+        loadGradesSeasonFilter();
         populateStudentFilter();
     } else if (tabName === 'teachers') {
         loadTeachers();
@@ -280,34 +417,102 @@ function switchTab(tabName) {
 let allGradesStudents = [];
 
 // Populate student filter for grades tab
-function populateStudentFilter() {
+async function populateStudentFilter() {
     const studentFilter = document.getElementById('gradesStudentFilter');
     if (!studentFilter) return;
     
-    allGradesStudents = [...allStudents]; // Store copy for filtering
-    
-    studentFilter.innerHTML = '<option value="">Select Student</option>';
-    
-    allStudents.forEach(student => {
-        const option = document.createElement('option');
-        option.value = student._id;
-        option.textContent = student.fullName;
-        option.dataset.name = student.fullName.toLowerCase();
-        option.dataset.email = (student.schoolEmail || '').toLowerCase();
-        option.dataset.phone = (student.phones || []).join(' ').toLowerCase();
-        studentFilter.appendChild(option);
-    });
+    try {
+        // Get selected season from grades season filter
+        const seasonId = document.getElementById('gradesSeasonFilter')?.value;
+        
+        // Build query with season parameter
+        const params = new URLSearchParams();
+        if (seasonId) {
+            params.append('season', seasonId);
+        }
+        
+        // Fetch students for the selected season
+        const data = await apiRequest(`/students?${params.toString()}`);
+        
+        if (data && data.success) {
+            allGradesStudents = data.students;
+            
+            studentFilter.innerHTML = `<option value="">${t('selectStudent')}</option>`;
+            
+            allGradesStudents.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student._id;
+                option.textContent = student.fullName;
+                option.dataset.name = student.fullName.toLowerCase();
+                option.dataset.email = (student.schoolEmail || '').toLowerCase();
+                option.dataset.phone = (student.phones || []).join(' ').toLowerCase();
+                studentFilter.appendChild(option);
+            });
+            
+            console.log(`✅ Loaded ${allGradesStudents.length} students for grades tab`);
+        }
+    } catch (error) {
+        console.error('Error loading students for grades:', error);
+        allGradesStudents = [];
+        studentFilter.innerHTML = `<option value="">${t('selectStudent')}</option>`;
+    }
 }
 
-// Filter students in grades dropdown based on search
+// Load season filter for grades page
+async function loadGradesSeasonFilter() {
+    try {
+        const response = await fetch('/api/seasons', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (!response.ok) {
+            console.warn('Could not load seasons for grades filter');
+            return;
+        }
+        
+        const seasons = await response.json();
+        const seasonFilter = document.getElementById('gradesSeasonFilter');
+        
+        if (!seasonFilter) return;
+        
+        // Clear existing options
+        seasonFilter.innerHTML = '';
+        
+        // Sort: Active first, then upcoming, then archived
+        const sortedSeasons = seasons.sort((a, b) => {
+            const order = { 'active': 0, 'upcoming': 1, 'archived': 2 };
+            return order[a.status] - order[b.status];
+        });
+        
+        sortedSeasons.forEach(season => {
+            const option = document.createElement('option');
+            option.value = season._id;
+            option.textContent = `${season.name} ${season.status === 'active' ? '(Active)' : season.status === 'archived' ? '(Archived)' : '(Upcoming)'}`;
+            
+            // Pre-select active season
+            if (season.status === 'active') {
+                option.selected = true;
+            }
+            
+            seasonFilter.appendChild(option);
+        });
+        
+        console.log('✅ Grades season filter loaded with', seasons.length, 'seasons');
+    } catch (error) {
+        console.error('Error loading grades season filter:', error);
+    }
+}
+
+// Filter students in grades dropdown based on search and season
 function filterGradesStudents() {
     const searchTerm = document.getElementById('gradesStudentSearch').value.toLowerCase();
+    const seasonId = document.getElementById('gradesSeasonFilter')?.value;
     const studentFilter = document.getElementById('gradesStudentFilter');
     
     if (!studentFilter) return;
     
     const currentValue = studentFilter.value;
-    studentFilter.innerHTML = '<option value="">Select Student</option>';
+    studentFilter.innerHTML = `<option value="">${t('selectStudent')}</option>`;
     
     let firstMatchId = null;
     let matchCount = 0;
@@ -317,11 +522,15 @@ function filterGradesStudents() {
         const email = (student.schoolEmail || '').toLowerCase();
         const phones = (student.phones || []).join(' ').toLowerCase();
         
-        // Check if search term matches name, email, or phone
-        if (!searchTerm || 
+        // Filter by season if selected
+        const studentSeasonId = student.group?.season?.toString();
+        const matchesSeason = !seasonId || studentSeasonId === seasonId;
+        
+        // Check if search term matches name, email, or phone AND season matches
+        if (matchesSeason && (!searchTerm || 
             name.includes(searchTerm) || 
             email.includes(searchTerm) || 
-            phones.includes(searchTerm)) {
+            phones.includes(searchTerm))) {
             
             const option = document.createElement('option');
             option.value = student._id;
@@ -414,6 +623,14 @@ async function loadStudents() {
         const formation = document.getElementById('formationFilter')?.value;
         const branch = document.getElementById('branchFilter')?.value;
         const paymentStatus = document.getElementById('paymentStatusFilter')?.value;
+        
+        // Add season filter - use current season context
+        if (legacyCurrentSeasonId) {
+            params.append('season', legacyCurrentSeasonId);
+            console.log('🔍 Loading students for season:', legacyCurrentSeasonId);
+        } else {
+            console.log('ℹ️ No season context - will load active season students');
+        }
         
         if (search) params.append('search', search);
         
@@ -633,7 +850,7 @@ function displayStudents(students, pendingStudents = [], isLimitedView = false) 
                 <div style="position: absolute; top: 10px; left: 10px;">
                     <i class="fas ${statusStyle.icon}" style="color: ${statusStyle.color}; font-size: 1.2rem;" title="${statusStyle.label}"></i>
                 </div>
-                ${student.photoPath ? `<img src="${student.photoPath}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
+                ${isValidPhotoPath(student.photoPath) ? `<img src="${student.photoPath}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
                   `<div class="student-photo" style="background: ${statusStyle.color}; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; border-color: ${statusStyle.borderColor};">${student.fullName.charAt(0)}</div>`}
                 <div class="student-name">${student.fullName}</div>
                 <div class="student-info">
@@ -684,7 +901,7 @@ function displayStudents(students, pendingStudents = [], isLimitedView = false) 
 function createPendingStudentCard(student) {
     return `
         <div class="student-card" style="border-left: 4px solid #ffc107; background: white;">
-            ${student.photoPath ? `<img src="${student.photoPath}" class="student-photo" style="border-color: #ffc107;">` : 
+            ${isValidPhotoPath(student.photoPath) ? `<img src="${student.photoPath}" class="student-photo" style="border-color: #ffc107;">` : 
                 `<div class="student-photo-placeholder" style="border-color: #ffc107;"><i class="fas fa-user"></i></div>`}
             <div class="student-info">
                 <h3 style="margin: 0 0 10px 0;">${student.fullName}</h3>
@@ -717,9 +934,13 @@ async function updateGroupFilters() {
     if (!filter) return;
     
     try {
-        // Load both language groups and branch subgroups
+        // Build query with season filter if available
+        const seasonParam = legacyCurrentSeasonId ? `&season=${legacyCurrentSeasonId}` : '';
+        console.log('🔍 Updating group filters with season:', legacyCurrentSeasonId);
+        
+        // Load both language groups and branch subgroups (filtered by season)
         const [languageGroupsData, branchSubgroupsData] = await Promise.all([
-            apiRequest('/groups?groupType=language'),  // Only language groups
+            apiRequest(`/groups?groupType=language${seasonParam}`),  // Season-filtered language groups
             fetch('/api/branch-groups', {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             }).then(r => r.json())
@@ -728,17 +949,22 @@ async function updateGroupFilters() {
         const languageGroups = languageGroupsData.success ? languageGroupsData.groups : [];
         const branchGroups = Array.isArray(branchSubgroupsData) ? branchSubgroupsData : [];
         
-        // Get all subgroups from all branch groups
-        let allSubgroups = [];
-        for (const branchGroup of branchGroups) {
-            const subgroupsResponse = await fetch(`/api/branch-groups/${branchGroup._id}/subgroups`, {
+        // Get all subgroups from all branch groups in PARALLEL (much faster!)
+        const subgroupPromises = branchGroups.map(branchGroup => {
+            const url = legacyCurrentSeasonId 
+                ? `/api/branch-groups/${branchGroup._id}/subgroups?season=${legacyCurrentSeasonId}`
+                : `/api/branch-groups/${branchGroup._id}/subgroups`;
+                
+            return fetch(url, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
-            });
-            if (subgroupsResponse.ok) {
-                const subgroups = await subgroupsResponse.json();
-                allSubgroups = allSubgroups.concat(subgroups);
-            }
-        }
+            })
+            .then(r => r.ok ? r.json() : [])
+            .catch(() => []);
+        });
+        
+        // Wait for all subgroup requests to complete
+        const subgroupArrays = await Promise.all(subgroupPromises);
+        const allSubgroups = subgroupArrays.flat(); // Flatten array of arrays
         
         // Build dropdown with sections
         let optionsHTML = '<option value="">All Groups</option>';
@@ -774,6 +1000,20 @@ function searchStudents() {
 }
 
 function filterStudents() {
+    // Update season context when season filter changes
+    const seasonFilter = document.getElementById('seasonFilter');
+    if (seasonFilter && seasonFilter.value) {
+        const oldSeasonId = legacyCurrentSeasonId;
+        legacyCurrentSeasonId = seasonFilter.value;
+        console.log('🔄 Season filter changed to:', seasonFilter.value);
+        
+        // If season changed, update group filters too
+        if (oldSeasonId !== legacyCurrentSeasonId) {
+            console.log('🔄 Updating group filters for new season');
+            updateGroupFilters();
+        }
+    }
+    
     loadStudents();
 }
 
@@ -817,15 +1057,47 @@ function closeModal() {
 // Notifications
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
+    
+    // Define vibrant colors for clear visibility
+    const colors = {
+        success: { bg: '#10b981', icon: '✓', shadow: 'rgba(16, 185, 129, 0.4)' },
+        error: { bg: '#ef4444', icon: '✕', shadow: 'rgba(239, 68, 68, 0.4)' },
+        info: { bg: '#3b82f6', icon: 'ℹ', shadow: 'rgba(59, 130, 246, 0.4)' },
+        warning: { bg: '#f59e0b', icon: '⚠', shadow: 'rgba(245, 158, 11, 0.4)' }
+    };
+    
+    const style = colors[type] || colors.info;
+    
     notification.style.cssText = `
-        position: fixed; top: 20px; right: 20px; padding: 15px 25px;
-        background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--info)'};
-        color: white; border-radius: 10px; z-index: 10000;
-        animation: slideIn 0.3s;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: ${style.bg};
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px ${style.shadow};
+        z-index: 10000;
+        font-size: 15px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease-out;
+        min-width: 300px;
     `;
-    notification.textContent = message;
+    
+    notification.innerHTML = `
+        <span style="font-size: 20px; font-weight: bold;">${style.icon}</span>
+        <span>${message}</span>
+    `;
+    
     document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 // Logout
@@ -1366,7 +1638,7 @@ function createReminderSection(title, className, students, color) {
             <tr>
                 <td>
                     <div class="student-name-cell">
-                        ${student.photoPath ? 
+                        ${isValidPhotoPath(student.photoPath) ? 
                             `<img src="${student.photoPath}" class="student-photo-small">` : 
                             `<div class="student-photo-small" style="background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${student.fullName.charAt(0)}</div>`
                         }
@@ -1480,6 +1752,18 @@ async function openEditStudentModal(student) {
     // Get student's current branch subgroup ID
     const currentBranchSubgroupId = student.branchSubgroup?._id || student.branchSubgroup || '';
     
+    // Get student's season from their group
+    const studentSeason = student.group?.season || legacyCurrentSeasonId;
+    console.log('📝 Editing student - Season:', studentSeason, 'Current:', legacyCurrentSeasonId);
+    
+    // Filter groups by student's season (or current season if student has no group yet)
+    const seasonGroups = allGroups.filter(g => {
+        if (!studentSeason) return g.status === 'active'; // No season filter if no season context
+        return g.status === 'active' && g.season?.toString() === studentSeason.toString();
+    });
+    
+    console.log(`📋 Filtered ${seasonGroups.length} groups for season from ${allGroups.length} total`);
+    
     // Check if student has selected any branches
     const hasBranches = student.filiere && student.filiere.length > 0;
     
@@ -1524,10 +1808,14 @@ async function openEditStudentModal(student) {
                     <label>Language Group *</label>
                     <select name="group" required>
                         <option value="">-- Select Group --</option>
-                        ${allGroups.filter(g => g.status === 'active').map(g => 
+                        ${seasonGroups.map(g => 
                             `<option value="${g._id}" ${g._id === currentGroupId ? 'selected' : ''}>${g.name} (${g.currentStudentCount}/${g.maxStudents})</option>`
                         ).join('')}
                     </select>
+                    ${studentSeason && seasonGroups.length === 0 ? 
+                        `<small style="color: #f59e0b; display: block; margin-top: 5px;">
+                            <i class="fas fa-exclamation-triangle"></i> No groups available for this season
+                        </small>` : ''}
                 </div>
                 ${hasBranches ? `
                 <div class="form-group">
@@ -1662,7 +1950,7 @@ async function openEditStudentModal(student) {
             <div class="form-group">
                 <label>Update Photo (optional)</label>
                 <input type="file" name="photo" accept="image/*">
-                ${student.photoPath ? `<small style="color: var(--text-light);">Current photo will be replaced if you upload a new one</small>` : ''}
+                ${isValidPhotoPath(student.photoPath) ? `<small style="color: var(--text-light);">Current photo will be replaced if you upload a new one</small>` : ''}
             </div>
             
             <!-- CIN Card Upload Section -->
@@ -1735,6 +2023,14 @@ async function openEditStudentModal(student) {
 // Helper function to load and cache branch subgroups (with parallel API calls)
 async function loadBranchSubgroupsAsync(selectedSubgroupId = '') {
     try {
+        // Get season context - use current season or warn if not available
+        const seasonId = legacyCurrentSeasonId;
+        if (!seasonId) {
+            console.warn('⚠️ No season selected, branch subgroups may show from all seasons');
+        } else {
+            console.log('📋 Loading branch subgroups for season:', seasonId);
+        }
+        
         const branchGroupsResponse = await fetch('/api/branch-groups', {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
@@ -1743,7 +2039,12 @@ async function loadBranchSubgroupsAsync(selectedSubgroupId = '') {
         // Fetch all subgroups in parallel (much faster than sequential)
         const subgroupPromises = branchGroups.map(async (branchGroup) => {
             try {
-                const response = await fetch(`/api/branch-groups/${branchGroup._id}/subgroups`, {
+                // Add season parameter if available
+                const url = seasonId 
+                    ? `/api/branch-groups/${branchGroup._id}/subgroups?season=${seasonId}`
+                    : `/api/branch-groups/${branchGroup._id}/subgroups`;
+                    
+                const response = await fetch(url, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (response.ok) {
@@ -2069,13 +2370,13 @@ function displayStudentGrades(grades) {
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background: var(--bg-light);">
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Exam Type</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Score</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Percentage</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${isLanguage ? 'Status' : 'Grade'}</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Exam Date</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Teacher</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Comments</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('examType')}</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('score')}</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('percentage')}</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${isLanguage ? t('status') : t('grade')}</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('examDate')}</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('teacher')}</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('comments')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2143,7 +2444,7 @@ function getStatusConfig(status) {
     const configs = {
         approved: {
             icon: '<i class="fas fa-check-circle"></i>',
-            label: 'Approved',
+            label: t('approved'),
             color: '#10b981'
         },
         mid: {
@@ -2219,7 +2520,7 @@ function displayTeachers(teachers) {
         teachersContent.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-light);">
                 <i class="fas fa-chalkboard-teacher" style="font-size: 3rem; color: var(--primary-color); opacity: 0.3; margin-bottom: 15px;"></i>
-                <p>No teachers found</p>
+                <p>${t('noTeachersFound')}</p>
             </div>
         `;
         return;
@@ -2230,13 +2531,13 @@ function displayTeachers(teachers) {
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr style="background: var(--bg-light);">
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Name</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Email</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Phone</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Formations</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Assigned Groups</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Status</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">Actions</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('name')}</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('email')}</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('phone')}</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('formations')}</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('assignedGroups')}</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('status')}</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color);">${t('actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2246,7 +2547,7 @@ function displayTeachers(teachers) {
         const statusColor = teacher.status === 'active' ? 'var(--success-color)' : 'var(--text-light)';
         const formations = teacher.formations.join(', ');
         
-        // Get group names for assigned groups
+        // Get group names for assigned groups (filter by active season only)
         const teacherGroups = teacher.groups || [];
         let groupsDisplay = 'None';
         if (teacherGroups.length > 0) {
@@ -2254,13 +2555,15 @@ function displayTeachers(teachers) {
                 if (typeof g === 'string') {
                     // If it's just an ID, find the group name
                     const group = allGroups.find(gr => gr._id === g);
-                    return group ? group.name : 'Unknown';
+                    return group ? group.name : null;
                 } else {
-                    // If it's populated, use the name directly
-                    return g.name || 'Unknown';
+                    // If it's populated, check if it's from active season
+                    const seasonId = g.season?.toString();
+                    const isActiveSeasonGroup = !legacyCurrentSeasonId || seasonId === legacyCurrentSeasonId;
+                    return isActiveSeasonGroup ? (g.name || null) : null;
                 }
-            });
-            groupsDisplay = groupNames.join(', ');
+            }).filter(name => name !== null); // Remove null entries
+            groupsDisplay = groupNames.length > 0 ? groupNames.join(', ') : 'None (active season)';
         }
         
         html += `
@@ -2270,7 +2573,7 @@ function displayTeachers(teachers) {
                 <td style="padding: 12px;">${teacher.phoneNumber}</td>
                 <td style="padding: 12px;">${formations}</td>
                 <td style="padding: 12px;"><span style="color: var(--primary-color); font-weight: 500;">${groupsDisplay}</span></td>
-                <td style="padding: 12px;"><span style="color: ${statusColor}; font-weight: 600;">${teacher.status}</span></td>
+                <td style="padding: 12px;"><span style="color: ${statusColor}; font-weight: 600;">${t(teacher.status)}</span></td>
                 <td style="padding: 12px;">
                     <div class="action-buttons">
                         <button class="btn btn-small" onclick="openEditTeacherModal('${teacher._id}')" title="Edit Teacher">
@@ -2299,15 +2602,22 @@ function displayTeachers(teachers) {
 
 // Open add teacher modal
 function openAddTeacherModal() {
+    // Filter groups by active season only
+    const activeSeasonGroups = allGroups.filter(group => {
+        if (!legacyCurrentSeasonId) return true; // If no season context, show all
+        const groupSeasonId = group.season?.toString();
+        return groupSeasonId === legacyCurrentSeasonId;
+    });
+    
     // Generate groups checkboxes
-    const groupsHTML = allGroups.length > 0 ? 
-        allGroups.map(group => `
+    const groupsHTML = activeSeasonGroups.length > 0 ? 
+        activeSeasonGroups.map(group => `
             <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px;">
                 <input type="checkbox" name="groups" value="${group._id}">
                 <span>${group.name} (${group.formation})</span>
             </label>
         `).join('') : 
-        '<p style="color: var(--text-light); font-style: italic;">No groups available. Create groups first.</p>';
+        '<p style="color: var(--text-light); font-style: italic;">No groups available in active season. Create groups first.</p>';
     
     const modal = createModal(`
         <h2 style="color: var(--primary-color); margin-bottom: 25px;"><i class="fas fa-user-plus"></i> Add Teacher</h2>
@@ -2516,10 +2826,17 @@ async function openEditTeacherModal(teacherId) {
     const teacher = allTeachers.find(t => t._id === teacherId);
     if (!teacher) return;
     
+    // Filter groups by active season only
+    const activeSeasonGroups = allGroups.filter(group => {
+        if (!legacyCurrentSeasonId) return true; // If no season context, show all
+        const groupSeasonId = group.season?.toString();
+        return groupSeasonId === legacyCurrentSeasonId;
+    });
+    
     // Generate groups checkboxes with current assignments
     const teacherGroups = teacher.groups || [];
-    const groupsHTML = allGroups.length > 0 ? 
-        allGroups.map(group => {
+    const groupsHTML = activeSeasonGroups.length > 0 ? 
+        activeSeasonGroups.map(group => {
             const isAssigned = teacherGroups.some(g => (typeof g === 'string' ? g : g._id) === group._id);
             return `
                 <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px;">
@@ -2528,7 +2845,7 @@ async function openEditTeacherModal(teacherId) {
                 </label>
             `;
         }).join('') : 
-        '<p style="color: var(--text-light); font-style: italic;">No groups available.</p>';
+        '<p style="color: var(--text-light); font-style: italic;">No groups available in active season.</p>';
     
     const modal = createModal(`
         <h2 style="color: var(--primary-color); margin-bottom: 25px;"><i class="fas fa-edit"></i> Edit Teacher</h2>

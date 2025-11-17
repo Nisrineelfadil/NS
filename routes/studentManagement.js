@@ -132,13 +132,7 @@ router.post('/groups', authenticateAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Name and max students are required' });
         }
         
-        // Check if group name already exists
-        const existingGroup = await Group.findOne({ name });
-        if (existingGroup) {
-            return res.status(400).json({ error: 'Group name already exists' });
-        }
-        
-        // Determine season to use
+        // Determine season to use first (needed for uniqueness check)
         const Season = require('../models/Season');
         let targetSeason;
         let targetSeasonName;
@@ -173,6 +167,17 @@ router.post('/groups', authenticateAdmin, async (req, res) => {
             
             targetSeason = currentSeason._id;
             targetSeasonName = currentSeason.name;
+        }
+        
+        // Check if group name already exists in this season (season-scoped uniqueness)
+        const existingGroup = await Group.findOne({ 
+            name, 
+            season: targetSeason 
+        });
+        if (existingGroup) {
+            return res.status(400).json({ 
+                error: `Group name "${name}" already exists in season ${targetSeasonName}` 
+            });
         }
         
         const group = new Group({
@@ -212,11 +217,17 @@ router.put('/groups/:id', authenticateAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Group not found' });
         }
         
-        // Check if new name conflicts with existing group
+        // Check if new name conflicts with existing group in same season
         if (name && name !== group.name) {
-            const existingGroup = await Group.findOne({ name, _id: { $ne: group._id } });
+            const existingGroup = await Group.findOne({ 
+                name, 
+                season: group.season,  // Check within same season only
+                _id: { $ne: group._id } 
+            });
             if (existingGroup) {
-                return res.status(400).json({ error: 'Group name already exists' });
+                return res.status(400).json({ 
+                    error: `Group name "${name}" already exists in season ${group.seasonName}` 
+                });
             }
             group.name = name;
         }
@@ -288,13 +299,30 @@ router.get('/students', authenticateAdmin, async (req, res) => {
             paymentStatus,
             branchSubgroup,
             search,
+            season,  // Add season parameter
             page = 1,
             limit = 50
         } = req.query;
         
         const filter = {};
         
-        if (group) filter.group = group;
+        // Filter by season (default to active season if not specified)
+        if (season) {
+            // Get groups from specified season
+            const seasonGroups = await Group.find({ season: season }).select('_id');
+            filter.group = { $in: seasonGroups.map(g => g._id) };
+        } else {
+            // Default: filter by active season
+            const Season = require('../models/Season');
+            const activeSeason = await Season.findOne({ status: 'active' });
+            if (activeSeason) {
+                const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
+                filter.group = { $in: activeSeasonGroups.map(g => g._id) };
+            }
+        }
+        
+        // Apply other filters (these will be combined with season filter)
+        if (group) filter.group = group;  // Override if specific group requested
         if (formation) filter.formation = { $in: [formation] };
         if (filiere) filter.filiere = { $in: [filiere] };
         if (status) filter.status = status;
@@ -313,7 +341,7 @@ router.get('/students', authenticateAdmin, async (req, res) => {
         
         const students = await ManagedStudent.find(filter)
             .select('-emailPassword')
-            .populate('group', 'name')
+            .populate('group', 'name season seasonName')
             .populate('addedBy', 'username')
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -450,21 +478,17 @@ router.post('/students',
         console.log('Formation array:', formationArray);
         console.log('Filiere array:', filiereArray);
         
-        // Handle photo upload - different for production (Vercel) vs local
+        // Handle photo upload - using memory storage, so convert to base64 for both environments
         let photoPath = null;
         const photoFile = req.files && req.files['photo'] ? req.files['photo'][0] : null;
         
         if (photoFile) {
-            if (isProduction) {
-                // On Vercel: convert to base64 and store in database
-                const base64Image = photoFile.buffer.toString('base64');
-                photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
-                console.log('Photo converted to base64 for Vercel');
-            } else {
-                // Locally: use file path
-                photoPath = `/uploads/managed-students/${photoFile.filename}`;
-                console.log('Photo saved to disk:', photoPath);
-            }
+            // Since we're using cinUpload with memoryStorage, convert to base64
+            const base64Image = photoFile.buffer.toString('base64');
+            photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
+            console.log('Photo converted to base64 and stored in database');
+        } else {
+            console.log('No photo uploaded - photoPath will be null');
         }
         
         // Handle CIN card upload
@@ -629,6 +653,15 @@ router.put('/students/:id',
                 return res.status(404).json({ error: 'New group not found' });
             }
             
+            // Validate season consistency - new group must be in same season as old group
+            if (oldGroup && oldGroup.season && newGroup.season) {
+                if (oldGroup.season.toString() !== newGroup.season.toString()) {
+                    return res.status(400).json({ 
+                        error: `Cannot move student to a different season. Student is in ${oldGroup.seasonName}, new group is in ${newGroup.seasonName}` 
+                    });
+                }
+            }
+            
             if (newGroup.currentStudentCount >= newGroup.maxStudents) {
                 return res.status(400).json({ error: 'New group is full' });
             }
@@ -712,17 +745,13 @@ router.put('/students/:id',
             }
         }
         
-        // Update photo if provided
+        // Update photo if provided - using memory storage, so convert to base64
         const photoFile = req.files && req.files['photo'] ? req.files['photo'][0] : null;
         if (photoFile) {
-            if (isProduction) {
-                // On Vercel: convert to base64
-                const base64Image = photoFile.buffer.toString('base64');
-                student.photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
-            } else {
-                // Locally: use file path
-                student.photoPath = `/uploads/managed-students/${photoFile.filename}`;
-            }
+            // Since we're using cinUpload with memoryStorage, convert to base64
+            const base64Image = photoFile.buffer.toString('base64');
+            student.photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
+            console.log('Photo updated and converted to base64');
         }
         
         // Handle CIN card update
@@ -854,11 +883,12 @@ router.delete('/students/:id', authenticateAdmin, async (req, res) => {
             await group.save();
         }
         
-        // Delete student photo if exists
-        if (student.photoPath) {
+        // Delete student photo if exists (only if it's a file path, not base64)
+        if (student.photoPath && !student.photoPath.startsWith('data:')) {
             try {
                 const photoPath = path.join(__dirname, '..', student.photoPath);
                 await fs.unlink(photoPath);
+                console.log('Photo file deleted from disk');
             } catch (err) {
                 console.error('Error deleting photo:', err);
             }
@@ -949,13 +979,26 @@ router.get('/payment-reminders', authenticateAdmin, async (req, res) => {
     try {
         const now = new Date();
         
-        // Find students who need reminders
-        const students = await ManagedStudent.find({
+        // Get active season to filter payment reminders
+        const Season = require('../models/Season');
+        const activeSeason = await Season.findOne({ status: 'active' });
+        
+        // Build query
+        const query = {
             paymentStatus: { $ne: 'paid' },
             status: 'active'
-        })
+        };
+        
+        // Filter by active season if available
+        if (activeSeason) {
+            const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
+            query.group = { $in: activeSeasonGroups.map(g => g._id) };
+        }
+        
+        // Find students who need reminders
+        const students = await ManagedStudent.find(query)
         .select('-emailPassword')
-        .populate('group', 'name')
+        .populate('group', 'name season seasonName')
         .sort({ paymentDate: 1 });
         
         const reminders = students.map(student => {
@@ -1023,11 +1066,40 @@ router.post('/payment-reminders/:studentId/sent', authenticateAdmin, async (req,
 // Get dashboard statistics
 router.get('/dashboard/stats', authenticateAdmin, async (req, res) => {
     try {
-        const totalGroups = await Group.countDocuments({ status: 'active' });
-        const totalStudents = await ManagedStudent.countDocuments({ status: 'active' });
+        // Get active season to filter groups
+        const Season = require('../models/Season');
+        const activeSeason = await Season.findOne({ status: 'active' });
+        
+        // Count only groups from active season
+        const groupQuery = { status: 'active' };
+        if (activeSeason) {
+            groupQuery.season = activeSeason._id;
+        }
+        
+        const totalGroups = await Group.countDocuments(groupQuery);
+        
+        // Count only students from active season's groups
+        let totalStudents = 0;
+        if (activeSeason) {
+            const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
+            totalStudents = await ManagedStudent.countDocuments({
+                group: { $in: activeSeasonGroups.map(g => g._id) },
+                status: 'active'
+            });
+        } else {
+            // Fallback: count all active students if no active season
+            totalStudents = await ManagedStudent.countDocuments({ status: 'active' });
+        }
+        
+        // Build payment query with season filter
+        const paymentQuery = { status: 'active' };
+        if (activeSeason) {
+            const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
+            paymentQuery.group = { $in: activeSeasonGroups.map(g => g._id) };
+        }
         
         const paymentStats = await ManagedStudent.aggregate([
-            { $match: { status: 'active' } },
+            { $match: paymentQuery },
             {
                 $group: {
                     _id: '$paymentStatus',
@@ -1038,13 +1110,13 @@ router.get('/dashboard/stats', authenticateAdmin, async (req, res) => {
         
         const now = new Date();
         const upcomingPayments = await ManagedStudent.countDocuments({
-            status: 'active',
+            ...paymentQuery,
             paymentStatus: { $ne: 'paid' },
             paymentDate: { $gte: now, $lte: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) }
         });
         
         const overduePayments = await ManagedStudent.countDocuments({
-            status: 'active',
+            ...paymentQuery,
             paymentStatus: { $ne: 'paid' },
             paymentDate: { $lt: now }
         });
@@ -1476,7 +1548,7 @@ router.post('/students/:id/generate-pdf', authenticateAdmin, async (req, res) =>
     }
 });
 
-// Backup managed student to Dropbox
+// Backup managed student to Mega.nz
 // Ensures PDF meets all requirements before uploading:
 // - File size under 3 MB
 // - Proper naming convention (StudentName_Season.pdf)
@@ -1491,7 +1563,7 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
         
         // Import services
         const { generateRegistrationPDF } = require('../services/pdfGenerator');
-        const dropboxService = require('../services/dropboxService');
+        const megaService = require('../services/megaService');
         const pdfValidator = require('../utils/pdfValidator');
         
         // Prepare student data for PDF
@@ -1516,7 +1588,7 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
         // Validate PDF before uploading
         const validation = pdfValidator.validateFileSize({ buffer: pdfBuffer });
         if (!validation.valid) {
-            console.error('❌ PDF validation failed before Dropbox upload:', validation.error);
+            console.error('❌ PDF validation failed before Mega upload:', validation.error);
             return res.status(400).json({ 
                 error: 'Generated PDF does not meet requirements',
                 details: validation.error,
@@ -1524,8 +1596,8 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
             });
         }
         
-        // Upload to Dropbox with proper naming
-        const result = await dropboxService.uploadStudentPDF(pdfBuffer, {
+        // Upload to Mega.nz with proper naming
+        const result = await megaService.uploadStudentPDF(pdfBuffer, {
             fullName: student.fullName,
             cin: student._id.toString(),
             season: student.season || 'Current'
@@ -1534,17 +1606,17 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
         if (result.success) {
             res.json({
                 success: true,
-                message: `Student PDF backed up to Dropbox successfully!`,
-                dropboxPath: result.filePath,
+                message: `Student PDF backed up to Mega.nz successfully!`,
+                megaPath: result.filePath,
                 fileSize: pdfValidator.formatBytes(validation.size)
             });
         } else {
-            throw new Error(result.message || 'Failed to upload to Dropbox');
+            throw new Error(result.message || 'Failed to upload to Mega.nz');
         }
         
     } catch (error) {
-        console.error('Error backing up to Dropbox:', error);
-        res.status(500).json({ error: error.message || 'Failed to backup to Dropbox' });
+        console.error('Error backing up to Mega.nz:', error);
+        res.status(500).json({ error: error.message || 'Failed to backup to Mega.nz' });
     }
 });
 

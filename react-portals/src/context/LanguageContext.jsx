@@ -15,10 +15,16 @@ const translations = {
     // Teacher Portal
     teacherPortal: 'Lehrerportal',
     gradeManagement: 'Notenverwaltung',
+    attendanceQR: 'Anwesenheits-QR',
     selectFormation: 'Formation auswählen',
     selectGroup: 'Gruppe auswählen',
+    selectFormationAndGroup: 'Formation und Gruppe auswählen',
+    selectFormationGroupText: 'Bitte wählen Sie eine Formation und Gruppe aus, um Schüler anzuzeigen.',
+    autoAssigned: 'Automatisch zugewiesen',
+    noGroupsAvailable: 'Keine Gruppen für diese Formation verfügbar',
     noStudentsFound: 'Keine Schüler gefunden',
     noStudentsEnrolled: 'Keine Schüler in dieser Formation und Gruppe eingeschrieben.',
+    loadingStudents: 'Schüler werden geladen...',
     students: 'Schüler',
     logout: 'Abmelden',
     enterGrades: 'Noten eingeben',
@@ -221,7 +227,7 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('de');
 
   useEffect(() => {
-    // Load saved language
+    // Load saved language (default to German)
     const savedLanguage = localStorage.getItem('language') || 'de';
     setLanguage(savedLanguage);
     

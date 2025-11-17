@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setupLanguageSwitcher();
             
             // Set initial language
-            const currentLang = localStorage.getItem('preferredLanguage') || 'en';
+            const currentLang = localStorage.getItem('preferredLanguage') || 'de';
             
             // Set active class on the current language option
             const languageOptions = document.querySelectorAll('.language-option');

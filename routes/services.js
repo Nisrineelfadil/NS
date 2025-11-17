@@ -4,7 +4,8 @@ const multer = require('multer');
 const ServiceRequest = require('../models/ServiceRequest');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
 const { logActivity, getClientIp } = require('../utils/activityLogger');
-const dropboxService = require('../services/dropboxService');
+const megaService = require('../services/megaService');
+const notificationService = require('../services/notificationService');
 const { validatePDFUpload } = require('../middleware/pdfValidationMiddleware');
 const pdfValidator = require('../utils/pdfValidator');
 
@@ -118,40 +119,47 @@ router.post('/upload', upload.single('file'),
             }
         }
 
-        // Upload file to Dropbox if provided
-        let dropboxPath = null;
+        // Upload file to Mega.nz if provided
+        let megaPath = null;
         if (req.file) {
             try {
-                console.log(`📤 Uploading file to Dropbox: ${req.file.originalname}`);
+                console.log(`📤 Uploading file to Mega.nz: ${req.file.originalname}`);
                 
                 // Create folder path based on service type
                 const folderPath = `/ServiceRequests/${serviceType}`;
                 const fileName = `${Date.now()}_${fullName.replace(/\s+/g, '_')}_${req.file.originalname}`;
-                dropboxPath = `${folderPath}/${fileName}`;
+                megaPath = `${folderPath}/${fileName}`;
                 
-                // Upload to Dropbox
-                await dropboxService.uploadServiceFile(req.file.buffer, dropboxPath);
+                // Upload to Mega.nz
+                const megaService = require('../services/megaService');
+                const uploadResult = await megaService.uploadServiceFile(req.file.buffer, megaPath);
                 
-                console.log(`✅ File uploaded to Dropbox: ${dropboxPath}`);
-                
-                // Add Dropbox path to service details
-                if (cvDetails) {
-                    cvDetails.fileName = req.file.originalname;
-                    cvDetails.fileSize = req.file.size;
-                    cvDetails.dropboxPath = dropboxPath;
-                }
-                if (applyingDetails) {
-                    applyingDetails.fileName = req.file.originalname;
-                    applyingDetails.fileSize = req.file.size;
-                    applyingDetails.dropboxPath = dropboxPath;
-                }
-                if (translationDetails) {
-                    translationDetails.fileName = req.file.originalname;
-                    translationDetails.fileSize = req.file.size;
-                    translationDetails.dropboxPath = dropboxPath;
+                if (uploadResult.success) {
+                    console.log(`✅ File uploaded to Mega.nz: ${megaPath}`);
+                    
+                    // Add Mega path to service details ONLY if upload succeeded
+                    if (cvDetails) {
+                        cvDetails.fileName = req.file.originalname;
+                        cvDetails.fileSize = req.file.size;
+                        cvDetails.dropboxPath = megaPath; // Keep field name for backward compatibility
+                    }
+                    if (applyingDetails) {
+                        applyingDetails.fileName = req.file.originalname;
+                        applyingDetails.fileSize = req.file.size;
+                        applyingDetails.dropboxPath = megaPath;
+                    }
+                    if (translationDetails) {
+                        translationDetails.fileName = req.file.originalname;
+                        translationDetails.fileSize = req.file.size;
+                        translationDetails.dropboxPath = megaPath;
+                    }
+                } else {
+                    console.error('❌ Mega upload failed - file path not saved');
+                    megaPath = null; // Don't save path if upload failed
                 }
             } catch (uploadError) {
-                console.error('Dropbox upload error:', uploadError);
+                console.error('❌ Mega upload error:', uploadError);
+                megaPath = null; // Don't save path if upload failed
                 // Continue without file if upload fails
             }
         }
@@ -168,6 +176,11 @@ router.post('/upload', upload.single('file'),
         });
 
         await serviceRequest.save();
+
+        // Send real-time notification to admins
+        notificationService.notifyNewServiceRequest(serviceRequest).catch(err => {
+            console.error('Failed to send notification:', err);
+        });
 
         res.status(201).json({
             success: true,
@@ -452,10 +465,10 @@ router.post('/:id/backup', authenticateAdmin, async (req, res) => {
         }
 
         // Download file from current location
-        const downloadResult = await dropboxService.downloadServiceFile(sourceDropboxPath);
+        const downloadResult = await megaService.downloadServiceFile(sourceDropboxPath);
         
         if (!downloadResult.success) {
-            throw new Error('Failed to download file from Dropbox');
+            throw new Error('Failed to download file from Mega');
         }
 
         // Create organized backup path (Year/Month structure like registrations)
@@ -469,7 +482,7 @@ router.post('/:id/backup', authenticateAdmin, async (req, res) => {
         const backupPath = `/ServiceBackups/${service.serviceType}/${year}/${monthName}/${service.fullName.replace(/\s+/g, '_')}_${fileName}`;
         
         // Upload to backup location
-        await dropboxService.uploadServiceFile(downloadResult.fileBuffer, backupPath);
+        await megaService.uploadServiceFile(downloadResult.fileBuffer, backupPath);
         
         console.log(`✅ Service backed up to: ${backupPath}`);
 
@@ -536,11 +549,11 @@ router.get('/:id/download', authenticateAdmin, async (req, res) => {
             });
         }
 
-        // Download from Dropbox
-        const result = await dropboxService.downloadServiceFile(dropboxPath);
+        // Download from Mega
+        const result = await megaService.downloadServiceFile(dropboxPath);
 
         if (!result.success) {
-            throw new Error('Failed to download file from Dropbox');
+            throw new Error('Failed to download file from Mega');
         }
 
         // Set headers for file download

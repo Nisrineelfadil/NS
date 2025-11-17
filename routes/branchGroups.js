@@ -11,13 +11,20 @@ router.get('/', authenticateAdmin, async (req, res) => {
             .sort({ name: 1 })
             .select('-__v');
         
-        // Add subgroup count for each branch group
+        // Add subgroup count for each branch group (filtered by season if provided)
         const branchGroupsWithCounts = await Promise.all(
             branchGroups.map(async (bg) => {
-                const subgroupCount = await Group.countDocuments({
+                const query = {
                     branchGroup: bg._id,
                     status: 'active'
-                });
+                };
+                
+                // Filter by season if provided
+                if (req.query.season) {
+                    query.season = req.query.season;
+                }
+                
+                const subgroupCount = await Group.countDocuments(query);
                 
                 return {
                     ...bg.toObject(),
@@ -42,11 +49,19 @@ router.get('/:id', authenticateAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Branch group not found' });
         }
         
-        // Get subgroups for this branch group
-        const subgroups = await Group.find({
+        // Build query for subgroups
+        const query = {
             branchGroup: branchGroup._id,
             status: 'active'
-        }).sort({ name: 1 });
+        };
+        
+        // Filter by season if provided
+        if (req.query.season) {
+            query.season = req.query.season;
+        }
+        
+        // Get subgroups for this branch group
+        const subgroups = await Group.find(query).sort({ name: 1 });
         
         res.json({
             ...branchGroup.toObject(),
@@ -212,6 +227,7 @@ router.get('/:id/subgroups', authenticateAdmin, async (req, res) => {
     try {
         console.log('🔍 GET /:id/subgroups called');
         console.log('   Branch Group ID:', req.params.id);
+        console.log('   Season ID:', req.query.season);
         
         const ManagedStudent = require('../models/ManagedStudent');
         
@@ -224,11 +240,20 @@ router.get('/:id/subgroups', authenticateAdmin, async (req, res) => {
         
         console.log('✅ Branch group found:', branchGroup.displayName);
         
-        const subgroups = await Group.find({
+        // Build query with season filter if provided
+        const query = {
             branchGroup: req.params.id,
             groupType: 'branch',
             status: 'active'
-        }).sort({ name: 1 });
+        };
+        
+        // Filter by season if provided
+        if (req.query.season) {
+            query.season = req.query.season;
+            console.log('   Filtering by season:', req.query.season);
+        }
+        
+        const subgroups = await Group.find(query).sort({ name: 1 });
         
         console.log(`📊 Found ${subgroups.length} subgroups`);
         
@@ -257,12 +282,24 @@ router.get('/:id/subgroups', authenticateAdmin, async (req, res) => {
 // Create subgroup for a branch group
 router.post('/:id/subgroups', authenticateAdmin, async (req, res) => {
     try {
-        const { name, maxStudents } = req.body;
+        console.log('📝 Creating subgroup - Request body:', req.body);
+        const { name, maxStudents, season, seasonName } = req.body;
+        
+        // Validate season is provided
+        if (!season || !seasonName) {
+            console.log('❌ Validation failed: Missing season data');
+            return res.status(400).json({ error: 'Season ID and name are required' });
+        }
+        
+        console.log('✅ Season validation passed:', { season, seasonName });
         
         const branchGroup = await BranchGroup.findById(req.params.id);
         if (!branchGroup) {
+            console.log('❌ Branch group not found:', req.params.id);
             return res.status(404).json({ error: 'Branch group not found' });
         }
+        
+        console.log('✅ Branch group found:', branchGroup.displayName);
         
         const Admin = require('../models/Admin');
         const admin = await Admin.findById(req.adminId);
@@ -270,13 +307,24 @@ router.post('/:id/subgroups', authenticateAdmin, async (req, res) => {
         // Auto-generate name if not provided
         let subgroupName = name;
         if (!subgroupName) {
-            // Get existing subgroups count
+            // Get existing subgroups count for this season
             const existingCount = await Group.countDocuments({
                 branchGroup: branchGroup._id,
-                groupType: 'branch'
+                groupType: 'branch',
+                season: season
             });
             subgroupName = `${branchGroup.displayName} GROUP ${existingCount + 1}`;
+            console.log('🔢 Auto-generated name:', subgroupName);
         }
+        
+        console.log('📦 Creating subgroup with data:', {
+            name: subgroupName,
+            groupType: 'branch',
+            branchGroup: branchGroup._id,
+            formation: branchGroup.formation,
+            season,
+            seasonName
+        });
         
         const subgroup = new Group({
             name: subgroupName,
@@ -284,6 +332,8 @@ router.post('/:id/subgroups', authenticateAdmin, async (req, res) => {
             branchGroup: branchGroup._id,
             branchGroupName: branchGroup.displayName,
             formation: branchGroup.formation,
+            season: season,
+            seasonName: seasonName,
             maxStudents: maxStudents || 30,
             currentStudentCount: 0,
             status: 'active',
@@ -291,15 +341,25 @@ router.post('/:id/subgroups', authenticateAdmin, async (req, res) => {
             createdByName: admin ? admin.username : 'System'
         });
         
+        console.log('💾 Saving subgroup...');
         await subgroup.save();
+        console.log('✅ Subgroup saved successfully:', subgroup._id);
         
         res.status(201).json({
             message: 'Subgroup created successfully',
             subgroup
         });
     } catch (error) {
-        console.error('Error creating subgroup:', error);
-        res.status(500).json({ error: 'Failed to create subgroup' });
+        console.error('❌ Error creating subgroup:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        res.status(500).json({ 
+            error: 'Failed to create subgroup',
+            details: error.message 
+        });
     }
 });
 
@@ -384,9 +444,16 @@ router.post('/:id/assign-student', authenticateAdmin, async (req, res) => {
         }
         
         const ManagedStudent = require('../models/ManagedStudent');
-        const student = await ManagedStudent.findById(studentId);
+        
+        // Get student with populated group to check season
+        const student = await ManagedStudent.findById(studentId).populate('group');
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
+        }
+        
+        // Validate student has a language group with season
+        if (!student.group || !student.group.season) {
+            return res.status(400).json({ error: 'Student must be assigned to a language group first' });
         }
         
         // Check if student is already assigned to a subgroup in this branch
@@ -402,22 +469,31 @@ router.post('/:id/assign-student', authenticateAdmin, async (req, res) => {
         
         let targetSubgroup;
         
+        // Get student's season from their language group
+        const studentSeason = student.group.season;
+        const studentSeasonName = student.group.seasonName;
+        
         // If subgroupId provided, use it
         if (subgroupId) {
             targetSubgroup = await Group.findById(subgroupId);
             if (!targetSubgroup) {
                 return res.status(404).json({ error: 'Subgroup not found' });
             }
+            // Verify subgroup is in the same season
+            if (targetSubgroup.season.toString() !== studentSeason.toString()) {
+                return res.status(400).json({ error: 'Subgroup must be in the same season as the student' });
+            }
         } else {
-            // Auto-create first subgroup if none exist
+            // Auto-create first subgroup if none exist for this season
             const existingSubgroups = await Group.find({
                 branchGroup: branchGroup._id,
                 groupType: 'branch',
+                season: studentSeason,
                 status: 'active'
             });
             
             if (existingSubgroups.length === 0) {
-                // Create first subgroup
+                // Create first subgroup for this season
                 const Admin = require('../models/Admin');
                 const admin = await Admin.findById(req.adminId);
                 
@@ -427,6 +503,8 @@ router.post('/:id/assign-student', authenticateAdmin, async (req, res) => {
                     branchGroup: branchGroup._id,
                     branchGroupName: branchGroup.displayName,
                     formation: branchGroup.formation,
+                    season: studentSeason,
+                    seasonName: studentSeasonName,
                     maxStudents: 30,
                     currentStudentCount: 0,
                     status: 'active',
@@ -436,7 +514,7 @@ router.post('/:id/assign-student', authenticateAdmin, async (req, res) => {
                 
                 await targetSubgroup.save();
             } else {
-                // Use first available subgroup
+                // Use first available subgroup in the same season
                 targetSubgroup = existingSubgroups[0];
             }
         }
@@ -470,14 +548,28 @@ router.get('/pending-assignments/list', authenticateAdmin, async (req, res) => {
     try {
         const ManagedStudent = require('../models/ManagedStudent');
         
-        const pendingStudents = await ManagedStudent.find({
+        // Base query for pending students
+        const query = {
             filiere: { $exists: true, $ne: [] },
             $or: [
                 { branchSubgroup: { $exists: false } },
                 { branchSubgroup: null }
             ],
             status: 'active'
-        }).populate('group', 'name');
+        };
+        
+        // Populate group to access season information
+        let pendingStudents = await ManagedStudent.find(query)
+            .populate('group', 'name season seasonName');
+        
+        // Filter by season if provided (filter after populate since season is in group)
+        if (req.query.season) {
+            pendingStudents = pendingStudents.filter(student => 
+                student.group && 
+                student.group.season && 
+                student.group.season.toString() === req.query.season
+            );
+        }
         
         res.json(pendingStudents);
     } catch (error) {

@@ -3,6 +3,7 @@ const router = express.Router();
 const Appointment = require('../models/Appointment');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
 const { generateDailyAppointmentsPDF } = require('../services/appointmentPdfGenerator');
+const notificationService = require('../services/notificationService');
 
 // Apply authentication middleware to all routes
 router.use(authenticateAdmin);
@@ -72,21 +73,43 @@ router.get('/', async (req, res) => {
 /**
  * GET /api/appointments/stats
  * Get appointment statistics
+ * Query params: date (optional - if provided, stats are for that specific date)
  */
 router.get('/stats', async (req, res) => {
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const { date } = req.query;
+        
+        let dateQuery = {};
+        let targetDate = new Date();
+        
+        // If date is provided, use it; otherwise use today
+        if (date) {
+            targetDate = new Date(date);
+        }
+        
+        targetDate.setHours(0, 0, 0, 0);
+        const nextDay = new Date(targetDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        
+        // Build date query for the specific day
+        dateQuery = {
+            appointmentDate: { $gte: targetDate, $lt: nextDay }
+        };
 
         const [totalCount, todayCount, pendingCount, completedCount] = await Promise.all([
-            Appointment.countDocuments(),
+            // Total for the selected date
+            Appointment.countDocuments(dateQuery),
+            // Today's count (always today regardless of filter)
             Appointment.countDocuments({
-                appointmentDate: { $gte: today, $lt: tomorrow }
+                appointmentDate: { 
+                    $gte: new Date(new Date().setHours(0, 0, 0, 0)), 
+                    $lt: new Date(new Date().setHours(23, 59, 59, 999)) 
+                }
             }),
-            Appointment.countDocuments({ status: 'pending' }),
-            Appointment.countDocuments({ status: 'completed' })
+            // Pending for the selected date
+            Appointment.countDocuments({ ...dateQuery, status: 'pending' }),
+            // Completed for the selected date
+            Appointment.countDocuments({ ...dateQuery, status: 'completed' })
         ]);
 
         res.json({
@@ -222,6 +245,11 @@ router.post('/', async (req, res) => {
         });
 
         await appointment.save();
+
+        // Send real-time notification to admins
+        notificationService.notifyNewAppointment(appointment).catch(err => {
+            console.error('Failed to send notification:', err);
+        });
 
         res.status(201).json({
             success: true,

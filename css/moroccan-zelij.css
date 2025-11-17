@@ -1,0 +1,437 @@
+/**
+ * Moroccan Zelij Design Decorations
+ * Traditional Moroccan tile patterns for corner decorations
+ * Adds authentic Moroccan cultural touch to the website
+ */
+
+/* ============================================
+   CORNER DECORATIONS - TOP RIGHT
+   ============================================ */
+
+/* Hero Section - Top Right Corner */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 250px;
+    height: 250px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.55;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Services Section - Top Right Corner */
+.services::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url('../Img/corner-red-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* About Section - Top Right Corner */
+.about::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 220px;
+    height: 220px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Student Life Section - Top Right Corner */
+.student-life::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url('../Img/corner-red-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Contact Section - Top Right Corner */
+.contact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 220px;
+    height: 220px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Ratings Section - Top Right Corner */
+.ratings-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url('../Img/corner-red-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ============================================
+   CORNER DECORATIONS - BOTTOM LEFT
+   ============================================ */
+
+/* Services Section - Bottom Left Corner */
+.services::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    transform: rotate(180deg);
+}
+
+/* About Section - Bottom Left Corner */
+.about::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 220px;
+    height: 220px;
+    background-image: url('../Img/corner-red-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+    transform: rotate(180deg);
+}
+
+/* Student Life Section - Bottom Left Corner */
+.student-life::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    transform: rotate(180deg);
+}
+
+/* Contact Section - Bottom Left Corner */
+.contact::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 220px;
+    height: 220px;
+    background-image: url('../Img/corner-red-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    transform: rotate(180deg);
+}
+
+/* Ratings Section - Bottom Left Corner */
+.ratings-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    transform: rotate(180deg);
+}
+
+/* ============================================
+   SINGLE ZELIJ ICONS - ACCENT DECORATIONS
+   ============================================ */
+
+/* Section Headers - Decorative Icon */
+.section-header::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    background-image: url('../Img/single-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.6;
+    z-index: 0;
+    animation: rotateZelij 20s linear infinite;
+}
+
+/* Alternate red zelij for even sections */
+.services .section-header::before,
+.student-life .section-header::before,
+.ratings-section .section-header::before {
+    background-image: url('../Img/single-red-zelij.png');
+}
+
+/* ============================================
+   FOOTER DECORATIONS
+   ============================================ */
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 180px;
+    height: 180px;
+    background-image: url('../Img/corner-gold-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top left;
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Removed - Footer top right corner red zelij */
+/*
+.footer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 180px;
+    height: 180px;
+    background-image: url('../Img/corner-red-zelij.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top right;
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+}
+*/
+
+/* ============================================
+   ENSURE SECTIONS HAVE POSITION RELATIVE
+   ============================================ */
+
+.hero,
+.services,
+.about,
+.student-life,
+.contact,
+.ratings-section,
+.footer {
+    position: relative;
+    overflow: hidden; /* Prevent decorations from overflowing */
+}
+
+.section-header {
+    position: relative;
+    padding-top: 40px; /* Space for top decoration */
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 768px) {
+    .hero::before,
+    .services::before,
+    .about::before,
+    .student-life::before,
+    .contact::before,
+    .ratings-section::before {
+        width: 150px;
+        height: 150px;
+        opacity: 0.1;
+    }
+    
+    .services::after,
+    .about::after,
+    .student-life::after,
+    .contact::after,
+    .ratings-section::after {
+        width: 150px;
+        height: 150px;
+        opacity: 0.1;
+    }
+    
+    .footer::before,
+    .footer::after {
+        width: 120px;
+        height: 120px;
+        opacity: 0.06;
+    }
+    
+    .section-header::before {
+        width: 40px;
+        height: 40px;
+        top: -25px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .hero::before,
+    .services::before,
+    .about::before,
+    .student-life::before,
+    .contact::before,
+    .ratings-section::before {
+        width: 100px;
+        height: 100px;
+        opacity: 0.08;
+    }
+    
+    .services::after,
+    .about::after,
+    .student-life::after,
+    .contact::after,
+    .ratings-section::after {
+        width: 100px;
+        height: 100px;
+        opacity: 0.08;
+    }
+    
+    .footer::before,
+    .footer::after {
+        width: 80px;
+        height: 80px;
+        opacity: 0.05;
+    }
+    
+    .section-header::before {
+        width: 35px;
+        height: 35px;
+        top: -20px;
+    }
+}
+
+/* ============================================
+   RTL SUPPORT (Arabic)
+   ============================================ */
+
+[dir="rtl"] .hero::before,
+[dir="rtl"] .services::before,
+[dir="rtl"] .about::before,
+[dir="rtl"] .student-life::before,
+[dir="rtl"] .contact::before,
+[dir="rtl"] .ratings-section::before {
+    right: auto;
+    left: 0;
+    transform: scaleX(-1);
+}
+
+[dir="rtl"] .services::after,
+[dir="rtl"] .about::after,
+[dir="rtl"] .student-life::after,
+[dir="rtl"] .contact::after,
+[dir="rtl"] .ratings-section::after {
+    left: auto;
+    right: 0;
+    transform: scaleX(-1) rotate(180deg);
+}
+
+[dir="rtl"] .footer::before {
+    left: auto;
+    right: 0;
+}
+
+[dir="rtl"] .footer::after {
+    right: auto;
+    left: 0;
+}
+
+/* ============================================
+   ANIMATION (OPTIONAL)
+   ============================================ */
+
+/* Rotation animation for single zelij icons */
+@keyframes rotateZelij {
+    from {
+        transform: translateX(-50%) rotate(0deg);
+    }
+    to {
+        transform: translateX(-50%) rotate(360deg);
+    }
+}
+
+/* Subtle fade-in animation for decorations */
+@keyframes zelijFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+}
+
+/* Apply animation on page load (optional) */
+.hero::before {
+    animation: zelijFadeIn 1s ease-out;
+}

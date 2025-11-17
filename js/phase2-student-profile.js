@@ -2,6 +2,13 @@
 // PHASE 2.2: STUDENT PROFILE EXPANSION VIEW
 // ============================================
 
+// Helper function to validate photo path
+function isValidPhotoPath(photoPath) {
+    if (!photoPath) return false;
+    if (photoPath.includes('undefined') || photoPath.includes('null')) return false;
+    return true;
+}
+
 // Open student profile expansion view
 window.viewStudentProfile = async function(studentId) {
     try {
@@ -121,7 +128,7 @@ function renderStudentForm(student) {
                     <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">Registration Form</p>
                 </div>
                 <div style="width: 120px; height: 150px; border: 2px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                    ${student.photoPath ? 
+                    ${isValidPhotoPath(student.photoPath) ? 
                         `<img src="${student.photoPath}" alt="Student" style="width: 100%; height: 100%; object-fit: cover;">` :
                         `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 600;">${student.fullName ? student.fullName.charAt(0).toUpperCase() : '?'}</div>`
                     }
@@ -336,7 +343,7 @@ function renderStudentData(student, grades) {
         <!-- Profile Card -->
         <div class="preview-card">
             <div class="preview-avatar">
-                ${student.photoPath ? 
+                ${isValidPhotoPath(student.photoPath) ? 
                     `<img src="${student.photoPath}" alt="Student">` : 
                     initial
                 }
@@ -526,10 +533,10 @@ window.downloadStudentPDF = async function(studentId, studentName, studentEmail)
     }
 };
 
-// Backup to cloud (Dropbox)
+// Backup to cloud (MEGA)
 window.backupToCloud = async function(studentId, studentName, studentEmail) {
     try {
-        showNotification('☁️ Backing up to Dropbox...', 'info');
+        showNotification('☁️ Backing up to MEGA...', 'info');
         
         // Use the student-management endpoint
         const backupResponse = await fetch(`/api/student-management/students/${studentId}/backup-dropbox`, {
@@ -541,13 +548,13 @@ window.backupToCloud = async function(studentId, studentName, studentEmail) {
         
         if (!backupResponse.ok) {
             const error = await backupResponse.json();
-            throw new Error(error.message || error.error || 'Failed to backup to Dropbox');
+            throw new Error(error.message || error.error || 'Failed to backup to MEGA');
         }
         
         const result = await backupResponse.json();
-        showNotification(`✅ ${result.message || 'Student data backed up to Dropbox successfully!'}`, 'success');
+        showNotification(`✅ ${result.message || 'Student data backed up to MEGA successfully!'}`, 'success');
     } catch (error) {
-        console.error('Error backing up to Dropbox:', error);
+        console.error('Error backing up to MEGA:', error);
         showNotification('❌ Failed to backup: ' + error.message, 'error');
     }
 };

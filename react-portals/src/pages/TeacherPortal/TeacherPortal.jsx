@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTeacherAuth } from '../../context/TeacherAuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { teacherAPI } from '../../services/api';
 import { getExamCount } from '../../utils/examHelpers';
 import Header from '../../components/common/Header';
@@ -17,6 +18,7 @@ import './TeacherPortal.css';
 
 const TeacherPortal = () => {
   const { user, isAuthenticated, logout } = useTeacherAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
@@ -27,6 +29,7 @@ const TeacherPortal = () => {
   const [selectedExam, setSelectedExam] = useState('A1'); // Can be 'A1'-'B2' for languages or 1-5 for branches
   const [showGradeModal, setShowGradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState('grades'); // 'grades' or 'attendance'
+  const [activeSeason, setActiveSeason] = useState(null); // Store active season info
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -34,6 +37,7 @@ const TeacherPortal = () => {
       if (user.formations && user.formations.length === 1) {
         setSelectedFormation(user.formations[0]);
       }
+      fetchActiveSeason();
       fetchGroups();
     }
   }, [isAuthenticated, user]);
@@ -52,6 +56,20 @@ const TeacherPortal = () => {
       fetchStudents();
     }
   }, [selectedFormation, selectedGroup, selectedExam]);
+
+  const fetchActiveSeason = async () => {
+    try {
+      const response = await teacherAPI.getSeasons();
+      const seasons = Array.isArray(response.data) ? response.data : (response.data.seasons || []);
+      const active = seasons.find(s => s.status === 'active');
+      if (active) {
+        setActiveSeason(active);
+        console.log('✅ Active season loaded:', active.name);
+      }
+    } catch (error) {
+      console.error('Error fetching active season:', error);
+    }
+  };
 
   const fetchGroups = async () => {
     try {
@@ -145,7 +163,7 @@ const TeacherPortal = () => {
   return (
     <div className="teacher-portal">
       <div className="container">
-        <Header title="Teacher Portal" subtitle={user?.email} user={user} logout={logout} />
+        <Header title={t('teacherPortal')} subtitle={user?.email} user={user} logout={logout} />
 
         {/* Tab Switcher */}
         <div className="portal-tabs">
@@ -154,14 +172,14 @@ const TeacherPortal = () => {
             onClick={() => setActiveTab('grades')}
           >
             <i className="fas fa-chart-bar"></i>
-            Grade Management
+            {t('gradeManagement')}
           </button>
           <button 
             className={`portal-tab ${activeTab === 'attendance' ? 'active' : ''}`}
             onClick={() => setActiveTab('attendance')}
           >
             <i className="fas fa-qrcode"></i>
-            Attendance QR
+            {t('attendanceQR')}
           </button>
         </div>
 
@@ -169,7 +187,7 @@ const TeacherPortal = () => {
         <div className="card">
           <h2>
             <i className="fas fa-chalkboard-teacher"></i>
-            Grade Management
+            {t('gradeManagement')}
           </h2>
 
           <FormationSelector
@@ -177,6 +195,7 @@ const TeacherPortal = () => {
             selectedFormation={selectedFormation}
             onSelect={setSelectedFormation}
             disabled={isFormationDisabled}
+            activeSeason={activeSeason}
           />
 
           {selectedFormation && (
@@ -198,7 +217,7 @@ const TeacherPortal = () => {
           )}
 
           {loading ? (
-            <Loading message="Loading students..." />
+            <Loading message={t('loadingStudents')} />
           ) : selectedFormation && selectedGroup ? (
             students.length > 0 ? (
               <StudentsGrid
@@ -210,15 +229,15 @@ const TeacherPortal = () => {
             ) : (
               <div className="empty-state">
                 <i className="fas fa-users-slash"></i>
-                <h3>No Students Found</h3>
-                <p>No students are enrolled in this formation and group.</p>
+                <h3>{t('noStudentsFound')}</h3>
+                <p>{t('noStudentsEnrolled')}</p>
               </div>
             )
           ) : (
             <div className="empty-state">
               <i className="fas fa-hand-pointer"></i>
-              <h3>Select Formation and Group</h3>
-              <p>Please select a formation and group to view students.</p>
+              <h3>{t('selectFormationAndGroup')}</h3>
+              <p>{t('selectFormationGroupText')}</p>
             </div>
           )}
         </div>

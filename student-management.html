@@ -79,23 +79,25 @@
         }
 
         .sidebar-logo img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: white;
-            padding: 5px;
+            width: 70px;
+            height: 70px;
             object-fit: contain;
         }
 
         .sidebar-logo-text h2 {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            margin-bottom: 2px;
+            font-size: 1.3rem;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .sidebar-logo-text h2 .school-text {
+            color: #dc3545;
         }
 
         .sidebar-logo-text p {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            color: white;
+            opacity: 0.8;
         }
 
         .sidebar-menu {
@@ -1468,8 +1470,8 @@
                 <div class="sidebar-logo">
                     <img src="Img/logo.png" alt="Logo" onerror="this.style.display='none'">
                     <div class="sidebar-logo-text">
-                        <h2>Nisrine School</h2>
-                        <p>Student Management</p>
+                        <h2>Nisrine <span class="school-text">School</span></h2>
+                        <p>Nisrineelfadil</p>
                     </div>
                 </div>
             </div>
@@ -1531,6 +1533,9 @@
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <div id="langMenu" class="lang-menu" style="display: none; position: absolute; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-top: 5px; z-index: 1000;">
+                            <div class="lang-option" onclick="changeLanguage('de')" style="padding: 10px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-flag"></i> Deutsch
+                            </div>
                             <div class="lang-option" onclick="changeLanguage('en')" style="padding: 10px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
                                 <i class="fas fa-flag-usa"></i> English
                             </div>
@@ -1597,18 +1602,18 @@
                         <div>
                             <h2 style="margin: 0 0 10px 0; color: #1e293b;">
                                 <i class="fas fa-calendar-alt" style="color: #FFCC00;"></i> 
-                                Academic Seasons
+                                <span data-i18n="academicSeasons">Academic Seasons</span>
                             </h2>
                             <p style="margin: 0; color: #64748b; font-size: 0.9rem;">
-                                Manage academic years and their associated groups
+                                <span data-i18n="manageAcademicYears">Manage academic years and their associated groups</span>
                             </p>
                         </div>
                         <div style="display: flex; gap: 10px;">
                             <button class="btn btn-secondary" onclick="quickCreateGroup()">
-                                <i class="fas fa-users"></i> Quick Create Group
+                                <i class="fas fa-users"></i> <span data-i18n="quickCreateGroup">Quick Create Group</span>
                             </button>
                             <button class="btn btn-primary" onclick="openAddSeasonModal()">
-                                <i class="fas fa-plus"></i> Create Season
+                                <i class="fas fa-plus"></i> <span data-i18n="createSeason">Create Season</span>
                             </button>
                         </div>
                     </div>
@@ -1623,14 +1628,14 @@
                         <div>
                             <h3 style="margin: 0 0 5px 0; color: #1e293b;">
                                 <i class="fas fa-sitemap" style="color: #667eea;"></i> 
-                                Branch Formations (Global)
+                                <span data-i18n="branchFormations">Branch Formations (Global)</span>
                             </h3>
                             <p style="margin: 0; color: #64748b; font-size: 0.85rem;">
-                                Default branch groups available across all seasons
+                                <span data-i18n="defaultBranchGroups">Default branch groups available across all seasons</span>
                             </p>
                         </div>
                         <button class="btn btn-primary" onclick="openAddBranchGroupModal()">
-                            <i class="fas fa-plus"></i> Create Branch Group
+                            <i class="fas fa-plus"></i> <span data-i18n="createBranchGroup">Create Branch Group</span>
                         </button>
                     </div>
                     <div id="branchGroupsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
@@ -1645,7 +1650,7 @@
                 <div class="breadcrumb-nav" style="margin-bottom: 20px;">
                     <button class="btn btn-secondary" onclick="backToSeasonsList()" style="display: flex; align-items: center; gap: 8px;">
                         <i class="fas fa-arrow-left"></i>
-                        <span>Back to Seasons</span>
+                        <span data-i18n="backToSeasons">Back to Seasons</span>
                     </button>
                 </div>
 
@@ -1669,11 +1674,11 @@
                     <div class="toggle-container" style="width: 100%; justify-content: center;">
                         <button class="toggle-btn active" onclick="switchSeasonTab('language')" id="seasonLanguageTab">
                             <i class="fas fa-users"></i>
-                            <span>Language Groups</span>
+                            <span data-i18n="languageGroups">Language Groups</span>
                         </button>
                         <button class="toggle-btn" onclick="switchSeasonTab('branch')" id="seasonBranchTab">
                             <i class="fas fa-graduation-cap"></i>
-                            <span>Branch Management</span>
+                            <span data-i18n="branchManagement">Branch Management</span>
                         </button>
                         <div class="toggle-slider" id="seasonToggleSlider"></div>
                     </div>
@@ -1686,10 +1691,10 @@
                             <div>
                                 <h3 style="margin: 0 0 5px 0; color: #1e293b;">
                                     <i class="fas fa-users" style="color: #f59e0b;"></i> 
-                                    Language Groups
+                                    <span data-i18n="languageGroups">Language Groups</span>
                                 </h3>
                                 <p style="margin: 0; color: #64748b; font-size: 0.85rem;">
-                                    Primary groups for language learning (Group A, B, C, etc.)
+                                    <span data-i18n="primaryGroupsDescription">Primary groups for language learning (Group A, B, C, etc.)</span>
                                 </p>
                             </div>
                             <button class="btn btn-primary" onclick="openCreateLanguageGroupModal()">
@@ -1758,6 +1763,8 @@
                         <input type="text" id="studentSearch" data-i18n-placeholder="searchStudents" placeholder="Search students..." onkeyup="searchStudents()">
                         <i class="fas fa-search"></i>
                     </div>
+                    <select class="filter-select" id="seasonFilter" onchange="filterStudents()" style="box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); border: 2px solid rgba(255, 215, 0, 0.3);">
+                    </select>
                     <select class="filter-select" id="groupFilter" onchange="filterStudents()">
                         <option value="" data-i18n="allGroups">All Groups</option>
                     </select>
@@ -1769,13 +1776,13 @@
                         <option value="Ausbildung">Ausbildung</option>
                     </select>
                     <select class="filter-select" id="branchFilter" onchange="filterStudents()">
-                        <option value="">All Branches</option>
+                        <option value="" data-i18n="allBranches">All Branches</option>
                         <option value="IT">IT</option>
                         <option value="Nursing">Nursing</option>
                         <option value="Cooking">Cooking</option>
                         <option value="Mechanics">Mechanics</option>
                         <option value="Business">Business</option>
-                        <option value="None">No Branch</option>
+                        <option value="None" data-i18n="noBranch">No Branch</option>
                     </select>
                     <select class="filter-select" id="paymentStatusFilter" onchange="filterStudents()">
                         <option value="" data-i18n="allPaymentStatus">All Payment Status</option>
@@ -1795,8 +1802,8 @@
         <div id="reminders-tab" class="tab-content">
             <!-- Overdue Payments Section -->
             <div class="card" style="margin-bottom: 30px;">
-                <h2 style="color: #ff4757;"><i class="fas fa-exclamation-triangle"></i> Overdue Payments</h2>
-                <p style="color: var(--text-light); margin-bottom: 25px;">Students with overdue payments requiring immediate attention</p>
+                <h2 style="color: #ff4757;"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="overduePayments">Overdue Payments</span></h2>
+                <p style="color: var(--text-light); margin-bottom: 25px;" data-i18n="studentsWithOverdue">Students with overdue payments requiring immediate attention</p>
                 <div id="overdueContent">
                     <!-- Overdue students will be loaded here -->
                 </div>
@@ -1804,7 +1811,7 @@
 
             <!-- Payment Reminders Section -->
             <div class="card">
-                <h2><i class="fas fa-bell"></i> Upcoming Payment Reminders</h2>
+                <h2><i class="fas fa-bell"></i> <span data-i18n="upcomingPaymentReminders">Upcoming Payment Reminders</span></h2>
                 <div id="remindersGrid">
                     <!-- Reminders will be loaded here -->
                 </div>
@@ -1814,28 +1821,38 @@
         <!-- Grades Tab -->
         <div id="grades-tab" class="tab-content">
             <div class="card">
-                <h2><i class="fas fa-chart-bar"></i> Student Grades</h2>
+                <h2><i class="fas fa-chart-bar"></i> <span data-i18n="studentGrades">Student Grades</span></h2>
                 
                 <!-- Search Bar -->
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">
-                        <i class="fas fa-search"></i> Search Student
+                        <i class="fas fa-search"></i> <span data-i18n="searchStudent">Search Student</span>
                     </label>
-                    <input type="text" id="gradesStudentSearch" placeholder="Search by name, email, or phone..." 
+                    <input type="text" id="gradesStudentSearch" data-i18n-placeholder="searchByNameEmail" placeholder="Search by name, email, or phone..." 
                            oninput="filterGradesStudents()" 
                            style="width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                </div>
+
+                <!-- Season Filter -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">
+                        <i class="fas fa-calendar-alt"></i> Season
+                    </label>
+                    <select id="gradesSeasonFilter" onchange="populateStudentFilter()" 
+                            style="width: 100%; padding: 12px 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 8px; font-size: 14px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
+                    </select>
                 </div>
 
                 <!-- Filters -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
                     <div>
-                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">Student</label>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;" data-i18n="student">Student</label>
                         <select id="gradesStudentFilter" onchange="loadStudentGrades()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             <option value="">Select Student</option>
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">Formation (Language)</label>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;" data-i18n="formationLanguage">Formation (Language)</label>
                         <select id="gradesFormationFilter" onchange="updateGradesFilters(); loadStudentGrades();" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             <option value="">All Formations</option>
                             <option value="Allemand">Allemand</option>
@@ -1845,7 +1862,7 @@
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">Branch (Filière)</label>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;" data-i18n="branchFiliere">Branch (Filière)</label>
                         <select id="gradesBranchFilter" onchange="updateGradesFilters(); loadStudentGrades();" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             <option value="">All Branches</option>
                             <option value="Informatique">Informatique</option>
@@ -1859,7 +1876,7 @@
                         </select>
                     </div>
                     <div>
-                        <label id="gradesSemesterLabel" style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">Semester</label>
+                        <label id="gradesSemesterLabel" style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;" data-i18n="semester">Semester</label>
                         <select id="gradesSemesterFilter" onchange="updateGradesFilters(true); loadStudentGrades();" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             <option value="">All Semesters</option>
                             <option value="Semester 1">Semester 1</option>
@@ -1868,7 +1885,7 @@
                     </div>
                     <div>
                         <label id="gradesExamLabel" style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">
-                            <i class="fas fa-file-alt"></i> Exam Number
+                            <i class="fas fa-file-alt"></i> <span data-i18n="examNumber">Exam Number</span>
                         </label>
                         <select id="gradesExamFilter" onchange="loadStudentGrades()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px; background: linear-gradient(135deg, rgba(255, 204, 0, 0.1), rgba(255, 149, 0, 0.1)); border-color: var(--primary-color);">
                             <option value="">All Exams</option>
@@ -1885,7 +1902,7 @@
                 <div id="gradesContent">
                     <div style="text-align: center; padding: 40px; color: var(--text-light);">
                         <i class="fas fa-user-graduate" style="font-size: 3rem; color: var(--primary-color); opacity: 0.3; margin-bottom: 15px;"></i>
-                        <p>Select a student to view their grades</p>
+                        <p data-i18n="selectStudentToView">Select a student to view their grades</p>
                     </div>
                 </div>
             </div>
@@ -1895,9 +1912,9 @@
         <div id="teachers-tab" class="tab-content">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <h2 style="margin-bottom: 0;"><i class="fas fa-chalkboard-teacher"></i> Teacher Management</h2>
+                    <h2 style="margin-bottom: 0;"><i class="fas fa-chalkboard-teacher"></i> <span data-i18n="teacherManagement">Teacher Management</span></h2>
                     <button class="btn" onclick="openAddTeacherModal()">
-                        <i class="fas fa-plus"></i> Add Teacher
+                        <i class="fas fa-plus"></i> <span data-i18n="addTeacher">Add Teacher</span>
                     </button>
                 </div>
                 
@@ -1905,7 +1922,7 @@
                 <div id="teachersContent">
                     <div style="text-align: center; padding: 40px; color: var(--text-light);">
                         <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary-color);"></i>
-                        <p>Loading teachers...</p>
+                        <p data-i18n="loadingTeachers">Loading teachers...</p>
                     </div>
                 </div>
             </div>
@@ -1917,12 +1934,12 @@
             <div class="card" style="background: linear-gradient(135deg, #FFCC00 0%, #FF9500 100%); color: #1f2937; margin-bottom: 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div>
-                        <h2 style="color: #1f2937; margin-bottom: 8px;"><i class="fas fa-clipboard-check"></i> Attendance Monitoring</h2>
-                        <p style="opacity: 0.85; margin: 0; font-size: 0.95rem; color: #374151;">Track and manage student attendance across all sessions</p>
+                        <h2 style="color: #1f2937; margin-bottom: 8px;"><i class="fas fa-clipboard-check"></i> <span data-i18n="attendanceMonitoring">Attendance Monitoring</span></h2>
+                        <p style="opacity: 0.85; margin: 0; font-size: 0.95rem; color: #374151;" data-i18n="trackManageAttendance">Track and manage student attendance across all sessions</p>
                     </div>
                     <button class="btn" onclick="exportAttendanceToExcel()" style="background: #1f2937; color: #FFCC00; border: none; font-weight: 600; padding: 12px 24px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s;" onmouseover="this.style.background='#374151'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0,0,0,0.3)'" onmouseout="this.style.background='#1f2937'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'">
                         <i class="fas fa-file-excel" style="font-size: 1.2rem;"></i>
-                        <span>Download Excel Report</span>
+                        <span data-i18n="downloadExcelReport">Download Excel Report</span>
                     </button>
                 </div>
             </div>
@@ -1934,13 +1951,13 @@
             <div class="card" style="margin-bottom: 25px;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
                     <i class="fas fa-filter" style="color: var(--primary-color); font-size: 1.2rem;"></i>
-                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-dark);">Filter Attendance Records</h3>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-dark);" data-i18n="filterAttendanceRecords">Filter Attendance Records</h3>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px;">
-                            <i class="fas fa-users" style="color: #667eea;"></i> Group
+                            <i class="fas fa-users" style="color: #667eea;"></i> <span data-i18n="group">Group</span>
                         </label>
                         <select id="attendanceGroupFilter" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s;">
                             <option value="">All Groups</option>
@@ -1948,7 +1965,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px;">
-                            <i class="fas fa-graduation-cap" style="color: #f59e0b;"></i> Formation
+                            <i class="fas fa-graduation-cap" style="color: #f59e0b;"></i> <span data-i18n="formation">Formation</span>
                         </label>
                         <select id="attendanceFormationFilter" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s;">
                             <option value="">All Formations</option>
@@ -1956,7 +1973,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px;">
-                            <i class="fas fa-toggle-on" style="color: #10b981;"></i> Status
+                            <i class="fas fa-toggle-on" style="color: #10b981;"></i> <span data-i18n="status">Status</span>
                         </label>
                         <select id="attendanceStatusFilter" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s;">
                             <option value="">All Status</option>
@@ -2039,11 +2056,11 @@
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-history" style="color: var(--primary-color); font-size: 1.2rem;"></i>
-                        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-dark);">Recent Attendance Sessions</h3>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-dark);" data-i18n="recentAttendanceSessions">Recent Attendance Sessions</h3>
                     </div>
                     <button class="btn btn-secondary" onclick="clearRecentSessions()" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 0.9rem;">
                         <i class="fas fa-sync-alt"></i>
-                        <span>Refresh Sessions</span>
+                        <span data-i18n="refreshSessions">Refresh Sessions</span>
                     </button>
                 </div>
                 <div id="recentSessionsContainer">
@@ -2178,14 +2195,14 @@
             </div>
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
                 <button type="button" class="btn btn-secondary" onclick="closeExportModal()" style="flex: 0 0 auto;">
-                    <i class="fas fa-times"></i> Cancel
+                    <i class="fas fa-times"></i> <span data-i18n="cancel">Cancel</span>
                 </button>
                 <div style="display: flex; gap: 10px;">
                     <button type="button" class="btn btn-danger" onclick="executeExport('pdf')" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                        <i class="fas fa-file-pdf"></i> Export PDF
+                        <i class="fas fa-file-pdf"></i> <span data-i18n="exportPDF">Export PDF</span>
                     </button>
                     <button type="button" class="btn btn-success" onclick="executeExport('excel')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                        <i class="fas fa-file-excel"></i> Export Excel
+                        <i class="fas fa-file-excel"></i> <span data-i18n="exportExcel">Export Excel</span>
                     </button>
                 </div>
             </div>

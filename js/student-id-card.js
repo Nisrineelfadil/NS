@@ -1,6 +1,13 @@
 // Student ID Card Generator
 // Requires: JsBarcode library and QRCode.js library
 
+// Helper function to validate photo path
+function isValidPhotoPath(photoPath) {
+    if (!photoPath) return false;
+    if (photoPath.includes('undefined') || photoPath.includes('null')) return false;
+    return true;
+}
+
 let currentStudentForCard = null;
 
 /**
@@ -111,7 +118,7 @@ function generateIDCard(student) {
     const filiere = student.filiere || [];
     const schoolEmail = student.schoolEmail || 'N/A';
     const emailPassword = student.emailPassword || '********';
-    const photoPath = student.photoPath || 'Img/default-avatar.png';
+    const photoPath = isValidPhotoPath(student.photoPath) ? student.photoPath : 'Img/default-avatar.png';
     
     // Format group code: G.{GroupRef}/F.{BranchInitial}.{BranchNum}
     function formatGroupCode(student) {

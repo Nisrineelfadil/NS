@@ -554,7 +554,7 @@ const translations = {
 };
 
 // Current language
-let currentLanguage = localStorage.getItem('cashRegisterLanguage') || 'en';
+let currentLanguage = localStorage.getItem('cashRegisterLanguage') || 'de';
 
 // Translate function
 function translate(key) {

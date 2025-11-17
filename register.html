@@ -946,7 +946,7 @@
             <div class="sparkle"></div>
             
             <div class="logo">
-                <a href="index.html">NISRINE <span class="red-text">SCHOOL</span></a>
+                <a href="/">NISRINE <span class="red-text">SCHOOL</span></a>
             </div>
             
             <h1>Student Registration</h1>
@@ -1090,7 +1090,7 @@
             </form>
             
             <div id="backButtonContainer">
-                <a href="index.html" class="back-home-btn" id="backButton">
+                <a href="/" class="back-home-btn" id="backButton">
                     <i class="fas fa-arrow-left"></i> Back to Home
                 </a>
             </div>
@@ -1110,7 +1110,7 @@
                     <i class="fas fa-phone"></i> <span id="contactPhone">+212 6XX XXX XXX</span>
                 </a>
             </div>
-            <a href="index.html" class="back-home-btn" style="margin-top: 30px; display: inline-block;">
+            <a href="/" class="back-home-btn" style="margin-top: 30px; display: inline-block;">
                 <i class="fas fa-arrow-left"></i> Back to Home
             </a>
         </div>
@@ -1154,13 +1154,13 @@
         } else if (fromModal) {
             // Update back button to go back to modal
             const backButton = document.getElementById('backButton');
-            backButton.href = 'index.html#register-modal';
+            backButton.href = '/#register-modal';
             backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Services';
             
             // Add click handler to open modal instead of navigation
             backButton.addEventListener('click', function(e) {
                 e.preventDefault();
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 // Store flag to reopen modal
                 sessionStorage.setItem('reopenModal', 'true');
             });

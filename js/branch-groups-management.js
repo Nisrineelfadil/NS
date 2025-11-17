@@ -604,20 +604,41 @@
 
     function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
+    
+    // Define vibrant colors for clear visibility
+    const colors = {
+        success: { bg: '#10b981', icon: '✓', shadow: 'rgba(16, 185, 129, 0.4)' },
+        error: { bg: '#ef4444', icon: '✕', shadow: 'rgba(239, 68, 68, 0.4)' },
+        info: { bg: '#3b82f6', icon: 'ℹ', shadow: 'rgba(59, 130, 246, 0.4)' },
+        warning: { bg: '#f59e0b', icon: '⚠', shadow: 'rgba(245, 158, 11, 0.4)' }
+    };
+    
+    const style = colors[type] || colors.info;
+    
     notification.className = `notification notification-${type}`;
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        padding: 15px 20px;
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        padding: 16px 24px;
+        background: ${style.bg};
         color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px ${style.shadow};
         z-index: 10000;
+        font-size: 15px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         animation: slideIn 0.3s ease-out;
+        min-width: 300px;
     `;
-    notification.textContent = message;
+    
+    notification.innerHTML = `
+        <span style="font-size: 20px; font-weight: bold;">${style.icon}</span>
+        <span>${message}</span>
+    `;
     
     document.body.appendChild(notification);
     

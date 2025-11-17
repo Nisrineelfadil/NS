@@ -1,13 +1,20 @@
 // API Base URL
 const API_URL = '/api/grades';
 
+// Helper function to validate photo path
+function isValidPhotoPath(photoPath) {
+    if (!photoPath) return false;
+    if (photoPath.includes('undefined') || photoPath.includes('null')) return false;
+    return true;
+}
+
 // Check if user is logged in
 let token = localStorage.getItem('studentToken');
 let studentData = null;
 
 // Translations
 let translations = {};
-let currentLang = localStorage.getItem('language') || 'en';
+let currentLang = localStorage.getItem('language') || 'de';
 
 // Inactivity Timer - Auto logout after 15 minutes of inactivity
 let inactivityTimer = null;
@@ -229,7 +236,7 @@ async function loadStudentProfile() {
             
             // Update avatar
             const avatarDiv = document.getElementById('userAvatar');
-            if (studentData.photoPath) {
+            if (isValidPhotoPath(studentData.photoPath)) {
                 avatarDiv.innerHTML = `<img src="${studentData.photoPath}" alt="Profile">`;
             } else {
                 avatarDiv.innerHTML = `<i class="fas fa-user"></i>`;

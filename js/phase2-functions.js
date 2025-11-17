@@ -2,6 +2,13 @@
 // PHASE 2.2: Season-Specific Drill-Down Management
 // ============================================
 
+// Helper function to validate photo path
+function isValidPhotoPath(photoPath) {
+    if (!photoPath) return false;
+    if (photoPath.includes('undefined') || photoPath.includes('null')) return false;
+    return true;
+}
+
 // Track current season for drill-down
 let currentSeasonId = null;
 let currentSeasonData = null;
@@ -88,24 +95,24 @@ function displaySeasons(seasons) {
                     </button>
                     <div id="seasonMenu-${season._id}" class="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 180px; z-index: 1000;">
                         <a href="#" onclick="manageSeasonGroups('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #667eea; text-decoration: none; font-weight: 600; border-bottom: 1px solid #e2e8f0;">
-                            <i class="fas fa-layer-group"></i> Manage Groups
+                            <i class="fas fa-layer-group"></i> ${t('manageGroups')}
                         </a>
                         <a href="#" onclick="editSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #1e293b; text-decoration: none;">
-                            <i class="fas fa-edit"></i> Edit Season
+                            <i class="fas fa-edit"></i> ${t('editSeason')}
                         </a>
                         ${season.status !== 'active' ? `
                         <a href="#" onclick="activateSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #059669; text-decoration: none;">
-                            <i class="fas fa-check-circle"></i> Activate
+                            <i class="fas fa-check-circle"></i> ${t('activate')}
                         </a>
                         ` : ''}
                         ${season.status === 'active' ? `
                         <a href="#" onclick="archiveSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #f59e0b; text-decoration: none;">
-                            <i class="fas fa-archive"></i> Archive
+                            <i class="fas fa-archive"></i> ${t('archive')}
                         </a>
                         ` : ''}
                         ${season.groupCount === 0 ? `
                         <a href="#" onclick="deleteSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #dc2626; text-decoration: none;">
-                            <i class="fas fa-trash"></i> Delete
+                            <i class="fas fa-trash"></i> ${t('delete')}
                         </a>
                         ` : ''}
                     </div>
@@ -114,15 +121,15 @@ function displaySeasons(seasons) {
             <div style="color: #64748b; font-size: 0.9rem;">
                 <p style="margin: 5px 0;">
                     <i class="fas fa-calendar-day"></i>
-                    <strong>Start:</strong> ${new Date(season.startDate).toLocaleDateString()}
+                    <strong>${t('start')}:</strong> ${new Date(season.startDate).toLocaleDateString()}
                 </p>
                 <p style="margin: 5px 0;">
                     <i class="fas fa-calendar-check"></i>
-                    <strong>End:</strong> ${new Date(season.endDate).toLocaleDateString()}
+                    <strong>${t('end')}:</strong> ${new Date(season.endDate).toLocaleDateString()}
                 </p>
                 <p style="margin: 5px 0;">
                     <i class="fas fa-layer-group"></i>
-                    <strong>Groups:</strong> ${season.groupCount || 0}
+                    <strong>${t('groups')}:</strong> ${season.groupCount || 0}
                 </p>
                 ${season.description ? `<p style="margin: 10px 0 0 0; font-style: italic;">${season.description}</p>` : ''}
             </div>
@@ -676,6 +683,14 @@ window.manageSeasonGroups = async function(seasonId) {
         const seasonData = await response.json();
         currentSeasonId = seasonId;
         currentSeasonData = seasonData;
+        
+        // Emit event for legacy system to sync
+        document.dispatchEvent(new CustomEvent('seasonSelected', {
+            detail: {
+                seasonId: seasonId,
+                seasonName: seasonData.name
+            }
+        }));
 
         // Update season header
         document.getElementById('currentSeasonName').textContent = seasonData.name;
@@ -1137,9 +1152,11 @@ window.editLanguageGroup = function(groupId) {
 // Load branch management data
 async function loadBranchManagement(seasonId) {
     try {
-        // Load branch groups and pending students
+        console.log('🔄 Loading branch management for season:', seasonId);
+        
+        // Load branch groups and pending students (filtered by season)
         const [branchGroupsResponse, studentsResponse] = await Promise.all([
-            fetch(`/api/branch-groups`, {
+            fetch(`/api/branch-groups?season=${seasonId}`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             }),
             fetch(`${API_BASE}/students`, {
@@ -1153,14 +1170,27 @@ async function loadBranchManagement(seasonId) {
         // Handle both array response and object with students property
         const students = Array.isArray(studentsData) ? studentsData : (studentsData.students || []);
 
+        console.log(`📊 Loaded ${branchGroups.length} branch groups for season ${seasonId}`);
+        
         // Display branch groups overview
         displayBranchGroupsOverview(branchGroups);
 
         // Find pending students (those with filiere but no branch subgroup assigned)
-        // Check for null, undefined, or empty string
-        const pendingStudents = students.filter(s => 
-            s.filiere && s.filiere.length > 0 && (!s.branchSubgroup || s.branchSubgroup === null || s.branchSubgroup === '')
-        );
+        // IMPORTANT: Only show students from the CURRENT SEASON
+        const pendingStudents = students.filter(s => {
+            // Must have a filiere (subject selection)
+            const hasFiliere = s.filiere && s.filiere.length > 0;
+            
+            // Must NOT have a branch subgroup assigned
+            const noBranchSubgroup = !s.branchSubgroup || s.branchSubgroup === null || s.branchSubgroup === '';
+            
+            // Must be in the CURRENT SEASON (check if student's group belongs to this season)
+            const inCurrentSeason = s.group && s.group.season && s.group.season.toString() === seasonId.toString();
+            
+            return hasFiliere && noBranchSubgroup && inCurrentSeason;
+        });
+        
+        console.log(`👥 Found ${pendingStudents.length} pending students in season ${seasonId}`);
         displayPendingBranchStudents(pendingStudents);
 
     } catch (error) {
@@ -1222,7 +1252,7 @@ function displayPendingBranchStudents(students) {
             ${students.map(student => `
                 <div class="card" style="padding: 15px;">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                        ${student.photoPath ? 
+                        ${isValidPhotoPath(student.photoPath) ? 
                             `<img src="${student.photoPath}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">` :
                             `<div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.2rem;">${student.fullName ? student.fullName.charAt(0).toUpperCase() : '?'}</div>`
                         }
@@ -1457,6 +1487,12 @@ window.createLanguageGroup = async function(event) {
 // View branch subgroups
 window.viewBranchSubgroups = async function(branchGroupId) {
     try {
+        // Ensure we have a current season
+        if (!currentSeasonId) {
+            showNotification('Please select a season first', 'warning');
+            return;
+        }
+        
         // Load branch group details
         const branchResponse = await fetch(`/api/branch-groups/${branchGroupId}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
@@ -1466,8 +1502,8 @@ window.viewBranchSubgroups = async function(branchGroupId) {
         
         const branchData = await branchResponse.json();
         
-        // Load subgroups
-        const subgroupsResponse = await fetch(`/api/branch-groups/${branchGroupId}/subgroups`, {
+        // Load subgroups filtered by current season
+        const subgroupsResponse = await fetch(`/api/branch-groups/${branchGroupId}/subgroups?season=${currentSeasonId}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -1600,6 +1636,11 @@ window.submitCreateBranchSubgroup = async function(event, branchGroupId) {
     const formData = new FormData(event.target);
     
     try {
+        // Ensure we have current season data
+        if (!currentSeasonId || !currentSeasonData) {
+            throw new Error('No active season selected');
+        }
+        
         const response = await fetch(`/api/branch-groups/${branchGroupId}/subgroups`, {
             method: 'POST',
             headers: {
@@ -1608,7 +1649,9 @@ window.submitCreateBranchSubgroup = async function(event, branchGroupId) {
             },
             body: JSON.stringify({
                 name: formData.get('name') || null,
-                maxStudents: parseInt(formData.get('maxStudents'))
+                maxStudents: parseInt(formData.get('maxStudents')),
+                season: currentSeasonId,
+                seasonName: currentSeasonData.name
             })
         });
         
@@ -1639,7 +1682,13 @@ window.submitCreateBranchSubgroup = async function(event, branchGroupId) {
 // Edit branch subgroup
 window.editBranchSubgroup = async function(branchGroupId, subgroupId) {
     try {
-        const response = await fetch(`/api/branch-groups/${branchGroupId}/subgroups`, {
+        // Ensure we have current season
+        if (!currentSeasonId) {
+            showNotification('Please select a season first', 'warning');
+            return;
+        }
+        
+        const response = await fetch(`/api/branch-groups/${branchGroupId}/subgroups?season=${currentSeasonId}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -2226,10 +2275,15 @@ window.assignToBranchSubgroup = async function(studentId) {
         });
         console.log('🔗 Full branch group object:', branchGroup);
         
-        // Load existing subgroups for this branch
+        // Load existing subgroups for this branch (filtered by current season)
         console.log('📡 Fetching subgroups from:', `/api/branch-groups/${branchGroup._id}/subgroups`);
         
-        const subgroupsResponse = await fetch(`/api/branch-groups/${branchGroup._id}/subgroups`, {
+        // Ensure we have current season
+        if (!currentSeasonId) {
+            throw new Error('No active season selected. Please select a season first.');
+        }
+        
+        const subgroupsResponse = await fetch(`/api/branch-groups/${branchGroup._id}/subgroups?season=${currentSeasonId}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -2396,6 +2450,14 @@ window.quickCreateGroup = async function() {
         // Set current season and drill down
         currentSeasonId = activeSeason._id;
         currentSeasonData = activeSeason;
+        
+        // Emit event for legacy system to sync
+        document.dispatchEvent(new CustomEvent('seasonSelected', {
+            detail: {
+                seasonId: activeSeason._id,
+                seasonName: activeSeason.name
+            }
+        }));
         
         // Update season header
         document.getElementById('currentSeasonName').textContent = activeSeason.name;

@@ -24,14 +24,41 @@ const systemStatsRoutes = require('./routes/systemStats');
 const adminActivityRoutes = require('./routes/adminActivity');
 const cashRegisterRoutes = require('./routes/cashRegister');
 const appointmentsRoutes = require('./routes/appointments');
+const ratingsRoutes = require('./routes/ratings');
+const notificationsRoutes = require('./routes/notifications');
 
 // Import services
 const paymentReminderService = require('./services/paymentReminderService');
 const attendanceService = require('./services/attendanceService');
+const notificationService = require('./services/notificationService');
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize HTTP server and Socket.IO
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  },
+  transports: ['websocket', 'polling']
+});
+
+// Initialize notification service with Socket.IO
+notificationService.initializeSocketIO(io);
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('✅ Admin client connected:', socket.id);
+  
+  socket.on('disconnect', () => {
+    console.log('❌ Admin client disconnected:', socket.id);
+  });
+});
 
 // Middleware
 // Enhanced CORS for Electron desktop app support
@@ -102,6 +129,7 @@ const serveHTML = (filename) => (req, res) => {
 
 // Serve HTML files (after static files)
 app.get('/', serveHTML('index.html'));
+app.get('/index.html', serveHTML('index.html')); // Add explicit route for index.html
 app.get('/register', serveHTML('register.html'));
 app.get('/admin', serveHTML('admin.html'));
 app.get('/my-registrations', serveHTML('my-registrations.html'));
@@ -202,6 +230,8 @@ app.use('/api/system-stats', dbMiddleware, systemStatsRoutes);
 app.use('/api/admin-activity', dbMiddleware, adminActivityRoutes);
 app.use('/api/cash-register', dbMiddleware, cashRegisterRoutes);
 app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
+app.use('/api/ratings', dbMiddleware, ratingsRoutes);
+app.use('/api/notifications', dbMiddleware, notificationsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -224,7 +254,7 @@ if (require.main === module) {
     .then(() => {
       console.log('✅ MongoDB connected successfully');
       
-      app.listen(PORT, HOST, () => {
+      server.listen(PORT, HOST, () => {
         console.log(`🚀 Server running at http://localhost:${PORT}/`);
         console.log(`   Also available at http://${DISPLAY_HOST}:${PORT}/`);
         console.log('📝 Registration API available at /api/register');
