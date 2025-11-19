@@ -1,5 +1,6 @@
 const ManagedStudent = require('../models/ManagedStudent');
 const PaymentReminder = require('../models/PaymentReminder');
+const { notifyPaymentDue } = require('./notificationService');
 
 class PaymentReminderService {
     constructor() {
@@ -72,6 +73,12 @@ class PaymentReminderService {
                     
                     if (!recentReminder) {
                         await this.createReminder(student, 'overdue');
+                        // Send push notification for overdue payment
+                        notifyPaymentDue(student._id, {
+                            paymentAmount: student.paymentAmount,
+                            paymentDate: student.paymentDate,
+                            paymentStatus: 'overdue'
+                        }).catch(err => console.error('Failed to send payment notification:', err));
                         console.log(`📧 Sent overdue reminder to ${student.fullName}`);
                     }
                 }
@@ -85,6 +92,13 @@ class PaymentReminderService {
                         
                         // Create upcoming payment reminder
                         await this.createReminder(student, 'upcoming');
+                        
+                        // Send push notification for upcoming payment
+                        notifyPaymentDue(student._id, {
+                            paymentAmount: student.paymentAmount,
+                            paymentDate: student.paymentDate,
+                            paymentStatus: 'pending'
+                        }).catch(err => console.error('Failed to send payment notification:', err));
                         
                         // Mark as sent
                         student.paymentReminderSent = true;

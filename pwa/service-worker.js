@@ -97,3 +97,115 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// ==================== PUSH NOTIFICATION HANDLERS ====================
+
+// Handle push notification received
+self.addEventListener('push', (event) => {
+  console.log('📬 Push notification received:', event);
+
+  let notificationData = {
+    title: 'Nisrine School',
+    body: 'You have a new notification',
+    icon: '/pwa/icon-192.png',
+    badge: '/pwa/icon-192.png',
+    data: {}
+  };
+
+  // Parse push data
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      notificationData = {
+        title: data.title || notificationData.title,
+        body: data.body || notificationData.body,
+        icon: data.icon || notificationData.icon,
+        badge: data.badge || notificationData.badge,
+        data: data.data || {},
+        tag: data.tag || 'nisrine-notification',
+        requireInteraction: data.requireInteraction || false,
+        vibrate: data.vibrate || [200, 100, 200]
+      };
+    } catch (error) {
+      console.error('Error parsing push data:', error);
+      notificationData.body = event.data.text();
+    }
+  }
+
+  // Show notification
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      data: notificationData.data,
+      tag: notificationData.tag,
+      requireInteraction: notificationData.requireInteraction,
+      vibrate: notificationData.vibrate,
+      actions: [
+        { action: 'open', title: 'Open App' },
+        { action: 'close', title: 'Dismiss' }
+      ]
+    })
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  console.log('🖱️ Notification clicked:', event);
+
+  event.notification.close();
+
+  // Handle different notification types
+  const data = event.notification.data || {};
+  let urlToOpen = '/pwa/';
+
+  // Route based on notification type
+  switch (data.type) {
+    case 'grade':
+      urlToOpen = '/pwa/grades';
+      break;
+    case 'attendance':
+      urlToOpen = '/pwa/attendance';
+      break;
+    case 'message':
+      urlToOpen = '/pwa/messages';
+      break;
+    case 'payment':
+      urlToOpen = '/pwa/payment';
+      break;
+    case 'admin_message':
+      urlToOpen = '/pwa/messages';
+      break;
+    default:
+      urlToOpen = '/pwa/';
+  }
+
+  // Open or focus the app
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url.includes('/pwa/') && 'focus' in client) {
+            return client.focus().then(() => {
+              // Navigate to the specific page
+              if ('navigate' in client) {
+                return client.navigate(urlToOpen);
+              }
+            });
+          }
+        }
+        
+        // If app not open, open new window
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+  console.log('❌ Notification closed:', event.notification.tag);
+});

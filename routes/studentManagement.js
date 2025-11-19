@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const bcrypt = require('bcryptjs');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
+const { notifyAdminMessage } = require('../services/notificationService');
 
 // Multer configuration for student photos
 // Use memory storage for Vercel compatibility (serverless doesn't support disk storage)
@@ -1407,6 +1408,11 @@ router.post('/students/:id/send-message', authenticateAdmin, async (req, res) =>
         });
         
         await newMessage.save();
+        
+        // Send push notification to student
+        notifyAdminMessage(req.params.id, newMessage).catch(err => 
+            console.error('Failed to send admin message notification:', err)
+        );
         
         res.json({ 
             success: true, 

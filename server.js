@@ -26,11 +26,13 @@ const cashRegisterRoutes = require('./routes/cashRegister');
 const appointmentsRoutes = require('./routes/appointments');
 const ratingsRoutes = require('./routes/ratings');
 const notificationsRoutes = require('./routes/notifications');
+const pushNotificationsRoutes = require('./routes/pushNotifications');
 
 // Import services
 const paymentReminderService = require('./services/paymentReminderService');
 const attendanceService = require('./services/attendanceService');
 const notificationService = require('./services/notificationService');
+const pushService = require('./services/pushNotificationService');
 
 // Initialize Express app
 const app = express();
@@ -50,6 +52,18 @@ const io = new Server(server, {
 
 // Initialize notification service with Socket.IO
 notificationService.initializeSocketIO(io);
+
+// Initialize push notification service with VAPID keys
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+const vapidContactEmail = process.env.VAPID_CONTACT_EMAIL || 'admin@nisrineschool.com';
+
+if (vapidPublicKey && vapidPrivateKey) {
+  pushService.initialize(vapidPublicKey, vapidPrivateKey, vapidContactEmail);
+  console.log('✅ Push notification service initialized');
+} else {
+  console.warn('⚠️  VAPID keys not found. Push notifications will not work. Run: node scripts/generate-vapid-keys.js');
+}
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -232,6 +246,7 @@ app.use('/api/cash-register', dbMiddleware, cashRegisterRoutes);
 app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
 app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
+app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
 
 // 404 handler
 app.use((req, res) => {
