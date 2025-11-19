@@ -96,3 +96,30 @@ react-portals/node_modules
 
 # PWA files
 pwa/node_modules
+pwa/static/js/*.map
+pwa/static/css/*.map
+public/pwa/static/js/*.map
+public/pwa/static/css/*.map
+
+# Source maps (not needed in production)
+*.map
+
+# Large image/video files
+Img/Video
+*.mp4
+*.avi
+*.mov
+
+# Archive files
+*.rar
+*.zip
+*.7z
+
+# Documentation folder
+Documents
+
+# Old build artifacts
+pwa/static/js/main.40896f1e.*
+pwa/static/js/main.5*.js
+pwa/static/css/main.5*.css
+public/pwa/static/js/main.40896f1e.*
