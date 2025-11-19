@@ -53,24 +53,20 @@ export const animations = {
   fadeIn: {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition: { duration: 0.3 }
+    transition: { duration: 0.3, ease: 'easeOut' }
   },
-  
   // Slide up animation
   slideUp: {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
+    initial: { y: 20, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
     transition: { duration: 0.4, ease: 'easeOut' }
   },
-  
   // Scale animation
-  scale: {
-    initial: { opacity: 0, scale: 0.9 },
-    animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.9 },
-    transition: { duration: 0.3 }
+  scaleIn: {
+    initial: { scale: 0.95, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+    transition: { duration: 0.3, ease: 'easeOut' }
   },
   
   // Card hover animation
