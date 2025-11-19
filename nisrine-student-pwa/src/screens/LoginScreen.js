@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import './LoginScreen.css';
 import logo from '../Logo/logo.png';
 import { useInstallPWA } from '../hooks/useInstallPWA';
 import { API_URL } from '../config';
+import { animations } from '../gradients';
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -116,46 +118,81 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-content">
-        <div className="logo-container">
+    <motion.div 
+      className="login-container"
+      initial="initial"
+      animate="animate"
+      variants={animations.fadeIn}
+    >
+      <motion.div 
+        className="login-content"
+        variants={animations.slideUp}
+      >
+        <motion.div 
+          className="logo-container"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
           <img src={logo} alt="Nisrine School Logo" className="logo-image" />
-          <h1 className="title">Nisrine School</h1>
-          <p className="subtitle">Student Portal</p>
-        </div>
+          <h1 className="title">Herzlich willkommen</h1>
+        </motion.div>
 
-        <form className="login-form" onSubmit={handleLogin}>
+        <motion.form 
+          className="login-form" 
+          onSubmit={handleLogin}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
           <div className="input-group">
-            <label className="input-label">School Email</label>
-            <input
-              type="email"
-              className="input-field"
-              placeholder="student@nisrineschool.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
+            <div className="input-wrapper">
+              <span className="input-icon">👤</span>
+              <input
+                type="email"
+                className="input-field"
+                placeholder="Username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <div className="input-group">
-            <label className="input-label">Password</label>
-            <input
-              type="password"
-              className="input-field"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
+            <div className="input-wrapper">
+              <span className="input-icon">🔒</span>
+              <input
+                type="password"
+                className="input-field"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+            </div>
           </div>
 
-          <button 
+          <motion.button 
             type="submit" 
             className={`login-button ${loading ? 'loading' : ''}`}
             disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loading ? 'Logging in...' : 'Login'}
-          </button>
+          </motion.button>
+
+          <motion.a
+            href="https://api.whatsapp.com/send/?phone=212664648455&text&type=phone_number&app_absent=0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-support"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Contact support
+          </motion.a>
 
           {!isInstalled && (
             <div className="download-section">
@@ -214,11 +251,11 @@ const LoginScreen = () => {
               </p>
             </div>
           )}
-        </form>
+        </motion.form>
 
         <p className="footer">© 2025 Nisrine School. All rights reserved.</p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

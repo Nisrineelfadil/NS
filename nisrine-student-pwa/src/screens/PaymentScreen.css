@@ -1,7 +1,12 @@
+/* Payment Screen - Modern Gradient Design */
+
 .payment-container {
   min-height: 100vh;
-  background: #f9fafb;
-  padding-bottom: 20px;
+  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+  padding: 20px;
+  padding-bottom: 30px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .payment-loading {
@@ -10,144 +15,269 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #f9fafb;
+  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #667EEA;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .payment-loading p {
-  margin-top: 10px;
+  margin-top: 16px;
   font-size: 16px;
-  color: #6b7280;
+  color: #6B7280;
+  font-weight: 500;
 }
 
+/* Header */
 .payment-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px 20px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  margin-bottom: 20px;
 }
 
 .payment-header h1 {
-  font-size: 20px;
-  font-weight: bold;
-  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1D1D1F;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
-.status-card {
-  margin: 15px;
-  padding: 30px;
-  border-radius: 20px;
+.back-button, .refresh-button {
+  background: #F3F4F6;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #1D1D1F;
+}
+
+.back-button:hover, .refresh-button:hover {
+  background: #E5E7EB;
+}
+
+.refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Status Card - Gradient */
+.status-card-gradient {
+  padding: 32px;
+  border-radius: 24px;
+  margin-bottom: 20px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #FFFFFF;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.status-icon {
+.status-icon-wrapper {
   width: 80px;
   height: 80px;
-  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 15px;
-  font-size: 40px;
+  margin: 0 auto 20px;
 }
 
 .status-title {
   font-size: 16px;
-  color: #6b7280;
-  margin: 0 0 5px 0;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  opacity: 1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #FFFFFF;
 }
 
 .status-text {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 32px;
+  font-weight: 700;
   margin: 0;
+  letter-spacing: -0.5px;
+  color: #FFFFFF;
 }
 
+/* Details Card */
 .details-card {
-  background: #fff;
-  margin: 15px;
-  margin-top: 0;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF;
+  padding: 24px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-title {
   font-size: 18px;
-  font-weight: bold;
-  color: #1f2937;
+  font-weight: 700;
+  color: #1D1D1F;
   margin: 0 0 20px 0;
+  letter-spacing: -0.3px;
 }
 
 .detail-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
+  justify-content: space-between;
+  padding: 16px 0;
 }
 
 .detail-label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
-  font-size: 14px;
-  color: #6b7280;
+  gap: 12px;
+  font-size: 15px;
+  color: #6B7280;
+  font-weight: 500;
 }
 
-.detail-label span:first-child {
-  font-size: 20px;
+.detail-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.detail-icon.money {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+}
+
+.detail-icon.calendar {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+}
+
+.detail-icon.timer {
+  background: linear-gradient(135deg, #FED7AA 0%, #FDBA74 100%);
+}
+
+.detail-icon.user {
+  background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+}
+
+.detail-icon.email {
+  background: linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 100%);
+}
+
+.detail-icon.formation {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
 }
 
 .detail-value {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: #1D1D1F;
   text-align: right;
-  flex: 1;
 }
 
 .detail-value-small {
-  font-size: 12px;
+  font-size: 14px;
+  max-width: 200px;
+  word-break: break-word;
 }
 
 .divider {
   height: 1px;
-  background: #e5e7eb;
+  background: linear-gradient(90deg, transparent 0%, #E5E7EB 50%, transparent 100%);
 }
 
+/* Help Card */
 .help-card {
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  padding: 20px;
+  border-radius: 16px;
   display: flex;
-  align-items: center;
-  background: #dbeafe;
-  margin: 15px;
-  margin-top: 0;
-  padding: 15px;
-  border-radius: 12px;
+  align-items: flex-start;
   gap: 12px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .help-icon {
   font-size: 24px;
+  flex-shrink: 0;
 }
 
 .help-card p {
-  flex: 1;
   font-size: 14px;
-  color: #1e40af;
-  line-height: 20px;
+  color: #4C51BF;
   margin: 0;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
-@media (max-width: 480px) {
-  .status-card {
-    padding: 25px 15px;
+/* Responsive */
+@media (max-width: 600px) {
+  .payment-container {
+    padding: 16px;
   }
-  
+
+  .payment-header {
+    padding: 14px 16px;
+  }
+
+  .payment-header h1 {
+    font-size: 20px;
+  }
+
+  .status-card-gradient {
+    padding: 28px 20px;
+  }
+
+  .status-icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+
+  .status-text {
+    font-size: 28px;
+  }
+
+  .details-card {
+    padding: 20px;
+  }
+
+  .detail-row {
+    padding: 14px 0;
+  }
+
+  .detail-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
   .detail-value {
+    font-size: 15px;
+  }
+
+  .detail-value-small {
     font-size: 13px;
+    max-width: 150px;
   }
 }

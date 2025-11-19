@@ -110,6 +110,9 @@ function displaySeasons(seasons) {
                             <i class="fas fa-archive"></i> ${t('archive')}
                         </a>
                         ` : ''}
+                        <a href="#" onclick="archiveToMegaCloud('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #dc2626; text-decoration: none;">
+                            <i class="fas fa-cloud" style="color: #dc2626;"></i> ${t('archiveToCloud')}
+                        </a>
                         ${season.groupCount === 0 ? `
                         <a href="#" onclick="deleteSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #dc2626; text-decoration: none;">
                             <i class="fas fa-trash"></i> ${t('delete')}
@@ -459,6 +462,11 @@ async function deleteSeason(seasonId) {
         showNotification(error.message, 'error');
     }
 }
+
+// Archive to Mega Cloud (Placeholder)
+window.archiveToMegaCloud = function(seasonId) {
+    alert('🔴 Archive to Mega Cloud feature coming soon!\n\nThis feature will allow you to automatically backup your season data to Mega cloud storage.');
+};
 
 // ============================================
 // Branch Groups Management

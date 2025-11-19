@@ -1488,7 +1488,7 @@
                     <i class="fas fa-user-graduate"></i>
                     <span data-i18n="students">Students</span>
                 </div>
-                <div class="menu-item" onclick="switchTab('reminders')">
+                <div class="menu-item" id="paymentRemindersMenuItem" onclick="switchTab('reminders')">
                     <i class="fas fa-bell"></i>
                     <span data-i18n="paymentReminders">Payment Reminders</span>
                 </div>
@@ -1776,13 +1776,16 @@
                         <option value="Ausbildung">Ausbildung</option>
                     </select>
                     <select class="filter-select" id="branchFilter" onchange="filterStudents()">
-                        <option value="" data-i18n="allBranches">All Branches</option>
-                        <option value="IT">IT</option>
-                        <option value="Nursing">Nursing</option>
-                        <option value="Cooking">Cooking</option>
-                        <option value="Mechanics">Mechanics</option>
-                        <option value="Business">Business</option>
-                        <option value="None" data-i18n="noBranch">No Branch</option>
+                        <option value="" data-i18n="allBranches">Alle Zweige</option>
+                        <option value="Gériatrie">Gériatrie</option>
+                        <option value="Aide soignant">Aide soignant</option>
+                        <option value="Agent socio éducatif">Agent socio éducatif</option>
+                        <option value="Assistante sociale">Assistante sociale</option>
+                        <option value="Restauration">Restauration</option>
+                        <option value="Cuisine">Cuisine</option>
+                        <option value="Informatique">Informatique</option>
+                        <option value="Gestion hôtelière">Gestion hôtelière</option>
+                        <option value="None" data-i18n="noBranch">Kein Zweig</option>
                     </select>
                     <select class="filter-select" id="paymentStatusFilter" onchange="filterStudents()">
                         <option value="" data-i18n="allPaymentStatus">All Payment Status</option>
@@ -2114,6 +2117,54 @@
                 </button>
                 <button type="button" class="btn btn-primary" onclick="sendGroupMessage(event)">
                     <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Private Message Modal -->
+    <div id="privateMessageModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-envelope"></i> <span data-i18n="admin.students.send_private_message">Send Private Message</span></h2>
+                <button class="modal-close" onclick="closeMessageModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> <span data-i18n="admin.students.recipient">Recipient</span></label>
+                    <input type="text" id="messageStudentName" readonly style="background: #f5f5f5; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem; width: 100%;">
+                    <input type="hidden" id="messageStudentId">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> <span data-i18n="admin.students.message_type">Message Type</span></label>
+                    <select id="messageType" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem; width: 100%;">
+                        <option value="info">📢 <span data-i18n="admin.students.type_info">Information</span></option>
+                        <option value="reminder">⏰ <span data-i18n="admin.students.type_reminder">Reminder</span></option>
+                        <option value="payment">💰 <span data-i18n="admin.students.type_payment">Payment</span></option>
+                        <option value="announcement">📣 <span data-i18n="admin.students.type_announcement">Announcement</span></option>
+                        <option value="alert">🚨 <span data-i18n="admin.students.type_alert">Alert</span></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-heading"></i> <span data-i18n="admin.students.message_title">Title</span> <small style="color: var(--text-light);">(<span data-i18n="admin.students.optional">Optional</span>)</small></label>
+                    <input type="text" id="messageTitle" placeholder="Auto-generated based on type" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem; width: 100%;">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-comment-alt"></i> <span data-i18n="admin.students.message_content">Message</span> *</label>
+                    <textarea id="messageText" rows="6" placeholder="Type your message here..." required style="padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem; width: 100%; resize: vertical;"></textarea>
+                    <small style="color: var(--text-light); display: block; margin-top: 5px;">
+                        <span data-i18n="admin.students.message_hint">This message will be sent privately to the student's app</span>
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeMessageModal()">
+                    <i class="fas fa-times"></i> <span data-i18n="admin.students.cancel">Cancel</span>
+                </button>
+                <button type="button" class="btn btn-primary" onclick="sendPrivateMessage()">
+                    <i class="fas fa-paper-plane"></i> <span data-i18n="admin.students.send_message">Send Message</span>
                 </button>
             </div>
         </div>

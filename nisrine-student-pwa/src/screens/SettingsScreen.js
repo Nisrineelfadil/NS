@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import Icon from '../components/Icon';
+import { animations } from '../gradients';
 import './SettingsScreen.css';
 
-const LANGUAGES = {
-  en: { name: 'English', flag: '🇬🇧' },
-  fr: { name: 'Français', flag: '🇫🇷' },
-  ar: { name: 'العربية', flag: '🇲🇦' },
-};
+const LANGUAGES = [
+  { key: 'en', name: 'English', flag: '🇬🇧', gradient: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)' },
+  { key: 'fr', name: 'Français', flag: '🇫🇷', gradient: 'linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%)' },
+  { key: 'ar', name: 'العربية', flag: '🇲🇦', gradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)' },
+];
 
 const SettingsScreen = () => {
   const navigate = useNavigate();
@@ -33,7 +36,7 @@ const SettingsScreen = () => {
     try {
       localStorage.setItem('appLanguage', languageKey);
       setSelectedLanguage(languageKey);
-      alert('Language Changed\n\nYour language preference has been saved! This feature will be fully implemented soon.');
+      // Success feedback with animation
     } catch (error) {
       console.error('Error saving language:', error);
       alert('Failed to save language');
@@ -59,128 +62,215 @@ const SettingsScreen = () => {
   };
 
   return (
-    <div className="settings-container" style={{ background: theme.background }}>
-      <div className="settings-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
+    <motion.div 
+      className="settings-container"
+      initial="initial"
+      animate="animate"
+      variants={animations.fadeIn}
+    >
+      <motion.div 
+        className="settings-header"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <motion.button 
+          className="back-button" 
+          onClick={() => navigate('/dashboard')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           ← Back
-        </button>
+        </motion.button>
         <h1>Settings</h1>
         <div style={{ width: '60px' }}></div>
-      </div>
+      </motion.div>
 
-      <div className="settings-header-card" style={{ background: theme.cardBg }}>
-        <span className="settings-icon">⚙️</span>
-        <h2 style={{ color: theme.text }}>Settings</h2>
-        <p style={{ color: theme.textLight }}>Customize your app experience</p>
-      </div>
-
-      <div className="settings-section" style={{ background: theme.cardBg }}>
-        <div className="section-header">
-          <span className="section-icon">🎨</span>
-          <h3 style={{ color: theme.text }}>Theme</h3>
+      <motion.div 
+        className="settings-intro"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        <div className="intro-icon">
+          <Icon type="settings" size={32} color="#667EEA" />
         </div>
-        <p className="section-description" style={{ color: theme.textLight }}>
+        <div className="intro-text">
+          <h2>Settings</h2>
+          <p>Customize your app experience</p>
+        </div>
+      </motion.div>
+
+      <motion.div 
+        className="settings-section"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+      >
+        <div className="section-header">
+          <div className="section-icon-wrapper">
+            <span className="section-icon">🎨</span>
+          </div>
+          <h3>Theme</h3>
+        </div>
+        <p className="section-description">
           Choose your preferred color theme
         </p>
 
         <div className="theme-grid">
-          {Object.keys(themes).map((themeKey) => (
-            <div
+          {Object.keys(themes).map((themeKey, index) => (
+            <motion.div
               key={themeKey}
               className={`theme-card ${currentTheme === themeKey ? 'active' : ''}`}
               style={{
-                background: themes[themeKey].cardBg,
-                borderColor: currentTheme === themeKey ? themes[themeKey].primary : themes[themeKey].borderColor,
+                background: themeKey === 'bright' 
+                  ? 'linear-gradient(135deg, #FFC107 0%, #FFD54F 100%)'
+                  : 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
               }}
               onClick={() => changeTheme(themeKey)}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <div 
-                className="theme-icon-container"
-                style={{ background: themes[themeKey].primary + '20' }}
-              >
-                <span style={{ fontSize: '40px' }}>
+              <div className="theme-icon-container">
+                <span style={{ fontSize: '48px' }}>
                   {themeKey === 'bright' ? '☀️' : '🌙'}
                 </span>
               </div>
-              <h4 style={{ color: themes[themeKey].text }}>{themes[themeKey].name}</h4>
+              <h4>{themes[themeKey].name}</h4>
               <div className="theme-colors">
-                <div className="color-dot" style={{ background: themes[themeKey].primary }}></div>
-                <div className="color-dot" style={{ background: themes[themeKey].secondary }}></div>
-                <div className="color-dot" style={{ background: themes[themeKey].background }}></div>
+                <motion.div 
+                  className="color-dot" 
+                  style={{ background: themes[themeKey].primary }}
+                  whileHover={{ scale: 1.3 }}
+                />
+                <motion.div 
+                  className="color-dot" 
+                  style={{ background: themes[themeKey].secondary }}
+                  whileHover={{ scale: 1.3 }}
+                />
               </div>
-              {currentTheme === themeKey && (
-                <div className="selected-badge" style={{ background: themes[themeKey].primary }}>
-                  <span>✓</span>
-                  <span>Active</span>
-                </div>
-              )}
-            </div>
+              <AnimatePresence>
+                {currentTheme === themeKey && (
+                  <motion.div 
+                    className="selected-badge"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                  >
+                    <span>✓</span>
+                    <span>Active</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="settings-section" style={{ background: theme.cardBg }}>
+      <motion.div 
+        className="settings-section language-section"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.4 }}
+      >
         <div className="section-header">
-          <span className="section-icon">🌐</span>
-          <h3 style={{ color: theme.text }}>Language</h3>
+          <div className="section-icon-wrapper">
+            <span className="section-icon">🌐</span>
+          </div>
+          <h3>Language</h3>
         </div>
-        <p className="section-description" style={{ color: theme.textLight }}>
+        <p className="section-description">
           Select your preferred language
         </p>
 
-        {Object.keys(LANGUAGES).map((langKey) => (
-          <div
-            key={langKey}
-            className={`option-card ${selectedLanguage === langKey ? 'selected' : ''}`}
-            style={{
-              background: theme.background,
-              borderColor: selectedLanguage === langKey ? theme.primary : 'transparent',
-            }}
-            onClick={() => saveLanguage(langKey)}
-          >
-            <div className="option-content">
-              <span className="flag-emoji">{LANGUAGES[langKey].flag}</span>
-              <span className="option-title" style={{ color: theme.text }}>
-                {LANGUAGES[langKey].name}
-              </span>
-            </div>
-            {selectedLanguage === langKey && (
-              <span style={{ color: theme.primary, fontSize: '24px' }}>✓</span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="settings-section" style={{ background: theme.cardBg, marginTop: '20px' }}>
-        <div className="section-header">
-          <span className="section-icon">🚪</span>
-          <h3 style={{ color: theme.text }}>Account</h3>
+        <div className="language-grid">
+          {LANGUAGES.map((lang, index) => (
+            <motion.div
+                key={lang.key}
+                className={`language-card ${selectedLanguage === lang.key ? 'selected' : ''}`}
+                style={{ background: lang.gradient }}
+                onClick={() => saveLanguage(lang.key)}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  delay: 0.5 + index * 0.1,
+                  duration: 0.4
+                }}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="language-flag">
+                  {lang.flag}
+                </div>
+                <h4 className="language-name">
+                  {lang.name}
+                </h4>
+                <AnimatePresence>
+                  {selectedLanguage === lang.key && (
+                    <motion.div 
+                      className="language-check"
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      exit={{ scale: 0, rotate: 180 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                    >
+                      ✓
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <motion.div 
+                  className="language-ripple"
+                  initial={{ scale: 0, opacity: 0.5 }}
+                  animate={selectedLanguage === lang.key ? {
+                    scale: [1, 1.5, 2],
+                    opacity: [0.5, 0.3, 0]
+                  } : { scale: 0, opacity: 0 }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+              </motion.div>
+            ))}
         </div>
-        <button
-          className="logout-button"
+      </motion.div>
+
+      <motion.div 
+        className="settings-section"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.4 }}
+      >
+        <div className="section-header">
+          <div className="section-icon-wrapper">
+            <span className="section-icon">🚪</span>
+          </div>
+          <h3>Account</h3>
+        </div>
+        <motion.button
+          className="logout-button-gradient"
           onClick={handleLogout}
-          style={{
-            width: '100%',
-            padding: '15px',
-            background: '#ef4444',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            marginTop: '10px'
-          }}
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
         >
           Logout
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
-      <div className="info-section">
-        <p style={{ color: theme.textLight }}>Nisrine School Student App</p>
-        <p style={{ color: theme.textLight }}>Version 1.1.0</p>
-      </div>
-    </div>
+      <motion.div 
+        className="info-section"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+      >
+        <p>Nisrine School Student App</p>
+        <p>Version 1.1.0</p>
+      </motion.div>
+    </motion.div>
   );
 };
 

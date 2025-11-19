@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
+import Icon from '../components/Icon';
+import { animations } from '../gradients';
 import './PaymentScreen.css';
 import { API_URL } from '../config';
 
@@ -47,17 +50,37 @@ const PaymentScreen = () => {
   };
 
   const getPaymentStatus = () => {
-    if (!paymentInfo) return { status: 'unknown', color: '#9ca3af', icon: '❓' };
+    if (!paymentInfo) return { 
+      status: 'unknown', 
+      gradient: 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+      icon: 'credit-card'
+    };
 
     const status = paymentInfo.paymentStatus?.toLowerCase();
     if (status === 'paid') {
-      return { status: 'Paid', color: '#10b981', icon: '✅' };
+      return { 
+        status: 'Paid', 
+        gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+        icon: 'credit-card'
+      };
     } else if (status === 'pending') {
-      return { status: 'Pending', color: '#f59e0b', icon: '⏰' };
+      return { 
+        status: 'Pending', 
+        gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+        icon: 'credit-card'
+      };
     } else if (status === 'overdue') {
-      return { status: 'Overdue', color: '#ef4444', icon: '⚠️' };
+      return { 
+        status: 'Overdue', 
+        gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+        icon: 'credit-card'
+      };
     }
-    return { status: 'Unknown', color: '#9ca3af', icon: '❓' };
+    return { 
+      status: 'Unknown', 
+      gradient: 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+      icon: 'credit-card'
+    };
   };
 
   const getDaysUntilDue = () => {
@@ -73,10 +96,14 @@ const PaymentScreen = () => {
 
   if (loading) {
     return (
-      <div className="payment-loading">
+      <motion.div 
+        className="payment-loading"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
         <div className="spinner"></div>
         <p>Loading payment information...</p>
-      </div>
+      </motion.div>
     );
   }
 
@@ -84,33 +111,68 @@ const PaymentScreen = () => {
   const daysUntilDue = getDaysUntilDue();
 
   return (
-    <div className="payment-container">
-      <div className="payment-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
+    <motion.div 
+      className="payment-container"
+      initial="initial"
+      animate="animate"
+      variants={animations.fadeIn}
+    >
+      <motion.div 
+        className="payment-header"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <motion.button 
+          className="back-button" 
+          onClick={() => navigate('/dashboard')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           ← Back
-        </button>
+        </motion.button>
         <h1>Payment Status</h1>
-        <button className="refresh-button" onClick={handleRefresh} disabled={refreshing}>
-          {refreshing ? '⟳' : '↻'}
-        </button>
-      </div>
+        <motion.button 
+          className="refresh-button" 
+          onClick={handleRefresh} 
+          disabled={refreshing}
+          whileHover={{ scale: 1.05, rotate: refreshing ? 360 : 0 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{ rotate: refreshing ? 360 : 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          ↻
+        </motion.button>
+      </motion.div>
 
-      <div className="status-card" style={{ background: paymentStatus.color + '20' }}>
-        <div className="status-icon" style={{ background: paymentStatus.color }}>
-          <span>{paymentStatus.icon}</span>
+      <motion.div 
+        className="status-card-gradient" 
+        style={{ background: paymentStatus.gradient }}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        whileHover={{ scale: 1.02, y: -4 }}
+      >
+        <div className="status-icon-wrapper">
+          <Icon type={paymentStatus.icon} size={40} color="#FFFFFF" />
         </div>
         <h2 className="status-title">Payment Status</h2>
-        <p className="status-text" style={{ color: paymentStatus.color }}>
+        <p className="status-text">
           {paymentStatus.status}
         </p>
-      </div>
+      </motion.div>
 
-      <div className="details-card">
+      <motion.div 
+        className="details-card"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+      >
         <h3 className="card-title">Payment Information</h3>
 
         <div className="detail-row">
           <div className="detail-label">
-            <span>💰</span>
+            <div className="detail-icon money">💰</div>
             <span>Amount</span>
           </div>
           <span className="detail-value">
@@ -122,7 +184,7 @@ const PaymentScreen = () => {
 
         <div className="detail-row">
           <div className="detail-label">
-            <span>📅</span>
+            <div className="detail-icon calendar">📅</div>
             <span>Due Date</span>
           </div>
           <span className="detail-value">
@@ -137,13 +199,14 @@ const PaymentScreen = () => {
             <div className="divider"></div>
             <div className="detail-row">
               <div className="detail-label">
-                <span>⏳</span>
+                <div className="detail-icon timer">⏳</div>
                 <span>Days Until Due</span>
               </div>
               <span
                 className="detail-value"
                 style={{
                   color: daysUntilDue < 0 ? '#ef4444' : daysUntilDue < 7 ? '#f59e0b' : '#10b981',
+                  fontWeight: '700'
                 }}
               >
                 {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)} days overdue` : `${daysUntilDue} days`}
@@ -151,14 +214,19 @@ const PaymentScreen = () => {
             </div>
           </>
         )}
-      </div>
+      </motion.div>
 
-      <div className="details-card">
+      <motion.div 
+        className="details-card"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
         <h3 className="card-title">Student Information</h3>
 
         <div className="detail-row">
           <div className="detail-label">
-            <span>👤</span>
+            <div className="detail-icon user">👤</div>
             <span>Full Name</span>
           </div>
           <span className="detail-value">{paymentInfo?.fullName || 'N/A'}</span>
@@ -168,7 +236,7 @@ const PaymentScreen = () => {
 
         <div className="detail-row">
           <div className="detail-label">
-            <span>✉️</span>
+            <div className="detail-icon email">✉️</div>
             <span>Email</span>
           </div>
           <span className="detail-value detail-value-small">
@@ -180,20 +248,25 @@ const PaymentScreen = () => {
 
         <div className="detail-row">
           <div className="detail-label">
-            <span>🎓</span>
+            <div className="detail-icon formation">🎓</div>
             <span>Formation</span>
           </div>
           <span className="detail-value">
             {paymentInfo?.formation?.join(', ') || 'N/A'}
           </span>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="help-card">
+      <motion.div 
+        className="help-card"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.4 }}
+      >
         <span className="help-icon">ℹ️</span>
         <p>For payment inquiries, please contact the school administration office.</p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -7,6 +7,12 @@ let allStudents = [];
 let cachedBranchSubgroups = null; // Cache for branch subgroups
 let branchSubgroupsLoadTime = null; // Track when cache was loaded
 
+// Pagination state
+const STUDENTS_PER_PAGE = 9; // Show 9 students per page
+let currentPage = 1;
+let totalStudents = 0;
+let filteredStudents = [];
+
 // Helper function to validate photo path
 function isValidPhotoPath(photoPath) {
     if (!photoPath) return false;
@@ -14,9 +20,43 @@ function isValidPhotoPath(photoPath) {
     return true;
 }
 
+// Photo cache to avoid re-fetching
+const photoCache = new Map();
+
+// Lazy load student photo
+async function loadStudentPhoto(studentId, photoElement) {
+    // Check cache first
+    if (photoCache.has(studentId)) {
+        const photoPath = photoCache.get(studentId);
+        if (photoPath) {
+            photoElement.src = photoPath;
+            photoElement.style.display = 'block';
+        }
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/students/${studentId}/photo`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.photoPath) {
+                photoCache.set(studentId, data.photoPath);
+                photoElement.src = data.photoPath;
+                photoElement.style.display = 'block';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading photo for student:', studentId, error);
+    }
+}
+
 // Season context - synced with Phase 2 (using legacy prefix to avoid conflicts)
 let legacyCurrentSeasonId = null;
 let legacyCurrentSeasonName = null;
+let legacyActiveSeasonId = null;  // Track the actual active season ID
 
 // Initialize season context from Phase 2 on page load
 async function initializeSeasonContext() {
@@ -30,6 +70,7 @@ async function initializeSeasonContext() {
             const season = await response.json();
             legacyCurrentSeasonId = season._id;
             legacyCurrentSeasonName = season.name;
+            legacyActiveSeasonId = season._id;  // Store active season ID
             console.log('✅ Legacy system initialized with active season:', season.name);
         } else {
             console.log('ℹ️ No active season found - will show all groups');
@@ -87,6 +128,7 @@ async function loadSeasonFilter() {
                 option.selected = true;
                 legacyCurrentSeasonId = season._id;
                 legacyCurrentSeasonName = season.name;
+                legacyActiveSeasonId = season._id;  // Store active season ID
                 activeSeasonFound = true;
             }
             
@@ -229,6 +271,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             console.warn('Could not load season filter:', err);
         }
+        
+        // Update payment tab visibility on page load
+        updatePaymentTabVisibility();
         
         await loadDashboardStats();
         await loadGroups();
@@ -615,7 +660,7 @@ function displayGroups(groups) {
 }
 
 // Students
-async function loadStudents() {
+async function loadStudents(resetPage = true) {
     try {
         const params = new URLSearchParams();
         const search = document.getElementById('studentSearch')?.value;
@@ -623,6 +668,11 @@ async function loadStudents() {
         const formation = document.getElementById('formationFilter')?.value;
         const branch = document.getElementById('branchFilter')?.value;
         const paymentStatus = document.getElementById('paymentStatusFilter')?.value;
+        
+        // Reset to page 1 when filters change
+        if (resetPage) {
+            currentPage = 1;
+        }
         
         // Add season filter - use current season context
         if (legacyCurrentSeasonId) {
@@ -649,45 +699,48 @@ async function loadStudents() {
         }
         
         if (formation) params.append('formation', formation);
-        if (branch) params.append('branch', branch);
+        if (branch) params.append('filiere', branch);  // Backend expects 'filiere' not 'branch'
         if (paymentStatus) params.append('paymentStatus', paymentStatus);
         
-        // Implement 20 students limit when no group is selected
-        if (!groupValue) {
-            params.append('limit', '20');
-        }
+        // Server-side pagination for fast loading
+        params.append('page', currentPage);
+        params.append('limit', STUDENTS_PER_PAGE);
+        
+        // Show loading indicator
+        const grid = document.getElementById('studentsGrid');
+        grid.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i><p style="margin-top: 10px; color: var(--text-light);">Loading students...</p></div>';
         
         const data = await apiRequest(`/students?${params.toString()}`);
         if (data && data.success) {
             allStudents = data.students;
             
+            // Get total count from pagination data
+            totalStudents = data.pagination?.total || data.students.length;
+            
             // Separate pending assignment students from active students
             const pendingStudents = data.students.filter(s => s.status === 'pending_assignment');
             const activeStudents = data.students.filter(s => s.status !== 'pending_assignment');
             
-            displayStudents(activeStudents, pendingStudents, !groupValue);
+            // Store filtered students for pagination
+            filteredStudents = activeStudents;
+            
+            displayStudents(activeStudents, pendingStudents);
         }
     } catch (error) {
         console.error('Error loading students:', error);
     }
 }
 
-function displayStudents(students, pendingStudents = [], isLimitedView = false) {
+function displayStudents(students, pendingStudents = []) {
     const grid = document.getElementById('studentsGrid');
     
     let html = '';
     
-    // Show info message if limited view
-    if (isLimitedView && students.length === 20) {
-        html += `
-            <div style="grid-column: 1 / -1; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #1565c0; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Showing 20 students.</strong> Select a specific group to view all students in that group.
-                </p>
-            </div>
-        `;
-    }
+    // Calculate pagination based on total students from server
+    const totalPages = Math.ceil(totalStudents / STUDENTS_PER_PAGE);
+    
+    // Students are already paginated from server, no need to slice
+    const pageStudents = students;
     
     // Pending Assignment Section
     if (pendingStudents.length > 0) {
@@ -714,8 +767,27 @@ function displayStudents(students, pendingStudents = [], isLimitedView = false) 
     }
     
     if (students.length > 0) {
-        html += `<div style="grid-column: 1 / -1;"><h3 style="margin: 0 0 15px 0; color: #1e293b;">Active Students (${students.length})</h3></div>`;
-        html += students.map(student => {
+        // Pagination info at top
+        const startItem = ((currentPage - 1) * STUDENTS_PER_PAGE) + 1;
+        const endItem = Math.min(currentPage * STUDENTS_PER_PAGE, totalStudents);
+        
+        html += `
+            <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #1e293b;">Active Students (${totalStudents})</h3>
+                ${totalPages > 1 ? `
+                    <div class="pagination-info" style="color: #64748b; font-size: 0.9rem;">
+                        Showing ${startItem}-${endItem} of ${totalStudents}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        // Pagination controls at top
+        if (totalPages > 1) {
+            html += createStudentPaginationControls(currentPage, totalPages, 'top');
+        }
+        
+        html += pageStudents.map(student => {
         const now = new Date();
         const paymentDate = new Date(student.paymentDate);
         const reminderDays = student.reminderDaysBefore || 7;
@@ -850,7 +922,8 @@ function displayStudents(students, pendingStudents = [], isLimitedView = false) 
                 <div style="position: absolute; top: 10px; left: 10px;">
                     <i class="fas ${statusStyle.icon}" style="color: ${statusStyle.color}; font-size: 1.2rem;" title="${statusStyle.label}"></i>
                 </div>
-                ${isValidPhotoPath(student.photoPath) ? `<img src="${student.photoPath}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
+                ${isValidPhotoPath(student.photoPath) ? 
+                  `<img src="${student.photoPath}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
                   `<div class="student-photo" style="background: ${statusStyle.color}; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; border-color: ${statusStyle.borderColor};">${student.fullName.charAt(0)}</div>`}
                 <div class="student-name">${student.fullName}</div>
                 <div class="student-info">
@@ -886,15 +959,66 @@ function displayStudents(students, pendingStudents = [], isLimitedView = false) 
                     <button class="btn btn-small" onclick="viewStudent('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-small btn-secondary" onclick="editStudent('${student._id}')" title="Edit Student"><i class="fas fa-edit"></i></button>
                     ${!isPaid ? `<button class="btn btn-small btn-success" onclick="markAsPaid('${student._id}', '${student.fullName}')" title="Mark as Paid"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="btn btn-small btn-info" onclick="openMessageModal('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')" title="Send Private Message" data-i18n-title="admin.students.send_message_title"><i class="fas fa-envelope"></i></button>
                     <button class="btn btn-small btn-warning" onclick="clearAbsenceHistory('${student._id}', '${student.fullName}')" title="Clear Absence History"><i class="fas fa-eraser"></i></button>
                     <button class="btn btn-small btn-danger" onclick="deleteStudent('${student._id}', '${student.fullName}')" title="Delete Student"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
         }).join('');
+        
+        // Pagination controls at bottom
+        if (totalPages > 1) {
+            html += createStudentPaginationControls(currentPage, totalPages, 'bottom');
+        }
     }
     
     grid.innerHTML = html;
+}
+
+// Create pagination controls for students (matching ratings design)
+function createStudentPaginationControls(currentPage, totalPages, position) {
+    const startItem = ((currentPage - 1) * STUDENTS_PER_PAGE) + 1;
+    const endItem = Math.min(currentPage * STUDENTS_PER_PAGE, totalStudents);
+    
+    // Generate page number buttons with span for animations
+    let pageButtons = '';
+    for (let i = 1; i <= totalPages; i++) {
+        pageButtons += `
+            <button class="pagination-page-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="changeStudentPage(${i})">
+                <span>${i}</span>
+            </button>
+        `;
+    }
+    
+    return `
+        <div class="student-pagination-controls" style="grid-column: 1 / -1; margin-top: ${position === 'bottom' ? '20px' : '0'}; margin-bottom: ${position === 'top' ? '20px' : '0'};">
+            <div class="pagination-info">
+                Showing ${startItem}-${endItem} of ${totalStudents}
+            </div>
+            <div class="pagination-buttons">
+                ${pageButtons}
+            </div>
+        </div>
+    `;
+}
+
+// Change student page with smooth animation
+window.changeStudentPage = function(newPage) {
+    if (newPage < 1 || newPage > Math.ceil(totalStudents / STUDENTS_PER_PAGE)) return;
+    if (newPage === currentPage) return;
+    
+    currentPage = newPage;
+    
+    // Reload students without resetting page
+    loadStudents(false);
+    
+    // Smooth scroll to top of student grid
+    const grid = document.getElementById('studentsGrid');
+    if (grid) {
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // Create pending student card with edit button for missing data
@@ -999,6 +1123,32 @@ function searchStudents() {
     loadStudents();
 }
 
+// Update payment reminders tab visibility based on season
+function updatePaymentTabVisibility() {
+    const paymentTab = document.getElementById('paymentRemindersMenuItem');
+    
+    if (!paymentTab) return;
+    
+    // Check if viewing active season
+    const isViewingActiveSeason = !legacyActiveSeasonId || legacyCurrentSeasonId === legacyActiveSeasonId;
+    
+    if (isViewingActiveSeason) {
+        // Viewing active season - show payment tab
+        paymentTab.style.display = 'flex';
+        console.log('✅ Payment reminders tab visible (active season)');
+    } else {
+        // Viewing old season - hide payment tab
+        paymentTab.style.display = 'none';
+        console.log('🔒 Payment reminders tab hidden (viewing historical season)');
+        
+        // If currently on payment tab, switch to dashboard
+        const currentTab = document.querySelector('.tab-content.active');
+        if (currentTab && currentTab.id === 'remindersTab') {
+            switchTab('dashboard');
+        }
+    }
+}
+
 function filterStudents() {
     // Update season context when season filter changes
     const seasonFilter = document.getElementById('seasonFilter');
@@ -1006,6 +1156,9 @@ function filterStudents() {
         const oldSeasonId = legacyCurrentSeasonId;
         legacyCurrentSeasonId = seasonFilter.value;
         console.log('🔄 Season filter changed to:', seasonFilter.value);
+        
+        // Update payment tab visibility when season changes
+        updatePaymentTabVisibility();
         
         // If season changed, update group filters too
         if (oldSeasonId !== legacyCurrentSeasonId) {
@@ -3555,3 +3708,94 @@ window.toggleEditCINInputs = function(studentId) {
         }
     }
 };
+
+// ==================== PRIVATE MESSAGE FUNCTIONS ====================
+
+// Open message modal
+window.openMessageModal = function(studentId, studentName) {
+    const modal = document.getElementById('privateMessageModal');
+    const studentNameInput = document.getElementById('messageStudentName');
+    const studentIdInput = document.getElementById('messageStudentId');
+    const messageText = document.getElementById('messageText');
+    const messageTitle = document.getElementById('messageTitle');
+    const messageType = document.getElementById('messageType');
+    
+    // Set student info
+    studentNameInput.value = studentName;
+    studentIdInput.value = studentId;
+    
+    // Reset form
+    messageText.value = '';
+    messageTitle.value = '';
+    messageType.value = 'info';
+    
+    // Show modal
+    modal.style.display = 'flex';
+};
+
+// Close message modal
+window.closeMessageModal = function() {
+    const modal = document.getElementById('privateMessageModal');
+    modal.style.display = 'none';
+};
+
+// Send private message
+window.sendPrivateMessage = async function() {
+    const studentId = document.getElementById('messageStudentId').value;
+    const studentName = document.getElementById('messageStudentName').value;
+    const messageText = document.getElementById('messageText').value.trim();
+    const messageTitle = document.getElementById('messageTitle').value.trim();
+    const messageType = document.getElementById('messageType').value;
+    
+    // Validate message content
+    if (!messageText) {
+        showNotification('Please enter a message', 'error');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const sendButton = event.target;
+        const originalText = sendButton.innerHTML;
+        sendButton.disabled = true;
+        sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        
+        const response = await fetch(`/api/student-management/students/${studentId}/send-message`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                type: messageType,
+                message: messageText,
+                title: messageTitle || undefined
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(`Message sent successfully to ${studentName}`, 'success');
+            closeMessageModal();
+        } else {
+            showNotification(data.message || 'Failed to send message', 'error');
+        }
+        
+        // Restore button
+        sendButton.disabled = false;
+        sendButton.innerHTML = originalText;
+        
+    } catch (error) {
+        console.error('Error sending message:', error);
+        showNotification('Error sending message. Please try again.', 'error');
+    }
+};
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('privateMessageModal');
+    if (event.target === modal) {
+        closeMessageModal();
+    }
+});

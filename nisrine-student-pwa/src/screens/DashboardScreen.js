@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { animations } from '../gradients';
+import Icon from '../components/Icon';
+import { API_URL } from '../config';
 import './DashboardScreen.css';
 
 const DashboardScreen = () => {
@@ -33,84 +37,154 @@ const DashboardScreen = () => {
     }
   };
 
-  const menuItems = [
-    {
-      title: 'My Grades',
-      icon: '🎓',
-      color: '#10b981',
-      path: '/grades',
-      description: 'View your exam results',
-    },
+  const largeCard = {
+    title: 'My Grades',
+    icon: '📊', // Will be replaced with SVG icon
+    iconType: 'chart',
+    gradient: 'linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%)',
+    path: '/grades',
+    description: 'View your exam results',
+  };
+
+  const gridItems = [
     {
       title: 'Scan Attendance',
       icon: '📱',
-      color: '#3b82f6',
+      iconType: 'smartphone',
+      gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E9E 100%)',
       path: '/attendance',
       description: 'Scan QR code for attendance',
     },
     {
       title: 'Payment Status',
       icon: '💳',
-      color: '#f59e0b',
+      iconType: 'credit-card',
+      gradient: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
       path: '/payment',
       description: 'Check payment information',
     },
     {
       title: 'Messages',
       icon: '✉️',
-      color: '#8b5cf6',
+      iconType: 'mail',
+      gradient: 'linear-gradient(135deg, #FF6B9D 0%, #FF8E9E 100%)',
       path: '/messages',
       description: 'Announcements & notifications',
     },
     {
       title: 'Settings',
       icon: '⚙️',
-      color: '#6b7280',
+      iconType: 'settings',
+      gradient: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
       path: '/settings',
       description: 'Theme & language preferences',
     },
   ];
 
   return (
-    <div className="dashboard-container" style={{ background: theme.background }}>
-      <div className="welcome-card" style={{ background: theme.primary }}>
-        <p className="welcome-text" style={{ color: theme.text }}>Welcome back,</p>
-        <h2 className="student-name" style={{ color: theme.text }}>{studentData?.fullName || 'Student'}</h2>
-        <p className="student-email" style={{ color: theme.text }}>{studentData?.schoolEmail}</p>
-      </div>
-
-      <div className="menu-grid">
-        {menuItems.map((item, index) => (
-          <div
-            key={index}
-            className="menu-item"
-            style={{ 
-              background: theme.cardBg,
-              borderLeftColor: item.color 
-            }}
-            onClick={() => navigate(item.path)}
+    <motion.div 
+      className="dashboard-container"
+      initial="initial"
+      animate="animate"
+      variants={animations.fadeIn}
+    >
+      {/* Header with student info and photo */}
+      <motion.div 
+        className="dashboard-header"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        <div className="header-text">
+          <p className="welcome-text-new">Welcome back</p>
+          <h2 className="student-name-new">{studentData?.fullName || 'Student'}</h2>
+          <p className="student-email-new">{studentData?.schoolEmail}</p>
+        </div>
+        <motion.div 
+          className="student-photo"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          {studentData?.photoPath && studentData.photoPath !== 'default-avatar.png' ? (
+            <img 
+              src={studentData.photoPath.startsWith('http') ? studentData.photoPath : `${API_URL}${studentData.photoPath}`} 
+              alt="Student" 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div 
+            className="photo-placeholder" 
+            style={{ display: studentData?.photoPath && studentData.photoPath !== 'default-avatar.png' ? 'none' : 'flex' }}
           >
-            <div className="icon-container" style={{ background: item.color + '20' }}>
-              <span className="menu-icon">{item.icon}</span>
-            </div>
-            <div className="menu-text-container">
-              <h3 className="menu-title" style={{ color: theme.text }}>{item.title}</h3>
-              <p className="menu-description" style={{ color: theme.textLight }}>{item.description}</p>
-            </div>
-            <span className="chevron" style={{ color: '#9ca3af' }}>›</span>
+            {studentData?.fullName?.charAt(0) || 'S'}
           </div>
-        ))}
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <button className="logout-button" style={{ background: theme.cardBg }} onClick={handleLogout}>
-        <span className="logout-icon">🚪</span>
-        <span className="logout-text">Logout</span>
-      </button>
+      {/* Large Grades Card */}
+      <motion.div
+        className="large-card"
+        style={{ background: largeCard.gradient }}
+        onClick={() => navigate(largeCard.path)}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+        whileHover={{ scale: 1.02, y: -5 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="large-card-icon">
+          <Icon type={largeCard.iconType} size={48} color="#FFFFFF" />
+        </div>
+        <h3 className="large-card-title">{largeCard.title}</h3>
+        <p className="large-card-description">{largeCard.description}</p>
+      </motion.div>
+
+      {/* 2x2 Grid */}
+      <motion.div 
+        className="cards-grid"
+        variants={animations.staggerContainer}
+      >
+        {gridItems.map((item, index) => (
+          <motion.div
+            key={index}
+            className="grid-card"
+            style={{ background: item.gradient }}
+            onClick={() => navigate(item.path)}
+            variants={animations.staggerItem}
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="grid-card-icon">
+              <Icon type={item.iconType} size={36} color="#FFFFFF" />
+            </div>
+            <h3 className="grid-card-title">{item.title}</h3>
+            <p className="grid-card-description">{item.description}</p>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Logout Button */}
+      <motion.button 
+        className="logout-button-gradient"
+        onClick={handleLogout}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+      >
+        Logout
+      </motion.button>
 
       <div className="dashboard-footer">
-        <p style={{ color: theme.textLight }}>Nisrine School Mobile App v1.0.1</p>
+        <p>Nisrine School Mobile App v1.0.1</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

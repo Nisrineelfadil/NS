@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import Icon from '../components/Icon';
+import { animations } from '../gradients';
 import './AttendanceScreen.css';
 import { API_URL } from '../config';
 
@@ -110,20 +113,50 @@ const AttendanceScreen = () => {
   };
 
   return (
-    <div className="attendance-container">
-      <div className="attendance-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
+    <motion.div 
+      className="attendance-container"
+      initial="initial"
+      animate="animate"
+      variants={animations.fadeIn}
+    >
+      <motion.div 
+        className="attendance-header"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <motion.button 
+          className="back-button" 
+          onClick={() => navigate('/dashboard')}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           ← Back
-        </button>
+        </motion.button>
         <h1>Scan Attendance</h1>
-        <button className="refresh-button" onClick={handleRefresh} disabled={refreshing}>
-          {refreshing ? '⟳' : '↻'}
-        </button>
-      </div>
+        <motion.button 
+          className="refresh-button" 
+          onClick={handleRefresh} 
+          disabled={refreshing}
+          whileHover={{ scale: 1.05, rotate: refreshing ? 360 : 0 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{ rotate: refreshing ? 360 : 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          ↻
+        </motion.button>
+      </motion.div>
 
-      <div className="scanner-card">
+      <motion.div 
+        className="scanner-card"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
         <div className="scanner-header">
-          <span className="scanner-icon">📱</span>
+          <div className="scanner-icon-wrapper">
+            <Icon type="smartphone" size={24} color="#FFFFFF" />
+          </div>
           <h2>Scan Attendance QR Code</h2>
         </div>
         
@@ -144,10 +177,12 @@ const AttendanceScreen = () => {
             />
           </div>
 
-          <button 
+          <motion.button 
             type="submit"
             className={`scan-button ${loading ? 'loading' : ''}`}
             disabled={loading}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loading ? (
               <span>Marking...</span>
@@ -157,17 +192,22 @@ const AttendanceScreen = () => {
                 <span>Mark Attendance</span>
               </>
             )}
-          </button>
+          </motion.button>
         </form>
 
         <div className="info-box">
           <span className="info-icon">ℹ️</span>
           <p>You'll be marked as Present if on time, or Late if after the grace period</p>
         </div>
-      </div>
+      </motion.div>
 
       {stats && (
-        <div className="stats-card">
+        <motion.div 
+          className="stats-card"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
           <h3 className="stats-title">Attendance Statistics</h3>
           
           <div className="stats-grid">
@@ -203,10 +243,15 @@ const AttendanceScreen = () => {
               <p className="stat-label">Rate</p>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      <div className="history-section">
+      <motion.div 
+        className="history-section"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
         <h3 className="history-title">Attendance History</h3>
         
         {attendanceHistory.length === 0 ? (
@@ -251,8 +296,8 @@ const AttendanceScreen = () => {
             </div>
           ))
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

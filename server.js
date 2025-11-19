@@ -63,17 +63,17 @@ io.on('connection', (socket) => {
 // Middleware
 // Enhanced CORS for Electron desktop app support
 app.use(cors({
-  origin: '*', // Allow all origins (including Electron app)
+  origin: '*', // Allow all origins (including Electron app and PWA)
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Pragma']
 }));
 
 // Additional headers for Electron app compatibility
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Cache-Control, Pragma');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   
   // Remove X-Frame-Options to allow Electron to load the page

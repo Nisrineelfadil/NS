@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Icon from '../components/Icon';
 import './GradesScreen.css';
 import { API_URL } from '../config';
 
@@ -194,9 +195,10 @@ const GradesScreen = () => {
             setSelectedExamNumber(null);
             setSelectedLevel(null);
             setSelectedTestType(null);
+            setSelectedSemester(null);
           }}
         >
-          <span className="toggle-icon">🌐</span>
+          <Icon type="globe" size={20} color={viewMode === 'languages' ? '#1D1D1F' : '#6B7280'} />
           Languages
         </button>
         
@@ -210,7 +212,7 @@ const GradesScreen = () => {
             setSelectedTestType(null);
           }}
         >
-          <span className="toggle-icon">🎓</span>
+          <Icon type="graduation-cap" size={20} color={viewMode === 'branches' ? '#1D1D1F' : '#6B7280'} />
           Subjects
         </button>
       </div>

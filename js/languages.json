@@ -263,6 +263,23 @@
                     "refresh": "Aktualisieren",
                     "accept": "Akzeptieren",
                     "reject": "Ablehnen"
+                },
+                "students": {
+                    "send_message_title": "Private Nachricht senden",
+                    "send_private_message": "Private Nachricht senden",
+                    "recipient": "Empfänger",
+                    "message_type": "Nachrichtentyp",
+                    "message_title": "Titel",
+                    "message_content": "Nachricht",
+                    "optional": "Optional",
+                    "message_hint": "Diese Nachricht wird privat an die App des Schülers gesendet",
+                    "cancel": "Abbrechen",
+                    "send_message": "Nachricht senden",
+                    "type_info": "Information",
+                    "type_reminder": "Erinnerung",
+                    "type_payment": "Zahlung",
+                    "type_announcement": "Ankündigung",
+                    "type_alert": "Warnung"
                 }
             }
         }
@@ -502,6 +519,23 @@
                     "weeks_ago": "weeks ago",
                     "months_ago": "months ago",
                     "years_ago": "years ago"
+                },
+                "students": {
+                    "send_message_title": "Send Private Message",
+                    "send_private_message": "Send Private Message",
+                    "recipient": "Recipient",
+                    "message_type": "Message Type",
+                    "message_title": "Title",
+                    "message_content": "Message",
+                    "optional": "Optional",
+                    "message_hint": "This message will be sent privately to the student's app",
+                    "cancel": "Cancel",
+                    "send_message": "Send Message",
+                    "type_info": "Information",
+                    "type_reminder": "Reminder",
+                    "type_payment": "Payment",
+                    "type_announcement": "Announcement",
+                    "type_alert": "Alert"
                 }
             }
         }
@@ -741,6 +775,23 @@
                     "weeks_ago": "semaines",
                     "months_ago": "mois",
                     "years_ago": "années"
+                },
+                "students": {
+                    "send_message_title": "Envoyer un Message Privé",
+                    "send_private_message": "Envoyer un Message Privé",
+                    "recipient": "Destinataire",
+                    "message_type": "Type de Message",
+                    "message_title": "Titre",
+                    "message_content": "Message",
+                    "optional": "Optionnel",
+                    "message_hint": "Ce message sera envoyé en privé à l'application de l'étudiant",
+                    "cancel": "Annuler",
+                    "send_message": "Envoyer le Message",
+                    "type_info": "Information",
+                    "type_reminder": "Rappel",
+                    "type_payment": "Paiement",
+                    "type_announcement": "Annonce",
+                    "type_alert": "Alerte"
                 }
             }
         }
@@ -980,6 +1031,23 @@
                     "weeks_ago": "أسابيع",
                     "months_ago": "أشهر",
                     "years_ago": "سنوات"
+                },
+                "students": {
+                    "send_message_title": "إرسال رسالة خاصة",
+                    "send_private_message": "إرسال رسالة خاصة",
+                    "recipient": "المستلم",
+                    "message_type": "نوع الرسالة",
+                    "message_title": "العنوان",
+                    "message_content": "الرسالة",
+                    "optional": "اختياري",
+                    "message_hint": "سيتم إرسال هذه الرسالة بشكل خاص إلى تطبيق الطالب",
+                    "cancel": "إلغاء",
+                    "send_message": "إرسال الرسالة",
+                    "type_info": "معلومات",
+                    "type_reminder": "تذكير",
+                    "type_payment": "دفع",
+                    "type_announcement": "إعلان",
+                    "type_alert": "تنبيه"
                 }
             }
         }
