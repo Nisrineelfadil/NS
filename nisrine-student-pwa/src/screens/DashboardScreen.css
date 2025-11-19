@@ -3,6 +3,10 @@
   background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
   padding: 20px;
   padding-bottom: 30px;
+  /* Hardware acceleration for smooth animations */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Dashboard Header with Photo */
@@ -107,16 +111,23 @@
 }
 
 .grid-card {
-  padding: 28px 24px;
+  background: linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%);
   border-radius: 20px;
+  padding: 28px 24px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #FFFFFF;
-  min-height: 160px;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-height: 160px;
+  /* Hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .grid-card-icon {
