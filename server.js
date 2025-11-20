@@ -248,23 +248,6 @@ app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
 app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
 
-// PWA catch-all route - serve index.html for all /pwa/* routes (for client-side routing)
-// This must come AFTER static middleware so static files are served first
-app.get('/pwa/*', (req, res, next) => {
-  // Skip if it's a static file request (has file extension)
-  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|json|map|txt)$/)) {
-    return next(); // Let static middleware handle it
-  }
-  
-  const pwaIndexPath = path.join(process.cwd(), 'pwa', 'index.html');
-  res.sendFile(pwaIndexPath, (err) => {
-    if (err) {
-      console.error('Error serving PWA index.html:', err.message);
-      res.status(500).send('Error loading PWA');
-    }
-  });
-});
-
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Page not found' });
