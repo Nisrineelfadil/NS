@@ -2,10 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "pwa/**",
-      "use": "@vercel/static"
-    },
-    {
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
@@ -15,8 +11,9 @@
           "favicon.ico",
           "css/**",
           "js/**",
-          "Img/**",
+          "Img/**/*.{png,jpg,jpeg,gif,ico}",
           "public/**",
+          "pwa/**",
           "translations/**",
           "react-portals/dist/**",
           "models/**",
@@ -26,15 +23,18 @@
           "config/**",
           "utils/**",
           "server.js"
+        ],
+        "excludeFiles": [
+          "Img/Video/**",
+          "**/*.mp4",
+          "**/*.avi",
+          "**/*.mov",
+          "Documents/**"
         ]
       }
     }
   ],
   "routes": [
-    {
-      "src": "/pwa/(.*)",
-      "dest": "/pwa/$1"
-    },
     {
       "src": "/api/(.*)",
       "dest": "/api/index.js"
