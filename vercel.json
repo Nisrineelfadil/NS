@@ -11,10 +11,10 @@
           "favicon.ico",
           "css/**/*.css",
           "js/**/*.js",
-          "Img/*.{png,jpg,jpeg,ico}",
-          "public/pwa/**",
-          "pwa/*.{html,json,js,png,ico}",
-          "pwa/static/**/*.{js,css,png}",
+          "Img/**/*.{png,jpg,jpeg,ico,gif,webp}",
+          "Img/**/*.{mp4,webm,mov}",
+          "public/**",
+          "pwa/**",
           "react-portals/dist/**",
           "models/**",
           "routes/**",
@@ -22,15 +22,17 @@
           "middleware/**",
           "config/**",
           "utils/**",
+          "scripts/**",
           "server.js"
         ],
         "excludeFiles": [
           "**/*.map",
           "**/*.md",
           "Documents/**",
-          "Img/Video/**",
           "nisrine-student-pwa/**",
-          "*.rar"
+          "node_modules/**",
+          "*.rar",
+          "*.zip"
         ]
       }
     }
