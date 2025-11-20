@@ -13,7 +13,7 @@
           "js/**",
           "Img/**",
           "public/**",
-          "pwa/build/**",
+          "pwa/**",
           "translations/**",
           "react-portals/dist/**",
           "models/**",
