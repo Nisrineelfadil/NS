@@ -5,8 +5,13 @@ try {
   // Set environment variable to indicate serverless environment
   process.env.VERCEL = '1';
   
-  // Load environment variables
-  require('dotenv').config();
+  // Load environment variables (optional - Vercel injects them automatically)
+  try {
+    require('dotenv').config();
+  } catch (e) {
+    // dotenv not available in serverless - that's okay, Vercel injects env vars
+    console.log('ℹ️ dotenv not available (expected in Vercel serverless)');
+  }
   
   // Verify critical environment variables
   const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
