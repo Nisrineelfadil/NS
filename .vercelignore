@@ -104,6 +104,12 @@ public/pwa/static/css/*.map
 # Source maps (not needed in production)
 *.map
 
+# Large video files (too big for Vercel 50MB limit - use external CDN)
+Img/Video/*.mp4
+*.mp4
+*.avi
+*.mov
+
 # Archive files
 *.rar
 *.zip
