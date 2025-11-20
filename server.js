@@ -38,20 +38,32 @@ const pushService = require('./services/pushNotificationService');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize HTTP server and Socket.IO
+// Initialize HTTP server and Socket.IO (only in non-serverless environment)
 const http = require('http');
 const { Server } = require('socket.io');
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  },
-  transports: ['websocket', 'polling']
-});
 
-// Initialize notification service with Socket.IO
-notificationService.initializeSocketIO(io);
+let io;
+if (process.env.VERCEL !== '1') {
+  // Only initialize Socket.IO in local development
+  io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST']
+    },
+    transports: ['websocket', 'polling']
+  });
+  
+  // Initialize notification service with Socket.IO
+  notificationService.initializeSocketIO(io);
+} else {
+  // In Vercel, create a dummy io object
+  io = {
+    on: () => {},
+    emit: () => {},
+    sockets: { emit: () => {} }
+  };
+}
 
 // Initialize push notification service with VAPID keys
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
@@ -65,14 +77,16 @@ if (vapidPublicKey && vapidPrivateKey) {
   console.warn('⚠️  VAPID keys not found. Push notifications will not work. Run: node scripts/generate-vapid-keys.js');
 }
 
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-  console.log('✅ Admin client connected:', socket.id);
-  
-  socket.on('disconnect', () => {
-    console.log('❌ Admin client disconnected:', socket.id);
+// Socket.IO connection handling (only in local development)
+if (process.env.VERCEL !== '1') {
+  io.on('connection', (socket) => {
+    console.log('✅ Admin client connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+      console.log('❌ Admin client disconnected:', socket.id);
+    });
   });
-});
+}
 
 // Middleware
 // Enhanced CORS for Electron desktop app support
