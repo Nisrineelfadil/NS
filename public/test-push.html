@@ -327,20 +327,32 @@
             log('🔄 Subscribing to push notifications...', 'info');
             
             try {
-                // Register service worker if not already registered
-                let registration = await navigator.serviceWorker.getRegistration('/pwa/');
+                // Register service worker for test page (root scope)
+                let registration = await navigator.serviceWorker.getRegistration('/');
                 
                 if (!registration) {
                     log('📝 Registering service worker...', 'info');
                     registration = await navigator.serviceWorker.register('/pwa/service-worker.js', {
-                        scope: '/pwa/'
+                        scope: '/'
                     });
+                    log('⏳ Waiting for service worker to be ready...', 'info');
                     await navigator.serviceWorker.ready;
-                    log('✅ Service worker registered', 'success');
+                    log('✅ Service worker registered and ready', 'success');
+                }
+                
+                log('📋 Checking existing subscription...', 'info');
+                
+                // Check if already subscribed
+                let subscription = await registration.pushManager.getSubscription();
+                
+                if (subscription) {
+                    log('ℹ️  Already subscribed, unsubscribing first...', 'info');
+                    await subscription.unsubscribe();
                 }
                 
                 // Subscribe to push
-                const subscription = await registration.pushManager.subscribe({
+                log('📝 Creating new push subscription...', 'info');
+                subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
                 });
