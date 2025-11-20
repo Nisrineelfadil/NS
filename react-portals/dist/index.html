@@ -9,6 +9,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Nisrine School - Portals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Polyfill for CommonJS require in browser -->
+    <script>
+      window.require = function(module) {
+        console.warn('require() called for:', module);
+        return {};
+      };
+      window.module = { exports: {} };
+      window.exports = {};
+    </script>
     <script type="module" crossorigin src="/assets/index-CS2zFgoY.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/react-vendor-CQ_w_L_q.js">
     <link rel="stylesheet" crossorigin href="/assets/index-Bbo31iyJ.css">
