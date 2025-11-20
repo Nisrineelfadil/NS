@@ -118,8 +118,8 @@ const staticOptions = {
   lastModified: true
 };
 
-// Use process.cwd() for Vercel serverless compatibility
-const rootPath = process.cwd();
+// Use __dirname for Vercel serverless compatibility (files are bundled with the function)
+const rootPath = __dirname;
 app.use(express.static(path.join(rootPath, 'public'), staticOptions));
 app.use('/uploads', express.static(path.join(rootPath, 'uploads'), staticOptions));
 app.use('/css', express.static(path.join(rootPath, 'css'), staticOptions));
@@ -251,6 +251,22 @@ app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
 app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
 app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
+
+// PWA catch-all route - serve index.html for all /pwa/* routes (for client-side routing)
+app.get('/pwa/*', (req, res, next) => {
+  // Skip if it's a static file request (has file extension)
+  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|json|map|txt)$/)) {
+    return next(); // Let static middleware handle it
+  }
+  
+  const pwaIndexPath = path.join(__dirname, 'pwa', 'index.html');
+  res.sendFile(pwaIndexPath, (err) => {
+    if (err) {
+      console.error('Error serving PWA index.html:', err.message);
+      res.status(500).send('Error loading PWA');
+    }
+  });
+});
 
 // 404 handler
 app.use((req, res) => {
