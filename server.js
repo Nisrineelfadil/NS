@@ -252,27 +252,6 @@ app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
 app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
 
-// PWA specific routes (explicit routes for PWA pages)
-const servePWA = (req, res) => {
-  const pwaIndexPath = path.join(__dirname, 'pwa', 'index.html');
-  res.sendFile(pwaIndexPath, (err) => {
-    if (err) {
-      console.error('Error serving PWA index.html:', err.message);
-      res.status(404).send('PWA not found');
-    }
-  });
-};
-
-app.get('/pwa', servePWA);
-app.get('/pwa/', servePWA);
-app.get('/pwa/login', servePWA);
-app.get('/pwa/dashboard', servePWA);
-app.get('/pwa/grades', servePWA);
-app.get('/pwa/attendance', servePWA);
-app.get('/pwa/payments', servePWA);
-app.get('/pwa/messages', servePWA);
-app.get('/pwa/settings', servePWA);
-
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Page not found' });

@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "pwa/**",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
@@ -13,8 +17,6 @@
           "js/**",
           "Img/**",
           "public/**",
-          "pwa/**/*",
-          "pwa/**/**/*",
           "translations/**",
           "react-portals/dist/**",
           "models/**",
@@ -29,6 +31,10 @@
     }
   ],
   "routes": [
+    {
+      "src": "/pwa/(.*)",
+      "dest": "/pwa/$1"
+    },
     {
       "src": "/api/(.*)",
       "dest": "/api/index.js"
