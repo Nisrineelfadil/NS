@@ -132,10 +132,14 @@ app.use('/pwa', express.static(path.join(rootPath, 'pwa'), staticOptions));
 
 // Helper function to serve HTML files (Vercel-compatible)
 const serveHTML = (filename) => (req, res) => {
-  const filePath = path.join(process.cwd(), filename);
+  // In Vercel serverless, use __dirname to get the correct path
+  const filePath = path.join(__dirname, filename);
   res.sendFile(filePath, (err) => {
     if (err) {
       console.error(`Error serving ${filename}:`, err.message);
+      console.error(`Attempted path: ${filePath}`);
+      console.error(`__dirname: ${__dirname}`);
+      console.error(`process.cwd(): ${process.cwd()}`);
       res.status(err.status || 500).send(`Error loading page: ${filename}`);
     }
   });
