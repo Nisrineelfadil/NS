@@ -118,8 +118,8 @@ public/pwa/static/css/*.map
 # Documentation folder
 Documents
 
-# Old build artifacts
-pwa/static/js/main.40896f1e.*
-pwa/static/js/main.5*.js
-pwa/static/css/main.5*.css
-public/pwa/static/js/main.40896f1e.*
+# Old build artifacts (DISABLED - these are current builds)
+# pwa/static/js/main.40896f1e.*
+# pwa/static/js/main.5*.js
+# pwa/static/css/main.5*.css
+# public/pwa/static/js/main.40896f1e.*
