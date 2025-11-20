@@ -1,5 +1,5 @@
 const Notification = require('../models/Notification');
-const pushService = require('./pushNotificationService');
+// const pushService = require('./pushNotificationService'); // DISABLED - Push notifications temporarily disabled
 
 // Store Socket.IO instance
 let io = null;
@@ -155,8 +155,8 @@ async function notifyGradeUploaded(studentId, gradeData) {
             }
         };
 
-        await pushService.sendToStudent(studentId, payload);
-        console.log(`📤 Grade notification sent to student ${studentId}`);
+        // await pushService.sendToStudent(studentId, payload); // DISABLED
+        console.log(`📤 Grade notification sent to student ${studentId} (push disabled)`);
     } catch (error) {
         console.error('Error sending grade push notification:', error);
     }
@@ -182,8 +182,8 @@ async function notifyAttendanceCodeGenerated(studentIds, sessionData) {
             vibrate: [200, 100, 200, 100, 200]
         };
 
-        await pushService.sendToMultipleStudents(studentIds, payload);
-        console.log(`📤 Attendance notification sent to ${studentIds.length} students`);
+        // await pushService.sendToMultipleStudents(studentIds, payload); // DISABLED
+        console.log(`📤 Attendance notification sent to ${studentIds.length} students (push disabled)`);
     } catch (error) {
         console.error('Error sending attendance push notification:', error);
     }
@@ -205,8 +205,8 @@ async function notifyAdminMessage(studentId, messageData) {
             }
         };
 
-        await pushService.sendToStudent(studentId, payload);
-        console.log(`📤 Admin message notification sent to student ${studentId}`);
+        // await pushService.sendToStudent(studentId, payload); // DISABLED
+        console.log(`📤 Admin message notification sent to student ${studentId} (push disabled)`);
     } catch (error) {
         console.error('Error sending admin message push notification:', error);
     }
@@ -242,8 +242,8 @@ async function notifyPaymentDue(studentId, paymentData) {
             requireInteraction: paymentData.paymentStatus === 'overdue'
         };
 
-        await pushService.sendToStudent(studentId, payload);
-        console.log(`📤 Payment notification sent to student ${studentId}`);
+        // await pushService.sendToStudent(studentId, payload); // DISABLED
+        console.log(`📤 Payment notification sent to student ${studentId} (push disabled)`);
     } catch (error) {
         console.error('Error sending payment push notification:', error);
     }

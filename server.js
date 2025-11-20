@@ -26,13 +26,13 @@ const cashRegisterRoutes = require('./routes/cashRegister');
 const appointmentsRoutes = require('./routes/appointments');
 const ratingsRoutes = require('./routes/ratings');
 const notificationsRoutes = require('./routes/notifications');
-const pushNotificationsRoutes = require('./routes/pushNotifications');
+// const pushNotificationsRoutes = require('./routes/pushNotifications'); // DISABLED - Push notifications temporarily disabled
 
 // Import services
 const paymentReminderService = require('./services/paymentReminderService');
 const attendanceService = require('./services/attendanceService');
 const notificationService = require('./services/notificationService');
-const pushService = require('./services/pushNotificationService');
+// const pushService = require('./services/pushNotificationService'); // DISABLED - Push notifications temporarily disabled
 
 // Initialize Express app
 const app = express();
@@ -66,21 +66,22 @@ if (!isServerless) {
   };
 }
 
-// Initialize push notification service with VAPID keys
-const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-const vapidContactEmail = process.env.VAPID_CONTACT_EMAIL || 'admin@nisrineschool.com';
-
-if (vapidPublicKey && vapidPrivateKey) {
-  try {
-    pushService.initialize(vapidPublicKey, vapidPrivateKey, vapidContactEmail);
-    console.log('✅ Push notification service initialized');
-  } catch (error) {
-    console.warn('⚠️  Push notification service initialization failed:', error.message);
-  }
-} else if (!isServerless) {
-  console.warn('⚠️  VAPID keys not found. Push notifications will not work. Run: node scripts/generate-vapid-keys.js');
-}
+// DISABLED - Push notification service
+// const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+// const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+// const vapidContactEmail = process.env.VAPID_CONTACT_EMAIL || 'admin@nisrineschool.com';
+// 
+// if (vapidPublicKey && vapidPrivateKey) {
+//   try {
+//     pushService.initialize(vapidPublicKey, vapidPrivateKey, vapidContactEmail);
+//     console.log('✅ Push notification service initialized');
+//   } catch (error) {
+//     console.warn('⚠️  Push notification service initialization failed:', error.message);
+//   }
+// } else if (!isServerless) {
+//   console.warn('⚠️  VAPID keys not found. Push notifications will not work. Run: node scripts/generate-vapid-keys.js');
+// }
+console.log('⚠️  Push notifications are disabled');
 
 // Socket.IO connection handling (only in local development)
 if (!isServerless && io.on) {
@@ -281,7 +282,7 @@ app.use('/api/cash-register', dbMiddleware, cashRegisterRoutes);
 app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
 app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
-app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
+// app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes); // DISABLED
 
 // 404 handler
 app.use((req, res) => {
