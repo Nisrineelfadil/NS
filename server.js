@@ -178,18 +178,24 @@ app.get('/cash-register', serveHTML('cash-register.html'));
 // Serve React portals (student and teacher)
 app.get('/student-portal', (req, res) => {
   const filePath = path.join(process.cwd(), 'react-portals', 'dist', 'index.html');
+  console.log('Student portal requested. File path:', filePath);
+  console.log('File exists:', fs.existsSync(filePath));
   res.sendFile(filePath, (err) => {
     if (err) {
-      res.status(404).send('React app not built. Run: cd react-portals && npm run build');
+      console.error('Error serving student portal:', err.message);
+      res.status(404).send(`React app not found at: ${filePath}`);
     }
   });
 });
 
 app.get('/teacher-portal', (req, res) => {
   const filePath = path.join(process.cwd(), 'react-portals', 'dist', 'index.html');
+  console.log('Teacher portal requested. File path:', filePath);
+  console.log('File exists:', fs.existsSync(filePath));
   res.sendFile(filePath, (err) => {
     if (err) {
-      res.status(404).send('React app not built. Run: cd react-portals && npm run build');
+      console.error('Error serving teacher portal:', err.message);
+      res.status(404).send(`React app not found at: ${filePath}`);
     }
   });
 });
