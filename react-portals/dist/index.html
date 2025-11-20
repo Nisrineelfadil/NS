@@ -9,18 +9,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Nisrine School - Portals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Polyfill for CommonJS require in browser -->
-    <script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Bbo31iyJ.css">
+    <!-- Load React vendor first as a module -->
+    <script type="module">
+      import * as ReactVendor from '/assets/react-vendor-CQ_w_L_q.js';
+      window.__REACT_VENDOR__ = ReactVendor;
+      
+      // Polyfill for CommonJS require
       window.require = function(module) {
-        console.warn('require() called for:', module);
+        if (module === './react-vendor-CQ_w_L_q.js' || module.includes('react-vendor')) {
+          return window.__REACT_VENDOR__;
+        }
+        console.warn('require() called for unknown module:', module);
         return {};
       };
       window.module = { exports: {} };
       window.exports = {};
     </script>
     <script type="module" crossorigin src="/assets/index-CS2zFgoY.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/react-vendor-CQ_w_L_q.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-Bbo31iyJ.css">
   </head>
   <body>
     <div id="root"></div>
