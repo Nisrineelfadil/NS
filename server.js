@@ -180,37 +180,25 @@ app.get('/cash-register', serveHTML('cash-register.html'));
 app.get('/student-portal', (req, res) => {
   const filePath = path.join(process.cwd(), 'react-portals', 'dist', 'index.html');
   console.log('Student portal requested. File path:', filePath);
-  
-  if (!fs.existsSync(filePath)) {
-    console.error('Student portal file not found');
-    return res.status(404).send(`React app not found at: ${filePath}`);
-  }
-  
-  // Read HTML and replace relative paths with absolute paths
-  let html = fs.readFileSync(filePath, 'utf8');
-  html = html.replace(/src="\.\/assets\//g, 'src="/assets/');
-  html = html.replace(/href="\.\/assets\//g, 'href="/assets/');
-  
-  res.setHeader('Content-Type', 'text/html');
-  res.send(html);
+  console.log('File exists:', fs.existsSync(filePath));
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving student portal:', err.message);
+      res.status(404).send(`React app not found at: ${filePath}`);
+    }
+  });
 });
 
 app.get('/teacher-portal', (req, res) => {
   const filePath = path.join(process.cwd(), 'react-portals', 'dist', 'index.html');
   console.log('Teacher portal requested. File path:', filePath);
-  
-  if (!fs.existsSync(filePath)) {
-    console.error('Teacher portal file not found');
-    return res.status(404).send(`React app not found at: ${filePath}`);
-  }
-  
-  // Read HTML and replace relative paths with absolute paths
-  let html = fs.readFileSync(filePath, 'utf8');
-  html = html.replace(/src="\.\/assets\//g, 'src="/assets/');
-  html = html.replace(/href="\.\/assets\//g, 'href="/assets/');
-  
-  res.setHeader('Content-Type', 'text/html');
-  res.send(html);
+  console.log('File exists:', fs.existsSync(filePath));
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving teacher portal:', err.message);
+      res.status(404).send(`React app not found at: ${filePath}`);
+    }
+  });
 });
 
 // Serve PWA root
