@@ -38,6 +38,30 @@
   ],
   "routes": [
     {
+      "src": "/pwa/static/(.*)",
+      "dest": "/pwa/static/$1"
+    },
+    {
+      "src": "/pwa/manifest.json",
+      "dest": "/pwa/manifest.json"
+    },
+    {
+      "src": "/pwa/service-worker.js",
+      "dest": "/pwa/service-worker.js"
+    },
+    {
+      "src": "/pwa/icon-(.*)",
+      "dest": "/pwa/icon-$1"
+    },
+    {
+      "src": "/pwa/favicon.ico",
+      "dest": "/pwa/favicon.ico"
+    },
+    {
+      "src": "/pwa/(.*)",
+      "dest": "/pwa/index.html"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/index.js"
     },
