@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const bcrypt = require('bcryptjs');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
+const { notifyAdminMessage } = require('../services/notificationService');
 
 // Multer configuration for student photos
 // Use memory storage for Vercel compatibility (serverless doesn't support disk storage)
@@ -307,22 +308,31 @@ router.get('/students', authenticateAdmin, async (req, res) => {
         const filter = {};
         
         // Filter by season (default to active season if not specified)
+        let seasonGroupIds = [];
         if (season) {
             // Get groups from specified season
             const seasonGroups = await Group.find({ season: season }).select('_id');
-            filter.group = { $in: seasonGroups.map(g => g._id) };
+            seasonGroupIds = seasonGroups.map(g => g._id);
         } else {
             // Default: filter by active season
             const Season = require('../models/Season');
             const activeSeason = await Season.findOne({ status: 'active' });
             if (activeSeason) {
                 const activeSeasonGroups = await Group.find({ season: activeSeason._id }).select('_id');
-                filter.group = { $in: activeSeasonGroups.map(g => g._id) };
+                seasonGroupIds = activeSeasonGroups.map(g => g._id);
             }
         }
         
-        // Apply other filters (these will be combined with season filter)
-        if (group) filter.group = group;  // Override if specific group requested
+        // Apply group filter
+        if (group) {
+            // Specific group requested - use it directly
+            filter.group = group;
+        } else if (seasonGroupIds.length > 0) {
+            // No specific group - filter by season groups
+            filter.group = { $in: seasonGroupIds };
+        }
+        
+        // Apply other filters (these will be combined with group/season filter)
         if (formation) filter.formation = { $in: [formation] };
         if (filiere) filter.filiere = { $in: [filiere] };
         if (status) filter.status = status;
@@ -345,13 +355,29 @@ router.get('/students', authenticateAdmin, async (req, res) => {
             .populate('addedBy', 'username')
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(parseInt(limit));
+            .limit(parseInt(limit))
+            .lean(); // Convert to plain objects for faster processing
+        
+        // PERFORMANCE OPTIMIZATION: Create thumbnails for list view
+        // Compress photos to 50x50 thumbnails for fast loading
+        const optimizedStudents = students.map(student => {
+            const optimized = { ...student };
+            
+            // If student has a base64 photo, create a thumbnail
+            if (optimized.photoPath && optimized.photoPath.startsWith('data:')) {
+                optimized.hasPhoto = true;
+                // Keep the photo for now - we'll optimize on frontend
+                // In future: generate thumbnails server-side
+            }
+            
+            return optimized;
+        });
         
         const total = await ManagedStudent.countDocuments(filter);
         
         res.json({ 
             success: true, 
-            students,
+            students: optimizedStudents,
             pagination: {
                 total,
                 page: parseInt(page),
@@ -362,6 +388,27 @@ router.get('/students', authenticateAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error fetching students:', error);
         res.status(500).json({ error: 'Failed to fetch students' });
+    }
+});
+
+// Get student photo only (lightweight endpoint for lazy loading)
+router.get('/students/:id/photo', authenticateAdmin, async (req, res) => {
+    try {
+        const student = await ManagedStudent.findById(req.params.id)
+            .select('photoPath')
+            .lean();
+        
+        if (!student) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            photoPath: student.photoPath || null 
+        });
+    } catch (error) {
+        console.error('Error fetching student photo:', error);
+        res.status(500).json({ error: 'Failed to fetch photo' });
     }
 });
 
@@ -1361,6 +1408,11 @@ router.post('/students/:id/send-message', authenticateAdmin, async (req, res) =>
         });
         
         await newMessage.save();
+        
+        // Send push notification to student
+        notifyAdminMessage(req.params.id, newMessage).catch(err => 
+            console.error('Failed to send admin message notification:', err)
+        );
         
         res.json({ 
             success: true, 

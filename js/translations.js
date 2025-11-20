@@ -156,6 +156,7 @@ const translations = {
         editSeason: "Saison bearbeiten",
         activate: "Aktivieren",
         archive: "Archivieren",
+        archiveToCloud: "In Cloud archivieren",
         deleteSeason: "Löschen",
         seasonsManagement: "Saisons-Verwaltung",
         branchGroupsManagement: "Zweiggruppen-Verwaltung",
@@ -472,7 +473,27 @@ const translations = {
         approved: "Approved",
         pending: "Pending",
         rejected: "Rejected",
-        exportPDF: "Export PDF"
+        exportPDF: "Export PDF",
+        
+        // Academic Seasons
+        academicSeasons: "Academic Seasons",
+        manageAcademicYears: "Manage academic years and their associated groups",
+        quickCreateGroup: "Quick Create Group",
+        createSeason: "Create Season",
+        start: "Start",
+        end: "End",
+        groups: "Groups",
+        manageGroups: "Manage Groups",
+        editSeason: "Edit Season",
+        activate: "Activate",
+        archive: "Archive",
+        archiveToCloud: "Archive To Cloud",
+        deleteSeason: "Delete",
+        seasonsManagement: "Seasons Management",
+        branchGroupsManagement: "Branch Groups Management",
+        seasonsAndGroups: "Seasons & Groups",
+        upcoming: "Upcoming",
+        archived: "Archived"
     },
     
     fr: {
@@ -617,7 +638,27 @@ const translations = {
         approved: "Approuvé",
         pending: "En attente",
         rejected: "Rejeté",
-        exportPDF: "Exporter PDF"
+        exportPDF: "Exporter PDF",
+        
+        // Saisons académiques
+        academicSeasons: "Saisons académiques",
+        manageAcademicYears: "Gérer les années académiques et leurs groupes associés",
+        quickCreateGroup: "Création rapide de groupe",
+        createSeason: "Créer une saison",
+        start: "Début",
+        end: "Fin",
+        groups: "Groupes",
+        manageGroups: "Gérer les groupes",
+        editSeason: "Modifier la saison",
+        activate: "Activer",
+        archive: "Archiver",
+        archiveToCloud: "Archiver dans le cloud",
+        deleteSeason: "Supprimer",
+        seasonsManagement: "Gestion des saisons",
+        branchGroupsManagement: "Gestion des groupes de branches",
+        seasonsAndGroups: "Saisons et groupes",
+        upcoming: "À venir",
+        archived: "Archivé"
     },
     
     ar: {
@@ -762,7 +803,27 @@ const translations = {
         approved: "موافق عليه",
         pending: "قيد الانتظار",
         rejected: "مرفوض",
-        exportPDF: "تصدير PDF"
+        exportPDF: "تصدير PDF",
+        
+        // المواسم الأكاديمية
+        academicSeasons: "المواسم الأكاديمية",
+        manageAcademicYears: "إدارة السنوات الأكاديمية ومجموعاتها المرتبطة",
+        quickCreateGroup: "إنشاء مجموعة سريع",
+        createSeason: "إنشاء موسم",
+        start: "البداية",
+        end: "النهاية",
+        groups: "المجموعات",
+        manageGroups: "إدارة المجموعات",
+        editSeason: "تعديل الموسم",
+        activate: "تفعيل",
+        archive: "أرشفة",
+        archiveToCloud: "أرشفة في السحابة",
+        deleteSeason: "حذف",
+        seasonsManagement: "إدارة المواسم",
+        branchGroupsManagement: "إدارة مجموعات الفروع",
+        seasonsAndGroups: "المواسم والمجموعات",
+        upcoming: "قادم",
+        archived: "مؤرشف"
     }
 };
 

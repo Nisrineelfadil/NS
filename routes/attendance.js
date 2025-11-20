@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
+const { notifyAttendanceCodeGenerated } = require('../services/notificationService');
 
 // Import models
 const AttendanceSession = require('../models/AttendanceSession');
@@ -147,6 +148,16 @@ router.post('/generate', verifyToken, verifyTeacher, async (req, res) => {
 
         await session.save();
         await AttendanceRecord.insertMany(attendanceRecords);
+
+        // Send push notifications to all students in the session
+        const studentIds = students.map(s => s._id);
+        notifyAttendanceCodeGenerated(studentIds, {
+            sessionId,
+            formation,
+            groupName: group.name,
+            qrValidityMinutes,
+            qrExpiresAt
+        }).catch(err => console.error('Failed to send attendance notifications:', err));
 
         // Generate QR code data
         const qrData = {

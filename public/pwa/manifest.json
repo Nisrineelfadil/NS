@@ -1,0 +1,27 @@
+{
+  "short_name": "Nisrine School",
+  "name": "Nisrine School App",
+  "description": "Nisrine School Student Portal - View grades, attendance, payments and more",
+  "icons": [
+    {
+      "src": "/pwa/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/pwa/login",
+  "scope": "/pwa/",
+  "display": "standalone",
+  "theme_color": "#FFCC00",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "categories": ["education"],
+  "prefer_related_applications": false
+}

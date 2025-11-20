@@ -12,7 +12,7 @@
 // This file is here to ensure the service worker is registered correctly.
 
 // Cache version updated automatically during build
-const CACHE_NAME = 'nisrine-school-v2-no-api-cache';
+const CACHE_NAME = 'nisrine-school-v4-gradient-design-nov2025';
 const urlsToCache = [
   '/pwa/',
   '/pwa/index.html',

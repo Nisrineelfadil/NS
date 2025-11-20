@@ -1,20 +1,20 @@
 {
   "version": 2,
+  "installCommand": "npm install",
   "builds": [
     {
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 30,
+        "maxDuration": 60,
         "includeFiles": [
           "*.html",
           "favicon.ico",
-          "css/**",
-          "js/**",
-          "Img/**",
+          "css/**/*.css",
+          "js/**/*.js",
+          "Img/**/*.{png,jpg,jpeg,ico,gif,webp}",
           "public/**",
-          "pwa/build/**",
-          "translations/**",
+          "pwa/**",
           "react-portals/dist/**",
           "models/**",
           "routes/**",
@@ -22,7 +22,18 @@
           "middleware/**",
           "config/**",
           "utils/**",
+          "scripts/**",
           "server.js"
+        ],
+        "excludeFiles": [
+          "**/*.map",
+          "**/*.md",
+          "Documents/**",
+          "nisrine-student-pwa/**",
+          "*.rar",
+          "*.zip",
+          "*.bat",
+          "*.ps1"
         ]
       }
     }
@@ -38,6 +49,7 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL": "1"
   }
 }

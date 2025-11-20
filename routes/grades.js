@@ -7,6 +7,7 @@ const ManagedStudent = require('../models/ManagedStudent');
 const Grade = require('../models/Grade');
 const Group = require('../models/Group');
 const StudentMessage = require('../models/StudentMessage');
+const { notifyGradeUploaded } = require('../services/notificationService');
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -448,6 +449,11 @@ router.post('/teacher/grades', verifyTeacherToken, async (req, res) => {
         const grade = new Grade(gradeData);
         await grade.save();
         console.log('✅ Grade created successfully:', grade._id);
+        
+        // Send push notification to student
+        notifyGradeUploaded(actualStudentId, grade).catch(err => 
+            console.error('Failed to send grade notification:', err)
+        );
         
         res.status(201).json({ message: 'Grade uploaded successfully', grade });
     } catch (error) {

@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+const pushService = require('./pushNotificationService');
 
 // Store Socket.IO instance
 let io = null;
@@ -135,6 +136,137 @@ async function notifyNewMessage(message) {
     }
 }
 
+// ==================== NEW: STUDENT PUSH NOTIFICATIONS ====================
+
+// Send push notification for new grade upload
+async function notifyGradeUploaded(studentId, gradeData) {
+    try {
+        const payload = {
+            title: '📊 New Grade Available',
+            body: `Your ${gradeData.formation} grade has been uploaded: ${gradeData.score}/${gradeData.maxScore}`,
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            data: {
+                type: 'grade',
+                gradeId: gradeData._id,
+                formation: gradeData.formation,
+                score: gradeData.score,
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        await pushService.sendToStudent(studentId, payload);
+        console.log(`📤 Grade notification sent to student ${studentId}`);
+    } catch (error) {
+        console.error('Error sending grade push notification:', error);
+    }
+}
+
+// Send push notification for attendance code generation
+async function notifyAttendanceCodeGenerated(studentIds, sessionData) {
+    try {
+        const payload = {
+            title: '✅ Attendance Code Available',
+            body: `Mark your attendance for ${sessionData.formation} class. Code expires in ${sessionData.qrValidityMinutes} minutes!`,
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            data: {
+                type: 'attendance',
+                sessionId: sessionData.sessionId,
+                formation: sessionData.formation,
+                groupName: sessionData.groupName,
+                expiresAt: sessionData.qrExpiresAt,
+                timestamp: new Date().toISOString()
+            },
+            requireInteraction: true,
+            vibrate: [200, 100, 200, 100, 200]
+        };
+
+        await pushService.sendToMultipleStudents(studentIds, payload);
+        console.log(`📤 Attendance notification sent to ${studentIds.length} students`);
+    } catch (error) {
+        console.error('Error sending attendance push notification:', error);
+    }
+}
+
+// Send push notification for admin message
+async function notifyAdminMessage(studentId, messageData) {
+    try {
+        const payload = {
+            title: '💬 New Message from Admin',
+            body: messageData.message.substring(0, 100) + (messageData.message.length > 100 ? '...' : ''),
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            data: {
+                type: 'admin_message',
+                messageId: messageData._id,
+                messageType: messageData.type,
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        await pushService.sendToStudent(studentId, payload);
+        console.log(`📤 Admin message notification sent to student ${studentId}`);
+    } catch (error) {
+        console.error('Error sending admin message push notification:', error);
+    }
+}
+
+// Send push notification for payment due
+async function notifyPaymentDue(studentId, paymentData) {
+    try {
+        const daysOverdue = Math.floor((new Date() - new Date(paymentData.paymentDate)) / (1000 * 60 * 60 * 24));
+        
+        let title, body;
+        if (paymentData.paymentStatus === 'overdue') {
+            title = '⚠️ Payment Overdue';
+            body = `Your payment of ${paymentData.paymentAmount} MAD is ${daysOverdue} day(s) overdue. Please pay as soon as possible.`;
+        } else {
+            title = '💰 Payment Reminder';
+            body = `Your payment of ${paymentData.paymentAmount} MAD is due soon. Due date: ${new Date(paymentData.paymentDate).toLocaleDateString()}`;
+        }
+
+        const payload = {
+            title,
+            body,
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            data: {
+                type: 'payment',
+                paymentAmount: paymentData.paymentAmount,
+                paymentDate: paymentData.paymentDate,
+                paymentStatus: paymentData.paymentStatus,
+                daysOverdue: daysOverdue,
+                timestamp: new Date().toISOString()
+            },
+            requireInteraction: paymentData.paymentStatus === 'overdue'
+        };
+
+        await pushService.sendToStudent(studentId, payload);
+        console.log(`📤 Payment notification sent to student ${studentId}`);
+    } catch (error) {
+        console.error('Error sending payment push notification:', error);
+    }
+}
+
+// Send bulk payment reminders (for daily cron job)
+async function notifyBulkPaymentReminders(studentsData) {
+    try {
+        const promises = studentsData.map(student => 
+            notifyPaymentDue(student._id, {
+                paymentAmount: student.paymentAmount,
+                paymentDate: student.paymentDate,
+                paymentStatus: student.paymentStatus
+            })
+        );
+
+        await Promise.allSettled(promises);
+        console.log(`📤 Bulk payment reminders sent to ${studentsData.length} students`);
+    } catch (error) {
+        console.error('Error sending bulk payment reminders:', error);
+    }
+}
+
 module.exports = {
     initializeSocketIO,
     emitNotification,
@@ -142,5 +274,11 @@ module.exports = {
     notifyNewServiceRequest,
     notifyNewRating,
     notifyNewAppointment,
-    notifyNewMessage
+    notifyNewMessage,
+    // NEW: Student push notifications
+    notifyGradeUploaded,
+    notifyAttendanceCodeGenerated,
+    notifyAdminMessage,
+    notifyPaymentDue,
+    notifyBulkPaymentReminders
 };
