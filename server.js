@@ -144,8 +144,9 @@ app.use('/uploads', express.static(path.join(rootPath, 'uploads'), staticOptions
 app.use('/css', express.static(path.join(rootPath, 'css'), staticOptions));
 app.use('/js', express.static(path.join(rootPath, 'js'), staticOptions));
 app.use('/Img', express.static(path.join(rootPath, 'Img'), staticOptions));
-// Serve React app assets
+// Serve React app assets (both paths for compatibility)
 app.use('/assets', express.static(path.join(rootPath, 'react-portals', 'dist', 'assets'), staticOptions));
+app.use('/react-portals/dist', express.static(path.join(rootPath, 'react-portals', 'dist'), staticOptions));
 // Serve PWA
 app.use('/pwa', express.static(path.join(rootPath, 'pwa'), staticOptions));
 
