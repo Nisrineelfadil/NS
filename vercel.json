@@ -1,7 +1,12 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
+  "outputDirectory": ".",
   "builds": [
+    {
+      "src": "pwa/**",
+      "use": "@vercel/static"
+    },
     {
       "src": "api/index.js",
       "use": "@vercel/node",
@@ -14,8 +19,6 @@
           "js/**/*.js",
           "Img/*.{png,jpg,jpeg,ico}",
           "public/pwa/**",
-          "pwa/*.{html,json,js,png,ico}",
-          "pwa/static/**/*.{js,css,png}",
           "react-portals/dist/**",
           "models/**",
           "routes/**",
