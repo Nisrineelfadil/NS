@@ -9,28 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Nisrine School - Portals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" crossorigin src="/assets/index-BFIQX-5K.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-Bbo31iyJ.css">
-    <!-- CommonJS polyfill - MUST be defined before any module loads -->
-    <script>
-      // Define CommonJS globals before any module loads
-      window.module = { exports: {} };
-      window.exports = window.module.exports;
-      window.require = function(module) {
-        console.warn('require() called for:', module);
-        // Return empty object for now, will be enhanced after React loads
-        return window.__MODULES__ && window.__MODULES__[module] || {};
-      };
-      window.__MODULES__ = {};
-    </script>
-    <!-- Load React vendor and make it available -->
-    <script type="module">
-      import * as ReactVendor from '/assets/react-vendor-CQ_w_L_q.js';
-      // Store React vendor for require() calls
-      window.__MODULES__['./react-vendor-CQ_w_L_q.js'] = ReactVendor;
-      window.__MODULES__['react-vendor-CQ_w_L_q.js'] = ReactVendor;
-      console.log('React vendor loaded and registered');
-    </script>
-    <script type="module" crossorigin src="/assets/index-CS2zFgoY.js"></script>
   </head>
   <body>
     <div id="root"></div>

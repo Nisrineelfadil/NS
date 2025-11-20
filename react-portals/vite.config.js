@@ -25,13 +25,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         format: 'es',
-        inlineDynamicImports: false,
+        inlineDynamicImports: true,
         entryFileNames: `[name]-[hash].js`,
         chunkFileNames: `[name]-[hash].js`,
-        assetFileNames: `[name]-[hash].[ext]`,
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-        }
+        assetFileNames: `[name]-[hash].[ext]`
       }
     }
   }
