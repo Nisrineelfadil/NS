@@ -118,8 +118,8 @@ const staticOptions = {
   lastModified: true
 };
 
-// Use __dirname for Vercel serverless compatibility (files are bundled with the function)
-const rootPath = __dirname;
+// Use process.cwd() for Vercel serverless compatibility
+const rootPath = process.cwd();
 app.use(express.static(path.join(rootPath, 'public'), staticOptions));
 app.use('/uploads', express.static(path.join(rootPath, 'uploads'), staticOptions));
 app.use('/css', express.static(path.join(rootPath, 'css'), staticOptions));
@@ -132,14 +132,10 @@ app.use('/pwa', express.static(path.join(rootPath, 'pwa'), staticOptions));
 
 // Helper function to serve HTML files (Vercel-compatible)
 const serveHTML = (filename) => (req, res) => {
-  // In Vercel serverless, use __dirname to get the correct path
-  const filePath = path.join(__dirname, filename);
+  const filePath = path.join(process.cwd(), filename);
   res.sendFile(filePath, (err) => {
     if (err) {
       console.error(`Error serving ${filename}:`, err.message);
-      console.error(`Attempted path: ${filePath}`);
-      console.error(`__dirname: ${__dirname}`);
-      console.error(`process.cwd(): ${process.cwd()}`);
       res.status(err.status || 500).send(`Error loading page: ${filename}`);
     }
   });
@@ -251,27 +247,6 @@ app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
 app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
 app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
-
-// PWA specific routes (explicit routes for PWA pages)
-const servePWA = (req, res) => {
-  const pwaIndexPath = path.join(__dirname, 'pwa', 'index.html');
-  res.sendFile(pwaIndexPath, (err) => {
-    if (err) {
-      console.error('Error serving PWA index.html:', err.message);
-      res.status(404).send('PWA not found');
-    }
-  });
-};
-
-app.get('/pwa', servePWA);
-app.get('/pwa/', servePWA);
-app.get('/pwa/login', servePWA);
-app.get('/pwa/dashboard', servePWA);
-app.get('/pwa/grades', servePWA);
-app.get('/pwa/attendance', servePWA);
-app.get('/pwa/payments', servePWA);
-app.get('/pwa/messages', servePWA);
-app.get('/pwa/settings', servePWA);
 
 // 404 handler
 app.use((req, res) => {

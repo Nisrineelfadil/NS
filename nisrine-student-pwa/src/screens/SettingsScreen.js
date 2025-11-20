@@ -75,56 +75,30 @@ const SettingsScreen = () => {
     try {
       setNotificationStatus('requesting');
       
-      // Step 1: Request permission
-      console.log('Step 1: Requesting permission...');
       const permission = await Notification.requestPermission();
-      console.log('Permission result:', permission);
-      
       if (permission !== 'granted') {
         alert('Please allow notifications to receive updates!');
         setNotificationStatus('denied');
         return;
       }
 
-      // Step 2: Get VAPID key
-      console.log('Step 2: Fetching VAPID key...');
       const response = await fetch('/api/push-notifications/vapid-public-key');
       const { publicKey } = await response.json();
-      console.log('VAPID key loaded');
 
-      // Step 3: Get service worker
-      console.log('Step 3: Getting service worker...');
       const registration = await navigator.serviceWorker.ready;
-      console.log('Service worker ready');
-      
-      // Step 4: Check for existing subscription
-      console.log('Step 4: Checking existing subscription...');
       let subscription = await registration.pushManager.getSubscription();
       
       if (subscription) {
-        console.log('Unsubscribing old subscription...');
         await subscription.unsubscribe();
-        console.log('Old subscription removed');
       }
 
-      // Step 5: Subscribe (this is where it might fail on iOS/localhost)
-      console.log('Step 5: Creating new subscription...');
-      
-      // Add timeout for subscription
-      const subscribePromise = registration.pushManager.subscribe({
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Subscription timeout - this may not work on HTTP. Try on HTTPS (production).')), 10000)
-      );
-      
-      subscription = await Promise.race([subscribePromise, timeoutPromise]);
-      console.log('Subscription created!');
 
-      // Step 6: Send to server
-      console.log('Step 6: Sending to server...');
       const token = localStorage.getItem('token');
       const result = await fetch('/api/push-notifications/subscribe', {
         method: 'POST',
@@ -145,19 +119,7 @@ const SettingsScreen = () => {
       }
     } catch (error) {
       console.error('Error enabling notifications:', error);
-      
-      // Show specific error message
-      let errorMessage = 'Failed to enable notifications. ';
-      
-      if (error.message.includes('timeout') || error.message.includes('push service error')) {
-        errorMessage += 'Push notifications require HTTPS. Please test on production (Vercel) for full functionality.';
-      } else if (error.name === 'AbortError') {
-        errorMessage += 'Push service error. This feature works best on HTTPS (production).';
-      } else {
-        errorMessage += error.message;
-      }
-      
-      alert(errorMessage);
+      alert('Failed to enable notifications. Please try again or check your browser settings.');
       setNotificationStatus('error');
     }
   };
