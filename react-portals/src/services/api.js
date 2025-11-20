@@ -107,7 +107,7 @@ export const teacherAPI = {
   deleteGrade: (gradeId) => teacherAPI_instance.delete(`/grades/teacher/grades/${gradeId}`),
   
   // Get seasons (for active season detection)
-  getSeasons: () => teacherAPI_instance.get('/seasons'),
+  getSeasons: () => teacherAPI_instance.get('/grades/teacher/seasons'),
 };
 
 // ============================================
