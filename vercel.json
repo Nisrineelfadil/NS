@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
   "builds": [
     {
       "src": "api/index.js",
@@ -10,11 +9,12 @@
         "includeFiles": [
           "*.html",
           "favicon.ico",
-          "css/**/*.css",
-          "js/**/*.js",
-          "Img/*.{png,jpg,jpeg,ico}",
+          "css/**",
+          "js/**",
+          "Img/**",
           "public/**",
-          "pwa/**",
+          "pwa/build/**",
+          "translations/**",
           "react-portals/dist/**",
           "models/**",
           "routes/**",
@@ -23,19 +23,15 @@
           "config/**",
           "utils/**",
           "server.js"
-        ],
-        "excludeFiles": [
-          "**/*.map",
-          "**/*.md",
-          "Documents/**",
-          "Img/Video/**",
-          "nisrine-student-pwa/**",
-          "*.rar"
         ]
       }
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index.js"
