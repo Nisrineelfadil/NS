@@ -5,7 +5,7 @@
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 30,
+        "maxDuration": 60,
         "includeFiles": [
           "*.html",
           "favicon.ico",
@@ -31,7 +31,9 @@
           "nisrine-student-pwa/**",
           "node_modules/**",
           "*.rar",
-          "*.zip"
+          "*.zip",
+          "*.bat",
+          "*.ps1"
         ]
       }
     }
@@ -47,6 +49,13 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL": "1"
+  },
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
   }
 }

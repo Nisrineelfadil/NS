@@ -39,13 +39,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize HTTP server and Socket.IO (only in non-serverless environment)
+const isServerless = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME;
 const http = require('http');
-const { Server } = require('socket.io');
 const server = http.createServer(app);
 
 let io;
-if (process.env.VERCEL !== '1') {
+if (!isServerless) {
   // Only initialize Socket.IO in local development
+  const { Server } = require('socket.io');
   io = new Server(server, {
     cors: {
       origin: '*',
@@ -57,7 +58,7 @@ if (process.env.VERCEL !== '1') {
   // Initialize notification service with Socket.IO
   notificationService.initializeSocketIO(io);
 } else {
-  // In Vercel, create a dummy io object
+  // In serverless, create a dummy io object
   io = {
     on: () => {},
     emit: () => {},
@@ -71,14 +72,18 @@ const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 const vapidContactEmail = process.env.VAPID_CONTACT_EMAIL || 'admin@nisrineschool.com';
 
 if (vapidPublicKey && vapidPrivateKey) {
-  pushService.initialize(vapidPublicKey, vapidPrivateKey, vapidContactEmail);
-  console.log('✅ Push notification service initialized');
-} else {
+  try {
+    pushService.initialize(vapidPublicKey, vapidPrivateKey, vapidContactEmail);
+    console.log('✅ Push notification service initialized');
+  } catch (error) {
+    console.warn('⚠️  Push notification service initialization failed:', error.message);
+  }
+} else if (!isServerless) {
   console.warn('⚠️  VAPID keys not found. Push notifications will not work. Run: node scripts/generate-vapid-keys.js');
 }
 
 // Socket.IO connection handling (only in local development)
-if (process.env.VERCEL !== '1') {
+if (!isServerless && io.on) {
   io.on('connection', (socket) => {
     console.log('✅ Admin client connected:', socket.id);
     
@@ -231,10 +236,19 @@ app.get('/api/health', (req, res) => {
 // Database connection middleware (only for API routes)
 const dbMiddleware = async (req, res, next) => {
   try {
+    // Check if MONGODB_URI exists
+    if (!process.env.MONGODB_URI) {
+      console.error('❌ MONGODB_URI environment variable is not set');
+      return res.status(500).json({ 
+        error: 'Database configuration error',
+        message: 'MONGODB_URI environment variable is not configured'
+      });
+    }
+    
     await connectDB();
     next();
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('❌ Database connection error:', error.message);
     res.status(500).json({ 
       error: 'Database connection failed',
       message: error.message,
@@ -264,13 +278,24 @@ app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: 'Page not found' });
+  console.log('404 - Not found:', req.method, req.path);
+  res.status(404).json({ error: 'Page not found', path: req.path });
 });
 
-// Error handler
+// Global error handler
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
+  console.error('❌ Server error:', err.message);
+  console.error('Stack:', err.stack);
+  
+  // Don't expose internal errors in production
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  res.status(err.status || 500).json({ 
+    error: 'Internal server error',
+    message: isDev ? err.message : 'An error occurred',
+    stack: isDev ? err.stack : undefined,
+    path: req.path
+  });
 });
 
 // Start server (only if not in serverless environment)
