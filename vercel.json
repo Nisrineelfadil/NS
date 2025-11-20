@@ -30,7 +30,6 @@
           "**/*.md",
           "Documents/**",
           "nisrine-student-pwa/**",
-          "node_modules/**",
           "*.rar",
           "*.zip",
           "*.bat",
