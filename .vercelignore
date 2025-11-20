@@ -104,12 +104,6 @@ public/pwa/static/css/*.map
 # Source maps (not needed in production)
 *.map
 
-# Large image/video files
-Img/Video
-*.mp4
-*.avi
-*.mov
-
 # Archive files
 *.rar
 *.zip
