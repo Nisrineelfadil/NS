@@ -18,8 +18,15 @@ function t(key) {
 
 // Initialize notification system
 function initializeNotifications() {
+    console.log('🚀 Initializing notification system...');
+    
     const authToken = localStorage.getItem('adminToken');
-    if (!authToken) return;
+    if (!authToken) {
+        console.log('❌ No auth token found, skipping notification init');
+        return;
+    }
+    
+    console.log('✅ Auth token found');
 
     // Check if running on Vercel (WebSockets not supported on serverless)
     const isVercel = window.location.hostname.includes('vercel.app');
@@ -27,9 +34,14 @@ function initializeNotifications() {
     if (isVercel) {
         console.log('⚠️ Running on Vercel - Real-time notifications disabled (WebSockets not supported on serverless)');
         console.log('💡 Notifications will still be stored in database and visible on page refresh');
-        // Don't initialize Socket.IO on Vercel
+        // Still load notifications and setup UI on Vercel, just no Socket.IO
+        loadNotifications();
+        setupNotificationUI();
+        createNotificationSound();
         return;
     }
+
+    console.log('✅ Running on localhost - initializing Socket.IO...');
 
     // Initialize Socket.IO connection (only for non-Vercel environments)
     socket = io(API_BASE_URL, {
@@ -358,18 +370,30 @@ function updateBadgeCount(count) {
 
 // Setup notification UI event listeners
 function setupNotificationUI() {
+    console.log('🎨 Setting up notification UI...');
+    
     const notificationBtn = document.getElementById('notificationBtn');
     const notificationDropdown = document.getElementById('notificationDropdown');
     const markAllReadBtn = document.getElementById('markAllReadBtn');
     const clearAllBtn = document.getElementById('clearAllBtn');
     
+    console.log('Notification button:', notificationBtn ? '✅ Found' : '❌ Not found');
+    console.log('Notification dropdown:', notificationDropdown ? '✅ Found' : '❌ Not found');
+    
+    if (!notificationBtn || !notificationDropdown) {
+        console.error('❌ Required notification elements not found!');
+        return;
+    }
+    
     // Add mute button to notification header
     addMuteButton();
     
     // Toggle dropdown
-    notificationBtn?.addEventListener('click', (e) => {
+    notificationBtn.addEventListener('click', (e) => {
+        console.log('🔔 Bell icon clicked!');
         e.stopPropagation();
-        notificationDropdown.classList.toggle('active');
+        const isActive = notificationDropdown.classList.toggle('active');
+        console.log('Dropdown is now:', isActive ? 'OPEN' : 'CLOSED');
     });
     
     // Close dropdown when clicking outside
