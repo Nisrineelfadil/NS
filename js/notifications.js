@@ -21,7 +21,17 @@ function initializeNotifications() {
     const authToken = localStorage.getItem('adminToken');
     if (!authToken) return;
 
-    // Initialize Socket.IO connection
+    // Check if running on Vercel (WebSockets not supported on serverless)
+    const isVercel = window.location.hostname.includes('vercel.app');
+    
+    if (isVercel) {
+        console.log('⚠️ Running on Vercel - Real-time notifications disabled (WebSockets not supported on serverless)');
+        console.log('💡 Notifications will still be stored in database and visible on page refresh');
+        // Don't initialize Socket.IO on Vercel
+        return;
+    }
+
+    // Initialize Socket.IO connection (only for non-Vercel environments)
     socket = io(API_BASE_URL, {
         transports: ['websocket', 'polling'],
         reconnection: true,
