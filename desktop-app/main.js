@@ -215,7 +215,7 @@ function createWindow() {
                 document.head.appendChild(style);
                 console.log('✅ Desktop app dropdown fix applied');
                 
-                // Add click event listener to force dropdown open
+                // Add click event listener to force dropdown open/close
                 if (btn && dropdown) {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -226,11 +226,17 @@ function createWindow() {
                         console.log('Current state - Has active class:', isActive);
                         
                         if (isActive) {
+                            // Close dropdown
                             dropdown.classList.remove('active');
+                            dropdown.style.opacity = '0';
+                            dropdown.style.visibility = 'hidden';
+                            dropdown.style.display = 'flex';
+                            dropdown.style.transform = 'translateY(-10px)';
+                            dropdown.style.pointerEvents = 'none';
                             console.log('❌ Closing dropdown');
                         } else {
+                            // Open dropdown
                             dropdown.classList.add('active');
-                            // Force visible styles
                             dropdown.style.opacity = '1';
                             dropdown.style.visibility = 'visible';
                             dropdown.style.display = 'flex';
@@ -248,6 +254,22 @@ function createWindow() {
                             console.log('  Visibility:', window.getComputedStyle(dropdown).visibility);
                         }, 100);
                     }, true); // Use capture phase
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        const notificationContainer = document.querySelector('.notification-container');
+                        if (notificationContainer && !notificationContainer.contains(e.target)) {
+                            if (dropdown.classList.contains('active')) {
+                                console.log('🖱️ Clicked outside - closing dropdown');
+                                dropdown.classList.remove('active');
+                                dropdown.style.opacity = '0';
+                                dropdown.style.visibility = 'hidden';
+                                dropdown.style.display = 'flex';
+                                dropdown.style.transform = 'translateY(-10px)';
+                                dropdown.style.pointerEvents = 'none';
+                            }
+                        }
+                    });
                 }
             }, 2000);
             
