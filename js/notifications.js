@@ -54,6 +54,8 @@ function initializeNotifications() {
     // Socket connection events
     socket.on('connect', () => {
         console.log('✅ Connected to notification server');
+        console.log('Socket ID:', socket.id);
+        console.log('Socket connected:', socket.connected);
     });
 
     socket.on('disconnect', () => {
@@ -61,13 +63,19 @@ function initializeNotifications() {
     });
 
     socket.on('connect_error', (error) => {
-        console.error('Connection error:', error);
+        console.error('❌ Connection error:', error);
     });
 
     // Listen for new notifications
     socket.on('new-notification', (notification) => {
-        console.log('📢 New notification received:', notification);
+        console.log('🎉 NEW NOTIFICATION RECEIVED VIA SOCKET.IO!');
+        console.log('📢 Notification data:', notification);
         handleNewNotification(notification);
+    });
+    
+    // Test listener to verify Socket.IO is working
+    socket.on('test', (data) => {
+        console.log('✅ Test event received:', data);
     });
 
     // Load existing notifications and setup UI (for localhost with Socket.IO)
