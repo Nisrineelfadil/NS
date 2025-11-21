@@ -144,13 +144,13 @@ function createWindow() {
             
             // Enable auto-polling for notifications (since Socket.IO doesn't work on Vercel)
             if (typeof loadNotifications === 'function') {
-                console.log('✅ Setting up auto-refresh for notifications every 30 seconds');
+                console.log('✅ Setting up auto-refresh for notifications every 10 seconds');
                 
-                // Check for new notifications every 30 seconds
+                // Check for new notifications every 10 seconds
                 setInterval(() => {
                     console.log('🔄 Auto-checking for new notifications...');
                     loadNotifications();
-                }, 30000); // 30 seconds
+                }, 10000); // 10 seconds
                 
                 // Also check when window becomes visible
                 document.addEventListener('visibilitychange', () => {

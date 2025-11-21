@@ -170,6 +170,10 @@ function handleNewNotification(notification) {
     animateBellIcon();
 }
 
+// Store last notification count to detect new ones
+let lastNotificationCount = 0;
+let lastUnreadCount = 0;
+
 // Load notifications from server
 async function loadNotifications() {
     try {
@@ -185,6 +189,26 @@ async function loadNotifications() {
         
         if (data.success) {
             console.log(`✅ Loaded ${data.notifications.length} notifications, ${data.unreadCount} unread`);
+            
+            // Check if there are NEW unread notifications
+            if (lastUnreadCount > 0 && data.unreadCount > lastUnreadCount) {
+                const newCount = data.unreadCount - lastUnreadCount;
+                console.log(`🆕 ${newCount} new notification(s) detected!`);
+                
+                // Play sound for new notifications
+                if (notificationSound && !isSoundMuted) {
+                    console.log('🔊 Playing sound for new notification');
+                    notificationSound();
+                }
+                
+                // Animate bell icon
+                animateBellIcon();
+            }
+            
+            // Update last counts
+            lastNotificationCount = data.notifications.length;
+            lastUnreadCount = data.unreadCount;
+            
             displayNotifications(data.notifications);
             updateBadgeCount(data.unreadCount);
         } else {

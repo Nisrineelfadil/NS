@@ -2741,15 +2741,18 @@ gap: 6px;
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
-    z-index: 1000;
+    z-index: 9999 !important;
     display: flex;
     flex-direction: column;
+    pointer-events: none;
 }
 
 .notification-dropdown.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto;
+    display: flex !important;
 }
 
 /* Notification Header */
