@@ -176,6 +176,57 @@ function createWindow() {
                 window.Notification.requestPermission = () => Promise.resolve('granted');
             }
             
+            // Fix dropdown visibility in desktop app
+            setTimeout(() => {
+                // Check if elements exist
+                const dropdown = document.getElementById('notificationDropdown');
+                const btn = document.getElementById('notificationBtn');
+                console.log('🔍 Dropdown element:', dropdown ? 'Found' : 'NOT FOUND');
+                console.log('🔍 Button element:', btn ? 'Found' : 'NOT FOUND');
+                
+                if (dropdown) {
+                    console.log('📏 Dropdown computed style:', {
+                        display: window.getComputedStyle(dropdown).display,
+                        opacity: window.getComputedStyle(dropdown).opacity,
+                        visibility: window.getComputedStyle(dropdown).visibility,
+                        zIndex: window.getComputedStyle(dropdown).zIndex
+                    });
+                }
+                
+                // Add strong CSS override
+                const style = document.createElement('style');
+                style.textContent = \`
+                    .notification-dropdown.active {
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        transform: translateY(0) !important;
+                        display: flex !important;
+                        pointer-events: auto !important;
+                        z-index: 99999 !important;
+                        position: absolute !important;
+                        background: white !important;
+                        border-radius: 15px !important;
+                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+                    }
+                    .notification-container {
+                        position: relative !important;
+                    }
+                \`;
+                document.head.appendChild(style);
+                console.log('✅ Desktop app dropdown fix applied');
+                
+                // Add click event listener to debug
+                if (btn && dropdown) {
+                    btn.addEventListener('click', () => {
+                        console.log('🖱️ Button clicked in desktop app!');
+                        console.log('Has active class:', dropdown.classList.contains('active'));
+                        console.log('Dropdown display:', window.getComputedStyle(dropdown).display);
+                        console.log('Dropdown opacity:', window.getComputedStyle(dropdown).opacity);
+                        console.log('Dropdown visibility:', window.getComputedStyle(dropdown).visibility);
+                    });
+                }
+            }, 2000);
+            
             console.log('✅ Desktop app enhancements loaded');
         `);
     });
