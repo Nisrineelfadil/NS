@@ -70,14 +70,12 @@ function initializeNotifications() {
         handleNewNotification(notification);
     });
 
-    // Load existing notifications
+    // Load existing notifications and setup UI (for localhost with Socket.IO)
     loadNotifications();
-
-    // Setup UI event listeners
     setupNotificationUI();
-
-    // Create notification sound
     createNotificationSound();
+    
+    console.log('✅ Notification system fully initialized with Socket.IO');
 }
 
 // Create notification sound (lightweight beep)
