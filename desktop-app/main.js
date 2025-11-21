@@ -215,15 +215,39 @@ function createWindow() {
                 document.head.appendChild(style);
                 console.log('✅ Desktop app dropdown fix applied');
                 
-                // Add click event listener to debug
+                // Add click event listener to force dropdown open
                 if (btn && dropdown) {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
                         console.log('🖱️ Button clicked in desktop app!');
-                        console.log('Has active class:', dropdown.classList.contains('active'));
-                        console.log('Dropdown display:', window.getComputedStyle(dropdown).display);
-                        console.log('Dropdown opacity:', window.getComputedStyle(dropdown).opacity);
-                        console.log('Dropdown visibility:', window.getComputedStyle(dropdown).visibility);
-                    });
+                        
+                        // Force toggle the dropdown
+                        const isActive = dropdown.classList.contains('active');
+                        console.log('Current state - Has active class:', isActive);
+                        
+                        if (isActive) {
+                            dropdown.classList.remove('active');
+                            console.log('❌ Closing dropdown');
+                        } else {
+                            dropdown.classList.add('active');
+                            // Force visible styles
+                            dropdown.style.opacity = '1';
+                            dropdown.style.visibility = 'visible';
+                            dropdown.style.display = 'flex';
+                            dropdown.style.transform = 'translateY(0)';
+                            dropdown.style.pointerEvents = 'auto';
+                            console.log('✅ Opening dropdown with forced styles');
+                        }
+                        
+                        // Log final state
+                        setTimeout(() => {
+                            console.log('Final state after click:');
+                            console.log('  Has active class:', dropdown.classList.contains('active'));
+                            console.log('  Display:', window.getComputedStyle(dropdown).display);
+                            console.log('  Opacity:', window.getComputedStyle(dropdown).opacity);
+                            console.log('  Visibility:', window.getComputedStyle(dropdown).visibility);
+                        }, 100);
+                    }, true); // Use capture phase
                 }
             }, 2000);
             
