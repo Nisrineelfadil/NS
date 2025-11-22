@@ -163,10 +163,7 @@ function createWindow() {
             
             // 3. Intercept fetch requests and use cache when possible
             const originalFetch = window.fetch;
-            window.fetch = function(url, options = {}) {
-                // TEMPORARILY DISABLED - Fix caching issues first
-                return originalFetch.apply(this, arguments);
-                
+            window.fetch = async function(url, options = {}) {
                 // Only cache GET requests
                 if (options.method && options.method !== 'GET') {
                     return originalFetch.apply(this, arguments);
@@ -179,25 +176,32 @@ function createWindow() {
                     
                     // Return cached data if less than 30 seconds old
                     if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 30000) {
-                        console.log('⚡ Using cached students (instant!)');
-                        return Promise.resolve(new Response(JSON.stringify(desktopCache[cacheKey]), {
+                        console.log(' Using cached students (instant!)');
+                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
                             status: 200,
+                            statusText: 'OK',
                             headers: { 'Content-Type': 'application/json' }
-                        }));
+                        });
+                        return Promise.resolve(cachedResponse);
                     }
                     
                     // Fetch fresh data and cache it
-                    return originalFetch.apply(this, arguments).then(response => {
-                        return response.clone().json().then(data => {
-                            desktopCache[cacheKey] = data;
-                            desktopCache.lastUpdate[cacheKey] = now;
-                            console.log('💾 Cached students for fast access');
-                            return new Response(JSON.stringify(data), {
-                                status: 200,
-                                headers: { 'Content-Type': 'application/json' }
-                            });
-                        });
-                    });
+                    try {
+                        const response = await originalFetch.apply(this, arguments);
+                        if (!response.ok) return response;
+                        
+                        const clonedResponse = response.clone();
+                        const data = await clonedResponse.json();
+                        
+                        desktopCache[cacheKey] = data;
+                        desktopCache.lastUpdate[cacheKey] = now;
+                        console.log(' Cached students for fast access');
+                        
+                        return response;
+                    } catch (err) {
+                        console.error('Failed to cache students:', err);
+                        return originalFetch.apply(this, arguments);
+                    }
                 }
                 
                 // Cache groups for 60 seconds
@@ -207,23 +211,30 @@ function createWindow() {
                     
                     if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 60000) {
                         console.log('⚡ Using cached groups (instant!)');
-                        return Promise.resolve(new Response(JSON.stringify(desktopCache[cacheKey]), {
+                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
                             status: 200,
+                            statusText: 'OK',
                             headers: { 'Content-Type': 'application/json' }
-                        }));
+                        });
+                        return Promise.resolve(cachedResponse);
                     }
                     
-                    return originalFetch.apply(this, arguments).then(response => {
-                        return response.clone().json().then(data => {
-                            desktopCache[cacheKey] = data;
-                            desktopCache.lastUpdate[cacheKey] = now;
-                            console.log('💾 Cached groups for fast access');
-                            return new Response(JSON.stringify(data), {
-                                status: 200,
-                                headers: { 'Content-Type': 'application/json' }
-                            });
-                        });
-                    });
+                    try {
+                        const response = await originalFetch.apply(this, arguments);
+                        if (!response.ok) return response;
+                        
+                        const clonedResponse = response.clone();
+                        const data = await clonedResponse.json();
+                        
+                        desktopCache[cacheKey] = data;
+                        desktopCache.lastUpdate[cacheKey] = now;
+                        console.log('💾 Cached groups for fast access');
+                        
+                        return response;
+                    } catch (err) {
+                        console.error('Failed to cache groups:', err);
+                        return originalFetch.apply(this, arguments);
+                    }
                 }
                 
                 // Cache seasons for 5 minutes (rarely change)
@@ -233,23 +244,30 @@ function createWindow() {
                     
                     if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 300000) {
                         console.log('⚡ Using cached seasons (instant!)');
-                        return Promise.resolve(new Response(JSON.stringify(desktopCache[cacheKey]), {
+                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
                             status: 200,
+                            statusText: 'OK',
                             headers: { 'Content-Type': 'application/json' }
-                        }));
+                        });
+                        return Promise.resolve(cachedResponse);
                     }
                     
-                    return originalFetch.apply(this, arguments).then(response => {
-                        return response.clone().json().then(data => {
-                            desktopCache[cacheKey] = data;
-                            desktopCache.lastUpdate[cacheKey] = now;
-                            console.log('💾 Cached seasons for fast access');
-                            return new Response(JSON.stringify(data), {
-                                status: 200,
-                                headers: { 'Content-Type': 'application/json' }
-                            });
-                        });
-                    });
+                    try {
+                        const response = await originalFetch.apply(this, arguments);
+                        if (!response.ok) return response;
+                        
+                        const clonedResponse = response.clone();
+                        const data = await clonedResponse.json();
+                        
+                        desktopCache[cacheKey] = data;
+                        desktopCache.lastUpdate[cacheKey] = now;
+                        console.log('💾 Cached seasons for fast access');
+                        
+                        return response;
+                    } catch (err) {
+                        console.error('Failed to cache seasons:', err);
+                        return originalFetch.apply(this, arguments);
+                    }
                 }
                 
                 // Cache teachers for 2 minutes
@@ -259,23 +277,30 @@ function createWindow() {
                     
                     if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 120000) {
                         console.log('⚡ Using cached teachers (instant!)');
-                        return Promise.resolve(new Response(JSON.stringify(desktopCache[cacheKey]), {
+                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
                             status: 200,
+                            statusText: 'OK',
                             headers: { 'Content-Type': 'application/json' }
-                        }));
+                        });
+                        return Promise.resolve(cachedResponse);
                     }
                     
-                    return originalFetch.apply(this, arguments).then(response => {
-                        return response.clone().json().then(data => {
-                            desktopCache[cacheKey] = data;
-                            desktopCache.lastUpdate[cacheKey] = now;
-                            console.log('💾 Cached teachers for fast access');
-                            return new Response(JSON.stringify(data), {
-                                status: 200,
-                                headers: { 'Content-Type': 'application/json' }
-                            });
-                        });
-                    });
+                    try {
+                        const response = await originalFetch.apply(this, arguments);
+                        if (!response.ok) return response;
+                        
+                        const clonedResponse = response.clone();
+                        const data = await clonedResponse.json();
+                        
+                        desktopCache[cacheKey] = data;
+                        desktopCache.lastUpdate[cacheKey] = now;
+                        console.log('💾 Cached teachers for fast access');
+                        
+                        return response;
+                    } catch (err) {
+                        console.error('Failed to cache teachers:', err);
+                        return originalFetch.apply(this, arguments);
+                    }
                 }
                 
                 // All other requests go through normally
