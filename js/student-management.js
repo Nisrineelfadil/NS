@@ -20,6 +20,29 @@ function isValidPhotoPath(photoPath) {
     return true;
 }
 
+// Helper function to normalize photo path
+function normalizePhotoPath(photoPath) {
+    if (!photoPath) return null;
+    
+    // If it's already a base64 data URI, return as-is
+    if (photoPath.startsWith('data:')) {
+        return photoPath;
+    }
+    
+    // If it's a relative path starting with /uploads, return as-is
+    if (photoPath.startsWith('/uploads')) {
+        return photoPath;
+    }
+    
+    // If it's just a filename (old format), prepend /uploads/managed-students/
+    if (photoPath.includes('student-') && photoPath.endsWith('.png')) {
+        return `/uploads/managed-students/${photoPath}`;
+    }
+    
+    // For any other case, return as-is
+    return photoPath;
+}
+
 // Photo cache to avoid re-fetching
 const photoCache = new Map();
 
@@ -923,7 +946,7 @@ function displayStudents(students, pendingStudents = []) {
                     <i class="fas ${statusStyle.icon}" style="color: ${statusStyle.color}; font-size: 1.2rem;" title="${statusStyle.label}"></i>
                 </div>
                 ${isValidPhotoPath(student.photoPath) ? 
-                  `<img src="${student.photoPath}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
+                  `<img src="${normalizePhotoPath(student.photoPath)}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
                   `<div class="student-photo" style="background: ${statusStyle.color}; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; border-color: ${statusStyle.borderColor};">${student.fullName.charAt(0)}</div>`}
                 <div class="student-name">${student.fullName}</div>
                 <div class="student-info">
@@ -1025,7 +1048,7 @@ window.changeStudentPage = function(newPage) {
 function createPendingStudentCard(student) {
     return `
         <div class="student-card" style="border-left: 4px solid #ffc107; background: white;">
-            ${isValidPhotoPath(student.photoPath) ? `<img src="${student.photoPath}" class="student-photo" style="border-color: #ffc107;">` : 
+            ${isValidPhotoPath(student.photoPath) ? `<img src="${normalizePhotoPath(student.photoPath)}" class="student-photo" style="border-color: #ffc107;">` : 
                 `<div class="student-photo-placeholder" style="border-color: #ffc107;"><i class="fas fa-user"></i></div>`}
             <div class="student-info">
                 <h3 style="margin: 0 0 10px 0;">${student.fullName}</h3>
@@ -1662,7 +1685,7 @@ async function viewStudent(studentId) {
             const s = data.student;
             const modal = createModal('Student Details', `
                 <div style="text-align: center; margin-bottom: 20px;">
-                    ${s.photoPath ? `<img src="${s.photoPath}" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-color);">` : 
+                    ${s.photoPath ? `<img src="${normalizePhotoPath(s.photoPath)}" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-color);">` : 
                       `<div style="width: 120px; height: 120px; border-radius: 50%; background: var(--primary-color); display: inline-flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--dark-bg);">${s.fullName.charAt(0)}</div>`}
                     <h2 style="color: var(--primary-color); margin-top: 15px;">${s.fullName}</h2>
                     <span class="badge badge-${s.paymentStatus === 'paid' ? 'success' : s.paymentStatus === 'overdue' ? 'danger' : 'warning'}">${s.paymentStatus.toUpperCase()}</span>
@@ -1792,7 +1815,7 @@ function createReminderSection(title, className, students, color) {
                 <td>
                     <div class="student-name-cell">
                         ${isValidPhotoPath(student.photoPath) ? 
-                            `<img src="${student.photoPath}" class="student-photo-small">` : 
+                            `<img src="${normalizePhotoPath(student.photoPath)}" class="student-photo-small">` : 
                             `<div class="student-photo-small" style="background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${student.fullName.charAt(0)}</div>`
                         }
                         <div>
