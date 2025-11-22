@@ -32,12 +32,12 @@ function initializeNotifications() {
     const isVercel = window.location.hostname.includes('vercel.app');
     
     if (isVercel) {
-        console.log('⚠️ Running on Vercel - Real-time notifications disabled (WebSockets not supported on serverless)');
-        console.log('💡 Notifications will still be stored in database and visible on page refresh');
-        // Still load notifications and setup UI on Vercel, just no Socket.IO
+        console.log('⚠️ Running on Vercel - Using polling for real-time updates');
+        // Use polling instead of WebSockets for Vercel
         loadNotifications();
         setupNotificationUI();
         createNotificationSound();
+        startPollingForNotifications();
         return;
     }
 
@@ -421,9 +421,27 @@ function setupNotificationUI() {
     // Toggle dropdown
     notificationBtn.addEventListener('click', (e) => {
         console.log('🔔 Bell icon clicked!');
+        e.preventDefault();
         e.stopPropagation();
-        const isActive = notificationDropdown.classList.toggle('active');
-        console.log('Dropdown is now:', isActive ? 'OPEN' : 'CLOSED');
+        
+        // Force toggle - remove then add if needed
+        const isCurrentlyActive = notificationDropdown.classList.contains('active');
+        
+        // Close all other dropdowns first
+        document.querySelectorAll('.notification-dropdown.active').forEach(dropdown => {
+            if (dropdown !== notificationDropdown) {
+                dropdown.classList.remove('active');
+            }
+        });
+        
+        // Toggle this dropdown
+        if (isCurrentlyActive) {
+            notificationDropdown.classList.remove('active');
+            console.log('Dropdown is now: CLOSED');
+        } else {
+            notificationDropdown.classList.add('active');
+            console.log('Dropdown is now: OPEN');
+        }
     });
     
     // Close dropdown when clicking outside
@@ -678,3 +696,64 @@ if (document.getElementById('dashboard')) {
         attributeFilter: ['style']
     });
 }
+
+// ============================================
+// POLLING FOR VERCEL (Serverless)
+// ============================================
+
+let lastNotificationId = null;
+let pollingInterval = null;
+
+function startPollingForNotifications() {
+    console.log('🔄 Starting notification polling (every 10 seconds)');
+    
+    // Poll every 10 seconds (safer for Vercel serverless)
+    pollingInterval = setInterval(async () => {
+        try {
+            const authToken = localStorage.getItem('adminToken');
+            if (!authToken) return;
+            
+            const response = await fetch(`${API_BASE_URL}/api/notifications`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            const notifications = data.notifications || [];
+            
+            if (notifications.length === 0) return;
+            
+            // Check for new notifications
+            const newestNotification = notifications[0];
+            
+            if (!lastNotificationId) {
+                // First load - just set the ID, don't show notification
+                lastNotificationId = newestNotification._id;
+                return;
+            }
+            
+            if (newestNotification._id !== lastNotificationId) {
+                console.log('🎉 NEW NOTIFICATION DETECTED!');
+                // New notification found!
+                handleNewNotification(newestNotification);
+                lastNotificationId = newestNotification._id;
+                
+                // Reload all notifications to update the list
+                loadNotifications();
+            }
+            
+        } catch (error) {
+            console.error('❌ Polling error:', error);
+        }
+    }, 10000); // Poll every 10 seconds (Vercel-friendly)
+}
+
+// Stop polling when page unloads
+window.addEventListener('beforeunload', () => {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+});
