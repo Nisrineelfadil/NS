@@ -169,14 +169,14 @@ function createWindow() {
                     return originalFetch.apply(this, arguments);
                 }
                 
-                // Cache student data for 30 seconds
-                if (url.includes('/api/student-management/students') && !url.includes('/photo')) {
+                // Cache student data for 30 seconds (but NOT payment reminders)
+                if (url.includes('/api/student-management/students') && !url.includes('/photo') && !url.includes('/payment-reminders')) {
                     const cacheKey = 'students';
                     const now = Date.now();
                     
                     // Return cached data if less than 30 seconds old
                     if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 30000) {
-                        console.log(' Using cached students (instant!)');
+                        console.log('⚡ Using cached students (instant!)');
                         const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
                             status: 200,
                             statusText: 'OK',
