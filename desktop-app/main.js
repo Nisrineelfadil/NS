@@ -164,6 +164,9 @@ function createWindow() {
             // 3. Intercept fetch requests and use cache when possible
             const originalFetch = window.fetch;
             window.fetch = function(url, options = {}) {
+                // TEMPORARILY DISABLED - Fix caching issues first
+                return originalFetch.apply(this, arguments);
+                
                 // Only cache GET requests
                 if (options.method && options.method !== 'GET') {
                     return originalFetch.apply(this, arguments);
