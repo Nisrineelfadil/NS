@@ -435,11 +435,11 @@ function renderStudentData(student, grades) {
                     style="width: 100%; padding: 12px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px;">
                 <i class="fas fa-chart-bar"></i> View All Grades
             </button>
-            <button onclick="viewPaymentHistory('${student._id}', '${student.fullName.replace(/'/g, "\\'")}');" 
+            <button onclick="viewPaymentHistory('${student._id}', '${(student.fullName || '').replace(/'/g, "\\'")}');" 
                     style="width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
                 <i class="fas fa-history"></i> View Payment History
             </button>
-            <button onclick="exportPaymentJournal('${student._id}', '${student.fullName.replace(/'/g, "\\'")}');" 
+            <button onclick="exportPaymentJournal('${student._id}', '${(student.fullName || '').replace(/'/g, "\\'")}');" 
                     style="width: 100%; padding: 12px; background: linear-gradient(135deg, #FFCC00, #FF9500); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);">
                 <i class="fas fa-file-download"></i> Export Payment Journal PDF
             </button>
