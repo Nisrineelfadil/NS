@@ -43,15 +43,6 @@ function initializeNotifications() {
 
     console.log('✅ Running on localhost - initializing Socket.IO...');
 
-    // Check if Socket.IO is already connected (avoid duplicate connections)
-    if (socket && socket.connected) {
-        console.log('✅ Socket.IO already connected, reusing existing connection');
-        loadNotifications();
-        setupNotificationUI();
-        createNotificationSound();
-        return;
-    }
-
     // Initialize Socket.IO connection (only for non-Vercel environments)
     socket = io(API_BASE_URL, {
         transports: ['websocket', 'polling'],
