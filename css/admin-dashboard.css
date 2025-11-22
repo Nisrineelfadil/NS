@@ -3110,3 +3110,62 @@ gap: 6px;
     will-change: transform;
     backface-visibility: hidden;
 }
+
+/* ============================================
+   SKELETON LOADER - Instant Loading Feedback
+   ============================================ */
+
+.skeleton-loader {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-box,
+.skeleton-line,
+.skeleton-circle {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0%,
+        #e0e0e0 50%,
+        #f0f0f0 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+.skeleton-line {
+    height: 16px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.skeleton-line:last-child {
+    width: 60%;
+}
+
+.skeleton-box {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}

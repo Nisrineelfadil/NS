@@ -1,9 +1,33 @@
-const { app, BrowserWindow, Menu, Notification, Tray, nativeImage } = require('electron');
-const path = require('path');
+// ============================================
+// NISRINE SCHOOL ADMIN - DESKTOP APP
+// Optimized Electron Application with Local Server
+// ============================================
 
+const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, dialog, shell } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const { spawn } = require('child_process');
+
+// Global variables
 let mainWindow;
 let tray = null;
-let notificationCount = 0;
+const isDev = process.argv.includes('--dev');
+
+// Production server URL (your deployed Vercel app)
+const PRODUCTION_SERVER = 'https://nisrine-school.vercel.app';
+const DEV_SERVER = 'http://localhost:3000';
+
+// ============================================
+// SERVER CONNECTION
+// ============================================
+
+function getServerURL() {
+    return isDev ? DEV_SERVER : PRODUCTION_SERVER;
+}
+
+// ============================================
+// WINDOW MANAGEMENT
+// ============================================
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -13,31 +37,241 @@ function createWindow() {
         minHeight: 768,
         icon: path.join(__dirname, 'assets', 'icon.png'),
         webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
-            webSecurity: true
+            webSecurity: true,
+            enableRemoteModule: false
         },
         backgroundColor: '#ffffff',
         show: false,
-        autoHideMenuBar: false
+        autoHideMenuBar: false,
+        title: 'Nisrine School Admin'
     });
 
-    // Load the admin panel from Vercel (production)
-    const startUrl = 'https://nisrine-school.vercel.app/admin';
+    // Show loading screen
+    showLoadingScreen();
     
-    // For local development/testing, uncomment this:
-    // const startUrl = 'http://localhost:3000/admin';
-    
-    console.log('Loading admin panel from:', startUrl);
-    mainWindow.loadURL(startUrl);
+    // Load from production server (no local server needed!)
+    setTimeout(() => {
+        const serverURL = getServerURL();
+        const appUrl = `${serverURL}/admin`;  // No .html extension for Vercel
+        console.log('📱 Loading app from:', appUrl);
+        mainWindow.loadURL(appUrl);
+    }, 2000);
 
     // Show window when ready
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
         mainWindow.maximize();
+        
+        // Inject desktop app enhancements
+        injectDesktopEnhancements();
     });
 
     // Create application menu
+    createAppMenu();
+
+    // Handle window close
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+
+    // Open external links in browser
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
+
+    // Create system tray
+    createSystemTray();
+}
+
+function showLoadingScreen() {
+    // Create temporary loading HTML file
+    const loadingHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Loading...</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    overflow: hidden;
+                }
+                .loader-container {
+                    text-align: center;
+                    color: white;
+                }
+                .logo {
+                    width: 120px;
+                    height: 120px;
+                    margin: 0 auto 30px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 48px;
+                    font-weight: bold;
+                    color: #667eea;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                }
+                .spinner {
+                    width: 60px;
+                    height: 60px;
+                    border: 5px solid rgba(255,255,255,0.3);
+                    border-top-color: white;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 30px;
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                h1 {
+                    font-size: 32px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                }
+                p {
+                    font-size: 16px;
+                    opacity: 0.9;
+                    animation: pulse 2s ease-in-out infinite;
+                }
+                @keyframes pulse {
+                    0%, 100% { opacity: 0.6; }
+                    50% { opacity: 1; }
+                }
+                .version {
+                    position: absolute;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 12px;
+                    opacity: 0.7;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="loader-container">
+                <div class="logo">NS</div>
+                <div class="spinner"></div>
+                <h1>Nisrine School Admin</h1>
+                <p>Starting application...</p>
+            </div>
+            <div class="version">Version 1.0.1</div>
+        </body>
+        </html>
+    `;
+    
+    // Write to temporary file
+    const tempPath = path.join(app.getPath('temp'), 'nisrine-loading.html');
+    fs.writeFileSync(tempPath, loadingHTML);
+    mainWindow.loadFile(tempPath);
+}
+
+function showErrorScreen(message) {
+    const errorHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Error</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                }
+                .error-container {
+                    text-align: center;
+                    color: white;
+                    max-width: 500px;
+                    padding: 40px;
+                }
+                .error-icon {
+                    font-size: 80px;
+                    margin-bottom: 20px;
+                }
+                h1 {
+                    font-size: 28px;
+                    margin-bottom: 15px;
+                }
+                p {
+                    font-size: 16px;
+                    opacity: 0.9;
+                    line-height: 1.6;
+                    margin-bottom: 30px;
+                }
+                button {
+                    background: white;
+                    color: #f5576c;
+                    border: none;
+                    padding: 15px 40px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                }
+                button:hover {
+                    transform: scale(1.05);
+                }
+            </style>
+        </head>
+        <body>
+            <div class="error-container">
+                <div class="error-icon">⚠️</div>
+                <h1>Application Error</h1>
+                <p>${message}</p>
+                <button onclick="location.reload()">Retry</button>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    // Write to temporary file
+    const tempPath = path.join(app.getPath('temp'), 'nisrine-error.html');
+    fs.writeFileSync(tempPath, errorHTML);
+    mainWindow.loadFile(tempPath);
+    mainWindow.show();
+}
+
+function injectDesktopEnhancements() {
+    mainWindow.webContents.executeJavaScript(`
+        console.log('🖥️ Desktop App Mode - Enhanced Performance');
+        
+        // Mark as desktop app
+        window.IS_DESKTOP_APP = true;
+        window.DESKTOP_VERSION = '1.0.1';
+        
+        // Desktop-specific optimizations
+        if (typeof initDesktopOptimizations === 'function') {
+            initDesktopOptimizations();
+        }
+        
+        console.log('✅ Desktop enhancements loaded');
+    `);
+}
+
+// ============================================
+// MENU & TRAY
+// ============================================
+
+function createAppMenu() {
     const menuTemplate = [
         {
             label: 'File',
@@ -45,24 +279,18 @@ function createWindow() {
                 {
                     label: 'Reload',
                     accelerator: 'CmdOrCtrl+R',
-                    click: () => {
-                        mainWindow.reload();
-                    }
+                    click: () => mainWindow.reload()
                 },
                 {
                     label: 'Force Reload',
                     accelerator: 'CmdOrCtrl+Shift+R',
-                    click: () => {
-                        mainWindow.webContents.reloadIgnoringCache();
-                    }
+                    click: () => mainWindow.webContents.reloadIgnoringCache()
                 },
                 { type: 'separator' },
                 {
                     label: 'Exit',
                     accelerator: 'CmdOrCtrl+Q',
-                    click: () => {
-                        app.quit();
-                    }
+                    click: () => app.quit()
                 }
             ]
         },
@@ -99,14 +327,13 @@ function createWindow() {
             label: 'Help',
             submenu: [
                 {
-                    label: 'About Nisrine School Admin',
+                    label: 'About',
                     click: () => {
-                        const { dialog } = require('electron');
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: 'About',
                             message: 'Nisrine School Admin',
-                            detail: 'Version 1.0.0\n\nAdmin Dashboard for Nisrine School\n\n© 2025 Nisrine School'
+                            detail: 'Version 1.0.1\n\nOptimized Desktop Application\n\n© 2025 Nisrine School'
                         });
                     }
                 },
@@ -114,9 +341,7 @@ function createWindow() {
                 {
                     label: 'Toggle Developer Tools',
                     accelerator: 'F12',
-                    click: () => {
-                        mainWindow.webContents.toggleDevTools();
-                    }
+                    click: () => mainWindow.webContents.toggleDevTools()
                 }
             ]
         }
@@ -124,371 +349,11 @@ function createWindow() {
 
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
-
-    // Handle window close
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
-
-    // Open external links in browser
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        require('electron').shell.openExternal(url);
-        return { action: 'deny' };
-    });
-
-    // Listen for notification events from the web page
-    mainWindow.webContents.on('did-finish-load', () => {
-        // Inject enhanced notification handler for desktop app
-        mainWindow.webContents.executeJavaScript(`
-            console.log('🖥️ Desktop app mode enabled');
-            
-            // ========================================
-            // DESKTOP APP PERFORMANCE BOOST
-            // Makes app 20x faster with smart caching
-            // ========================================
-            
-            // 1. Enable aggressive browser caching
-            if ('caches' in window) {
-                console.log('✅ Cache API available - enabling smart caching');
-            }
-            
-            // 2. Preload critical data in background
-            const desktopCache = {
-                students: null,
-                groups: null,
-                seasons: null,
-                teachers: null,
-                lastUpdate: {}
-            };
-            
-            // 3. Intercept fetch requests and use cache when possible
-            const originalFetch = window.fetch;
-            window.fetch = async function(url, options = {}) {
-                // Only cache GET requests
-                if (options.method && options.method !== 'GET') {
-                    return originalFetch.apply(this, arguments);
-                }
-                
-                // Cache student data for 30 seconds (but NOT payment reminders)
-                if (url.includes('/api/student-management/students') && !url.includes('/photo') && !url.includes('/payment-reminders')) {
-                    const cacheKey = 'students';
-                    const now = Date.now();
-                    
-                    // Return cached data if less than 30 seconds old
-                    if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 30000) {
-                        console.log('⚡ Using cached students (instant!)');
-                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
-                            status: 200,
-                            statusText: 'OK',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        return Promise.resolve(cachedResponse);
-                    }
-                    
-                    // Fetch fresh data and cache it
-                    try {
-                        const response = await originalFetch.apply(this, arguments);
-                        if (!response.ok) return response;
-                        
-                        const clonedResponse = response.clone();
-                        const data = await clonedResponse.json();
-                        
-                        desktopCache[cacheKey] = data;
-                        desktopCache.lastUpdate[cacheKey] = now;
-                        console.log(' Cached students for fast access');
-                        
-                        return response;
-                    } catch (err) {
-                        console.error('Failed to cache students:', err);
-                        return originalFetch.apply(this, arguments);
-                    }
-                }
-                
-                // Cache groups for 60 seconds
-                if (url.includes('/api/groups')) {
-                    const cacheKey = 'groups';
-                    const now = Date.now();
-                    
-                    if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 60000) {
-                        console.log('⚡ Using cached groups (instant!)');
-                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
-                            status: 200,
-                            statusText: 'OK',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        return Promise.resolve(cachedResponse);
-                    }
-                    
-                    try {
-                        const response = await originalFetch.apply(this, arguments);
-                        if (!response.ok) return response;
-                        
-                        const clonedResponse = response.clone();
-                        const data = await clonedResponse.json();
-                        
-                        desktopCache[cacheKey] = data;
-                        desktopCache.lastUpdate[cacheKey] = now;
-                        console.log('💾 Cached groups for fast access');
-                        
-                        return response;
-                    } catch (err) {
-                        console.error('Failed to cache groups:', err);
-                        return originalFetch.apply(this, arguments);
-                    }
-                }
-                
-                // Cache seasons for 5 minutes (rarely change)
-                if (url.includes('/api/seasons')) {
-                    const cacheKey = 'seasons';
-                    const now = Date.now();
-                    
-                    if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 300000) {
-                        console.log('⚡ Using cached seasons (instant!)');
-                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
-                            status: 200,
-                            statusText: 'OK',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        return Promise.resolve(cachedResponse);
-                    }
-                    
-                    try {
-                        const response = await originalFetch.apply(this, arguments);
-                        if (!response.ok) return response;
-                        
-                        const clonedResponse = response.clone();
-                        const data = await clonedResponse.json();
-                        
-                        desktopCache[cacheKey] = data;
-                        desktopCache.lastUpdate[cacheKey] = now;
-                        console.log('💾 Cached seasons for fast access');
-                        
-                        return response;
-                    } catch (err) {
-                        console.error('Failed to cache seasons:', err);
-                        return originalFetch.apply(this, arguments);
-                    }
-                }
-                
-                // Cache teachers for 2 minutes
-                if (url.includes('/api/grades/admin/teachers')) {
-                    const cacheKey = 'teachers';
-                    const now = Date.now();
-                    
-                    if (desktopCache[cacheKey] && (now - desktopCache.lastUpdate[cacheKey]) < 120000) {
-                        console.log('⚡ Using cached teachers (instant!)');
-                        const cachedResponse = new Response(JSON.stringify(desktopCache[cacheKey]), {
-                            status: 200,
-                            statusText: 'OK',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        return Promise.resolve(cachedResponse);
-                    }
-                    
-                    try {
-                        const response = await originalFetch.apply(this, arguments);
-                        if (!response.ok) return response;
-                        
-                        const clonedResponse = response.clone();
-                        const data = await clonedResponse.json();
-                        
-                        desktopCache[cacheKey] = data;
-                        desktopCache.lastUpdate[cacheKey] = now;
-                        console.log('💾 Cached teachers for fast access');
-                        
-                        return response;
-                    } catch (err) {
-                        console.error('Failed to cache teachers:', err);
-                        return originalFetch.apply(this, arguments);
-                    }
-                }
-                
-                // All other requests go through normally
-                return originalFetch.apply(this, arguments);
-            };
-            
-            // 4. Preload data when app starts (background loading)
-            setTimeout(() => {
-                console.log('🚀 Preloading data in background...');
-                const authToken = localStorage.getItem('adminToken');
-                if (authToken) {
-                    // Preload students
-                    fetch('/api/student-management/students?page=1&limit=50', {
-                        headers: { 'Authorization': \`Bearer \${authToken}\` }
-                    }).catch(() => {});
-                    
-                    // Preload groups
-                    fetch('/api/groups', {
-                        headers: { 'Authorization': \`Bearer \${authToken}\` }
-                    }).catch(() => {});
-                    
-                    // Preload seasons
-                    fetch('/api/seasons', {
-                        headers: { 'Authorization': \`Bearer \${authToken}\` }
-                    }).catch(() => {});
-                    
-                    console.log('✅ Background preloading started');
-                }
-            }, 2000);
-            
-            // 5. Clear cache when user performs write operations
-            window.addEventListener('studentUpdated', () => {
-                console.log('🔄 Clearing student cache after update');
-                desktopCache.students = null;
-            });
-            
-            window.addEventListener('groupUpdated', () => {
-                console.log('🔄 Clearing group cache after update');
-                desktopCache.groups = null;
-            });
-            
-            console.log('⚡ Desktop performance boost enabled!');
-            
-            // Enable auto-polling for notifications (since Socket.IO doesn't work on Vercel)
-            if (typeof loadNotifications === 'function') {
-                console.log('✅ Setting up auto-refresh for notifications every 10 seconds');
-                
-                // Check for new notifications every 10 seconds
-                setInterval(() => {
-                    console.log('🔄 Auto-checking for new notifications...');
-                    loadNotifications();
-                }, 10000); // 10 seconds
-                
-                // Also check when window becomes visible
-                document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden) {
-                        console.log('👀 Window visible - checking notifications');
-                        loadNotifications();
-                    }
-                });
-            }
-            
-            // Override browser notifications to use Electron's native notifications
-            if (window.Notification) {
-                const OriginalNotification = window.Notification;
-                window.Notification = function(title, options) {
-                    console.log('📢 Notification:', title);
-                    // Send to Electron for native notification
-                    if (window.electronAPI) {
-                        window.electronAPI.showNotification(title, options?.body || '');
-                    }
-                    return new OriginalNotification(title, options);
-                };
-                window.Notification.permission = 'granted';
-                window.Notification.requestPermission = () => Promise.resolve('granted');
-            }
-            
-            // Fix dropdown visibility in desktop app
-            setTimeout(() => {
-                // Check if elements exist
-                const dropdown = document.getElementById('notificationDropdown');
-                const btn = document.getElementById('notificationBtn');
-                console.log('🔍 Dropdown element:', dropdown ? 'Found' : 'NOT FOUND');
-                console.log('🔍 Button element:', btn ? 'Found' : 'NOT FOUND');
-                
-                if (dropdown) {
-                    console.log('📏 Dropdown computed style:', {
-                        display: window.getComputedStyle(dropdown).display,
-                        opacity: window.getComputedStyle(dropdown).opacity,
-                        visibility: window.getComputedStyle(dropdown).visibility,
-                        zIndex: window.getComputedStyle(dropdown).zIndex
-                    });
-                }
-                
-                // Add strong CSS override
-                const style = document.createElement('style');
-                style.textContent = \`
-                    .notification-dropdown.active {
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        transform: translateY(0) !important;
-                        display: flex !important;
-                        pointer-events: auto !important;
-                        z-index: 99999 !important;
-                        position: absolute !important;
-                        background: white !important;
-                        border-radius: 15px !important;
-                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-                    }
-                    .notification-container {
-                        position: relative !important;
-                    }
-                \`;
-                document.head.appendChild(style);
-                console.log('✅ Desktop app dropdown fix applied');
-                
-                // Add click event listener to force dropdown open/close
-                if (btn && dropdown) {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        console.log('🖱️ Button clicked in desktop app!');
-                        
-                        // Force toggle the dropdown
-                        const isActive = dropdown.classList.contains('active');
-                        console.log('Current state - Has active class:', isActive);
-                        
-                        if (isActive) {
-                            // Close dropdown
-                            dropdown.classList.remove('active');
-                            dropdown.style.opacity = '0';
-                            dropdown.style.visibility = 'hidden';
-                            dropdown.style.display = 'flex';
-                            dropdown.style.transform = 'translateY(-10px)';
-                            dropdown.style.pointerEvents = 'none';
-                            console.log('❌ Closing dropdown');
-                        } else {
-                            // Open dropdown
-                            dropdown.classList.add('active');
-                            dropdown.style.opacity = '1';
-                            dropdown.style.visibility = 'visible';
-                            dropdown.style.display = 'flex';
-                            dropdown.style.transform = 'translateY(0)';
-                            dropdown.style.pointerEvents = 'auto';
-                            console.log('✅ Opening dropdown with forced styles');
-                        }
-                        
-                        // Log final state
-                        setTimeout(() => {
-                            console.log('Final state after click:');
-                            console.log('  Has active class:', dropdown.classList.contains('active'));
-                            console.log('  Display:', window.getComputedStyle(dropdown).display);
-                            console.log('  Opacity:', window.getComputedStyle(dropdown).opacity);
-                            console.log('  Visibility:', window.getComputedStyle(dropdown).visibility);
-                        }, 100);
-                    }, true); // Use capture phase
-                    
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', (e) => {
-                        const notificationContainer = document.querySelector('.notification-container');
-                        if (notificationContainer && !notificationContainer.contains(e.target)) {
-                            if (dropdown.classList.contains('active')) {
-                                console.log('🖱️ Clicked outside - closing dropdown');
-                                dropdown.classList.remove('active');
-                                dropdown.style.opacity = '0';
-                                dropdown.style.visibility = 'hidden';
-                                dropdown.style.display = 'flex';
-                                dropdown.style.transform = 'translateY(-10px)';
-                                dropdown.style.pointerEvents = 'none';
-                            }
-                        }
-                    });
-                }
-            }, 2000);
-            
-            console.log('✅ Desktop app enhancements loaded');
-        `);
-    });
-
-    // Create system tray
-    createSystemTray();
 }
 
-// Create system tray icon
 function createSystemTray() {
-    // Create a simple tray icon (you can replace with custom icon)
     const iconPath = path.join(__dirname, 'assets', 'icon.png');
     
-    // Use default icon if custom not found
     let trayIcon;
     try {
         trayIcon = nativeImage.createFromPath(iconPath);
@@ -503,85 +368,32 @@ function createSystemTray() {
     
     const contextMenu = Menu.buildFromTemplate([
         {
-            label: 'Show Admin Panel',
+            label: 'Show App',
             click: () => {
                 mainWindow.show();
                 mainWindow.focus();
             }
         },
-        {
-            label: 'Notifications: 0',
-            id: 'notification-count',
-            enabled: false
-        },
         { type: 'separator' },
         {
             label: 'Quit',
-            click: () => {
-                app.quit();
-            }
+            click: () => app.quit()
         }
     ]);
     
     tray.setToolTip('Nisrine School Admin');
     tray.setContextMenu(contextMenu);
     
-    // Click tray icon to show window
     tray.on('click', () => {
         mainWindow.show();
         mainWindow.focus();
     });
 }
 
-// Update tray notification count
-function updateTrayNotificationCount(count) {
-    notificationCount = count;
-    if (tray) {
-        const contextMenu = Menu.buildFromTemplate([
-            {
-                label: 'Show Admin Panel',
-                click: () => {
-                    mainWindow.show();
-                    mainWindow.focus();
-                }
-            },
-            {
-                label: `Notifications: ${count}`,
-                id: 'notification-count',
-                enabled: false
-            },
-            { type: 'separator' },
-            {
-                label: 'Quit',
-                click: () => {
-                    app.quit();
-                }
-            }
-        ]);
-        tray.setContextMenu(contextMenu);
-        tray.setToolTip(`Nisrine School Admin - ${count} new notification${count !== 1 ? 's' : ''}`);
-    }
-}
+// ============================================
+// APP LIFECYCLE
+// ============================================
 
-// Show native notification
-function showNativeNotification(title, body) {
-    const notification = new Notification({
-        title: title,
-        body: body,
-        icon: path.join(__dirname, 'assets', 'icon.png'),
-        sound: true, // Play system sound
-        urgency: 'normal'
-    });
-    
-    notification.show();
-    
-    notification.on('click', () => {
-        mainWindow.show();
-        mainWindow.focus();
-    });
-}
-
-// App lifecycle
 app.whenReady().then(() => {
     createWindow();
 
@@ -598,9 +410,8 @@ app.on('window-all-closed', () => {
     }
 });
 
-// Handle certificate errors (for self-signed certificates in development)
+// Handle certificate errors for localhost
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-    // Only allow in development
     if (url.startsWith('http://localhost')) {
         event.preventDefault();
         callback(true);
@@ -608,3 +419,17 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
         callback(false);
     }
 });
+
+// ============================================
+// IPC HANDLERS
+// ============================================
+
+ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
+});
+
+ipcMain.handle('get-app-path', () => {
+    return app.getAppPath();
+});
+
+console.log('✅ Nisrine School Admin Desktop App initialized');

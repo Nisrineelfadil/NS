@@ -9,112 +9,143 @@ function isValidPhotoPath(photoPath) {
     return true;
 }
 
-// Open student profile expansion view
+// Open student profile expansion view - OPTIMIZED FOR SPEED
 window.viewStudentProfile = async function(studentId) {
     try {
-        // Close any existing modal first to prevent caching issues
+        // Close any existing modal first
         const existingModal = document.getElementById('studentProfileModal');
         if (existingModal) {
             existingModal.remove();
         }
         
-        // Fetch student data
-        const response = await fetch(`/api/student-management/students/${studentId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        // ⚡ INSTANT: Show skeleton modal immediately (no waiting!)
+        showSkeletonModal(studentId);
         
-        if (!response.ok) throw new Error('Failed to load student data');
+        // ⚡ PARALLEL: Fetch student data and grades simultaneously
+        const [studentResponse, gradesResponse] = await Promise.all([
+            fetch(`/api/student-management/students/${studentId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            }),
+            fetch(`/api/grades/admin/students/${studentId}/grades`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            }).catch(() => null) // Don't fail if grades fail
+        ]);
         
-        const data = await response.json();
+        if (!studentResponse.ok) throw new Error('Failed to load student data');
+        
+        const data = await studentResponse.json();
         const student = data.student || data;
         
-        // Validate student data
         if (!student || !student._id) {
             throw new Error('Invalid student data received');
         }
         
-        // Debug: Log student data to check what fields are present
-        console.log('📋 Student Profile Data:', {
-            fullName: student.fullName,
-            dateOfBirth: student.dateOfBirth,
-            address: student.address,
-            city: student.city,
-            cin: student.cin,
-            studyLevel: student.studyLevel
-        });
-        
-        // Fetch student grades
+        // Parse grades
         let grades = [];
-        try {
-            const gradesResponse = await fetch(`/api/grades/admin/students/${studentId}/grades`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
-            if (gradesResponse.ok) {
-                const gradesData = await gradesResponse.json();
-                grades = gradesData.grades || gradesData || [];
-                console.log('📊 Fetched grades for student:', grades.length, 'grades');
-                console.log('📊 Grade data sample:', grades[0]);
-            }
-        } catch (error) {
-            console.error('Error fetching grades:', error);
+        if (gradesResponse && gradesResponse.ok) {
+            const gradesData = await gradesResponse.json();
+            grades = gradesData.grades || gradesData || [];
         }
         
-        // Create modal
-        const modal = document.createElement('div');
-        modal.className = 'split-modal active';
-        modal.id = 'studentProfileModal';
+        // ⚡ UPDATE: Replace skeleton with real data
+        updateModalWithData(student, grades);
         
-        modal.innerHTML = `
-            <div class="split-modal-container">
-                <!-- Header -->
-                <div class="split-modal-header">
-                    <h2><i class="fas fa-user-circle"></i> Student Profile - ${student.fullName || 'Student'}</h2>
-                    <button class="split-modal-close" onclick="closeStudentProfile()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <!-- Body -->
-                <div class="split-modal-body">
-                    <!-- Left Panel: Registration Form (Read-Only) -->
-                    <div class="split-panel-left">
-                        ${renderStudentForm(student)}
-                    </div>
-                    
-                    <!-- Right Panel: Full Student Data -->
-                    <div class="split-panel-right">
-                        ${renderStudentData(student, grades)}
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="split-modal-footer">
-                    <div class="btn-group">
-                        <button type="button" class="btn-split secondary" onclick="editStudentProfile('${studentId}')">
-                            <i class="fas fa-edit"></i> Edit Student
-                        </button>
-                    </div>
-                    <div class="btn-group">
-                        <button type="button" class="btn-split secondary" onclick="closeStudentProfile()">
-                            <i class="fas fa-times"></i> Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Load CIN status after modal is added to DOM
-        setTimeout(() => {
-            loadCINStatus(studentId);
-        }, 100);
+        // Load CIN status in background
+        setTimeout(() => loadCINStatus(studentId), 100);
         
     } catch (error) {
         console.error('Error loading student profile:', error);
+        const modal = document.getElementById('studentProfileModal');
+        if (modal) modal.remove();
         showNotification('Failed to load student profile', 'error');
     }
 };
+
+// ⚡ Show skeleton loading modal instantly
+function showSkeletonModal(studentId) {
+    const modal = document.createElement('div');
+    modal.className = 'split-modal active';
+    modal.id = 'studentProfileModal';
+    
+    modal.innerHTML = `
+        <div class="split-modal-container">
+            <div class="split-modal-header">
+                <h2><i class="fas fa-user-circle"></i> Loading Student Profile...</h2>
+                <button class="split-modal-close" onclick="closeStudentProfile()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="split-modal-body">
+                <div class="split-panel-left">
+                    <div class="skeleton-loader">
+                        <div class="skeleton-box" style="height: 200px; margin-bottom: 20px;"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+                
+                <div class="split-panel-right">
+                    <div class="skeleton-loader">
+                        <div class="skeleton-circle" style="width: 120px; height: 120px; margin: 0 auto 20px;"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="split-modal-footer">
+                <div class="skeleton-line" style="width: 150px;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// ⚡ Update modal with real data
+function updateModalWithData(student, grades) {
+    const modal = document.getElementById('studentProfileModal');
+    if (!modal) return;
+    
+    modal.innerHTML = `
+        <div class="split-modal-container">
+            <div class="split-modal-header">
+                <h2><i class="fas fa-user-circle"></i> Student Profile - ${student.fullName || 'Student'}</h2>
+                <button class="split-modal-close" onclick="closeStudentProfile()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="split-modal-body">
+                <div class="split-panel-left">
+                    ${renderStudentForm(student)}
+                </div>
+                
+                <div class="split-panel-right">
+                    ${renderStudentData(student, grades)}
+                </div>
+            </div>
+            
+            <div class="split-modal-footer">
+                <div class="btn-group">
+                    <button type="button" class="btn-split secondary" onclick="editStudentProfile('${student._id}')">
+                        <i class="fas fa-edit"></i> Edit Student
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-split secondary" onclick="closeStudentProfile()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
 // Render student form (read-only) - PDF Registration Form Style
 function renderStudentForm(student) {
