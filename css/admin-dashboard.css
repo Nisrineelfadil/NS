@@ -271,6 +271,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    overflow: visible;
 }
 
 .topbar-left h1 {
@@ -282,6 +283,8 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+    overflow: visible;
+    position: relative;
 }
 
 .topbar-btn {
@@ -2662,6 +2665,7 @@ gap: 6px;
 /* Notification Container */
 .notification-container {
     position: relative;
+    z-index: 10000;
 }
 
 /* Notification Button */
