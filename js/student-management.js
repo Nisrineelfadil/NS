@@ -46,17 +46,42 @@ function normalizePhotoPath(photoPath) {
 // Photo cache to avoid re-fetching
 const photoCache = new Map();
 
+// Intersection Observer for lazy loading photos (only load when visible)
+let photoObserver = null;
+
+function initPhotoObserver() {
+    if (photoObserver) return;
+    
+    photoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                const studentId = img.dataset.studentId;
+                if (studentId && !img.src) {
+                    loadStudentPhoto(studentId, img);
+                    photoObserver.unobserve(img); // Stop observing once loaded
+                }
+            }
+        });
+    }, {
+        rootMargin: '50px' // Start loading 50px before element is visible
+    });
+}
+
 // Lazy load student photo
 async function loadStudentPhoto(studentId, photoElement) {
     // Check cache first
     if (photoCache.has(studentId)) {
         const photoPath = photoCache.get(studentId);
         if (photoPath) {
-            photoElement.src = photoPath;
+            photoElement.src = normalizePhotoPath(photoPath);
             photoElement.style.display = 'block';
         }
         return;
     }
+    
+    // Show loading spinner
+    photoElement.style.opacity = '0.5';
     
     try {
         const response = await fetch(`${API_BASE}/students/${studentId}/photo`, {
@@ -66,13 +91,19 @@ async function loadStudentPhoto(studentId, photoElement) {
         if (response.ok) {
             const data = await response.json();
             if (data.success && data.photoPath) {
-                photoCache.set(studentId, data.photoPath);
-                photoElement.src = data.photoPath;
+                const normalizedPath = normalizePhotoPath(data.photoPath);
+                photoCache.set(studentId, normalizedPath);
+                photoElement.src = normalizedPath;
                 photoElement.style.display = 'block';
+                photoElement.style.opacity = '1';
+            } else {
+                // No photo available
+                photoElement.style.opacity = '1';
             }
         }
     } catch (error) {
         console.error('Error loading photo for student:', studentId, error);
+        photoElement.style.opacity = '1';
     }
 }
 
@@ -945,8 +976,8 @@ function displayStudents(students, pendingStudents = []) {
                 <div style="position: absolute; top: 10px; left: 10px;">
                     <i class="fas ${statusStyle.icon}" style="color: ${statusStyle.color}; font-size: 1.2rem;" title="${statusStyle.label}"></i>
                 </div>
-                ${isValidPhotoPath(student.photoPath) ? 
-                  `<img src="${normalizePhotoPath(student.photoPath)}" class="student-photo" style="border-color: ${statusStyle.borderColor};">` : 
+                ${student.hasPhoto !== false ? 
+                  `<img data-student-id="${student._id}" class="student-photo lazy-photo" style="border-color: ${statusStyle.borderColor}; background: ${statusStyle.bgColor};">` : 
                   `<div class="student-photo" style="background: ${statusStyle.color}; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; border-color: ${statusStyle.borderColor};">${student.fullName.charAt(0)}</div>`}
                 <div class="student-name">${student.fullName}</div>
                 <div class="student-info">
@@ -997,6 +1028,17 @@ function displayStudents(students, pendingStudents = []) {
     }
     
     grid.innerHTML = html;
+    
+    // Initialize photo lazy loading observer
+    initPhotoObserver();
+    
+    // Observe all lazy-load images
+    const lazyImages = grid.querySelectorAll('.lazy-photo');
+    lazyImages.forEach(img => {
+        if (photoObserver) {
+            photoObserver.observe(img);
+        }
+    });
 }
 
 // Create pagination controls for students (matching ratings design)

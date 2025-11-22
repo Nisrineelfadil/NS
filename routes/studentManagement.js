@@ -349,8 +349,9 @@ router.get('/students', authenticateAdmin, async (req, res) => {
         
         const skip = (parseInt(page) - 1) * parseInt(limit);
         
+        // PERFORMANCE OPTIMIZATION: Exclude photos from initial load for faster response
         const students = await ManagedStudent.find(filter)
-            .select('-emailPassword')
+            .select('-emailPassword -photoPath') // Exclude photos for speed
             .populate('group', 'name season seasonName')
             .populate('addedBy', 'username')
             .sort({ createdAt: -1 })
@@ -358,19 +359,12 @@ router.get('/students', authenticateAdmin, async (req, res) => {
             .limit(parseInt(limit))
             .lean(); // Convert to plain objects for faster processing
         
-        // PERFORMANCE OPTIMIZATION: Create thumbnails for list view
-        // Compress photos to 50x50 thumbnails for fast loading
+        // Add hasPhoto flag without loading the actual photo
         const optimizedStudents = students.map(student => {
-            const optimized = { ...student };
-            
-            // If student has a base64 photo, create a thumbnail
-            if (optimized.photoPath && optimized.photoPath.startsWith('data:')) {
-                optimized.hasPhoto = true;
-                // Keep the photo for now - we'll optimize on frontend
-                // In future: generate thumbnails server-side
-            }
-            
-            return optimized;
+            return {
+                ...student,
+                hasPhoto: false // Photos will be loaded lazily via /students/:id/photo endpoint
+            };
         });
         
         const total = await ManagedStudent.countDocuments(filter);
@@ -404,7 +398,8 @@ router.get('/students/:id/photo', authenticateAdmin, async (req, res) => {
         
         res.json({ 
             success: true, 
-            photoPath: student.photoPath || null 
+            photoPath: student.photoPath || null,
+            hasPhoto: !!student.photoPath
         });
     } catch (error) {
         console.error('Error fetching student photo:', error);
