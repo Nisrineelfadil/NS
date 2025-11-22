@@ -716,6 +716,35 @@
             color: #1e40af;
         }
 
+        /* Notification Dropdown Active State */
+        .notification-dropdown.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            pointer-events: auto !important;
+        }
+
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .bell-ring {
+            animation: ring 0.5s ease-in-out;
+        }
+
+        @keyframes ring {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+            20%, 40%, 60%, 80% { transform: rotate(10deg); }
+        }
+
         /* Responsive - Tablet */
         @media (max-width: 1024px) {
             .groups-grid,
@@ -1547,6 +1576,34 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Notification Bell -->
+                    <div class="notification-container" style="position: relative; margin-right: 15px;">
+                        <button class="btn btn-icon" id="notificationBtn" style="position: relative; padding: 10px 12px; background: white; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
+                            <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--text-dark);"></i>
+                            <span class="notification-badge" id="notificationBadge" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; font-weight: bold; display: flex; align-items: center; justify-content: center;">0</span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown" style="display: none; position: absolute; top: calc(100% + 10px); right: 0; width: 380px; max-height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); z-index: 9999; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; pointer-events: none;">
+                            <div class="notification-header" style="padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                                <h3 style="margin: 0; font-size: 1rem; color: var(--text-dark);" data-i18n="admin.notifications.title">Notifications</h3>
+                                <button class="mark-all-read-btn" id="markAllReadBtn" style="background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-check-double"></i> <span data-i18n="admin.notifications.mark_all_read">Mark all read</span>
+                                </button>
+                            </div>
+                            <div class="notification-list" id="notificationList" style="max-height: 400px; overflow-y: auto; padding: 10px;">
+                                <div class="notification-empty" style="text-align: center; padding: 40px 20px; color: var(--text-light);">
+                                    <i class="fas fa-bell-slash" style="font-size: 3rem; opacity: 0.3; margin-bottom: 10px;"></i>
+                                    <p data-i18n="admin.notifications.no_notifications">No notifications</p>
+                                </div>
+                            </div>
+                            <div class="notification-footer" style="padding: 10px 20px; border-top: 1px solid var(--border-color); text-align: center;">
+                                <button class="clear-all-btn" id="clearAllBtn" style="background: none; border: none; color: var(--danger-color); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; margin: 0 auto;">
+                                    <i class="fas fa-trash"></i> <span data-i18n="admin.notifications.clear_all">Clear all</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Dynamic buttons will be added here -->
                 </div>
             </div>
@@ -2276,6 +2333,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script src="/js/translations.js?v=2.0"></script>
+    <script src="/js/notifications.js?v=2.0"></script>
     <script src="/js/phase2-functions.js?v=2.7"></script>
     <script src="/js/branch-groups-management.js?v=2.0"></script>
     <script src="/js/student-management.js?v=2.0"></script>
