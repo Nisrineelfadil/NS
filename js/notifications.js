@@ -423,6 +423,7 @@ function setupNotificationUI() {
         console.log('🔔 Bell icon clicked!');
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         
         // Force toggle - remove then add if needed
         const isCurrentlyActive = notificationDropdown.classList.contains('active');
@@ -446,14 +447,18 @@ function setupNotificationUI() {
             notificationBtn.style.transform = 'translateY(0)';
             console.log('Dropdown is now: OPEN');
         }
+        
+        return false;
     });
     
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.notification-container')) {
-            closeNotificationDropdown();
-        }
-    });
+    // Close dropdown when clicking outside (use setTimeout to avoid immediate trigger)
+    setTimeout(() => {
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.notification-container')) {
+                closeNotificationDropdown();
+            }
+        });
+    }, 100);
     
     // Mark all as read
     markAllReadBtn?.addEventListener('click', async () => {
