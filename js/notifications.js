@@ -434,12 +434,16 @@ function setupNotificationUI() {
             }
         });
         
-        // Toggle this dropdown
+        // Toggle this dropdown and button state
         if (isCurrentlyActive) {
             notificationDropdown.classList.remove('active');
+            notificationBtn.classList.remove('active');
+            notificationBtn.style.transform = '';
             console.log('Dropdown is now: CLOSED');
         } else {
             notificationDropdown.classList.add('active');
+            notificationBtn.classList.add('active');
+            notificationBtn.style.transform = 'translateY(0)';
             console.log('Dropdown is now: OPEN');
         }
     });
@@ -467,7 +471,11 @@ function setupNotificationUI() {
 // Close notification dropdown
 function closeNotificationDropdown() {
     const dropdown = document.getElementById('notificationDropdown');
+    const btn = document.getElementById('notificationBtn');
+    
     dropdown?.classList.remove('active');
+    btn?.classList.remove('active');
+    if (btn) btn.style.transform = '';
 }
 
 // Mark all notifications as read

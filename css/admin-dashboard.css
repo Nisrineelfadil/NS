@@ -2685,6 +2685,16 @@ gap: 6px;
     transform: translateY(-2px);
 }
 
+.topbar-btn.btn-icon.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(0) !important;
+}
+
+.topbar-btn.btn-icon.active i {
+    color: white;
+}
+
 .topbar-btn.btn-icon i {
     font-size: 1.2rem;
     color: var(--text-dark);
