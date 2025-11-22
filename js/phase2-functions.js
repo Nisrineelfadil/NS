@@ -59,7 +59,9 @@ async function loadSeasons() {
 
         if (!response.ok) throw new Error('Failed to load seasons');
         
-        const seasons = await response.json();
+        const data = await response.json();
+        // Handle both array response and object with seasons property
+        const seasons = Array.isArray(data) ? data : (data.seasons || []);
         displaySeasons(seasons);
     } catch (error) {
         console.error('Error loading seasons:', error);
