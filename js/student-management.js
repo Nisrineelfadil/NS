@@ -2723,7 +2723,7 @@ function displayTeachers(teachers) {
         const statusColor = teacher.status === 'active' ? 'var(--success-color)' : 'var(--text-light)';
         const formations = teacher.formations.join(', ');
         
-        // Get group names for assigned groups (filter by active season only)
+        // Get group names for assigned groups (show ALL groups with season info)
         const teacherGroups = teacher.groups || [];
         let groupsDisplay = 'None';
         if (teacherGroups.length > 0) {
@@ -2731,15 +2731,17 @@ function displayTeachers(teachers) {
                 if (typeof g === 'string') {
                     // If it's just an ID, find the group name
                     const group = allGroups.find(gr => gr._id === g);
-                    return group ? group.name : null;
+                    if (!group) return null;
+                    // Show group name with season if available
+                    const seasonName = group.seasonName || '';
+                    return seasonName ? `${group.name} (${seasonName})` : group.name;
                 } else {
-                    // If it's populated, check if it's from active season
-                    const seasonId = g.season?.toString();
-                    const isActiveSeasonGroup = !legacyCurrentSeasonId || seasonId === legacyCurrentSeasonId;
-                    return isActiveSeasonGroup ? (g.name || null) : null;
+                    // If it's populated, show group name with season
+                    const seasonName = g.seasonName || '';
+                    return seasonName ? `${g.name} (${seasonName})` : (g.name || null);
                 }
             }).filter(name => name !== null); // Remove null entries
-            groupsDisplay = groupNames.length > 0 ? groupNames.join(', ') : 'None (active season)';
+            groupsDisplay = groupNames.length > 0 ? groupNames.join(', ') : 'None';
         }
         
         html += `
