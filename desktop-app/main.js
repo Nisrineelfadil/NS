@@ -72,7 +72,43 @@ function createWindow() {
     // Create application menu
     createAppMenu();
 
-    // Handle window close
+    // Handle window close - logout admin before closing
+    mainWindow.on('close', async (e) => {
+        // Prevent immediate close
+        e.preventDefault();
+        
+        console.log('🔒 Logging out admin before closing app...');
+        
+        try {
+            // Execute logout script in the renderer process
+            await mainWindow.webContents.executeJavaScript(`
+                (async () => {
+                    try {
+                        // Clear admin token
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('superAdminToken');
+                        
+                        // Clear any session data
+                        sessionStorage.clear();
+                        
+                        console.log('✅ Admin logged out successfully');
+                        return true;
+                    } catch (error) {
+                        console.error('❌ Logout error:', error);
+                        return false;
+                    }
+                })();
+            `);
+            
+            console.log('✅ Logout completed, closing app...');
+        } catch (error) {
+            console.error('❌ Error during logout:', error);
+        }
+        
+        // Now actually close the window
+        mainWindow.destroy();
+    });
+    
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
@@ -405,9 +441,17 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+    console.log('🔒 All windows closed, ensuring logout...');
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+// Handle app quit - ensure logout happens
+app.on('before-quit', async (e) => {
+    console.log('🔒 App is quitting, final logout check...');
+    // The logout already happened in the window close event
+    // This is just a safety check
 });
 
 // Handle certificate errors for localhost
