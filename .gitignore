@@ -6,6 +6,7 @@ node_modules/
 # build/
 nisrine-student-pwa/build/
 nisrine-student-app/build/
+desktop-app/dist/
 
 # Environment variables
 .env
