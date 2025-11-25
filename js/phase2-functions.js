@@ -847,7 +847,7 @@ function displaySeasonLanguageGroups(groups) {
                 <button onclick="messageLanguageGroup('${group._id}', '${group.name}')" class="btn btn-small" style="background: #3b82f6; color: white;" title="Send Message">
                     <i class="fas fa-paper-plane"></i> Message
                 </button>
-                <button onclick="editLanguageGroup('${group._id}')" class="btn btn-small btn-secondary" title="Edit Group">
+                <button onclick='editLanguageGroup(${JSON.stringify(group)})' class="btn btn-small btn-secondary" title="Edit Group">
                     <i class="fas fa-edit"></i> Edit
                 </button>
             </div>
@@ -1152,11 +1152,24 @@ window.sendLanguageGroupMessage = async function(event, groupId, groupName) {
 };
 
 // Edit language group
-window.editLanguageGroup = function(groupId) {
-    // This will open the existing edit group modal
-    // You can reuse the existing editGroup function or create a new one
-    showNotification('Edit group functionality - Opening edit modal...', 'info');
-    // TODO: Implement or call existing edit group function
+window.editLanguageGroup = function(groupData) {
+    // If groupData is a string (old format), fetch from API
+    if (typeof groupData === 'string') {
+        if (typeof editGroup === 'function') {
+            editGroup(groupData);
+        } else {
+            showNotification('Edit group function not available', 'error');
+        }
+        return;
+    }
+    
+    // New optimized path: use the group data directly (instant!)
+    if (typeof editGroupWithData === 'function') {
+        editGroupWithData(groupData);
+    } else {
+        showNotification('Edit group function not available', 'error');
+        console.error('editGroupWithData function not found');
+    }
 };
 
 // Load branch management data

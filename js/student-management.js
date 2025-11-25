@@ -1754,6 +1754,13 @@ async function viewStudent(studentId) {
 }
 
 // Payment Reminders
+// Store reminders data to avoid re-fetching
+let cachedRemindersData = {
+    due15Days: [],
+    due7Days: [],
+    dueTomorrow: []
+};
+
 async function loadPaymentReminders() {
     try {
         const data = await apiRequest('/payment-reminders');
@@ -1791,6 +1798,22 @@ function displayPaymentReminders(reminders) {
         }
     });
     
+    // Cache the categorized data
+    cachedRemindersData = {
+        due15Days,
+        due7Days,
+        dueTomorrow
+    };
+    
+    // Render the sections
+    renderPaymentRemindersSections();
+}
+
+// Separate render function (doesn't fetch data, just displays)
+function renderPaymentRemindersSections() {
+    const grid = document.getElementById('remindersGrid');
+    const { due15Days, due7Days, dueTomorrow } = cachedRemindersData;
+    
     let html = '';
     
     // Section 1: Due in 15 days
@@ -1824,8 +1847,22 @@ function displayPaymentReminders(reminders) {
     grid.innerHTML = html;
 }
 
+// Pagination state for each section
+const paginationState = {
+    'overdue': { currentPage: 1, itemsPerPage: 6 },
+    'due-15': { currentPage: 1, itemsPerPage: 6 },
+    'due-7': { currentPage: 1, itemsPerPage: 6 },
+    'due-tomorrow': { currentPage: 1, itemsPerPage: 6 }
+};
+
 function createReminderSection(title, className, students, color) {
     if (students.length === 0) return '';
+    
+    const state = paginationState[className];
+    const totalPages = Math.ceil(students.length / state.itemsPerPage);
+    const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    const endIndex = startIndex + state.itemsPerPage;
+    const paginatedStudents = students.slice(startIndex, endIndex);
     
     let html = `
         <div class="reminder-section">
@@ -1845,15 +1882,15 @@ function createReminderSection(title, className, students, color) {
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="${className}-tbody">
     `;
     
-    students.forEach(student => {
+    paginatedStudents.forEach(student => {
         const paymentDate = new Date(student.paymentDate);
         const daysUntil = Math.ceil((paymentDate - new Date()) / (1000 * 60 * 60 * 24));
         
         html += `
-            <tr>
+            <tr class="fade-in">
                 <td>
                     <div class="student-name-cell">
                         ${isValidPhotoPath(student.photoPath) ? 
@@ -1896,11 +1933,95 @@ function createReminderSection(title, className, students, color) {
     html += `
                 </tbody>
             </table>
+    `;
+    
+    // Add pagination controls if needed
+    if (totalPages > 1) {
+        html += createPaginationControls(className, state.currentPage, totalPages, students.length, color);
+    }
+    
+    html += `</div>`;
+    
+    return html;
+}
+
+// Create beautiful pagination controls
+function createPaginationControls(className, currentPage, totalPages, totalItems, color) {
+    const startItem = (currentPage - 1) * paginationState[className].itemsPerPage + 1;
+    const endItem = Math.min(currentPage * paginationState[className].itemsPerPage, totalItems);
+    
+    let html = `
+        <div class="pagination-container" style="border-top: 1px solid #e5e7eb; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #f9fafb;">
+            <div class="pagination-info" style="color: #64748b; font-size: 0.9rem;">
+                Showing <strong style="color: ${color};">${startItem}-${endItem}</strong> of <strong>${totalItems}</strong> students
+            </div>
+            <div class="pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+                <button 
+                    class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                    onclick="changePage('${className}', ${currentPage - 1})"
+                    ${currentPage === 1 ? 'disabled' : ''}
+                    title="Previous Page"
+                    style="padding: 8px 12px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-chevron-left" style="font-size: 0.8rem;"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <div class="pagination-numbers" style="display: flex; gap: 5px;">
+    `;
+    
+    // Page numbers with smart ellipsis
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            html += `
+                <button 
+                    class="pagination-number ${i === currentPage ? 'active' : ''}" 
+                    onclick="changePage('${className}', ${i})"
+                    style="
+                        min-width: 40px;
+                        height: 40px;
+                        border: 1px solid ${i === currentPage ? color : '#e5e7eb'};
+                        background: ${i === currentPage ? color : 'white'};
+                        color: ${i === currentPage ? 'white' : '#64748b'};
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: ${i === currentPage ? '600' : '400'};
+                        transition: all 0.2s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">
+                    ${i}
+                </button>
+            `;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += `<span style="padding: 0 5px; color: #cbd5e1;">...</span>`;
+        }
+    }
+    
+    html += `
+                </div>
+                
+                <button 
+                    class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                    onclick="changePage('${className}', ${currentPage + 1})"
+                    ${currentPage === totalPages ? 'disabled' : ''}
+                    title="Next Page"
+                    style="padding: 8px 12px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;">
+                    <span>Next</span>
+                    <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
+                </button>
+            </div>
         </div>
     `;
     
     return html;
 }
+
+// Change page function (OPTIMIZED - no server call!)
+window.changePage = function(className, newPage) {
+    paginationState[className].currentPage = newPage;
+    renderPaymentRemindersSections(); // Just re-render, no API call!
+};
 
 async function sendReminder(studentId, studentName) {
     if (!confirm(`Send payment reminder to "${studentName}"?`)) return;
@@ -3271,8 +3392,81 @@ async function deleteTeacher(teacherId) {
     }
 }
 
-// Edit Group
-async function editGroup(groupId) {
+// Edit Group with Data (Instant - No API call needed!)
+window.editGroupWithData = function(group) {
+    try {
+        console.log('Opening edit modal with data:', group);
+        
+        // Safely get values with fallbacks
+        const groupName = group.name || '';
+        const groupFormation = group.formation || 'Mixed';
+        const groupBranchFormation = group.branchFormation || 'None';
+        const groupMaxStudents = group.maxStudents || 30;
+        const groupStatus = group.status || 'active';
+        const groupId = group._id;
+        
+        // Open modal with group data (INSTANT!)
+        const modal = createModal('Edit Group', `
+            <form onsubmit="updateGroup(event, '${groupId}')">
+                <div class="form-group">
+                    <label>Group Name *</label>
+                    <input type="text" name="name" value="${groupName}" required>
+                </div>
+                <div class="form-group">
+                    <label>Language Formation *</label>
+                    <select name="formation" required>
+                        <option value="Mixed" ${groupFormation === 'Mixed' ? 'selected' : ''}>Mixed</option>
+                        <option value="Allemand" ${groupFormation === 'Allemand' ? 'selected' : ''}>Allemand</option>
+                        <option value="Anglais" ${groupFormation === 'Anglais' ? 'selected' : ''}>Anglais</option>
+                        <option value="Français" ${groupFormation === 'Français' ? 'selected' : ''}>Français</option>
+                        <option value="Ausbildung" ${groupFormation === 'Ausbildung' ? 'selected' : ''}>Ausbildung</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Branch Formation (Filière) <span style="font-size: 11px; color: #888;">- Keep as "Mixed"</span></label>
+                    <select name="branchFormation">
+                        <option value="Mixed" ${groupBranchFormation === 'Mixed' ? 'selected' : ''}>All Branches (Mixed) - Recommended</option>
+                        <option value="None" ${!groupBranchFormation || groupBranchFormation === 'None' ? 'selected' : ''}>None</option>
+                        <option value="Gériatrie" ${groupBranchFormation === 'Gériatrie' ? 'selected' : ''}>Gériatrie</option>
+                        <option value="Aide soignant" ${groupBranchFormation === 'Aide soignant' ? 'selected' : ''}>Aide soignant</option>
+                        <option value="Agent socio éducatif" ${groupBranchFormation === 'Agent socio éducatif' ? 'selected' : ''}>Agent socio éducatif</option>
+                        <option value="Assistante sociale" ${groupBranchFormation === 'Assistante sociale' ? 'selected' : ''}>Assistante sociale</option>
+                        <option value="Restauration" ${groupBranchFormation === 'Restauration' ? 'selected' : ''}>Restauration</option>
+                        <option value="Cuisine" ${groupBranchFormation === 'Cuisine' ? 'selected' : ''}>Cuisine</option>
+                        <option value="Informatique" ${groupBranchFormation === 'Informatique' ? 'selected' : ''}>Informatique</option>
+                        <option value="Gestion hôtelière" ${groupBranchFormation === 'Gestion hôtelière' ? 'selected' : ''}>Gestion hôtelière</option>
+                    </select>
+                    <small style="color: #666; font-size: 11px; display: block; margin-top: 5px;">
+                        ℹ️ Branch teachers will see students from all groups who study their branch
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Max Students *</label>
+                    <input type="number" name="maxStudents" value="${groupMaxStudents}" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="active" ${groupStatus === 'active' ? 'selected' : ''}>Active</option>
+                        <option value="inactive" ${groupStatus === 'inactive' ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Group
+                </button>
+            </form>
+        `);
+        
+        document.body.appendChild(modal);
+        modal.classList.add('active');
+    } catch (error) {
+        console.error('Error opening edit modal:', error);
+        showNotification(error.message || 'Failed to open edit modal', 'error');
+    }
+};
+
+// Edit Group (Legacy - with API call)
+window.editGroup = async function(groupId) {
     try {
         // Fetch group details
         const response = await fetch(`${API_BASE}/groups/${groupId}`, {
@@ -3283,12 +3477,21 @@ async function editGroup(groupId) {
         
         const group = await response.json();
         
+        console.log('Group data:', group); // Debug log
+        
+        // Safely get values with fallbacks
+        const groupName = group.name || '';
+        const groupFormation = group.formation || 'Mixed';
+        const groupBranchFormation = group.branchFormation || 'None';
+        const groupMaxStudents = group.maxStudents || 30;
+        const groupStatus = group.status || 'active';
+        
         // Open modal with group data
         const modal = createModal('Edit Group', `
             <form onsubmit="updateGroup(event, '${groupId}')">
                 <div class="form-group">
                     <label>Group Name *</label>
-                    <input type="text" name="name" value="${group.name}" required>
+                    <input type="text" name="name" value="${groupName}" required>
                 </div>
                 <div class="form-group">
                     <label>Language Formation *</label>
@@ -3320,13 +3523,13 @@ async function editGroup(groupId) {
                 </div>
                 <div class="form-group">
                     <label>Max Students *</label>
-                    <input type="number" name="maxStudents" value="${group.maxStudents}" min="1" required>
+                    <input type="number" name="maxStudents" value="${groupMaxStudents}" min="1" required>
                 </div>
                 <div class="form-group">
                     <label>Status</label>
                     <select name="status">
-                        <option value="active" ${group.status === 'active' ? 'selected' : ''}>Active</option>
-                        <option value="inactive" ${group.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                        <option value="active" ${groupStatus === 'active' ? 'selected' : ''}>Active</option>
+                        <option value="inactive" ${groupStatus === 'inactive' ? 'selected' : ''}>Inactive</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">
@@ -3392,7 +3595,7 @@ async function loadOverdueStudents() {
     }
 }
 
-// Display overdue students
+// Display overdue students with pagination
 function displayOverdueStudents(students) {
     const overdueContent = document.getElementById('overdueContent');
     
@@ -3403,6 +3606,13 @@ function displayOverdueStudents(students) {
     
     // Sort by payment date (oldest first)
     students.sort((a, b) => new Date(a.paymentDate) - new Date(b.paymentDate));
+    
+    // Pagination
+    const state = paginationState['overdue'];
+    const totalPages = Math.ceil(students.length / state.itemsPerPage);
+    const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    const endIndex = startIndex + state.itemsPerPage;
+    const paginatedStudents = students.slice(startIndex, endIndex);
     
     let html = `
         <div style="overflow-x: auto;">
@@ -3422,14 +3632,14 @@ function displayOverdueStudents(students) {
                 <tbody>
     `;
     
-    students.forEach(student => {
+    paginatedStudents.forEach(student => {
         const paymentDate = new Date(student.paymentDate);
         const now = new Date();
         const daysOverdue = Math.floor((now - paymentDate) / (1000 * 60 * 60 * 24));
         const groupName = student.group?.name || student.groupName || 'N/A';
         
         html += `
-            <tr style="border-bottom: 1px solid var(--border-color); background: rgba(255, 71, 87, 0.05);">
+            <tr class="fade-in" style="border-bottom: 1px solid var(--border-color); background: rgba(255, 71, 87, 0.05);">
                 <td style="padding: 12px;">
                     <strong>${student.fullName}</strong>
                 </td>
@@ -3469,6 +3679,14 @@ function displayOverdueStudents(students) {
                 </tbody>
             </table>
         </div>
+    `;
+    
+    // Add pagination if needed
+    if (totalPages > 1) {
+        html += createOverduePaginationControls(state.currentPage, totalPages, students.length);
+    }
+    
+    html += `
         <div style="margin-top: 20px; padding: 15px; background: rgba(255, 71, 87, 0.1); border-left: 4px solid #ff4757; border-radius: 8px;">
             <p style="color: #ff4757; font-weight: 600; margin-bottom: 8px;">
                 <i class="fas fa-exclamation-triangle"></i> ${students.length} student${students.length !== 1 ? 's' : ''} with overdue payments
@@ -3481,6 +3699,85 @@ function displayOverdueStudents(students) {
     
     overdueContent.innerHTML = html;
 }
+
+// Create pagination controls for overdue section
+function createOverduePaginationControls(currentPage, totalPages, totalItems) {
+    const startItem = (currentPage - 1) * paginationState['overdue'].itemsPerPage + 1;
+    const endItem = Math.min(currentPage * paginationState['overdue'].itemsPerPage, totalItems);
+    const color = '#ff4757'; // Red for overdue
+    
+    let html = `
+        <div class="pagination-container" style="border-top: 1px solid #e5e7eb; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; margin-top: 0;">
+            <div class="pagination-info" style="color: #64748b; font-size: 0.9rem;">
+                Showing <strong style="color: ${color};">${startItem}-${endItem}</strong> of <strong>${totalItems}</strong> students
+            </div>
+            <div class="pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+                <button 
+                    class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                    onclick="changeOverduePage(${currentPage - 1})"
+                    ${currentPage === 1 ? 'disabled' : ''}
+                    title="Previous Page"
+                    style="padding: 8px 12px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-chevron-left" style="font-size: 0.8rem;"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <div class="pagination-numbers" style="display: flex; gap: 5px;">
+    `;
+    
+    // Page numbers with smart ellipsis
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            html += `
+                <button 
+                    class="pagination-number ${i === currentPage ? 'active' : ''}" 
+                    onclick="changeOverduePage(${i})"
+                    style="
+                        min-width: 40px;
+                        height: 40px;
+                        border: 1px solid ${i === currentPage ? color : '#e5e7eb'};
+                        background: ${i === currentPage ? color : 'white'};
+                        color: ${i === currentPage ? 'white' : '#64748b'};
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: ${i === currentPage ? '600' : '400'};
+                        transition: all 0.2s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">
+                    ${i}
+                </button>
+            `;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += `<span style="padding: 0 5px; color: #cbd5e1;">...</span>`;
+        }
+    }
+    
+    html += `
+                </div>
+                
+                <button 
+                    class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                    onclick="changeOverduePage(${currentPage + 1})"
+                    ${currentPage === totalPages ? 'disabled' : ''}
+                    title="Next Page"
+                    style="padding: 8px 12px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;">
+                    <span>Next</span>
+                    <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// Change page function for overdue section
+window.changeOverduePage = function(newPage) {
+    paginationState['overdue'].currentPage = newPage;
+    loadOverdueStudents(); // Reload overdue students with new page
+};
 
 // ==================== GROUP MESSAGING ====================
 

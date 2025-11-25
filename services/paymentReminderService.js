@@ -189,28 +189,37 @@ class PaymentReminderService {
         }
     }
 
-    // Get all pending reminders
+    // Get all pending reminders (OPTIMIZED)
     async getPendingReminders() {
         try {
             const now = new Date();
+            const fifteenDaysFromNow = new Date(now);
+            fifteenDaysFromNow.setDate(fifteenDaysFromNow.getDate() + 15);
             
+            // OPTIMIZED: Use database query to filter students
+            // Only get students whose payment is due within 15 days OR overdue
             const students = await ManagedStudent.find({
                 status: 'active',
-                paymentStatus: { $ne: 'paid' }
+                paymentStatus: { $ne: 'paid' },
+                paymentDate: { $lte: fifteenDaysFromNow } // Payment due within 15 days or already passed
             })
+            .select('fullName phoneNumber parentPhone schoolEmail groupName formation paymentAmount paymentDate paymentStatus reminderDaysBefore paymentReminderSent lastReminderDate')
             .populate('group', 'name')
-            .sort({ paymentDate: 1 });
+            .sort({ paymentDate: 1 })
+            .lean(); // Use lean() for faster queries (returns plain JS objects)
 
             const reminders = [];
 
             for (const student of students) {
-                const reminderDate = new Date(student.paymentDate);
-                reminderDate.setDate(reminderDate.getDate() - student.reminderDaysBefore);
+                const paymentDate = new Date(student.paymentDate);
+                const reminderDate = new Date(paymentDate);
+                reminderDate.setDate(reminderDate.getDate() - (student.reminderDaysBefore || 7));
                 
-                const isOverdue = now > student.paymentDate;
-                const shouldRemind = now >= reminderDate && now < student.paymentDate;
-                const daysUntilPayment = Math.ceil((student.paymentDate - now) / (1000 * 60 * 60 * 24));
+                const isOverdue = now > paymentDate;
+                const shouldRemind = now >= reminderDate && now < paymentDate;
+                const daysUntilPayment = Math.ceil((paymentDate - now) / (1000 * 60 * 60 * 24));
 
+                // Include if overdue OR if within reminder window
                 if (isOverdue || shouldRemind) {
                     reminders.push({
                         student: {
@@ -220,6 +229,7 @@ class PaymentReminderService {
                             parentPhone: student.parentPhone,
                             schoolEmail: student.schoolEmail,
                             groupName: student.groupName,
+                            formation: student.formation,
                             paymentAmount: student.paymentAmount,
                             paymentDate: student.paymentDate,
                             paymentStatus: student.paymentStatus
