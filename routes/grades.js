@@ -1227,7 +1227,7 @@ router.get('/admin/students/:studentId/grades', verifyToken, async (req, res) =>
 // Get all grades (Admin - with filters)
 router.get('/admin/grades', verifyToken, async (req, res) => {
     try {
-        const { formation, groupId, semester, academicYear, studentId } = req.query;
+        const { formation, groupId, semester, academicYear, studentId, studentName } = req.query;
         
         let query = {};
         
@@ -1236,6 +1236,20 @@ router.get('/admin/grades', verifyToken, async (req, res) => {
         if (semester) query.semester = semester;
         if (academicYear) query.academicYear = academicYear;
         if (studentId) query.student = studentId;
+        
+        // If searching by student name, find matching students first
+        if (studentName && !studentId) {
+            const students = await ManagedStudent.find({
+                fullName: { $regex: studentName, $options: 'i' }
+            }).select('_id');
+            
+            if (students.length > 0) {
+                query.student = { $in: students.map(s => s._id) };
+            } else {
+                // No matching students found
+                return res.json([]);
+            }
+        }
         
         const grades = await Grade.find(query)
             .populate('student', 'fullName schoolEmail photoPath')

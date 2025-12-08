@@ -236,7 +236,21 @@
                     </div>
                 </div>
                 <div class="about-image">
-                    <img src="Img/about.png" alt="Nisrine School - German Language Center">
+                    <!-- YouTube Video (plays first) -->
+                    <div id="about-video-container" class="about-media-container">
+                        <iframe id="about-youtube-video" 
+                                width="100%" 
+                                height="100%" 
+                                src="https://www.youtube.com/embed/bS07FeWQiHc?enablejsapi=1&autoplay=1&mute=1" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    <!-- Static Image (shows after video) -->
+                    <div id="about-image-container" class="about-media-container" style="display: none;">
+                        <img src="Img/about.png" alt="Nisrine School - German Language Center">
+                    </div>
                     <div class="experience-badge apple-glass">
                         <div class="counter-container">
                             <span class="counter" data-target="1000">0</span><span class="plus">+</span>
@@ -792,6 +806,9 @@
 
     <!-- Student Slider JavaScript -->
     <script src="js/simple-slider.js"></script>
+
+    <!-- About Section Media Switcher -->
+    <script src="js/about-media-switcher.js"></script>
 
     <!-- Modern Gallery JavaScript -->
     <script src="js/modern-gallery.js"></script>

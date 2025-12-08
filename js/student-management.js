@@ -446,7 +446,7 @@ function updateHeaderActions(tabName) {
 }
 
 // Tab Switching
-function switchTab(tabName) {
+async function switchTab(tabName) {
     // Update sidebar menu - find the correct menu item
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');
@@ -492,8 +492,8 @@ function switchTab(tabName) {
     
     // Load data for specific tabs
     if (tabName === 'grades') {
-        loadGradesSeasonFilter();
-        populateStudentFilter();
+        // Load season filter first, which will also load groups and students
+        await loadGradesSeasonFilter();
     } else if (tabName === 'teachers') {
         loadTeachers();
     } else if (tabName === 'seasons') {
@@ -521,34 +521,37 @@ async function populateStudentFilter() {
     if (!studentFilter) return;
     
     try {
-        // Get selected season from grades season filter
+        // Get selected season and group from filters
         const seasonId = document.getElementById('gradesSeasonFilter')?.value;
+        const groupId = document.getElementById('gradesGroupFilter')?.value;
         
-        // Build query with season parameter
+        // Build query with season and group parameters
         const params = new URLSearchParams();
         if (seasonId) {
             params.append('season', seasonId);
         }
+        if (groupId) {
+            params.append('group', groupId);
+        }
+        // Remove the limit to get ALL students (not just 50)
+        params.append('limit', '1000');
         
-        // Fetch students for the selected season
+        console.log('📥 Fetching students for grades tab:', { seasonId, groupId });
+        
+        // Fetch students for the selected season/group
         const data = await apiRequest(`/students?${params.toString()}`);
         
         if (data && data.success) {
             allGradesStudents = data.students;
             
+            console.log(`✅ Loaded ${allGradesStudents.length} students for grades tab`);
+            
+            // Don't populate the dropdown here - let filterGradesStudents() handle it
+            // This ensures the dropdown is always filtered by group/search
             studentFilter.innerHTML = `<option value="">${t('selectStudent')}</option>`;
             
-            allGradesStudents.forEach(student => {
-                const option = document.createElement('option');
-                option.value = student._id;
-                option.textContent = student.fullName;
-                option.dataset.name = student.fullName.toLowerCase();
-                option.dataset.email = (student.schoolEmail || '').toLowerCase();
-                option.dataset.phone = (student.phones || []).join(' ').toLowerCase();
-                studentFilter.appendChild(option);
-            });
-            
-            console.log(`✅ Loaded ${allGradesStudents.length} students for grades tab`);
+            // Trigger filtering to populate the dropdown based on current filters
+            filterGradesStudents();
         }
     } catch (error) {
         console.error('Error loading students for grades:', error);
@@ -597,18 +600,74 @@ async function loadGradesSeasonFilter() {
         });
         
         console.log('✅ Grades season filter loaded with', seasons.length, 'seasons');
+        
+        // Also load groups for the group filter
+        await loadGradesGroupFilter();
+        
+        // Then populate student filter
+        await populateStudentFilter();
     } catch (error) {
         console.error('Error loading grades season filter:', error);
     }
 }
 
-// Filter students in grades dropdown based on search and season
+// Load group filter for grades page
+async function loadGradesGroupFilter() {
+    try {
+        // Get selected season to filter groups
+        const seasonId = document.getElementById('gradesSeasonFilter')?.value;
+        
+        const response = await fetch('/api/student-management/groups', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (!response.ok) {
+            console.warn('Could not load groups for grades filter');
+            return;
+        }
+        
+        const data = await response.json();
+        let groups = data.groups || [];
+        
+        // Filter groups by selected season
+        if (seasonId) {
+            groups = groups.filter(group => {
+                const groupSeasonId = group.season?._id?.toString() || group.season?.toString();
+                return groupSeasonId === seasonId;
+            });
+            console.log(`🔍 Filtered to ${groups.length} groups for season ${seasonId}`);
+        }
+        
+        const groupFilter = document.getElementById('gradesGroupFilter');
+        
+        if (!groupFilter) return;
+        
+        // Clear existing options (keep "All Groups")
+        groupFilter.innerHTML = '<option value="">All Groups</option>';
+        
+        groups.forEach(group => {
+            const option = document.createElement('option');
+            option.value = group._id;
+            option.textContent = `${group.name} (${group.formation})`;
+            groupFilter.appendChild(option);
+        });
+        
+        console.log('✅ Grades group filter loaded with', groups.length, 'groups');
+    } catch (error) {
+        console.error('Error loading grades group filter:', error);
+    }
+}
+
+// Filter students in grades dropdown based on search, season, and group
 function filterGradesStudents() {
     const searchTerm = document.getElementById('gradesStudentSearch').value.toLowerCase();
     const seasonId = document.getElementById('gradesSeasonFilter')?.value;
+    const groupId = document.getElementById('gradesGroupFilter')?.value;
     const studentFilter = document.getElementById('gradesStudentFilter');
     
     if (!studentFilter) return;
+    
+    console.log('🔍 Filtering students:', { searchTerm, seasonId, groupId, totalStudents: allGradesStudents.length });
     
     const currentValue = studentFilter.value;
     studentFilter.innerHTML = `<option value="">${t('selectStudent')}</option>`;
@@ -625,12 +684,25 @@ function filterGradesStudents() {
         const studentSeasonId = student.group?.season?.toString();
         const matchesSeason = !seasonId || studentSeasonId === seasonId;
         
-        // Check if search term matches name, email, or phone AND season matches
-        if (matchesSeason && (!searchTerm || 
-            name.includes(searchTerm) || 
-            email.includes(searchTerm) || 
-            phones.includes(searchTerm))) {
-            
+        // Filter by group if selected
+        const studentGroupId = student.group?._id?.toString() || student.group?.toString();
+        const matchesGroup = !groupId || studentGroupId === groupId;
+        
+        // Check if search term matches name, email, or phone AND season AND group match
+        const nameMatch = name.includes(searchTerm);
+        const emailMatch = email.includes(searchTerm);
+        const phoneMatch = phones.includes(searchTerm);
+        const searchMatch = !searchTerm || nameMatch || emailMatch || phoneMatch;
+        
+        // Debug logging for first student when filtering by group or searching
+        if ((groupId || searchTerm) && matchCount === 0) {
+            console.log(`🔎 First student check: "${student.fullName}"`);
+            console.log(`   Group: ${studentGroupId} vs ${groupId} = ${matchesGroup}`);
+            console.log(`   Season: ${studentSeasonId} vs ${seasonId} = ${matchesSeason}`);
+            console.log(`   Search: "${searchTerm}" in "${name}" = ${nameMatch}`);
+        }
+        
+        if (matchesSeason && matchesGroup && searchMatch) {
             const option = document.createElement('option');
             option.value = student._id;
             option.textContent = student.fullName;
@@ -643,6 +715,21 @@ function filterGradesStudents() {
             matchCount++;
         }
     });
+    
+    console.log(`✅ Found ${matchCount} matching students, first match: ${firstMatchId}`);
+    
+    // If no students found when group is selected, show which groups have students
+    if (matchCount === 0 && groupId) {
+        const groupsWithStudents = {};
+        allGradesStudents.forEach(s => {
+            const gId = s.group?._id?.toString() || s.group?.toString();
+            if (gId) {
+                groupsWithStudents[gId] = (groupsWithStudents[gId] || 0) + 1;
+            }
+        });
+        console.log('📊 Students per group in loaded data:', groupsWithStudents);
+        console.log('🔍 Selected group ID:', groupId);
+    }
     
     // Auto-select and load first matching student if there's a search term
     if (searchTerm && firstMatchId) {

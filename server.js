@@ -26,6 +26,7 @@ const cashRegisterRoutes = require('./routes/cashRegister');
 const appointmentsRoutes = require('./routes/appointments');
 const ratingsRoutes = require('./routes/ratings');
 const notificationsRoutes = require('./routes/notifications');
+const seasonBackupRoutes = require('./routes/seasonBackup');
 // const pushNotificationsRoutes = require('./routes/pushNotifications'); // DISABLED - Push notifications temporarily disabled
 
 // Import services
@@ -282,6 +283,10 @@ app.use('/api/cash-register', dbMiddleware, cashRegisterRoutes);
 app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
 app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
+app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
+  req.io = io; // Pass Socket.IO instance to routes
+  next();
+}, seasonBackupRoutes);
 // app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes); // DISABLED
 
 // 404 handler

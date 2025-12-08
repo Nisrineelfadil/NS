@@ -465,10 +465,319 @@ async function deleteSeason(seasonId) {
     }
 }
 
-// Archive to Mega Cloud (Placeholder)
-window.archiveToMegaCloud = function(seasonId) {
-    alert('🔴 Archive to Mega Cloud feature coming soon!\n\nThis feature will allow you to automatically backup your season data to Mega cloud storage.');
+// Archive to Mega Cloud - Season Backup System
+window.archiveToMegaCloud = async function(seasonId) {
+    try {
+        // Get season name for confirmation
+        const seasonCard = document.querySelector(`[data-season-id="${seasonId}"]`);
+        const seasonName = seasonCard?.querySelector('h3')?.textContent?.trim() || 'this season';
+        
+        // Confirm backup
+        const confirmed = confirm(
+            `📦 Create Complete Season Backup\n\n` +
+            `Season: ${seasonName}\n\n` +
+            `This will:\n` +
+            `✅ Extract all student data (payments, grades, attendance)\n` +
+            `✅ Organize files in structured folders\n` +
+            `✅ Compress to ZIP file\n` +
+            `✅ Upload to MEGA cloud storage\n\n` +
+            `This may take 5-10 minutes for ${document.getElementById('totalStudentsCount')?.textContent || '161'} students.\n\n` +
+            `Continue?`
+        );
+        
+        if (!confirmed) return;
+        
+        // Show progress modal
+        showBackupProgressModal(seasonName);
+        
+        // Start backup
+        const response = await fetch('/api/season-backup/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                seasonId: seasonId,
+                uploadToCloud: true,
+                keepLocalCopy: false
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to start backup');
+        }
+        
+        // Store backup ID for tracking
+        window.currentBackupId = data.backupId;
+        
+        updateBackupProgress({
+            percent: 5,
+            message: 'Backup started successfully...',
+            phase: 'initialization'
+        });
+        
+        // Poll for status updates (fallback if Socket.IO not available)
+        if (!window.socket || !window.socket.connected) {
+            pollBackupStatus(data.backupId);
+        }
+        
+    } catch (error) {
+        console.error('Error starting backup:', error);
+        hideBackupProgressModal();
+        alert('❌ Failed to start backup:\n\n' + error.message);
+    }
 };
+
+// Show backup progress modal
+function showBackupProgressModal(seasonName) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('backupProgressModal');
+    if (existingModal) existingModal.remove();
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'backupProgressModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        ">
+            <h3 style="margin: 0 0 20px 0; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5em;">📦</span>
+                Creating Season Backup
+            </h3>
+            
+            <div style="margin-bottom: 15px;">
+                <strong>Season:</strong> ${seasonName}
+            </div>
+            
+            <div style="
+                background: #f1f5f9;
+                border-radius: 8px;
+                height: 30px;
+                overflow: hidden;
+                margin-bottom: 15px;
+            ">
+                <div id="backupProgressBar" style="
+                    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+                    height: 100%;
+                    width: 0%;
+                    transition: width 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 0.85rem;
+                ">
+                    <span id="backupProgressPercent">0%</span>
+                </div>
+            </div>
+            
+            <div id="backupProgressMessage" style="
+                color: #64748b;
+                font-size: 0.95rem;
+                margin-bottom: 10px;
+            ">
+                Initializing backup...
+            </div>
+            
+            <div id="backupProgressDetails" style="
+                color: #94a3b8;
+                font-size: 0.85rem;
+                min-height: 20px;
+            "></div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="cancelBackup()" style="
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                ">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Update backup progress
+function updateBackupProgress(data) {
+    const progressBar = document.getElementById('backupProgressBar');
+    const progressPercent = document.getElementById('backupProgressPercent');
+    const message = document.getElementById('backupProgressMessage');
+    const details = document.getElementById('backupProgressDetails');
+    
+    if (progressBar) {
+        progressBar.style.width = data.percent + '%';
+    }
+    
+    if (progressPercent) {
+        progressPercent.textContent = data.percent + '%';
+    }
+    
+    if (message) {
+        const phaseEmojis = {
+            initialization: '🔧',
+            extraction: '📊',
+            metadata: '📝',
+            compression: '🗜️',
+            upload: '☁️',
+            cleanup: '🧹',
+            complete: '✅',
+            error: '❌'
+        };
+        
+        const emoji = phaseEmojis[data.phase] || '⏳';
+        message.textContent = `${emoji} ${data.message}`;
+    }
+    
+    if (details && data.currentStudent && data.totalStudents) {
+        details.textContent = `Processed ${data.currentStudent} of ${data.totalStudents} students`;
+    }
+}
+
+// Hide backup progress modal
+function hideBackupProgressModal() {
+    const modal = document.getElementById('backupProgressModal');
+    if (modal) modal.remove();
+}
+
+// Cancel backup
+window.cancelBackup = function() {
+    if (confirm('Are you sure you want to cancel the backup?')) {
+        hideBackupProgressModal();
+        window.currentBackupId = null;
+    }
+};
+
+// Poll backup status (fallback if Socket.IO not available)
+async function pollBackupStatus(backupId) {
+    const maxAttempts = 120; // 10 minutes max (5 second intervals)
+    let attempts = 0;
+    
+    const interval = setInterval(async () => {
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+            clearInterval(interval);
+            hideBackupProgressModal();
+            alert('⚠️ Backup is taking longer than expected.\n\nPlease check the backup history later.');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/season-backup/status/${backupId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.backup) {
+                const backup = data.backup;
+                
+                if (backup.status === 'completed') {
+                    clearInterval(interval);
+                    updateBackupProgress({
+                        percent: 100,
+                        message: 'Backup completed successfully!',
+                        phase: 'complete'
+                    });
+                    
+                    setTimeout(() => {
+                        hideBackupProgressModal();
+                        alert(
+                            `✅ Backup Completed Successfully!\n\n` +
+                            `Students: ${backup.stats.totalStudents}\n` +
+                            `Files: ${backup.stats.totalFiles}\n` +
+                            `Size: ${backup.stats.totalSizeMB} MB\n` +
+                            `Duration: ${backup.duration}s\n\n` +
+                            (backup.megaUpload?.success ? 
+                                `☁️ Uploaded to MEGA cloud storage` : 
+                                `⚠️ Cloud upload failed (local backup created)`)
+                        );
+                    }, 1500);
+                    
+                } else if (backup.status === 'failed') {
+                    clearInterval(interval);
+                    hideBackupProgressModal();
+                    alert('❌ Backup failed:\n\n' + (backup.error?.message || 'Unknown error'));
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error polling backup status:', error);
+        }
+    }, 5000); // Poll every 5 seconds
+}
+
+// Listen for Socket.IO backup events (if available)
+if (window.socket) {
+    window.socket.on('backup:progress', (data) => {
+        if (data.backupId === window.currentBackupId) {
+            updateBackupProgress(data);
+        }
+    });
+    
+    window.socket.on('backup:complete', (data) => {
+        if (data.backupId === window.currentBackupId) {
+            updateBackupProgress({
+                percent: 100,
+                message: 'Backup completed successfully!',
+                phase: 'complete'
+            });
+            
+            setTimeout(() => {
+                hideBackupProgressModal();
+                alert(
+                    `✅ Backup Completed Successfully!\n\n` +
+                    `Students: ${data.result.stats.totalStudents}\n` +
+                    `Files: ${data.result.stats.totalFiles}\n` +
+                    `Size: ${data.result.stats.totalSizeMB} MB\n` +
+                    `Duration: ${data.result.duration}s\n\n` +
+                    (data.result.uploadResult?.success ? 
+                        `☁️ Uploaded to MEGA cloud storage` : 
+                        `⚠️ Cloud upload failed (local backup created)`)
+                );
+            }, 1500);
+        }
+    });
+    
+    window.socket.on('backup:error', (data) => {
+        if (data.backupId === window.currentBackupId) {
+            hideBackupProgressModal();
+            alert('❌ Backup failed:\n\n' + data.error);
+        }
+    });
+}
 
 // ============================================
 // Branch Groups Management

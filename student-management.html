@@ -1836,14 +1836,25 @@
                            style="width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                 </div>
 
-                <!-- Season Filter -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">
-                        <i class="fas fa-calendar-alt"></i> Season
-                    </label>
-                    <select id="gradesSeasonFilter" onchange="populateStudentFilter()" 
-                            style="width: 100%; padding: 12px 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 8px; font-size: 14px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
-                    </select>
+                <!-- Season and Group Filters -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">
+                            <i class="fas fa-calendar-alt"></i> Season
+                        </label>
+                        <select id="gradesSeasonFilter" onchange="loadGradesGroupFilter(); populateStudentFilter();" 
+                                style="width: 100%; padding: 12px 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 8px; font-size: 14px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: var(--text-light); font-weight: 500;">
+                            <i class="fas fa-users"></i> <span data-i18n="group">Group</span>
+                        </label>
+                        <select id="gradesGroupFilter" onchange="populateStudentFilter()" 
+                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                            <option value="">All Groups</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Filters -->
