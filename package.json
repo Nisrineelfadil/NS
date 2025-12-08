@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "build": "node build-pwa.js"
+    "build": "echo 'No build step required for main app'",
+    "build:pwa": "node build-pwa.js"
   },
   "repository": {
     "type": "git",
