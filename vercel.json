@@ -1,45 +1,12 @@
 {
   "version": 2,
-  "installCommand": "npm install",
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 60,
-        "includeFiles": [
-          "*.html",
-          "favicon.ico",
-          "css/**",
-          "js/**",
-          "Img/**",
-          "public/**",
-          "pwa/**",
-          "react-portals/dist/**",
-          "models/**/*.js",
-          "routes/**/*.js",
-          "services/**/*.js",
-          "middleware/**/*.js",
-          "config/**/*.js",
-          "utils/**/*.js",
-          "scripts/**/*.js",
-          "server.js",
-          "package.json",
-          "node_modules/**"
-        ],
-        "excludeFiles": [
-          "**/*.map",
-          "**/*.md",
-          "Documents/**",
-          "nisrine-student-pwa/**",
-          "*.rar",
-          "*.zip",
-          "*.bat",
-          "*.ps1"
-        ]
-      }
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "includeFiles": "{*.html,favicon.ico,css/**,js/**,Img/**,public/**,pwa/**,react-portals/dist/**,models/**,routes/**,services/**,middleware/**,config/**,utils/**,server.js}"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
@@ -49,9 +16,5 @@
       "src": "/(.*)",
       "dest": "/api/index.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "VERCEL": "1"
-  }
+  ]
 }
