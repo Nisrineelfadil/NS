@@ -154,13 +154,34 @@ app.use('/pwa', express.static(path.join(rootPath, 'pwa'), staticOptions));
 
 // Helper function to serve HTML files (Vercel-compatible)
 const serveHTML = (filename) => (req, res) => {
-  const filePath = path.join(process.cwd(), filename);
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error(`Error serving ${filename}:`, err.message);
-      res.status(err.status || 500).send(`Error loading page: ${filename}`);
+  try {
+    const filePath = path.join(process.cwd(), filename);
+    
+    // Check if file exists first
+    if (!fs.existsSync(filePath)) {
+      console.error(`❌ File not found: ${filePath}`);
+      return res.status(404).send(`File not found: ${filename}`);
     }
-  });
+    
+    // Send the file
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error(`❌ Error serving ${filename}:`, err.message);
+        console.error('File path:', filePath);
+        console.error('Error code:', err.code);
+        
+        // Don't send response if headers already sent
+        if (!res.headersSent) {
+          res.status(err.status || 500).send(`Error loading page: ${filename}`);
+        }
+      }
+    });
+  } catch (error) {
+    console.error(`❌ Exception in serveHTML for ${filename}:`, error.message);
+    if (!res.headersSent) {
+      res.status(500).send(`Server error loading ${filename}`);
+    }
+  }
 };
 
 // Serve HTML files (after static files)

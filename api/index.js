@@ -28,6 +28,14 @@ try {
   const app = require('../server');
   
   console.log('✅ Express app loaded successfully');
+  console.log('📁 Current working directory:', process.cwd());
+  console.log('📁 __dirname:', __dirname);
+  
+  // Log available files in root
+  const fs = require('fs');
+  const path = require('path');
+  const rootFiles = fs.readdirSync(process.cwd()).filter(f => f.endsWith('.html'));
+  console.log('📄 HTML files found:', rootFiles.join(', '));
   
   // Export the Express app directly for Vercel
   // Vercel's @vercel/node builder knows how to handle Express apps
