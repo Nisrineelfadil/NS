@@ -3279,3 +3279,1441 @@ gap: 6px;
         height: 35px;
     }
 }
+
+/* ==================== JOB APPLICATIONS STYLES ==================== */
+
+/* Service Type Selection (First Level) */
+.service-type-selection {
+    padding: 20px 0;
+}
+
+.services-title {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.services-title i {
+    color: var(--primary-color);
+}
+
+.service-type-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.service-type-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
+}
+
+.service-type-card:hover {
+    transform: translateX(10px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.service-type-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.service-type-icon.cv {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.service-type-icon.applying {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.service-type-icon.translation {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.service-type-info {
+    flex: 1;
+}
+
+.service-type-info h3 {
+    font-size: 1.25rem;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+}
+
+.service-type-info p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.service-type-count {
+    background: var(--bg-light);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    min-width: 60px;
+    text-align: center;
+}
+
+.service-type-arrow {
+    color: var(--text-light);
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.service-type-card:hover .service-type-arrow {
+    transform: translateX(5px);
+    color: var(--primary-color);
+}
+
+/* Back Button */
+.back-to-services-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-light);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+}
+
+.back-to-services-btn:hover {
+    background: white;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Applying Service Content */
+.applying-service-content {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Applying Tabs (Ausbildung/Arbeit) */
+.applying-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 25px;
+    background: white;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.applying-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.applying-tab:hover {
+    background: var(--bg-light);
+    color: var(--text-dark);
+}
+
+.applying-tab.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+}
+
+.applying-tab i {
+    font-size: 1.2rem;
+}
+
+.applying-tab .tab-badge {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.applying-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.applying-tab .tab-badge.pending-badge {
+    background: #ef4444;
+    color: white;
+}
+
+.applying-tab.active .tab-badge.pending-badge {
+    background: rgba(255, 255, 255, 0.9);
+    color: #ef4444;
+}
+
+/* Pending Review Header */
+.pending-review-header {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 20px;
+    border-left: 4px solid #f59e0b;
+}
+
+.pending-review-header h3 {
+    color: #92400e;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pending-review-header p {
+    color: #a16207;
+    font-size: 0.9rem;
+}
+
+/* Review Modal Styles */
+.review-applicant-info {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.review-applicant-info h4 {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.review-applicant-info p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.review-applicant-info p i {
+    width: 16px;
+    color: var(--primary-color);
+}
+
+/* Notes preview in table */
+.notes-preview {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Review Modal Form Styles */
+#reviewApplicationModal .modal-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#reviewApplicationModal .modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px 25px;
+    border-radius: 16px 16px 0 0;
+    flex-shrink: 0;
+}
+
+#reviewApplicationModal .modal-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+#reviewApplicationModal .modal-body {
+    background: white;
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: 60vh;
+}
+
+#reviewApplicationModal .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#reviewApplicationModal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#reviewApplicationModal .modal-body::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+#reviewApplicationModal .modal-footer {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 0 0 16px 16px;
+    flex-shrink: 0;
+    border-top: 1px solid var(--border-color);
+}
+
+#reviewApplicationModal .form-group {
+    margin-bottom: 18px;
+}
+
+#reviewApplicationModal .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+#reviewApplicationModal .form-group label i {
+    color: var(--primary-color);
+    width: 16px;
+}
+
+#reviewApplicationModal .form-group select,
+#reviewApplicationModal .form-group input,
+#reviewApplicationModal .form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    color: var(--text-dark);
+}
+
+#reviewApplicationModal .form-group select:focus,
+#reviewApplicationModal .form-group input:focus,
+#reviewApplicationModal .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
+}
+
+#reviewApplicationModal .form-group select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+}
+
+#reviewApplicationModal .form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+#reviewApplicationModal .modal-footer {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+#reviewApplicationModal .modal-footer .action-btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Info button style for download */
+.action-btn.btn-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+}
+
+.action-btn.btn-info:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+}
+
+.action-btn.btn-sm {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+
+.no-docs {
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* CV and Translation Service Admin Styles */
+.cv-tabs,
+.translation-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.cv-tab,
+.translation-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    color: var(--text-dark);
+    flex: 1;
+    min-width: 180px;
+    justify-content: center;
+}
+
+.cv-tab:hover,
+.translation-tab:hover {
+    border-color: var(--primary-color);
+    background: #fffef5;
+}
+
+.cv-tab.active,
+.translation-tab.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 20px rgba(255, 204, 0, 0.3);
+}
+
+.cv-tab .tab-badge,
+.translation-tab .tab-badge {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.cv-tab.active .tab-badge,
+.translation-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.cv-tab .tab-badge.pending-badge,
+.translation-tab .tab-badge.pending-badge {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.cv-tab.active .tab-badge.pending-badge,
+.translation-tab.active .tab-badge.pending-badge {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.cv-tab-content,
+.translation-tab-content {
+    display: none;
+}
+
+.cv-tab-content.active,
+.translation-tab-content.active {
+    display: block;
+}
+
+.cv-management-header,
+.translation-management-header {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-left: 5px solid #3b82f6;
+}
+
+.cv-management-header h3,
+.translation-management-header h3 {
+    color: #1e40af;
+    margin-bottom: 8px;
+    font-size: 1.3rem;
+}
+
+.cv-management-header p,
+.translation-management-header p {
+    color: #3b82f6;
+    margin: 0;
+}
+
+/* Status Filter Cards */
+.cv-status-cards,
+.translation-status-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.status-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.status-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.status-card.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 20px rgba(255, 204, 0, 0.2);
+}
+
+.status-card .status-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.status-card.new-card .status-icon {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+}
+
+.status-card.progress-card .status-icon {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+}
+
+.status-card.completed-card .status-icon {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+}
+
+.status-card.all-card .status-icon {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #374151;
+}
+
+.status-card .status-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-card .status-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.status-card .status-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* Translation Table Styles */
+.translation-table .document-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f3f4f6;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.translation-table .document-count i {
+    color: var(--primary-color);
+}
+
+.translation-table .language-pair {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    color: #5b21b6;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.translation-table .language-pair i {
+    font-size: 0.75rem;
+}
+
+.translation-table .document-count {
+    white-space: nowrap;
+}
+
+/* Status Badges for Translation */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.status-badge.pending {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+}
+
+.status-badge.in-progress {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+}
+
+.status-badge.completed {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+}
+
+/* Status Update Dropdown */
+.status-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.status-dropdown select {
+    appearance: none;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 35px 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.status-dropdown select:hover {
+    border-color: var(--primary-color);
+}
+
+.status-dropdown select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
+}
+
+.status-dropdown::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+    font-size: 0.75rem;
+}
+
+/* Coming Soon Placeholder */
+.coming-soon-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    background: white;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+}
+
+.coming-soon-placeholder i {
+    font-size: 4rem;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.coming-soon-placeholder h3 {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.coming-soon-placeholder p {
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+/* Main Service Tabs - DEPRECATED but kept for compatibility */
+.service-main-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.service-main-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 20px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: var(--bg-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.service-main-tab:hover {
+    background: #f0f0f0;
+    color: var(--text-dark);
+}
+
+.service-main-tab.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+}
+
+.service-main-tab i {
+    font-size: 1.2rem;
+}
+
+.tab-badge {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.service-main-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Service Main Content */
+.service-main-content {
+    display: none;
+}
+
+.service-main-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Job Field Cards */
+.job-field-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.job-field-card {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.job-field-card:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary-color);
+}
+
+.job-field-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.job-field-icon.pflege { background: linear-gradient(135deg, #ec4899, #db2777); }
+.job-field-icon.verkaufer { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.job-field-icon.gastronomie { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.job-field-icon.fleischer { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.job-field-icon.maurer { background: linear-gradient(135deg, #6b7280, #4b5563); }
+.job-field-icon.other { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+.job-field-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.job-field-info h4 {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.job-field-info p {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.job-field-count {
+    background: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+/* Applications Filters */
+.applications-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+}
+
+.applications-filters .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.applications-filters .filter-group label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.applications-filters select {
+    padding: 8px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.applications-filters select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.applications-filters .search-group {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+}
+
+.applications-filters .search-group input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.applications-filters .search-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.applications-filters .search-group i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.btn-add-application {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-add-application:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* Applications Table */
+.applications-table .applicant-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.applications-table .language-badge {
+    background: var(--info-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.applications-table .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.applications-table .contact-link {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease;
+}
+
+.applications-table .contact-link:hover {
+    color: var(--primary-color);
+}
+
+.applications-table .contact-link i {
+    width: 14px;
+}
+
+/* Field Badge */
+.field-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.field-badge.pflege { background: linear-gradient(135deg, #ec4899, #db2777); }
+.field-badge.verkaufer { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.field-badge.gastronomie { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.field-badge.fleischer { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.field-badge.maurer { background: linear-gradient(135deg, #6b7280, #4b5563); }
+.field-badge.other { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+/* Diploma Badge */
+.diploma-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.diploma-badge.has-diploma {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.diploma-badge.certificate {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.diploma-badge.not-reviewed {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.diploma-badge.none {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Status Badge for Applications */
+.status-badge-app {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Action Buttons Small */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-btn-small {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.action-btn-small.btn-view {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.action-btn-small.btn-view:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-btn-small.btn-edit {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.action-btn-small.btn-edit:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+.action-btn-small.btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.action-btn-small.btn-delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Detail Section */
+.detail-section {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.detail-section h3 {
+    font-size: 1rem;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-section h3 i {
+    color: var(--primary-color);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-item label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.detail-item span {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.detail-item a {
+    color: var(--info-color);
+    text-decoration: none;
+}
+
+.detail-item a:hover {
+    text-decoration: underline;
+}
+
+/* Status Pipeline */
+.status-pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    overflow-x: auto;
+}
+
+.pipeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 80px;
+}
+
+.pipeline-step .step-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: #e5e7eb;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+}
+
+.pipeline-step span {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.pipeline-step.completed .step-icon {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+}
+
+.pipeline-step.current .step-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: 0 0 0 4px rgba(255, 204, 0, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.pipeline-step.pending .step-icon {
+    background: #e5e7eb;
+    color: #9ca3af;
+}
+
+.pipeline-connector {
+    flex: 1;
+    height: 3px;
+    background: #e5e7eb;
+    min-width: 20px;
+    margin: 0 5px;
+    margin-bottom: 25px;
+    transition: background 0.3s ease;
+}
+
+.pipeline-connector.completed {
+    background: linear-gradient(90deg, var(--success-color), var(--success-color));
+}
+
+/* Status Update Section */
+.status-update-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.status-update-section label {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.status-update-section select {
+    padding: 10px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+    min-width: 200px;
+}
+
+.status-update-section select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Status History */
+.status-history {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-status {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.history-date {
+    font-size: 0.85rem;
+    color: var(--text-dark);
+}
+
+.history-by {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.history-notes {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .service-main-tabs {
+        flex-direction: column;
+    }
+    
+    .job-field-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .applications-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .applications-filters .filter-group {
+        width: 100%;
+    }
+    
+    .applications-filters select,
+    .applications-filters .search-group input {
+        width: 100%;
+    }
+    
+    .status-pipeline {
+        justify-content: flex-start;
+        gap: 5px;
+    }
+    
+    .pipeline-step {
+        min-width: 60px;
+    }
+    
+    .pipeline-step span {
+        font-size: 0.65rem;
+    }
+}
+
+/* ============================================
+   CV & Translation Service Table Fixes
+   ============================================ */
+
+/* CV Service - Contact info styling to match Translation */
+.cv-table .contact-info,
+.translation-table .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.cv-table .contact-info span,
+.translation-table .contact-info span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.cv-table .contact-info span i,
+.translation-table .contact-info span i {
+    color: var(--text-light);
+    width: 14px;
+    font-size: 0.8rem;
+}
+
+/* Translation Service - Fix action buttons visibility */
+.translation-table {
+    table-layout: auto;
+    width: 100%;
+}
+
+.translation-table th:last-child,
+.translation-table td:last-child {
+    min-width: 80px;
+    text-align: center;
+    position: sticky;
+    right: 0;
+    background: white;
+    z-index: 1;
+}
+
+.translation-table .action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+/* CV Table - Same fixes */
+.cv-table th:last-child,
+.cv-table td:last-child {
+    min-width: 100px;
+    text-align: center;
+}
+
+.cv-table .action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+/* Document count badge styling */
+.cv-table .document-count,
+.translation-table .document-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.cv-table .document-count i,
+.translation-table .document-count i {
+    font-size: 0.85rem;
+}
+
+/* Language pair badge styling */
+.translation-table .language-pair {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Notes preview styling */
+.cv-table .notes-preview {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
+}

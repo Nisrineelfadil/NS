@@ -9,6 +9,159 @@ const followBtn = document.getElementById('followBtn');
 const confirmBtn = document.getElementById('confirmBtn');
 const submitBtn = document.getElementById('submitBtn');
 
+// Multiple Document Upload Management
+const MAX_DOCUMENTS = 25;
+let currentSlotCount = 1;
+
+// Initialize document upload functionality
+function initDocumentUpload() {
+    const addMoreBtn = document.getElementById('addMoreBtn');
+    const slotsContainer = document.getElementById('documentUploadSlots');
+    
+    if (!addMoreBtn || !slotsContainer) return;
+    
+    // Add more button click handler
+    addMoreBtn.addEventListener('click', () => {
+        if (currentSlotCount >= MAX_DOCUMENTS) {
+            return;
+        }
+        
+        currentSlotCount++;
+        addDocumentSlot(currentSlotCount);
+        updateSlotCounter();
+        
+        if (currentSlotCount >= MAX_DOCUMENTS) {
+            addMoreBtn.disabled = true;
+        }
+    });
+    
+    // Initialize first slot's file change listener
+    const firstInput = slotsContainer.querySelector('.document-input');
+    if (firstInput) {
+        firstInput.addEventListener('change', handleFileChange);
+    }
+}
+
+// Add a new document slot
+function addDocumentSlot(slotNumber) {
+    const slotsContainer = document.getElementById('documentUploadSlots');
+    
+    const slotDiv = document.createElement('div');
+    slotDiv.className = 'document-slot';
+    slotDiv.dataset.slot = slotNumber;
+    
+    slotDiv.innerHTML = `
+        <div class="slot-header">
+            <span class="slot-number">Document ${slotNumber}</span>
+            <button type="button" class="remove-slot-btn" onclick="removeDocumentSlot(${slotNumber})">
+                <i class="fas fa-times"></i> Remove
+            </button>
+        </div>
+        <input type="file" name="documents[]" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" class="document-input">
+    `;
+    
+    slotsContainer.appendChild(slotDiv);
+    
+    // Add file change listener
+    const input = slotDiv.querySelector('.document-input');
+    input.addEventListener('change', handleFileChange);
+    
+    // Animate in
+    slotDiv.style.opacity = '0';
+    slotDiv.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        slotDiv.style.transition = 'all 0.3s ease';
+        slotDiv.style.opacity = '1';
+        slotDiv.style.transform = 'translateY(0)';
+    }, 10);
+}
+
+// Remove a document slot
+function removeDocumentSlot(slotNumber) {
+    const slotsContainer = document.getElementById('documentUploadSlots');
+    const slots = slotsContainer.querySelectorAll('.document-slot');
+    
+    // Don't remove if it's the only slot
+    if (slots.length <= 1) {
+        return;
+    }
+    
+    const slotToRemove = slotsContainer.querySelector(`[data-slot="${slotNumber}"]`);
+    if (slotToRemove) {
+        slotToRemove.style.transition = 'all 0.3s ease';
+        slotToRemove.style.opacity = '0';
+        slotToRemove.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            slotToRemove.remove();
+            renumberSlots();
+            currentSlotCount = slotsContainer.querySelectorAll('.document-slot').length;
+            updateSlotCounter();
+            
+            // Re-enable add button if under limit
+            const addMoreBtn = document.getElementById('addMoreBtn');
+            if (currentSlotCount < MAX_DOCUMENTS) {
+                addMoreBtn.disabled = false;
+            }
+        }, 300);
+    }
+}
+
+// Renumber slots after removal
+function renumberSlots() {
+    const slotsContainer = document.getElementById('documentUploadSlots');
+    const slots = slotsContainer.querySelectorAll('.document-slot');
+    
+    slots.forEach((slot, index) => {
+        const newNumber = index + 1;
+        slot.dataset.slot = newNumber;
+        slot.querySelector('.slot-number').textContent = `Document ${newNumber}`;
+        
+        const removeBtn = slot.querySelector('.remove-slot-btn');
+        if (removeBtn) {
+            removeBtn.setAttribute('onclick', `removeDocumentSlot(${newNumber})`);
+        }
+    });
+}
+
+// Update slot counter display
+function updateSlotCounter() {
+    const counter = document.getElementById('slotCounter');
+    if (counter) {
+        counter.textContent = `${currentSlotCount} / ${MAX_DOCUMENTS} documents`;
+    }
+}
+
+// Handle file selection change
+function handleFileChange(e) {
+    const input = e.target;
+    const slot = input.closest('.document-slot');
+    
+    if (input.files.length > 0) {
+        slot.classList.add('has-file');
+        
+        // Remove existing file name display
+        const existingDisplay = slot.querySelector('.file-name-display');
+        if (existingDisplay) existingDisplay.remove();
+        
+        // Add file name display
+        const fileNameDiv = document.createElement('div');
+        fileNameDiv.className = 'file-name-display';
+        fileNameDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${input.files[0].name}`;
+        slot.appendChild(fileNameDiv);
+    } else {
+        slot.classList.remove('has-file');
+        const existingDisplay = slot.querySelector('.file-name-display');
+        if (existingDisplay) existingDisplay.remove();
+    }
+}
+
+// Make removeDocumentSlot available globally
+window.removeDocumentSlot = removeDocumentSlot;
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', initDocumentUpload);
+
 // When user clicks "Follow on Instagram"
 if (followBtn) {
     followBtn.addEventListener('click', function() {
@@ -102,12 +255,37 @@ document.getElementById('translateForm').addEventListener('submit', async (e) =>
         email: formData.get('email'),
         translationDetails: {
             languages: formData.get('languages') || '',
-            documentType: formData.get('documentType') || '',
-            pageCount: formData.get('pageCount') || '',
-            deadline: formData.get('deadline') || '',
             notes: formData.get('notes') || ''
         }
     };
+
+    // Collect all document files
+    const documentInputs = document.querySelectorAll('.document-input');
+    const files = [];
+    documentInputs.forEach(input => {
+        if (input.files.length > 0) {
+            files.push(input.files[0]);
+        }
+    });
+
+    // Validate at least one file is selected
+    if (files.length === 0) {
+        const messageEl = document.getElementById('formMessage');
+        messageEl.className = 'form-message error show';
+        messageEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please upload at least one document.';
+        return;
+    }
+
+    // Check file sizes (5MB max each)
+    const maxSize = 5 * 1024 * 1024;
+    for (const file of files) {
+        if (file.size > maxSize) {
+            const messageEl = document.getElementById('formMessage');
+            messageEl.className = 'form-message error show';
+            messageEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> File "${file.name}" is too large. Maximum size is 5MB per file.`;
+            return;
+        }
+    }
 
     // Show loading state
     submitBtn.disabled = true;
@@ -124,11 +302,13 @@ document.getElementById('translateForm').addEventListener('submit', async (e) =>
         uploadFormData.append('email', data.email);
         uploadFormData.append('translationDetails', JSON.stringify(data.translationDetails));
 
-        // Add file if exists
-        const fileInput = document.getElementById('file');
-        if (fileInput.files.length > 0) {
-            uploadFormData.append('file', fileInput.files[0]);
-        }
+        // Add all document files
+        files.forEach((file, index) => {
+            uploadFormData.append('files', file);
+        });
+        
+        // Also add document count for backend reference
+        uploadFormData.append('documentCount', files.length);
 
         const response = await fetch(`${API_BASE_URL}/api/services/upload`, {
             method: 'POST',

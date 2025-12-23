@@ -221,12 +221,10 @@ router.delete('/cancel/:sessionId', verifyToken, verifyTeacher, async (req, res)
         session.status = 'cancelled';
         await session.save();
 
-        // Delete all pending/absent attendance records for this session
-        // This prevents students from being marked absent for a mistaken session
+        // Delete ALL attendance records for this cancelled session
+        // When a session is cancelled, no attendance should be recorded (including present/late)
         const deleteResult = await AttendanceRecord.deleteMany({
-            sessionId: sessionId,
-            status: { $in: ['pending', 'absent'] },
-            scanTime: null  // Only delete records where students haven't scanned yet
+            sessionId: sessionId
         });
 
         console.log(`🚫 Session ${sessionId} cancelled by ${req.teacher.fullName}`);
@@ -493,9 +491,18 @@ router.get('/admin/seasons', authenticateAdmin, async (req, res) => {
 // Get all attendance records with filters
 router.get('/admin/records', authenticateAdmin, async (req, res) => {
     try {
-        const { groupId, teacherId, studentId, formation, status, startDate, endDate, season, page = 1, limit = 50 } = req.query;
+        const { groupId, teacherId, studentId, formation, status, startDate, endDate, season, search, page = 1, limit = 50 } = req.query;
 
         let query = {};
+        
+        // Search by student name or email (works without group selection)
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            query.$or = [
+                { studentName: searchRegex },
+                { studentEmail: searchRegex }
+            ];
+        }
 
         // Filter by season (default to active season)
         if (season) {
@@ -1023,7 +1030,7 @@ router.get('/export/monthly', authenticateAdmin, async (req, res) => {
             return true;
         };
         
-        // Build calendar days for the month
+        // Build calendar days for the month - include all weekdays (Mon-Fri for language groups)
         const calendarDays = [];
         const daysInMonth = new Date(year, monthNum, 0).getDate();
         
@@ -1085,14 +1092,16 @@ router.get('/export/monthly', authenticateAdmin, async (req, res) => {
             const fs = require('fs');
             const path = require('path');
             
-            // Use landscape if more than 7 students, portrait otherwise
-            const useLandscape = students.length > 7;
+            // First page is always portrait for summary, table pages are landscape
             const doc = new PDFDocument({ 
                 size: 'A4',
-                layout: useLandscape ? 'landscape' : 'portrait',
+                layout: 'portrait',
                 margin: 50,
                 bufferPages: true
             });
+            
+            // Table will always use landscape for better visibility
+            const useLandscape = true;
             
             // Set response headers for PDF
             res.setHeader('Content-Type', 'application/pdf');
@@ -1154,144 +1163,136 @@ router.get('/export/monthly', authenticateAdmin, async (req, res) => {
             doc.text(`Présents: ${presentCount} | Retards: ${lateCount} | Absents: ${absentCount}`, 67, currentY);
             currentY += 20;
             doc.text(`Taux de Présence: ${attendanceRate}%`, 67, currentY);
-            currentY += 30;
+            currentY += 40;
             
-            // Draw line separator
-            doc.strokeColor('#000000').lineWidth(1);
-            doc.moveTo(67, currentY).lineTo(528, currentY).stroke();
-            currentY += 20;
+            // Add note about table on next page
+            doc.fontSize(10).font('Helvetica-Oblique').fillColor('#666666')
+               .text('→ Voir la feuille de présence détaillée sur la page suivante', 67, currentY);
             
-            // Calendar-style Attendance Table (Days as ROWS, Students as COLUMNS)
-            let tableY = currentY;
+            // Add a new LANDSCAPE page for the attendance table
+            doc.addPage({ 
+                size: 'A4', 
+                layout: 'landscape',
+                margin: 30
+            });
+            
+            // STUDENTS AS ROWS, DAYS AS COLUMNS - Standard attendance sheet format
+            let tableY = 30;
             
             doc.fontSize(14).font('Helvetica-Bold').fillColor('#000000')
-               .text('Feuille de Présence Mensuelle', 67, tableY);
+               .text('Feuille de Présence Mensuelle', 30, tableY, { align: 'center', width: 782 });
+            tableY += 20;
             
-            tableY += 30;
+            doc.fontSize(10).font('Helvetica').fillColor('#666666')
+               .text(`${group.name} - ${monthName} ${year}`, 30, tableY, { align: 'center', width: 782 });
+            tableY += 20;
             
-            // Table configuration - VERTICAL layout (days as rows)
-            const pageWidth = useLandscape ? 842 : 595; // A4 landscape = 842, portrait = 595
-            const startX = 50;
-            const dayColWidth = 40; // Width for day number + name column
-            const studentColWidth = useLandscape ? 50 : 60; // Narrower columns in landscape for more students
-            const maxStudentsPerPage = Math.floor((pageWidth - startX - dayColWidth - 50) / studentColWidth);
+            // Table configuration - STUDENTS AS ROWS, DAYS AS COLUMNS
+            // All days fit on one page - calculate column width dynamically
+            const pageWidth = 842; // A4 landscape width
+            const pageHeight = 595; // A4 landscape height
+            const startX = 25;
+            const studentNameColWidth = 110; // Width for student name column
+            const availableWidthForDays = pageWidth - startX - studentNameColWidth - 25;
+            const dayColWidth = Math.floor(availableWidthForDays / calendarDays.length); // Dynamic width to fit all days
+            const rowHeight = 16;
+            const headerHeight = 22;
             
-            // Split students into pages if needed
-            const studentPages = [];
-            for (let i = 0; i < students.length; i += maxStudentsPerPage) {
-                studentPages.push(students.slice(i, i + maxStudentsPerPage));
-            }
+            // All days on one page - no splitting needed
+            const tableWidth = studentNameColWidth + (calendarDays.length * dayColWidth);
             
-            // Draw table for each page of students
-            studentPages.forEach((pageStudents, pageIndex) => {
-                if (pageIndex > 0) {
-                    doc.addPage();
-                    tableY = 50;
+            // Helper function to draw header row
+            const drawHeader = () => {
+                doc.fontSize(6).font('Helvetica-Bold');
+                
+                // Student name header
+                doc.rect(startX, tableY, studentNameColWidth, headerHeight).fillAndStroke('#4B5563', '#374151');
+                doc.fillColor('#FFFFFF').text('Étudiant', startX + 5, tableY + 7, { 
+                    width: studentNameColWidth - 10, 
+                    align: 'left' 
+                });
+                
+                // Day headers
+                calendarDays.forEach((dayInfo, dayIndex) => {
+                    const dayX = startX + studentNameColWidth + (dayIndex * dayColWidth);
+                    doc.rect(dayX, tableY, dayColWidth, headerHeight).fillAndStroke('#FFCC00', '#FF9500');
+                    doc.fillColor('#000000').fontSize(7).text(dayInfo.day.toString(), dayX, tableY + 3, { 
+                        width: dayColWidth, 
+                        align: 'center'
+                    });
+                    doc.fontSize(4).text(dayInfo.dayName, dayX, tableY + 12, { 
+                        width: dayColWidth, 
+                        align: 'center'
+                    });
+                });
+                
+                tableY += headerHeight;
+            };
+            
+            // Draw initial header
+            drawHeader();
+            
+            // Draw student rows
+            students.forEach((student, studentIndex) => {
+                // Check if we need a new page
+                if (tableY + rowHeight > pageHeight - 35) {
+                    doc.addPage({ size: 'A4', layout: 'landscape', margin: 25 });
+                    tableY = 25;
+                    
+                    // Redraw header on new page
+                    drawHeader();
                 }
                 
-                // Helper function to draw header row
-                const drawHeaderRow = () => {
-                    doc.fontSize(8).font('Helvetica-Bold');
-                    
-                    // Day/Date header cell
-                    doc.rect(startX, tableY, dayColWidth, 30).fillAndStroke('#4B5563', '#374151');
-                    doc.fillColor('#FFFFFF').text('Date', startX + 2, tableY + 10, { 
-                        width: dayColWidth - 4, 
-                        align: 'center' 
-                    });
-                    
-                    // Student name headers
-                    pageStudents.forEach((student, index) => {
-                        const studentX = startX + dayColWidth + (index * studentColWidth);
-                        doc.rect(studentX, tableY, studentColWidth, 30).fillAndStroke('#FFCC00', '#FF9500');
-                        doc.fillColor('#000000').fontSize(7).text(student.fullName, studentX + 2, tableY + 5, { 
-                            width: studentColWidth - 4, 
-                            align: 'center',
-                            ellipsis: true
-                        });
-                    });
-                    
-                    tableY += 30;
-                };
+                // Alternate row colors
+                if (studentIndex % 2 === 0) {
+                    doc.rect(startX, tableY, tableWidth, rowHeight).fill('#F9FAFB');
+                }
                 
-                // Draw initial header
-                drawHeaderRow();
-                
-                // Draw day rows (days as rows, students as columns)
-                let currentWeek = null;
-                calendarDays.forEach((dayInfo, dayIndex) => {
-                    const rowHeight = 18;
-                    
-                    // Check if we need a new page (leave room for header + at least 5 rows)
-                    if (tableY + rowHeight > 750) {
-                        doc.addPage();
-                        tableY = 50;
-                        
-                        // Repeat header on new page
-                        drawHeaderRow();
-                        currentWeek = null;
-                    }
-                    
-                    // Draw week separator line
-                    if (currentWeek !== null && dayInfo.weekNumber !== currentWeek) {
-                        doc.strokeColor('#FF9500').lineWidth(2);
-                        doc.moveTo(startX, tableY).lineTo(startX + dayColWidth + (pageStudents.length * studentColWidth), tableY).stroke();
-                        tableY += 2;
-                    }
-                    currentWeek = dayInfo.weekNumber;
-                    
-                    // Alternate row colors
-                    if (dayIndex % 2 === 0) {
-                        doc.rect(startX, tableY, dayColWidth + (pageStudents.length * studentColWidth), rowHeight).fill('#F9FAFB');
-                    }
-                    
-                    // Day cell
-                    doc.fontSize(8).font('Helvetica-Bold').fillColor('#000000');
-                    doc.text(`${dayInfo.day} ${dayInfo.dayName}`, startX + 2, tableY + 5, { 
-                        width: dayColWidth - 4, 
-                        align: 'center' 
-                    });
-                    
-                    // Draw cell border for day
-                    doc.strokeColor('#E5E7EB').lineWidth(0.5);
-                    doc.rect(startX, tableY, dayColWidth, rowHeight).stroke();
-                    
-                    // Student attendance cells for this day
-                    pageStudents.forEach((student, studentIndex) => {
-                        const studentX = startX + dayColWidth + (studentIndex * studentColWidth);
-                        const studentId = student._id.toString();
-                        const attendance = attendanceMatrix[studentId][dayInfo.day];
-                        
-                        // Draw cell border
-                        doc.strokeColor('#E5E7EB').lineWidth(0.5);
-                        doc.rect(studentX, tableY, studentColWidth, rowHeight).stroke();
-                        
-                        // Fill cell with status indicator
-                        if (attendance) {
-                            let statusSymbol = '';
-                            let statusColor = '#000000';
-                            
-                            if (attendance.status === 'present') {
-                                statusSymbol = 'P';
-                                statusColor = '#10b981';
-                            } else if (attendance.status === 'late') {
-                                statusSymbol = 'R';
-                                statusColor = '#f59e0b';
-                            } else if (attendance.status === 'absent') {
-                                statusSymbol = 'A';
-                                statusColor = '#ef4444';
-                            }
-                            
-                            doc.fontSize(9).font('Helvetica-Bold').fillColor(statusColor);
-                            doc.text(statusSymbol, studentX + 2, tableY + 4, { 
-                                width: studentColWidth - 4, 
-                                align: 'center' 
-                            });
-                        }
-                    });
-                    
-                    tableY += rowHeight;
+                // Student name cell
+                doc.strokeColor('#E5E7EB').lineWidth(0.5);
+                doc.rect(startX, tableY, studentNameColWidth, rowHeight).stroke();
+                doc.fontSize(6).font('Helvetica-Bold').fillColor('#000000');
+                doc.text(student.fullName, startX + 2, tableY + 4, { 
+                    width: studentNameColWidth - 4, 
+                    align: 'left',
+                    ellipsis: true
                 });
+                
+                // Attendance cells for each day
+                const studentId = student._id.toString();
+                calendarDays.forEach((dayInfo, dayIndex) => {
+                    const dayX = startX + studentNameColWidth + (dayIndex * dayColWidth);
+                    const attendance = attendanceMatrix[studentId][dayInfo.day];
+                    
+                    // Draw cell border
+                    doc.strokeColor('#E5E7EB').lineWidth(0.5);
+                    doc.rect(dayX, tableY, dayColWidth, rowHeight).stroke();
+                    
+                    // Fill cell with status indicator
+                    if (attendance) {
+                        let statusSymbol = '';
+                        let statusColor = '#000000';
+                        
+                        if (attendance.status === 'present') {
+                            statusSymbol = 'P';
+                            statusColor = '#10b981';
+                        } else if (attendance.status === 'late') {
+                            statusSymbol = 'R';
+                            statusColor = '#f59e0b';
+                        } else if (attendance.status === 'absent') {
+                            statusSymbol = 'A';
+                            statusColor = '#ef4444';
+                        }
+                        
+                        doc.fontSize(7).font('Helvetica-Bold').fillColor(statusColor);
+                        doc.text(statusSymbol, dayX, tableY + 4, { 
+                            width: dayColWidth, 
+                            align: 'center' 
+                        });
+                    }
+                });
+                
+                tableY += rowHeight;
             });
             
             // Footer

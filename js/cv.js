@@ -1,6 +1,131 @@
 // CV Service JavaScript
 const API_BASE_URL = window.location.origin;
 
+// Multiple Document Upload Management
+const MAX_DOCUMENTS = 25;
+let currentSlotCount = 1;
+
+function initDocumentUpload() {
+    const addMoreBtn = document.getElementById('addMoreBtn');
+    const slotsContainer = document.getElementById('documentUploadSlots');
+    
+    if (!addMoreBtn || !slotsContainer) return;
+    
+    // Add more button click handler
+    addMoreBtn.addEventListener('click', () => {
+        if (currentSlotCount >= MAX_DOCUMENTS) return;
+        
+        currentSlotCount++;
+        addDocumentSlot(currentSlotCount);
+        updateSlotCounter();
+        
+        if (currentSlotCount >= MAX_DOCUMENTS) {
+            addMoreBtn.disabled = true;
+        }
+    });
+    
+    // Initialize first slot's file input handler
+    const firstInput = slotsContainer.querySelector('.document-input');
+    if (firstInput) {
+        firstInput.addEventListener('change', handleFileChange);
+    }
+    
+    updateSlotCounter();
+}
+
+function addDocumentSlot(slotNumber) {
+    const slotsContainer = document.getElementById('documentUploadSlots');
+    
+    const slotDiv = document.createElement('div');
+    slotDiv.className = 'document-slot';
+    slotDiv.dataset.slot = slotNumber;
+    
+    slotDiv.innerHTML = `
+        <div class="slot-header">
+            <span class="slot-number">Document ${slotNumber}</span>
+            <button type="button" class="remove-slot-btn" onclick="removeDocumentSlot(${slotNumber})">
+                <i class="fas fa-times"></i> Remove
+            </button>
+        </div>
+        <input type="file" name="documents[]" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" class="document-input">
+    `;
+    
+    slotsContainer.appendChild(slotDiv);
+    
+    // Add file change handler
+    const input = slotDiv.querySelector('.document-input');
+    input.addEventListener('change', handleFileChange);
+}
+
+function removeDocumentSlot(slotNumber) {
+    const slot = document.querySelector(`.document-slot[data-slot="${slotNumber}"]`);
+    if (slot) {
+        slot.remove();
+        currentSlotCount--;
+        renumberSlots();
+        updateSlotCounter();
+        
+        // Re-enable add more button
+        const addMoreBtn = document.getElementById('addMoreBtn');
+        if (addMoreBtn) {
+            addMoreBtn.disabled = false;
+        }
+    }
+}
+
+function renumberSlots() {
+    const slots = document.querySelectorAll('.document-slot');
+    slots.forEach((slot, index) => {
+        const newNumber = index + 1;
+        slot.dataset.slot = newNumber;
+        const numberSpan = slot.querySelector('.slot-number');
+        if (numberSpan) {
+            numberSpan.textContent = `Document ${newNumber}`;
+        }
+        const removeBtn = slot.querySelector('.remove-slot-btn');
+        if (removeBtn && newNumber > 1) {
+            removeBtn.setAttribute('onclick', `removeDocumentSlot(${newNumber})`);
+        }
+    });
+    currentSlotCount = slots.length;
+}
+
+function updateSlotCounter() {
+    const counter = document.getElementById('slotCounter');
+    if (counter) {
+        counter.textContent = `${currentSlotCount} / ${MAX_DOCUMENTS} documents`;
+    }
+}
+
+function handleFileChange(e) {
+    const input = e.target;
+    const slot = input.closest('.document-slot');
+    
+    if (input.files.length > 0) {
+        slot.classList.add('has-file');
+        
+        // Remove existing file name display
+        const existingDisplay = slot.querySelector('.file-name-display');
+        if (existingDisplay) existingDisplay.remove();
+        
+        // Add file name display
+        const fileNameDiv = document.createElement('div');
+        fileNameDiv.className = 'file-name-display';
+        fileNameDiv.innerHTML = `<i class="fas fa-file-check"></i> ${input.files[0].name}`;
+        slot.appendChild(fileNameDiv);
+    } else {
+        slot.classList.remove('has-file');
+        const existingDisplay = slot.querySelector('.file-name-display');
+        if (existingDisplay) existingDisplay.remove();
+    }
+}
+
+// Make removeDocumentSlot available globally
+window.removeDocumentSlot = removeDocumentSlot;
+
+// Initialize document upload on DOM ready
+document.addEventListener('DOMContentLoaded', initDocumentUpload);
+
 // Instagram Follow Flow
 let followClicked = false;
 let confirmationAllowed = false;
@@ -101,12 +226,35 @@ document.getElementById('cvForm').addEventListener('submit', async (e) => {
         phone: formData.get('phone'),
         email: formData.get('email'),
         cvDetails: {
-            experience: formData.get('experience') || '',
-            education: formData.get('education') || '',
-            field: formData.get('field') || '',
             notes: formData.get('notes') || ''
         }
     };
+
+    // Collect all document files
+    const documentInputs = document.querySelectorAll('.document-input');
+    const files = [];
+    documentInputs.forEach(input => {
+        if (input.files.length > 0) {
+            files.push(input.files[0]);
+        }
+    });
+
+    // Validate at least one file is selected
+    if (files.length === 0) {
+        messageEl.className = 'form-message error show';
+        messageEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please upload at least one document.';
+        return;
+    }
+
+    // Check file sizes (5MB max each)
+    const maxSize = 5 * 1024 * 1024;
+    for (const file of files) {
+        if (file.size > maxSize) {
+            messageEl.className = 'form-message error show';
+            messageEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> File "${file.name}" is too large. Maximum size is 5MB per file.`;
+            return;
+        }
+    }
 
     // Show loading state
     submitBtn.disabled = true;
@@ -123,18 +271,26 @@ document.getElementById('cvForm').addEventListener('submit', async (e) => {
         uploadFormData.append('email', data.email);
         uploadFormData.append('cvDetails', JSON.stringify(data.cvDetails));
 
-        // Add file if exists
-        const fileInput = document.getElementById('file');
-        if (fileInput.files.length > 0) {
-            uploadFormData.append('file', fileInput.files[0]);
-        }
+        // Add all document files
+        files.forEach((file, index) => {
+            uploadFormData.append('files', file);
+        });
+        uploadFormData.append('documentCount', files.length);
 
         const response = await fetch(`${API_BASE_URL}/api/services/upload`, {
             method: 'POST',
             body: uploadFormData
         });
 
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            if (response.status === 413 || response.status === 400) {
+                throw new Error('FILE_TOO_LARGE');
+            }
+            throw new Error('Server error. Please try again.');
+        }
 
         if (result.success) {
             // Show success message
@@ -148,13 +304,20 @@ document.getElementById('cvForm').addEventListener('submit', async (e) => {
                 window.location.href = '/';
             }, 3000);
         } else {
+            if (result.errorType === 'FILE_TOO_LARGE') {
+                throw new Error('FILE_TOO_LARGE');
+            }
             throw new Error(result.message || 'Submission failed');
         }
 
     } catch (error) {
         console.error('Submission error:', error);
         messageEl.className = 'form-message error show';
-        messageEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.';
+        let displayMessage = error.message || 'Something went wrong. Please try again.';
+        if (error.message === 'FILE_TOO_LARGE') {
+            displayMessage = 'One or more files are too large. Maximum file size is 5MB per file.';
+        }
+        messageEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${displayMessage}`;
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit CV Request';

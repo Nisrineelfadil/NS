@@ -136,6 +136,29 @@ async function notifyNewMessage(message) {
     }
 }
 
+// Create and emit notification for new job application
+async function notifyNewJobApplication(application) {
+    try {
+        const notification = await Notification.createNotification({
+            type: 'service_request',
+            title: 'New Job Application',
+            message: `${application.fullName} submitted a job application (${application.requestedJobType || 'Bewerbung'})`,
+            relatedId: application._id,
+            relatedModel: 'JobApplication',
+            metadata: {
+                studentName: application.fullName,
+                serviceType: 'applying',
+                requestedJobType: application.requestedJobType
+            }
+        });
+        
+        emitNotification(notification);
+        return notification;
+    } catch (error) {
+        console.error('Error creating job application notification:', error);
+    }
+}
+
 // ==================== NEW: STUDENT PUSH NOTIFICATIONS ====================
 
 // Send push notification for new grade upload
@@ -275,6 +298,7 @@ module.exports = {
     notifyNewRating,
     notifyNewAppointment,
     notifyNewMessage,
+    notifyNewJobApplication,
     // NEW: Student push notifications
     notifyGradeUploaded,
     notifyAttendanceCodeGenerated,

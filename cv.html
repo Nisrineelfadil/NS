@@ -447,6 +447,147 @@
             color: #991b1b;
         }
 
+        /* Multiple Document Upload Styles */
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        #documentUploadSlots {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .document-slot {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .document-slot:hover {
+            border-color: #FFCC00;
+            background: #fffef5;
+        }
+
+        .document-slot.has-file {
+            border-color: #10b981;
+            border-style: solid;
+            background: #f0fdf4;
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slot-number {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .remove-slot-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .remove-slot-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .document-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .document-input::-webkit-file-upload-button {
+            background: linear-gradient(135deg, #FFCC00, #FF9500);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .document-input::-webkit-file-upload-button:hover {
+            transform: scale(1.02);
+        }
+
+        .add-more-btn {
+            background: linear-gradient(135deg, #FFCC00, #FF9500);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+        }
+
+        .add-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+        }
+
+        .add-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slot-counter {
+            display: inline-block;
+            margin-left: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .file-name-display {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-name-display i {
+            color: #4caf50;
+        }
+
         /* Closed Message Styles - Clean & Balanced */
         .closed-message {
             background: white;
@@ -777,38 +918,31 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="experience">
-                        <i class="fas fa-briefcase"></i> Years of Experience
-                    </label>
-                    <input type="text" id="experience" name="experience" placeholder="e.g., 5 years">
-                </div>
-
-                <div class="form-group">
-                    <label for="education">
-                        <i class="fas fa-graduation-cap"></i> Education Level
-                    </label>
-                    <input type="text" id="education" name="education" placeholder="e.g., Bachelor's Degree">
-                </div>
-
-                <div class="form-group">
-                    <label for="field">
-                        <i class="fas fa-laptop-code"></i> Field/Industry
-                    </label>
-                    <input type="text" id="field" name="field" placeholder="e.g., Software Development">
-                </div>
-
-                <div class="form-group">
                     <label for="notes">
                         <i class="fas fa-comment"></i> Additional Notes
                     </label>
-                    <textarea id="notes" name="notes" placeholder="Any specific requirements or information..."></textarea>
+                    <textarea id="notes" name="notes" placeholder="Tell us about your experience, education, skills, and any specific requirements..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="file">
-                        <i class="fas fa-upload"></i> Upload Current CV (Optional)
+                    <label>
+                        <i class="fas fa-upload"></i> Upload Your Documents *
                     </label>
-                    <input type="file" id="file" name="file" accept=".pdf,.doc,.docx">
+                    <p class="upload-hint">Upload your certificates, diplomas, photos, or any documents needed for your CV. You can upload up to 25 files.</p>
+                    
+                    <div id="documentUploadSlots">
+                        <div class="document-slot" data-slot="1">
+                            <div class="slot-header">
+                                <span class="slot-number">Document 1</span>
+                            </div>
+                            <input type="file" name="documents[]" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required class="document-input">
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="addMoreBtn" class="add-more-btn">
+                        <i class="fas fa-plus-circle"></i> Add More Documents
+                    </button>
+                    <span id="slotCounter" class="slot-counter">1 / 25 documents</span>
                 </div>
 
                 <!-- Instagram Follow Section -->

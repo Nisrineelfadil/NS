@@ -1162,6 +1162,496 @@ body[dir="rtl"] .lang-dropdown button {
     }
 }
 
+/* ==================== OVERLAPPING STYLES ==================== */
+
+/* Overlapping Stats Cards */
+.overlapping-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card.unpaid {
+    border-left: 4px solid #ef4444;
+}
+
+.stat-card.paid {
+    border-left: 4px solid #10b981;
+}
+
+.stat-card.total {
+    border-left: 4px solid #FFCC00;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-card.unpaid .stat-icon {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.stat-card.paid .stat-icon {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.stat-card.total .stat-icon {
+    background: rgba(255, 204, 0, 0.2);
+    color: #FFCC00;
+}
+
+.stat-content h4 {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.3rem;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.stat-amount {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+/* Age Badges */
+.age-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.age-recent {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.age-moderate {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.age-old {
+    background: rgba(249, 115, 22, 0.2);
+    color: #f97316;
+}
+
+.age-very-old {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Status Badges for Overlapping */
+.status-badge.unpaid {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.status-badge.paid {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.status-badge.cancelled {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+}
+
+/* Phone Link */
+.phone-link {
+    color: #60a5fa;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.phone-link:hover {
+    color: #93c5fd;
+    text-decoration: underline;
+}
+
+/* Action Buttons for Overlapping */
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.action-btn.mark-paid-btn {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.action-btn.mark-paid-btn:hover {
+    background: #10b981;
+    color: white;
+}
+
+.action-btn.call-btn {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.action-btn.call-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-btn.edit-btn {
+    background: rgba(255, 204, 0, 0.2);
+    color: #FFCC00;
+}
+
+.action-btn.edit-btn:hover {
+    background: #FFCC00;
+    color: #1a1a2e;
+}
+
+.action-btn.cancel-btn {
+    background: rgba(249, 115, 22, 0.2);
+    color: #f97316;
+}
+
+.action-btn.cancel-btn:hover {
+    background: #f97316;
+    color: white;
+}
+
+.action-btn.delete-btn {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.action-btn.delete-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Faded row for paid/cancelled */
+.row-faded {
+    opacity: 0.6;
+}
+
+.row-faded:hover {
+    opacity: 0.8;
+}
+
+/* Overlapping Search Input */
+#overlappingSearch {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+#overlappingSearch::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#overlappingSearch:focus {
+    outline: none;
+    border-color: #FFCC00;
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+}
+
+/* ==================== RECEIPT STYLES ==================== */
+
+/* Receipt action buttons in table */
+.receipt-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+}
+
+.receipt-btn:hover {
+    background: rgba(107, 114, 128, 0.4);
+    color: #ffffff;
+}
+
+.receipt-btn.upload {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.receipt-btn.upload:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.receipt-btn.has-receipt {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.receipt-btn.has-receipt:hover {
+    background: #10b981;
+    color: white;
+}
+
+/* Receipt Modal Styles */
+.receipt-modal-content {
+    max-width: 800px;
+    width: 90%;
+}
+
+.receipt-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.receipt-preview-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    min-height: 300px;
+    max-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.receipt-preview-container img {
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.receipt-preview-container iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+    border-radius: 8px;
+}
+
+.receipt-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.receipt-loading i {
+    font-size: 2rem;
+    color: #FFCC00;
+}
+
+.receipt-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.receipt-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.receipt-info strong {
+    color: #FFCC00;
+}
+
+.receipt-actions {
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.delete-receipt-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.delete-receipt-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Upload Modal Styles */
+.upload-area {
+    border: 2px dashed rgba(255, 204, 0, 0.4);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 204, 0, 0.05);
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: #FFCC00;
+    background: rgba(255, 204, 0, 0.1);
+}
+
+.upload-area i {
+    font-size: 3rem;
+    color: #FFCC00;
+    margin-bottom: 1rem;
+}
+
+.upload-area p {
+    margin: 0.5rem 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.upload-area .upload-hint {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.file-preview img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.file-preview .file-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.file-preview .file-info span {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+
+.remove-file-btn {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.remove-file-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.upload-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 1rem 0;
+}
+
+.upload-note i {
+    color: #3b82f6;
+    margin-top: 2px;
+}
+
 /* Print Styles */
 @media print {
     body {

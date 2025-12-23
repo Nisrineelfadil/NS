@@ -4,6 +4,24 @@ const CashTransaction = require('../models/CashTransaction');
 const MonthlyNote = require('../models/MonthlyNote');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
 const PDFDocument = require('pdfkit');
+const multer = require('multer');
+const imageOptimizer = require('../utils/imageOptimizer');
+
+// Configure multer for receipt uploads (memory storage)
+const receiptUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB max upload
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, and PDF are allowed.'), false);
+    }
+  }
+});
 
 // Middleware to check if user is authenticated
 router.use(authenticateAdmin);
@@ -684,6 +702,216 @@ router.get('/export/pdf', requireSuperAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate PDF',
+      error: error.message
+    });
+  }
+});
+
+// ==================== RECEIPT ROUTES ====================
+
+// Upload receipt for a transaction
+router.post('/transactions/:id/receipt', receiptUpload.single('receipt'), async (req, res) => {
+  try {
+    const transaction = await CashTransaction.findById(req.params.id);
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+    
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+    
+    let imageData;
+    let mimeType = req.file.mimetype;
+    
+    // If it's an image (not PDF), optimize it
+    if (req.file.mimetype.startsWith('image/')) {
+      // Validate image
+      const validation = await imageOptimizer.validateImageReadability(req.file.buffer);
+      if (!validation.valid) {
+        return res.status(400).json({
+          success: false,
+          message: validation.error
+        });
+      }
+      
+      // Optimize the image (use CIN config for receipts - good balance of quality/size)
+      const optimized = await imageOptimizer.optimizeCINImage(req.file.buffer, 'receipt');
+      imageData = optimized.buffer.toString('base64');
+      mimeType = 'image/jpeg'; // Always convert to JPEG for consistency
+      
+      console.log(`📄 Receipt optimized: ${imageOptimizer.formatBytes(req.file.buffer.length)} → ${imageOptimizer.formatBytes(optimized.size)} (${optimized.compressionRatio}% reduction)`);
+    } else {
+      // For PDFs, store as-is but check size
+      if (req.file.buffer.length > 2 * 1024 * 1024) {
+        return res.status(400).json({
+          success: false,
+          message: 'PDF file too large. Maximum size is 2MB.'
+        });
+      }
+      imageData = req.file.buffer.toString('base64');
+    }
+    
+    // Update transaction with receipt
+    transaction.receiptImage = {
+      data: imageData,
+      mimeType: mimeType,
+      fileName: req.file.originalname,
+      uploadedAt: new Date(),
+      uploadedBy: req.admin.id,
+      uploadedByName: req.admin.username
+    };
+    
+    await transaction.save();
+    
+    res.json({
+      success: true,
+      message: 'Receipt uploaded successfully',
+      receipt: {
+        fileName: req.file.originalname,
+        uploadedAt: transaction.receiptImage.uploadedAt,
+        uploadedByName: transaction.receiptImage.uploadedByName
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error uploading receipt:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload receipt',
+      error: error.message
+    });
+  }
+});
+
+// Get receipt for a transaction (for viewing)
+router.get('/transactions/:id/receipt', async (req, res) => {
+  try {
+    const transaction = await CashTransaction.findById(req.params.id);
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+    
+    if (!transaction.receiptImage || !transaction.receiptImage.data) {
+      return res.status(404).json({
+        success: false,
+        message: 'No receipt found for this transaction'
+      });
+    }
+    
+    // Return as JSON with base64 data for modal display
+    res.json({
+      success: true,
+      receipt: {
+        data: transaction.receiptImage.data,
+        mimeType: transaction.receiptImage.mimeType,
+        fileName: transaction.receiptImage.fileName,
+        uploadedAt: transaction.receiptImage.uploadedAt,
+        uploadedByName: transaction.receiptImage.uploadedByName
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching receipt:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch receipt',
+      error: error.message
+    });
+  }
+});
+
+// Download receipt for a transaction
+router.get('/transactions/:id/receipt/download', async (req, res) => {
+  try {
+    const transaction = await CashTransaction.findById(req.params.id);
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+    
+    if (!transaction.receiptImage || !transaction.receiptImage.data) {
+      return res.status(404).json({
+        success: false,
+        message: 'No receipt found for this transaction'
+      });
+    }
+    
+    const buffer = Buffer.from(transaction.receiptImage.data, 'base64');
+    const fileName = transaction.receiptImage.fileName || `receipt_${transaction._id}.jpg`;
+    
+    // Set appropriate content type
+    res.setHeader('Content-Type', transaction.receiptImage.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', buffer.length);
+    
+    res.send(buffer);
+    
+  } catch (error) {
+    console.error('Error downloading receipt:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to download receipt',
+      error: error.message
+    });
+  }
+});
+
+// Delete receipt from a transaction (without deleting the transaction)
+router.delete('/transactions/:id/receipt', async (req, res) => {
+  try {
+    const transaction = await CashTransaction.findById(req.params.id);
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+    
+    if (!transaction.receiptImage || !transaction.receiptImage.data) {
+      return res.status(404).json({
+        success: false,
+        message: 'No receipt found for this transaction'
+      });
+    }
+    
+    // Clear the receipt data
+    transaction.receiptImage = {
+      data: null,
+      mimeType: null,
+      fileName: null,
+      uploadedAt: null,
+      uploadedBy: null,
+      uploadedByName: null
+    };
+    
+    await transaction.save();
+    
+    res.json({
+      success: true,
+      message: 'Receipt deleted successfully'
+    });
+    
+  } catch (error) {
+    console.error('Error deleting receipt:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete receipt',
       error: error.message
     });
   }

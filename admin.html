@@ -416,105 +416,591 @@
 
                     <!-- Services Tab -->
                     <div class="tab-content" id="servicesTab">
-                        <!-- Service Requests Stats -->
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-icon orange">
-                                    <i class="fas fa-file-alt"></i>
+                        <!-- Service Type Selection Cards (First Level) -->
+                        <div class="service-type-selection active" id="serviceTypeSelection">
+                            <h2 class="services-title"><i class="fas fa-briefcase"></i> <span data-i18n="admin.services.title">Service Requests</span></h2>
+                            <div class="service-type-cards">
+                                <div class="service-type-card" onclick="openServiceType('cv')">
+                                    <div class="service-type-icon cv">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="service-type-info">
+                                        <h3 data-i18n="admin.services.cv_service">CV Service</h3>
+                                        <p data-i18n="admin.services.cv_desc">Resume creation and optimization</p>
+                                    </div>
+                                    <span class="service-type-count" id="cvServiceCount">0</span>
+                                    <i class="fas fa-chevron-right service-type-arrow"></i>
                                 </div>
-                                <div class="stat-info">
-                                    <h3 data-i18n="admin.services.cv_service">CV Service</h3>
-                                    <div class="number" id="cvServiceCount">0</div>
+                                <div class="service-type-card" onclick="openServiceType('applying')">
+                                    <div class="service-type-icon applying">
+                                        <i class="fas fa-user-tie"></i>
+                                    </div>
+                                    <div class="service-type-info">
+                                        <h3 data-i18n="admin.services.applying_service">Applying Service</h3>
+                                        <p data-i18n="admin.services.applying_desc">Job applications for Germany</p>
+                                    </div>
+                                    <span class="service-type-count" id="applyingServiceCount">0</span>
+                                    <i class="fas fa-chevron-right service-type-arrow"></i>
+                                </div>
+                                <div class="service-type-card" onclick="openServiceType('translation')">
+                                    <div class="service-type-icon translation">
+                                        <i class="fas fa-language"></i>
+                                    </div>
+                                    <div class="service-type-info">
+                                        <h3 data-i18n="admin.services.translation_service">Translation Service</h3>
+                                        <p data-i18n="admin.services.translation_desc">Document translation services</p>
+                                    </div>
+                                    <span class="service-type-count" id="translationServiceCount">0</span>
+                                    <i class="fas fa-chevron-right service-type-arrow"></i>
                                 </div>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-icon blue">
-                                    <i class="fas fa-briefcase"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <h3 data-i18n="admin.services.applying_service">Applying Service</h3>
-                                    <div class="number" id="applyingServiceCount">0</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon green">
-                                    <i class="fas fa-language"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <h3 data-i18n="admin.services.translation_service">Translation Service</h3>
-                                    <div class="number" id="translationServiceCount">0</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon purple">
+                        </div>
+
+                        <!-- Applying Service Content (Second Level - Ausbildung/Arbeit) -->
+                        <div class="applying-service-content" id="applyingServiceContent" style="display: none;">
+                            <!-- Back Button -->
+                            <button class="back-to-services-btn" onclick="backToServiceTypes()">
+                                <i class="fas fa-arrow-left"></i> <span data-i18n="admin.services.back_to_services">Back to Services</span>
+                            </button>
+                            
+                            <!-- Ausbildung/Arbeit/Pending Tabs -->
+                            <div class="applying-tabs">
+                                <button class="applying-tab" data-applying-type="pending">
                                     <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <h3 data-i18n="admin.services.pending_requests">Pending Requests</h3>
-                                    <div class="number" id="pendingServicesCount">0</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Service Category Tabs -->
-                        <div class="category-tabs-container">
-                            <div class="category-tab active" data-service-category="all">
-                                <i class="fas fa-list"></i>
-                                <span data-i18n="admin.services.all_services">All Services</span>
-                                <span class="tab-count" id="allServicesCount">0</span>
-                            </div>
-                            <div class="category-tab" data-service-category="cv">
-                                <i class="fas fa-file-alt"></i>
-                                <span data-i18n="admin.services.cv">CV Service</span>
-                                <span class="tab-count" id="cvTabCount">0</span>
-                            </div>
-                            <div class="category-tab" data-service-category="applying">
-                                <i class="fas fa-briefcase"></i>
-                                <span data-i18n="admin.services.applying">Applying</span>
-                                <span class="tab-count" id="applyingTabCount">0</span>
-                            </div>
-                            <div class="category-tab" data-service-category="translation">
-                                <i class="fas fa-language"></i>
-                                <span data-i18n="admin.services.translation">Translation</span>
-                                <span class="tab-count" id="translationTabCount">0</span>
-                            </div>
-                        </div>
-
-                        <!-- Service Requests Table -->
-                        <div class="section-card">
-                            <div class="section-header">
-                                <h2>
+                                    <span data-i18n="admin.services.pending_review">Pending Review</span>
+                                    <span class="tab-badge pending-badge" id="pendingReviewCount">0</span>
+                                </button>
+                                <button class="applying-tab active" data-applying-type="ausbildung">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <span data-i18n="admin.services.ausbildung">Ausbildung</span>
+                                    <span class="tab-badge" id="ausbildungTotalCount">0</span>
+                                </button>
+                                <button class="applying-tab" data-applying-type="arbeit">
                                     <i class="fas fa-briefcase"></i>
-                                    <span id="serviceCategoryTitle">All Service Requests</span>
-                                </h2>
-                                <div style="display: flex; gap: 10px;">
-                                    <button class="action-btn btn-info" onclick="refreshServices()">
-                                        <i class="fas fa-sync"></i> <span data-i18n="admin.services.refresh">Refresh</span>
-                                    </button>
-                                    <button class="action-btn btn-success" onclick="exportServicesData()">
-                                        <i class="fas fa-download"></i> <span data-i18n="admin.services.export_data">Export Data</span>
-                                    </button>
+                                    <span data-i18n="admin.services.arbeit">Arbeit</span>
+                                    <span class="tab-badge" id="arbeitTotalCount">0</span>
+                                </button>
+                            </div>
+
+                            <!-- Pending Review Content -->
+                            <div class="service-main-content" id="pendingContent">
+                                <div class="pending-review-header">
+                                    <h3><i class="fas fa-inbox"></i> <span data-i18n="admin.services.new_submissions">New Submissions</span></h3>
+                                    <p data-i18n="admin.services.pending_review_desc">Review and classify new applications before they appear in Ausbildung/Arbeit tabs</p>
+                                </div>
+                                
+                                <div class="section-card">
+                                    <div class="section-body">
+                                        <div class="loading" id="pendingLoading">Loading pending applications...</div>
+                                        <div id="pendingTableContainer" style="display: none; overflow-x: auto;">
+                                            <table class="data-table applications-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-i18n="admin.services.name">Name</th>
+                                                        <th data-i18n="admin.services.contact">Contact</th>
+                                                        <th data-i18n="admin.services.requested_type">Requested Type</th>
+                                                        <th data-i18n="admin.services.notes">Notes</th>
+                                                        <th data-i18n="admin.services.date">Date</th>
+                                                        <th data-i18n="admin.services.actions">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pendingTableBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="section-body">
-                                <div class="loading" id="servicesLoading" data-i18n="admin.services.loading">Loading service requests...</div>
-                                <div id="servicesTableContainer" style="display: none; overflow-x: auto;">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th data-i18n="admin.services.service_type">Service Type</th>
-                                                <th data-i18n="admin.services.full_name">Full Name</th>
-                                                <th data-i18n="admin.services.phone">Phone</th>
-                                                <th data-i18n="admin.services.email">Email</th>
-                                                <th data-i18n="admin.services.status">Status</th>
-                                                <th data-i18n="admin.services.date">Date</th>
-                                                <th data-i18n="admin.services.actions">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="servicesTableBody">
-                                            <!-- Data will be inserted here -->
-                                        </tbody>
-                                    </table>
+
+                            <!-- Ausbildung Content -->
+                        <div class="service-main-content active" id="ausbildungContent">
+                            <!-- Job Field Cards -->
+                            <div class="job-field-cards">
+                                <div class="job-field-card" data-field="pflege">
+                                    <div class="job-field-icon pflege"><i class="fas fa-heart"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.pflege">Pflege</h4>
+                                        <p data-i18n="admin.services.pflege_desc">Care/Nursing</p>
+                                    </div>
+                                    <span class="job-field-count" id="ausbildungPflegeCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="verkaufer">
+                                    <div class="job-field-icon verkaufer"><i class="fas fa-shopping-cart"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.verkaufer">Verkäufer</h4>
+                                        <p data-i18n="admin.services.verkaufer_desc">Sales</p>
+                                    </div>
+                                    <span class="job-field-count" id="ausbildungVerkauferCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="gastronomie">
+                                    <div class="job-field-icon gastronomie"><i class="fas fa-utensils"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.gastronomie">Gastronomie</h4>
+                                        <p data-i18n="admin.services.gastronomie_desc">Hotel, Cooking, Hospitality</p>
+                                    </div>
+                                    <span class="job-field-count" id="ausbildungGastronomieCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="fleischer">
+                                    <div class="job-field-icon fleischer"><i class="fas fa-drumstick-bite"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.fleischer">Fleischer</h4>
+                                        <p data-i18n="admin.services.fleischer_desc">Butcher</p>
+                                    </div>
+                                    <span class="job-field-count" id="ausbildungFleischerCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="maurer">
+                                    <div class="job-field-icon maurer"><i class="fas fa-hard-hat"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.maurer">Maurer</h4>
+                                        <p data-i18n="admin.services.maurer_desc">Mason/Bricklayer</p>
+                                    </div>
+                                    <span class="job-field-count" id="ausbildungMaurerCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="other">
+                                    <div class="job-field-icon other"><i class="fas fa-ellipsis-h"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.other">Other</h4>
+                                        <p data-i18n="admin.services.other_desc">Other Fields</p>
+                                    </div>
+                                    <span class="job-field-count" id="ausbildungOtherCount">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Filters Bar -->
+                            <div class="applications-filters">
+                                <div class="filter-group">
+                                    <label data-i18n="admin.services.filter_field">Field:</label>
+                                    <select id="ausbildungFieldFilter" onchange="loadJobApplications('ausbildung')">
+                                        <option value="all" data-i18n="admin.services.all_fields">All Fields</option>
+                                        <option value="pflege">Pflege</option>
+                                        <option value="verkaufer">Verkäufer</option>
+                                        <option value="gastronomie">Gastronomie</option>
+                                        <option value="fleischer">Fleischer</option>
+                                        <option value="maurer">Maurer</option>
+                                        <option value="other" data-i18n="admin.services.other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label data-i18n="admin.services.filter_status">Status:</label>
+                                    <select id="ausbildungStatusFilter" onchange="loadJobApplications('ausbildung')">
+                                        <option value="all" data-i18n="admin.services.all_status">All Status</option>
+                                        <option value="new" data-i18n="admin.services.status_new">New</option>
+                                        <option value="erstgespraech" data-i18n="admin.services.status_erstgespraech">Erstgespräch</option>
+                                        <option value="vorvertrag" data-i18n="admin.services.status_vorvertrag">Vorvertrag</option>
+                                        <option value="interview" data-i18n="admin.services.status_interview">Interview</option>
+                                        <option value="vertrag" data-i18n="admin.services.status_vertrag">Vertrag</option>
+                                        <option value="botschaft" data-i18n="admin.services.status_botschaft">Botschaft</option>
+                                        <option value="visum" data-i18n="admin.services.status_visum">Visum</option>
+                                        <option value="completed" data-i18n="admin.services.status_completed">Completed</option>
+                                        <option value="cancelled" data-i18n="admin.services.status_cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label data-i18n="admin.services.filter_diploma">Diploma:</label>
+                                    <select id="ausbildungDiplomaFilter" onchange="loadJobApplications('ausbildung')">
+                                        <option value="all" data-i18n="admin.services.all_diploma">All</option>
+                                        <option value="true" data-i18n="admin.services.has_diploma">Has Diploma</option>
+                                        <option value="false" data-i18n="admin.services.certificate_only">Certificate Only</option>
+                                        <option value="notReviewed" data-i18n="admin.services.not_reviewed">Not Reviewed</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group search-group">
+                                    <input type="text" id="ausbildungSearch" placeholder="Search name, email, phone..." onkeyup="debounceSearch('ausbildung')">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <button class="btn-add-application" onclick="openAddApplicationModal('ausbildung')">
+                                    <i class="fas fa-plus"></i> <span data-i18n="admin.services.add_application">Add Application</span>
+                                </button>
+                            </div>
+
+                            <!-- Applications Table -->
+                            <div class="section-card">
+                                <div class="section-body">
+                                    <div class="loading" id="ausbildungLoading">Loading applications...</div>
+                                    <div id="ausbildungTableContainer" style="display: none; overflow-x: auto;">
+                                        <table class="data-table applications-table">
+                                            <thead>
+                                                <tr>
+                                                    <th data-i18n="admin.services.name">Name</th>
+                                                    <th data-i18n="admin.services.contact">Contact</th>
+                                                    <th data-i18n="admin.services.field">Field</th>
+                                                    <th data-i18n="admin.services.diploma">Diploma</th>
+                                                    <th data-i18n="admin.services.status">Status</th>
+                                                    <th data-i18n="admin.services.date">Date</th>
+                                                    <th data-i18n="admin.services.actions">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ausbildungTableBody">
+                                            </tbody>
+                                        </table>
+                                        <!-- Ausbildung Pagination -->
+                                        <div id="ausbildungPagination"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Arbeit Content -->
+                        <div class="service-main-content" id="arbeitContent">
+                            <!-- Job Field Cards -->
+                            <div class="job-field-cards">
+                                <div class="job-field-card" data-field="pflege">
+                                    <div class="job-field-icon pflege"><i class="fas fa-heart"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.pflege">Pflege</h4>
+                                        <p data-i18n="admin.services.pflege_desc">Care/Nursing</p>
+                                    </div>
+                                    <span class="job-field-count" id="arbeitPflegeCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="verkaufer">
+                                    <div class="job-field-icon verkaufer"><i class="fas fa-shopping-cart"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.verkaufer">Verkäufer</h4>
+                                        <p data-i18n="admin.services.verkaufer_desc">Sales</p>
+                                    </div>
+                                    <span class="job-field-count" id="arbeitVerkauferCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="gastronomie">
+                                    <div class="job-field-icon gastronomie"><i class="fas fa-utensils"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.gastronomie">Gastronomie</h4>
+                                        <p data-i18n="admin.services.gastronomie_desc">Hotel, Cooking, Hospitality</p>
+                                    </div>
+                                    <span class="job-field-count" id="arbeitGastronomieCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="fleischer">
+                                    <div class="job-field-icon fleischer"><i class="fas fa-drumstick-bite"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.fleischer">Fleischer</h4>
+                                        <p data-i18n="admin.services.fleischer_desc">Butcher</p>
+                                    </div>
+                                    <span class="job-field-count" id="arbeitFleischerCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="maurer">
+                                    <div class="job-field-icon maurer"><i class="fas fa-hard-hat"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.maurer">Maurer</h4>
+                                        <p data-i18n="admin.services.maurer_desc">Mason/Bricklayer</p>
+                                    </div>
+                                    <span class="job-field-count" id="arbeitMaurerCount">0</span>
+                                </div>
+                                <div class="job-field-card" data-field="other">
+                                    <div class="job-field-icon other"><i class="fas fa-ellipsis-h"></i></div>
+                                    <div class="job-field-info">
+                                        <h4 data-i18n="admin.services.other">Other</h4>
+                                        <p data-i18n="admin.services.other_desc">Other Fields</p>
+                                    </div>
+                                    <span class="job-field-count" id="arbeitOtherCount">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Filters Bar -->
+                            <div class="applications-filters">
+                                <div class="filter-group">
+                                    <label data-i18n="admin.services.filter_field">Field:</label>
+                                    <select id="arbeitFieldFilter" onchange="loadJobApplications('arbeit')">
+                                        <option value="all" data-i18n="admin.services.all_fields">All Fields</option>
+                                        <option value="pflege">Pflege</option>
+                                        <option value="verkaufer">Verkäufer</option>
+                                        <option value="gastronomie">Gastronomie</option>
+                                        <option value="fleischer">Fleischer</option>
+                                        <option value="maurer">Maurer</option>
+                                        <option value="other" data-i18n="admin.services.other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label data-i18n="admin.services.filter_status">Status:</label>
+                                    <select id="arbeitStatusFilter" onchange="loadJobApplications('arbeit')">
+                                        <option value="all" data-i18n="admin.services.all_status">All Status</option>
+                                        <option value="new" data-i18n="admin.services.status_new">New</option>
+                                        <option value="erstgespraech" data-i18n="admin.services.status_erstgespraech">Erstgespräch</option>
+                                        <option value="vorvertrag" data-i18n="admin.services.status_vorvertrag">Vorvertrag</option>
+                                        <option value="interview" data-i18n="admin.services.status_interview">Interview</option>
+                                        <option value="vertrag" data-i18n="admin.services.status_vertrag">Vertrag</option>
+                                        <option value="botschaft" data-i18n="admin.services.status_botschaft">Botschaft</option>
+                                        <option value="visum" data-i18n="admin.services.status_visum">Visum</option>
+                                        <option value="completed" data-i18n="admin.services.status_completed">Completed</option>
+                                        <option value="cancelled" data-i18n="admin.services.status_cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label data-i18n="admin.services.filter_diploma">Diploma:</label>
+                                    <select id="arbeitDiplomaFilter" onchange="loadJobApplications('arbeit')">
+                                        <option value="all" data-i18n="admin.services.all_diploma">All</option>
+                                        <option value="true" data-i18n="admin.services.has_diploma">Has Diploma</option>
+                                        <option value="false" data-i18n="admin.services.certificate_only">Certificate Only</option>
+                                        <option value="notReviewed" data-i18n="admin.services.not_reviewed">Not Reviewed</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group search-group">
+                                    <input type="text" id="arbeitSearch" placeholder="Search name, email, phone..." onkeyup="debounceSearch('arbeit')">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <button class="btn-add-application" onclick="openAddApplicationModal('arbeit')">
+                                    <i class="fas fa-plus"></i> <span data-i18n="admin.services.add_application">Add Application</span>
+                                </button>
+                            </div>
+
+                            <!-- Applications Table -->
+                            <div class="section-card">
+                                <div class="section-body">
+                                    <div class="loading" id="arbeitLoading">Loading applications...</div>
+                                    <div id="arbeitTableContainer" style="display: none; overflow-x: auto;">
+                                        <table class="data-table applications-table">
+                                            <thead>
+                                                <tr>
+                                                    <th data-i18n="admin.services.name">Name</th>
+                                                    <th data-i18n="admin.services.contact">Contact</th>
+                                                    <th data-i18n="admin.services.field">Field</th>
+                                                    <th data-i18n="admin.services.diploma">Diploma</th>
+                                                    <th data-i18n="admin.services.status">Status</th>
+                                                    <th data-i18n="admin.services.date">Date</th>
+                                                    <th data-i18n="admin.services.actions">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="arbeitTableBody">
+                                            </tbody>
+                                        </table>
+                                        <!-- Arbeit Pagination -->
+                                        <div id="arbeitPagination"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <!-- End of Applying Service Content -->
+
+                        <!-- CV Service Content -->
+                        <div class="cv-service-content" id="cvServiceContent" style="display: none;">
+                            <button class="back-to-services-btn" onclick="backToServiceTypes()">
+                                <i class="fas fa-arrow-left"></i> <span data-i18n="admin.services.back_to_services">Back to Services</span>
+                            </button>
+                            
+                            <!-- CV Tabs -->
+                            <div class="cv-tabs">
+                                <button class="cv-tab active" data-cv-tab="pending">
+                                    <i class="fas fa-inbox"></i>
+                                    <span data-i18n="admin.services.cv_pending">New Requests</span>
+                                    <span class="tab-badge pending-badge" id="cvPendingCount">0</span>
+                                </button>
+                                <button class="cv-tab" data-cv-tab="management">
+                                    <i class="fas fa-tasks"></i>
+                                    <span data-i18n="admin.services.cv_management">All Requests</span>
+                                    <span class="tab-badge" id="cvTotalCount">0</span>
+                                </button>
+                            </div>
+
+                            <!-- Pending Requests Tab -->
+                            <div class="cv-tab-content active" id="cvPendingTab">
+                                <div class="pending-review-header">
+                                    <h3><i class="fas fa-inbox"></i> <span data-i18n="admin.services.new_cv_requests">New CV Requests</span></h3>
+                                    <p data-i18n="admin.services.cv_pending_desc">Review new CV requests and start creating CVs for clients</p>
+                                </div>
+                                
+                                <div class="section-card">
+                                    <div class="section-body">
+                                        <div class="loading" id="cvPendingLoading">Loading CV requests...</div>
+                                        <div id="cvPendingTableContainer" style="display: none; overflow-x: auto;">
+                                            <table class="data-table cv-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-i18n="admin.services.name">Name</th>
+                                                        <th data-i18n="admin.services.contact">Contact</th>
+                                                        <th data-i18n="admin.services.documents">Documents</th>
+                                                        <th data-i18n="admin.services.notes">Notes</th>
+                                                        <th data-i18n="admin.services.date">Date</th>
+                                                        <th data-i18n="admin.services.actions">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="cvPendingTableBody">
+                                                </tbody>
+                                            </table>
+                                            <!-- CV Pending Pagination -->
+                                            <div id="cvPendingPagination"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- All Requests Management Tab -->
+                            <div class="cv-tab-content" id="cvManagementTab" style="display: none;">
+                                <div class="cv-management-header">
+                                    <h3><i class="fas fa-tasks"></i> <span data-i18n="admin.services.manage_cv">Manage CV Requests</span></h3>
+                                    <p data-i18n="admin.services.cv_management_desc">Track and update the status of all CV requests</p>
+                                </div>
+
+                                <!-- Status Filter Cards -->
+                                <div class="cv-status-cards">
+                                    <div class="status-card new-card" data-status="pending" onclick="filterCVByStatus('pending')">
+                                        <div class="status-icon"><i class="fas fa-clock"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_new">New</span>
+                                            <span class="status-count" id="cvNewCount">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-card progress-card" data-status="in-progress" onclick="filterCVByStatus('in-progress')">
+                                        <div class="status-icon"><i class="fas fa-spinner"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_in_progress">In Progress</span>
+                                            <span class="status-count" id="cvInProgressCount">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-card completed-card" data-status="completed" onclick="filterCVByStatus('completed')">
+                                        <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_finished">Finished</span>
+                                            <span class="status-count" id="cvCompletedCount">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-card all-card active" data-status="all" onclick="filterCVByStatus('all')">
+                                        <div class="status-icon"><i class="fas fa-list"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_all">All</span>
+                                            <span class="status-count" id="cvAllCount">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="section-card">
+                                    <div class="section-body">
+                                        <div class="loading" id="cvManagementLoading">Loading CV requests...</div>
+                                        <div id="cvManagementTableContainer" style="display: none; overflow-x: auto;">
+                                            <table class="data-table cv-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-i18n="admin.services.name">Name</th>
+                                                        <th data-i18n="admin.services.contact">Contact</th>
+                                                        <th data-i18n="admin.services.documents">Documents</th>
+                                                        <th data-i18n="admin.services.status">Status</th>
+                                                        <th data-i18n="admin.services.date">Date</th>
+                                                        <th data-i18n="admin.services.actions">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="cvManagementTableBody">
+                                                </tbody>
+                                            </table>
+                                            <!-- CV All Pagination -->
+                                            <div id="cvAllPagination"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Translation Service Content -->
+                        <div class="translation-service-content" id="translationServiceContent" style="display: none;">
+                            <button class="back-to-services-btn" onclick="backToServiceTypes()">
+                                <i class="fas fa-arrow-left"></i> <span data-i18n="admin.services.back_to_services">Back to Services</span>
+                            </button>
+                            
+                            <!-- Translation Tabs -->
+                            <div class="translation-tabs">
+                                <button class="translation-tab active" data-translation-tab="pending">
+                                    <i class="fas fa-inbox"></i>
+                                    <span data-i18n="admin.services.translation_pending">New Requests</span>
+                                    <span class="tab-badge pending-badge" id="translationPendingCount">0</span>
+                                </button>
+                                <button class="translation-tab" data-translation-tab="management">
+                                    <i class="fas fa-tasks"></i>
+                                    <span data-i18n="admin.services.translation_management">All Requests</span>
+                                    <span class="tab-badge" id="translationTotalCount">0</span>
+                                </button>
+                            </div>
+
+                            <!-- Pending Requests Tab -->
+                            <div class="translation-tab-content active" id="translationPendingTab">
+                                <div class="pending-review-header">
+                                    <h3><i class="fas fa-inbox"></i> <span data-i18n="admin.services.new_translation_requests">New Translation Requests</span></h3>
+                                    <p data-i18n="admin.services.translation_pending_desc">Review new translation requests and start processing them</p>
+                                </div>
+                                
+                                <div class="section-card">
+                                    <div class="section-body">
+                                        <div class="loading" id="translationPendingLoading">Loading translation requests...</div>
+                                        <div id="translationPendingTableContainer" style="display: none; overflow-x: auto;">
+                                            <table class="data-table translation-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-i18n="admin.services.name">Name</th>
+                                                        <th data-i18n="admin.services.contact">Contact</th>
+                                                        <th data-i18n="admin.services.languages">Languages</th>
+                                                        <th data-i18n="admin.services.documents">Documents</th>
+                                                        <th data-i18n="admin.services.date">Date</th>
+                                                        <th data-i18n="admin.services.actions">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="translationPendingTableBody">
+                                                </tbody>
+                                            </table>
+                                            <!-- Translation Pending Pagination -->
+                                            <div id="translationPendingPagination"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- All Requests Management Tab -->
+                            <div class="translation-tab-content" id="translationManagementTab" style="display: none;">
+                                <div class="translation-management-header">
+                                    <h3><i class="fas fa-tasks"></i> <span data-i18n="admin.services.manage_translations">Manage Translation Requests</span></h3>
+                                    <p data-i18n="admin.services.translation_management_desc">Track and update the status of all translation requests</p>
+                                </div>
+
+                                <!-- Status Filter Cards -->
+                                <div class="translation-status-cards">
+                                    <div class="status-card new-card" data-status="pending" onclick="filterTranslationsByStatus('pending')">
+                                        <div class="status-icon"><i class="fas fa-clock"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_new">New</span>
+                                            <span class="status-count" id="translationNewCount">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-card progress-card" data-status="in-progress" onclick="filterTranslationsByStatus('in-progress')">
+                                        <div class="status-icon"><i class="fas fa-spinner"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_in_progress">In Progress</span>
+                                            <span class="status-count" id="translationInProgressCount">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-card completed-card" data-status="completed" onclick="filterTranslationsByStatus('completed')">
+                                        <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_finished">Finished</span>
+                                            <span class="status-count" id="translationCompletedCount">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-card all-card active" data-status="all" onclick="filterTranslationsByStatus('all')">
+                                        <div class="status-icon"><i class="fas fa-list"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-label" data-i18n="admin.services.status_all">All</span>
+                                            <span class="status-count" id="translationAllCount">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="section-card">
+                                    <div class="section-body">
+                                        <div class="loading" id="translationManagementLoading">Loading translation requests...</div>
+                                        <div id="translationManagementTableContainer" style="display: none; overflow-x: auto;">
+                                            <table class="data-table translation-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-i18n="admin.services.name">Name</th>
+                                                        <th data-i18n="admin.services.contact">Contact</th>
+                                                        <th data-i18n="admin.services.languages">Languages</th>
+                                                        <th data-i18n="admin.services.documents">Documents</th>
+                                                        <th data-i18n="admin.services.status">Status</th>
+                                                        <th data-i18n="admin.services.date">Date</th>
+                                                        <th data-i18n="admin.services.actions">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="translationManagementTableBody">
+                                                </tbody>
+                                            </table>
+                                            <!-- Translation All Pagination -->
+                                            <div id="translationAllPagination"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1290,11 +1776,339 @@
         </div>
     </div>
 
+    <!-- Job Application Modal -->
+    <div class="modal-overlay" id="jobApplicationModal">
+        <div class="modal-container" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> <span id="applicationModalTitle">Add Application</span></h2>
+                <button class="modal-close" onclick="closeApplicationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="applicationForm" onsubmit="saveApplication(event)">
+                    <input type="hidden" id="applicationId">
+                    <input type="hidden" id="applicationTypeInput">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appFullName"><i class="fas fa-user"></i> <span data-i18n="admin.services.full_name">Full Name</span> *</label>
+                            <input type="text" id="appFullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appPhone"><i class="fas fa-phone"></i> <span data-i18n="admin.services.phone">Phone</span> *</label>
+                            <input type="tel" id="appPhone" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appEmail"><i class="fas fa-envelope"></i> <span data-i18n="admin.services.email">Email</span> *</label>
+                            <input type="email" id="appEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appJobField"><i class="fas fa-briefcase"></i> <span data-i18n="admin.services.job_field">Job Field</span> *</label>
+                            <select id="appJobField" required onchange="toggleCustomField()">
+                                <option value="pflege">Pflege (Care/Nursing)</option>
+                                <option value="verkaufer">Verkäufer (Sales)</option>
+                                <option value="gastronomie">Gastronomie (Hotel/Cooking)</option>
+                                <option value="fleischer">Fleischer (Butcher)</option>
+                                <option value="maurer">Maurer (Mason)</option>
+                                <option value="other" data-i18n="admin.services.other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="customFieldGroup" style="display: none;">
+                        <label for="appCustomField"><i class="fas fa-edit"></i> <span data-i18n="admin.services.custom_field">Specify Field</span></label>
+                        <input type="text" id="appCustomField" placeholder="Enter custom job field...">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appLanguageLevel"><i class="fas fa-language"></i> <span data-i18n="admin.services.language_level">Language Level</span></label>
+                            <select id="appLanguageLevel">
+                                <option value="">Not specified</option>
+                                <option value="A1">A1</option>
+                                <option value="A2">A2</option>
+                                <option value="B1">B1</option>
+                                <option value="B2">B2</option>
+                                <option value="C1">C1</option>
+                                <option value="C2">C2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="appStatus"><i class="fas fa-tasks"></i> <span data-i18n="admin.services.status">Status</span></label>
+                            <select id="appStatus">
+                                <option value="new">New</option>
+                                <option value="erstgespraech">Erstgespräch (Initial Interview)</option>
+                                <option value="vorvertrag">Vorvertrag (Pre-contract)</option>
+                                <option value="interview">Interview (German Employer)</option>
+                                <option value="vertrag">Vertrag (Contract Received)</option>
+                                <option value="botschaft">Botschaft (Embassy)</option>
+                                <option value="visum">Visum (Visa Obtained)</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appDiplomaType"><i class="fas fa-graduation-cap"></i> <span data-i18n="admin.services.diploma_status">Diploma Status</span></label>
+                            <select id="appDiplomaType" onchange="toggleDiplomaDetails()">
+                                <option value="">Not Reviewed</option>
+                                <option value="diploma">Has Diploma</option>
+                                <option value="certificate">Certificate Only</option>
+                                <option value="none">No Qualification</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="diplomaDetailsGroup" style="display: none;">
+                            <label for="appDiplomaDetails"><i class="fas fa-info-circle"></i> <span data-i18n="admin.services.diploma_details">Diploma Details</span></label>
+                            <input type="text" id="appDiplomaDetails" placeholder="e.g., Bachelor in Nursing">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appExperience"><i class="fas fa-history"></i> <span data-i18n="admin.services.experience">Experience</span></label>
+                        <textarea id="appExperience" rows="2" placeholder="Work experience..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appQualifications"><i class="fas fa-certificate"></i> <span data-i18n="admin.services.qualifications">Qualifications</span></label>
+                        <textarea id="appQualifications" rows="2" placeholder="Qualifications and skills..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appNotes"><i class="fas fa-sticky-note"></i> <span data-i18n="admin.services.notes">Admin Notes</span></label>
+                        <textarea id="appNotes" rows="2" placeholder="Internal notes..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="action-btn btn-success" style="flex: 1;">
+                            <i class="fas fa-save"></i> <span data-i18n="admin.services.save">Save</span>
+                        </button>
+                        <button type="button" class="action-btn btn-danger" onclick="closeApplicationModal()" style="flex: 1;">
+                            <i class="fas fa-times"></i> <span data-i18n="admin.services.cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Details Modal -->
+    <div class="modal-overlay" id="applicationDetailsModal">
+        <div class="modal-container" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-user"></i> <span data-i18n="admin.services.application_details">Application Details</span></h2>
+                <button class="modal-close" onclick="closeApplicationDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Applicant Info -->
+                <div class="detail-section">
+                    <h3><i class="fas fa-id-card"></i> <span data-i18n="admin.services.applicant_info">Applicant Information</span></h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label data-i18n="admin.services.name">Name</label>
+                            <span id="detailName">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <label data-i18n="admin.services.phone">Phone</label>
+                            <span id="detailPhone">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <label data-i18n="admin.services.email">Email</label>
+                            <span id="detailEmail">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <label data-i18n="admin.services.field">Field</label>
+                            <span id="detailField">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <label data-i18n="admin.services.language_level">Language Level</label>
+                            <span id="detailLanguage">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <label data-i18n="admin.services.diploma">Diploma</label>
+                            <span id="detailDiploma">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Pipeline -->
+                <div class="detail-section">
+                    <h3><i class="fas fa-tasks"></i> <span data-i18n="admin.services.status_pipeline">Status Pipeline</span></h3>
+                    <div class="status-pipeline" id="statusPipeline">
+                        <div class="pipeline-step" data-status="new">
+                            <div class="step-icon"><i class="fas fa-file-alt"></i></div>
+                            <span>New</span>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-step" data-status="erstgespraech">
+                            <div class="step-icon"><i class="fas fa-comments"></i></div>
+                            <span>Erstgespräch</span>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-step" data-status="vorvertrag">
+                            <div class="step-icon"><i class="fas fa-file-signature"></i></div>
+                            <span>Vorvertrag</span>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-step" data-status="interview">
+                            <div class="step-icon"><i class="fas fa-handshake"></i></div>
+                            <span>Interview</span>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-step" data-status="vertrag">
+                            <div class="step-icon"><i class="fas fa-file-contract"></i></div>
+                            <span>Vertrag</span>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-step" data-status="botschaft">
+                            <div class="step-icon"><i class="fas fa-building"></i></div>
+                            <span>Botschaft</span>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-step" data-status="visum">
+                            <div class="step-icon"><i class="fas fa-passport"></i></div>
+                            <span>Visum</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Update Status -->
+                    <div class="status-update-section">
+                        <label data-i18n="admin.services.update_status">Update Status:</label>
+                        <select id="detailStatusSelect" onchange="updateApplicationStatus()">
+                            <option value="new">New</option>
+                            <option value="erstgespraech">Erstgespräch</option>
+                            <option value="vorvertrag">Vorvertrag</option>
+                            <option value="interview">Interview</option>
+                            <option value="vertrag">Vertrag</option>
+                            <option value="botschaft">Botschaft</option>
+                            <option value="visum">Visum</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Status History -->
+                <div class="detail-section">
+                    <h3><i class="fas fa-history"></i> <span data-i18n="admin.services.status_history">Status History</span></h3>
+                    <div class="status-history" id="statusHistory">
+                        <!-- History items will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="action-btn btn-info" onclick="editCurrentApplication()">
+                        <i class="fas fa-edit"></i> <span data-i18n="admin.services.edit">Edit</span>
+                    </button>
+                    <button class="action-btn btn-danger" onclick="deleteCurrentApplication()">
+                        <i class="fas fa-trash"></i> <span data-i18n="admin.services.delete">Delete</span>
+                    </button>
+                    <button class="action-btn" onclick="closeApplicationDetailsModal()" style="margin-left: auto;">
+                        <i class="fas fa-times"></i> <span data-i18n="admin.services.close">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Application Modal -->
+    <div class="modal-overlay" id="reviewApplicationModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-check"></i> <span data-i18n="admin.services.review_application">Review Application</span></h2>
+                <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Applicant Info Summary -->
+                <div class="review-applicant-info">
+                    <h4 id="reviewApplicantName">-</h4>
+                    <p><i class="fas fa-phone"></i> <span id="reviewApplicantPhone">-</span></p>
+                    <p><i class="fas fa-envelope"></i> <span id="reviewApplicantEmail">-</span></p>
+                    <p><i class="fas fa-briefcase"></i> <span data-i18n="admin.services.requested">Requested:</span> <span id="reviewRequestedType">-</span></p>
+                    <p><i class="fas fa-comment"></i> <span id="reviewNotes">-</span></p>
+                </div>
+
+                <form id="reviewForm">
+                    <input type="hidden" id="reviewApplicationId">
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-layer-group"></i> <span data-i18n="admin.services.application_type">Application Type</span> *</label>
+                        <select id="reviewApplicationType" required>
+                            <option value="">Select type...</option>
+                            <option value="ausbildung">Ausbildung (Apprenticeship)</option>
+                            <option value="arbeit">Arbeit (Work)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-briefcase"></i> <span data-i18n="admin.services.job_field">Job Field</span> *</label>
+                        <select id="reviewJobField" required onchange="toggleReviewCustomField()">
+                            <option value="">Select field...</option>
+                            <option value="pflege">Pflege (Care/Nursing)</option>
+                            <option value="verkaufer">Verkäufer (Sales)</option>
+                            <option value="gastronomie">Gastronomie (Hotel/Cooking)</option>
+                            <option value="fleischer">Fleischer (Butcher)</option>
+                            <option value="maurer">Maurer (Mason)</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="reviewCustomFieldGroup" style="display: none;">
+                        <label><i class="fas fa-edit"></i> <span data-i18n="admin.services.custom_field">Specify Field</span></label>
+                        <input type="text" id="reviewCustomJobField" placeholder="Enter custom field name">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-certificate"></i> <span data-i18n="admin.services.diploma_status">Diploma Status</span> *</label>
+                        <select id="reviewDiplomaType" required>
+                            <option value="">Select diploma status...</option>
+                            <option value="diploma">Has Diploma</option>
+                            <option value="certificate">Certificate Only (Internship)</option>
+                            <option value="none">No Diploma/Certificate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-info-circle"></i> <span data-i18n="admin.services.diploma_details">Diploma Details</span></label>
+                        <input type="text" id="reviewDiplomaDetails" placeholder="e.g., Nursing diploma from XYZ University">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> <span data-i18n="admin.services.admin_notes">Admin Notes</span></label>
+                        <textarea id="reviewAdminNotes" rows="2" placeholder="Optional notes about this review"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn btn-success" onclick="submitReview()">
+                    <i class="fas fa-check"></i> <span data-i18n="admin.services.approve_classify">Approve & Classify</span>
+                </button>
+                <button class="action-btn btn-danger" onclick="rejectApplication()">
+                    <i class="fas fa-times"></i> <span data-i18n="admin.services.reject">Reject</span>
+                </button>
+                <button class="action-btn" onclick="closeReviewModal()">
+                    <i class="fas fa-arrow-left"></i> <span data-i18n="admin.services.cancel">Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="js/system-stats.js"></script>
     <script src="js/admin-dashboard.js"></script>
     <script src="js/appointments.js"></script>
     <script src="js/admin-ratings.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/job-applications.js"></script>
+    <script src="js/translation-admin.js"></script>
+    <script src="js/cv-admin.js"></script>
 </body>
 </html>

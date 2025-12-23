@@ -70,24 +70,55 @@ router.post('/', async (req, res) => {
     }
 });
 
-// POST /api/services/upload - Create service request with file upload (public)
-router.post('/upload', upload.single('file'), 
-    validatePDFUpload({
-        checkIntegrity: true,
-        required: false,
-        getStudentName: (req) => req.body.fullName,
-        getSeason: async (req) => {
-            // Get current active season if available
-            const Settings = require('../models/Settings');
-            try {
-                const settings = await Settings.getSettings();
-                return settings.currentSeason || 'Current';
-            } catch (error) {
-                return 'Current';
-            }
+// Configure multer for multiple file uploads (for translation service)
+const uploadMultiple = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB per file
+        files: 25 // Max 25 files
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /pdf|doc|docx|jpg|jpeg|png|txt/;
+        const extname = allowedTypes.test(file.originalname.toLowerCase());
+        if (extname) {
+            return cb(null, true);
         }
-    }),
-    async (req, res) => {
+        cb(new Error('Only PDF, DOC, DOCX, TXT, and image files are allowed'));
+    }
+});
+
+// POST /api/services/upload - Create service request with file upload (public)
+// Supports both single file (file) and multiple files (files) for translation
+router.post('/upload', (req, res, next) => {
+    // Use fields to accept both 'file' (single) and 'files' (multiple)
+    uploadMultiple.fields([
+        { name: 'file', maxCount: 1 },
+        { name: 'files', maxCount: 25 }
+    ])(req, res, (err) => {
+        if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'File is too large. Maximum size is 5MB per file.',
+                    errorType: 'FILE_TOO_LARGE'
+                });
+            }
+            if (err.code === 'LIMIT_FILE_COUNT') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Too many files. Maximum is 25 files.',
+                    errorType: 'TOO_MANY_FILES'
+                });
+            }
+            return res.status(400).json({
+                success: false,
+                message: err.message || 'File upload error',
+                errorType: 'UPLOAD_ERROR'
+            });
+        }
+        next();
+    });
+}, async (req, res) => {
     try {
         const { serviceType, fullName, phone, email } = req.body;
 
@@ -111,56 +142,69 @@ router.post('/upload', upload.single('file'),
             translationDetails = JSON.parse(req.body.translationDetails);
         }
 
-        // Log PDF validation results if available
-        if (req.file && req.file.originalname.toLowerCase().endsWith('.pdf') && req.pdfValidation) {
-            console.log('✅ PDF validation passed:', req.pdfValidation.metadata);
-            if (req.pdfValidation.warnings.length > 0) {
-                console.warn('⚠️ PDF validation warnings:', req.pdfValidation.warnings);
-            }
+        // Collect all files (from both 'file' and 'files' fields)
+        let allFiles = [];
+        if (req.files) {
+            if (req.files.file) allFiles = allFiles.concat(req.files.file);
+            if (req.files.files) allFiles = allFiles.concat(req.files.files);
         }
 
-        // Upload file to Mega.nz if provided
-        let megaPath = null;
-        if (req.file) {
-            try {
-                console.log(`📤 Uploading file to Mega.nz: ${req.file.originalname}`);
-                
-                // Create folder path based on service type
-                const folderPath = `/ServiceRequests/${serviceType}`;
-                const fileName = `${Date.now()}_${fullName.replace(/\s+/g, '_')}_${req.file.originalname}`;
-                megaPath = `${folderPath}/${fileName}`;
-                
-                // Upload to Mega.nz
-                const megaService = require('../services/megaService');
-                const uploadResult = await megaService.uploadServiceFile(req.file.buffer, megaPath);
-                
-                if (uploadResult.success) {
-                    console.log(`✅ File uploaded to Mega.nz: ${megaPath}`);
+        // Upload files to Mega.nz if provided
+        let uploadedFiles = [];
+        if (allFiles.length > 0) {
+            console.log(`📤 Uploading ${allFiles.length} file(s) to Mega.nz...`);
+            
+            for (const file of allFiles) {
+                try {
+                    // Create folder path based on service type
+                    const folderPath = `/ServiceRequests/${serviceType}`;
+                    const fileName = `${Date.now()}_${fullName.replace(/\s+/g, '_')}_${file.originalname}`;
+                    const megaPath = `${folderPath}/${fileName}`;
                     
-                    // Add Mega path to service details ONLY if upload succeeded
-                    if (cvDetails) {
-                        cvDetails.fileName = req.file.originalname;
-                        cvDetails.fileSize = req.file.size;
-                        cvDetails.dropboxPath = megaPath; // Keep field name for backward compatibility
+                    // Upload to Mega.nz
+                    const uploadResult = await megaService.uploadServiceFile(file.buffer, megaPath);
+                    
+                    if (uploadResult.success) {
+                        console.log(`✅ File uploaded to Mega.nz: ${megaPath}`);
+                        uploadedFiles.push({
+                            fileName: file.originalname,
+                            fileSize: file.size,
+                            dropboxPath: megaPath // Keep field name for backward compatibility
+                        });
+                    } else {
+                        console.error(`❌ Mega upload failed for ${file.originalname}`);
                     }
-                    if (applyingDetails) {
-                        applyingDetails.fileName = req.file.originalname;
-                        applyingDetails.fileSize = req.file.size;
-                        applyingDetails.dropboxPath = megaPath;
-                    }
-                    if (translationDetails) {
-                        translationDetails.fileName = req.file.originalname;
-                        translationDetails.fileSize = req.file.size;
-                        translationDetails.dropboxPath = megaPath;
-                    }
-                } else {
-                    console.error('❌ Mega upload failed - file path not saved');
-                    megaPath = null; // Don't save path if upload failed
+                } catch (uploadError) {
+                    console.error(`❌ Mega upload error for ${file.originalname}:`, uploadError);
+                    // Continue with other files
                 }
-            } catch (uploadError) {
-                console.error('❌ Mega upload error:', uploadError);
-                megaPath = null; // Don't save path if upload failed
-                // Continue without file if upload fails
+            }
+            
+            // Add uploaded files info to service details
+            if (uploadedFiles.length > 0) {
+                if (cvDetails) {
+                    // For CV, store all files
+                    cvDetails.files = uploadedFiles;
+                    cvDetails.documentCount = uploadedFiles.length;
+                    // Keep backward compatibility with single file fields
+                    cvDetails.fileName = uploadedFiles[0].fileName;
+                    cvDetails.fileSize = uploadedFiles[0].fileSize;
+                    cvDetails.dropboxPath = uploadedFiles[0].dropboxPath;
+                }
+                if (applyingDetails) {
+                    applyingDetails.fileName = uploadedFiles[0].fileName;
+                    applyingDetails.fileSize = uploadedFiles[0].fileSize;
+                    applyingDetails.dropboxPath = uploadedFiles[0].dropboxPath;
+                }
+                if (translationDetails) {
+                    // For translation, store all files
+                    translationDetails.files = uploadedFiles;
+                    translationDetails.documentCount = uploadedFiles.length;
+                    // Keep backward compatibility with single file fields
+                    translationDetails.fileName = uploadedFiles[0].fileName;
+                    translationDetails.fileSize = uploadedFiles[0].fileSize;
+                    translationDetails.dropboxPath = uploadedFiles[0].dropboxPath;
+                }
             }
         }
 
@@ -216,7 +260,8 @@ router.get('/', authenticateAdmin, async (req, res) => {
 
         res.json({
             success: true,
-            services
+            services,
+            requests: services // Alias for frontend compatibility
         });
 
     } catch (error) {
@@ -257,6 +302,99 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch statistics'
+        });
+    }
+});
+
+// GET /api/services/:id/download-documents - Download all documents as ZIP (admin only)
+router.get('/:id/download-documents', authenticateAdmin, async (req, res) => {
+    try {
+        const service = await ServiceRequest.findById(req.params.id);
+        
+        if (!service) {
+            return res.status(404).json({
+                success: false,
+                message: 'Service request not found'
+            });
+        }
+
+        const details = service.translationDetails || service.cvDetails || service.applyingDetails || {};
+        const files = details.files || [];
+        
+        // If only one file or no files array, use single file path
+        if (files.length === 0 && details.dropboxPath) {
+            // Single file download
+            try {
+                const downloadResult = await megaService.downloadServiceFile(details.dropboxPath);
+                
+                if (!downloadResult.success || !downloadResult.fileBuffer) {
+                    throw new Error('Download failed');
+                }
+                
+                const ext = details.fileName ? details.fileName.split('.').pop().toLowerCase() : 'pdf';
+                let contentType = 'application/octet-stream';
+                if (ext === 'pdf') contentType = 'application/pdf';
+                else if (ext === 'doc') contentType = 'application/msword';
+                else if (ext === 'docx') contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                
+                res.setHeader('Content-Type', contentType);
+                res.setHeader('Content-Disposition', `attachment; filename="${details.fileName || 'document'}"`);
+                res.send(downloadResult.fileBuffer);
+                return;
+            } catch (downloadError) {
+                console.error('Single file download error:', downloadError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to download document'
+                });
+            }
+        }
+        
+        // Multiple files - create ZIP
+        if (files.length > 0) {
+            const archiver = require('archiver');
+            
+            const archive = archiver('zip', {
+                zlib: { level: 9 }
+            });
+            
+            const clientName = service.fullName.replace(/\s+/g, '_');
+            const zipFilename = `${clientName}_Documents.zip`;
+            
+            res.setHeader('Content-Type', 'application/zip');
+            res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
+            
+            archive.pipe(res);
+            
+            // Download each file and add to archive
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                try {
+                    console.log(`📥 Downloading file ${i + 1}/${files.length}: ${file.fileName}`);
+                    const downloadResult = await megaService.downloadServiceFile(file.dropboxPath);
+                    
+                    if (downloadResult.success && downloadResult.fileBuffer) {
+                        archive.append(downloadResult.fileBuffer, { name: file.fileName });
+                    }
+                } catch (fileError) {
+                    console.error(`Error downloading file ${file.fileName}:`, fileError);
+                    // Continue with other files
+                }
+            }
+            
+            await archive.finalize();
+        } else {
+            return res.status(404).json({
+                success: false,
+                message: 'No documents found for this request'
+            });
+        }
+
+    } catch (error) {
+        console.error('Download documents error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to download documents'
         });
     }
 });

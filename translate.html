@@ -447,6 +447,146 @@
             color: #991b1b;
         }
 
+        /* Multiple Document Upload Styles */
+        .upload-hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        #documentUploadSlots {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .document-slot {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .document-slot:hover {
+            border-color: #FFCC00;
+            background: #fffef5;
+        }
+
+        .document-slot.has-file {
+            border-style: solid;
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slot-number {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .remove-slot-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .remove-slot-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .document-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .document-input::-webkit-file-upload-button {
+            background: linear-gradient(135deg, #FFCC00, #FF9500);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .document-input::-webkit-file-upload-button:hover {
+            background: linear-gradient(135deg, #FF9500, #FFCC00);
+        }
+
+        .add-more-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .add-more-btn:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .add-more-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slot-counter {
+            margin-left: 15px;
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .file-name-display {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-name-display i {
+            color: #10b981;
+        }
+
         /* Closed Message Styles - Clean & Balanced */
         .closed-message {
             background: white;
@@ -793,35 +933,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="documentType">
-                        <i class="fas fa-file"></i> Document Type *
-                    </label>
-                    <select id="documentType" name="documentType" required>
-                        <option value="">Select document type...</option>
-                        <option value="certificate">Certificate</option>
-                        <option value="diploma">Diploma</option>
-                        <option value="contract">Contract</option>
-                        <option value="letter">Letter</option>
-                        <option value="business">Business Document</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="pageCount">
-                        <i class="fas fa-file-alt"></i> Number of Pages
-                    </label>
-                    <input type="number" id="pageCount" name="pageCount" min="1" placeholder="e.g., 5">
-                </div>
-
-                <div class="form-group">
-                    <label for="deadline">
-                        <i class="fas fa-calendar"></i> Deadline (Optional)
-                    </label>
-                    <input type="date" id="deadline" name="deadline">
-                </div>
-
-                <div class="form-group">
                     <label for="notes">
                         <i class="fas fa-comment"></i> Additional Notes
                     </label>
@@ -829,10 +940,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="file">
-                        <i class="fas fa-upload"></i> Upload Document to Translate *
+                    <label>
+                        <i class="fas fa-upload"></i> Upload Documents to Translate *
                     </label>
-                    <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required>
+                    <p class="upload-hint">You can upload up to 25 documents. Click "Add More" to add additional documents.</p>
+                    
+                    <div id="documentUploadSlots">
+                        <div class="document-slot" data-slot="1">
+                            <div class="slot-header">
+                                <span class="slot-number">Document 1</span>
+                            </div>
+                            <input type="file" name="documents[]" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required class="document-input">
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="addMoreBtn" class="add-more-btn">
+                        <i class="fas fa-plus-circle"></i> Add More Documents
+                    </button>
+                    <span id="slotCounter" class="slot-counter">1 / 25 documents</span>
                 </div>
 
                 <!-- Instagram Follow Section -->

@@ -99,7 +99,7 @@ const translations = {
         
         // Payment Reminders
         paymentRemindersTitle: "Zahlungserinnerungen",
-        dueIn15Days: "Fällig in 15 Tagen",
+        dueIn15Days: "Fällig in 8-30 Tagen",
         dueIn7Days: "Fällig in 7 Tagen",
         dueTomorrow: "Fällig morgen",
         student: "Schüler",
@@ -215,7 +215,7 @@ const translations = {
         studentsWithOverdue: "Schüler mit überfälligen Zahlungen, die sofortige Aufmerksamkeit erfordern",
         noOverduePayments: "Keine überfälligen Zahlungen gefunden!",
         upcomingPaymentReminders: "Anstehende Zahlungserinnerungen",
-        dueIn15Days: "Fällig in 15 Tagen",
+        dueIn15Days: "Fällig in 8-30 Tagen",
         dueIn7Days: "Fällig in 7 Tagen",
         dueTomorrow: "Fällig morgen",
         students: "Schüler",
@@ -430,7 +430,7 @@ const translations = {
         
         // Payment Reminders
         paymentRemindersTitle: "Payment Reminders",
-        dueIn15Days: "Due in 15 Days",
+        dueIn15Days: "Due in 8-30 Days",
         dueIn7Days: "Due in 7 Days",
         dueTomorrow: "Due Tomorrow",
         student: "Student",
@@ -595,7 +595,7 @@ const translations = {
         
         // Rappels de paiement
         paymentRemindersTitle: "Rappels de paiement",
-        dueIn15Days: "Dû dans 15 jours",
+        dueIn15Days: "Dû dans 8-30 jours",
         dueIn7Days: "Dû dans 7 jours",
         dueTomorrow: "Dû demain",
         student: "Étudiant",
@@ -760,7 +760,7 @@ const translations = {
         
         // تذكيرات الدفع
         paymentRemindersTitle: "تذكيرات الدفع",
-        dueIn15Days: "مستحق خلال 15 يومًا",
+        dueIn15Days: "مستحق خلال 8-30 يومًا",
         dueIn7Days: "مستحق خلال 7 أيام",
         dueTomorrow: "مستحق غدًا",
         student: "الطالب",

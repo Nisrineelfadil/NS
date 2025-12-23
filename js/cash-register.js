@@ -77,14 +77,16 @@ async function checkAuth() {
 
         // Show/hide tabs based on role
         if (currentUser.role === 'super_admin' || currentUser.role === 'superadmin') {
-            // Super admin sees everything
+            // Super admin sees everything: Dashboard, Transactions, Overlapping, Yearly Overview
             document.getElementById('yearlyTab').style.display = 'flex';
+            document.getElementById('overlappingTab').style.display = 'flex';
             document.getElementById('exportSection').style.display = 'block';
             loadMonthData();
         } else {
-            // Normal admin only sees transactions tab
+            // Normal admin only sees: Transactions, Overlapping
             document.querySelector('[data-tab="dashboard"]').style.display = 'none';
             document.querySelector('[data-tab="yearly"]').style.display = 'none';
+            document.getElementById('overlappingTab').style.display = 'flex';
             // Switch to transactions tab automatically
             switchTab('transactions');
         }
@@ -126,6 +128,8 @@ function switchTab(tabName) {
     // Load data for the tab
     if (tabName === 'transactions') {
         loadTransactions();
+    } else if (tabName === 'overlapping') {
+        loadOverlappingServices();
     } else if (tabName === 'yearly') {
         loadYearlyData();
     }
@@ -473,6 +477,21 @@ function displayTransactions(transactions) {
     tbody.innerHTML = transactions.map(t => {
         const typeIcon = t.type === 'income' ? '🟢' : '🔴';
         const statusClass = t.status === 'completed' ? 'completed' : 'pending';
+        const hasReceipt = t.receiptImage && t.receiptImage.data;
+        
+        // Receipt action buttons
+        const receiptButtons = hasReceipt ? `
+            <button class="receipt-btn has-receipt" onclick="viewReceipt('${t._id}')" title="${translate('viewReceipt')}">
+                <i class="fas fa-eye"></i>
+            </button>
+            <button class="receipt-btn" onclick="downloadReceipt('${t._id}')" title="${translate('downloadReceipt')}">
+                <i class="fas fa-download"></i>
+            </button>
+        ` : `
+            <button class="receipt-btn upload" onclick="openReceiptUpload('${t._id}')" title="${translate('uploadReceipt')}">
+                <i class="fas fa-upload"></i>
+            </button>
+        `;
         
         return `
             <tr>
@@ -493,10 +512,11 @@ function displayTransactions(transactions) {
                 <td>${t.remarks || '-'}</td>
                 <td>
                     <div class="action-btns">
-                        <button onclick="editTransaction('${t._id}')" title="Edit">
+                        <button onclick="editTransaction('${t._id}')" title="${translate('edit')}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="delete-btn" onclick="deleteTransaction('${t._id}')" title="Delete">
+                        ${receiptButtons}
+                        <button class="delete-btn" onclick="deleteTransaction('${t._id}')" title="${translate('delete')}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -980,3 +1000,588 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ==================== OVERLAPPING FUNCTIONS ====================
+
+// Load overlapping services
+async function loadOverlappingServices() {
+    const status = document.getElementById('overlappingStatusFilter')?.value || 'unpaid';
+    const search = document.getElementById('overlappingSearch')?.value || '';
+    
+    let url = `/api/overlapping?status=${status}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayOverlappingServices(data.services);
+            loadOverlappingStats();
+        }
+    } catch (error) {
+        console.error('Error loading overlapping services:', error);
+        showNotification('Failed to load services', 'error');
+    }
+}
+
+// Display overlapping services in table
+function displayOverlappingServices(services) {
+    const tbody = document.getElementById('overlappingTableBody');
+    
+    if (!services || services.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="loading">${translate('noServicesFound')}</td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = services.map(s => {
+        const statusClass = s.status;
+        const statusIcon = s.status === 'paid' ? '✓' : s.status === 'cancelled' ? '✕' : '⏳';
+        
+        // Age badge color based on category
+        let ageBadgeClass = 'age-recent';
+        if (s.ageCategory === 'very_old') ageBadgeClass = 'age-very-old';
+        else if (s.ageCategory === 'old') ageBadgeClass = 'age-old';
+        else if (s.ageCategory === 'moderate') ageBadgeClass = 'age-moderate';
+        
+        const ageText = s.ageDays === 1 ? '1 day' : `${s.ageDays} days`;
+        
+        // Action buttons based on status
+        let actionButtons = '';
+        if (s.status === 'unpaid') {
+            actionButtons = `
+                <button class="action-btn mark-paid-btn" onclick="markAsPaid('${s._id}')" title="${translate('markAsPaid')}">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="action-btn call-btn" onclick="callClient('${s.phone}')" title="${translate('call')}">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button class="action-btn edit-btn" onclick="editOverlappingService('${s._id}')" title="${translate('edit')}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn cancel-btn" onclick="cancelService('${s._id}')" title="${translate('cancelService')}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+        } else {
+            actionButtons = `
+                <button class="action-btn delete-btn" onclick="deleteOverlappingService('${s._id}')" title="${translate('delete')}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        }
+        
+        return `
+            <tr class="${s.status !== 'unpaid' ? 'row-faded' : ''}">
+                <td><strong>${s.clientName}</strong></td>
+                <td>
+                    <a href="tel:${s.phone}" class="phone-link">${s.phone}</a>
+                </td>
+                <td>${s.serviceType}</td>
+                <td><strong>${s.amount.toFixed(2)} MAD</strong></td>
+                <td>${new Date(s.dateRequested).toLocaleDateString()}</td>
+                <td>
+                    <span class="age-badge ${ageBadgeClass}">${ageText}</span>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">
+                        ${statusIcon} ${translate(s.status)}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-btns">
+                        ${actionButtons}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Load overlapping stats
+async function loadOverlappingStats() {
+    try {
+        const response = await fetch('/api/overlapping/stats', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const { stats } = data;
+            
+            document.getElementById('unpaidCount').textContent = stats.unpaid.count;
+            document.getElementById('unpaidAmount').textContent = `${stats.unpaid.totalAmount.toFixed(2)} MAD`;
+            
+            document.getElementById('paidCount').textContent = stats.paid.count;
+            document.getElementById('paidAmount').textContent = `${stats.paid.totalAmount.toFixed(2)} MAD`;
+            
+            document.getElementById('totalPendingAmount').textContent = `${stats.unpaid.totalAmount.toFixed(2)} MAD`;
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+// Open overlapping modal for adding
+function openOverlappingModal() {
+    document.getElementById('overlappingModalTitle').textContent = translate('addUnpaidService');
+    document.getElementById('overlappingForm').reset();
+    document.getElementById('overlappingId').value = '';
+    document.getElementById('serviceDate').valueAsDate = new Date();
+    document.getElementById('overlappingModal').classList.add('active');
+}
+
+// Edit overlapping service
+async function editOverlappingService(id) {
+    try {
+        const response = await fetch(`/api/overlapping/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const s = data.service;
+            
+            document.getElementById('overlappingModalTitle').textContent = translate('editUnpaidService');
+            document.getElementById('overlappingId').value = s._id;
+            document.getElementById('clientName').value = s.clientName;
+            document.getElementById('clientPhone').value = s.phone;
+            document.getElementById('serviceType').value = s.serviceType;
+            document.getElementById('serviceAmount').value = s.amount;
+            document.getElementById('serviceDate').valueAsDate = new Date(s.dateRequested);
+            document.getElementById('serviceDescription').value = s.description || '';
+            
+            document.getElementById('overlappingModal').classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error loading service:', error);
+        showNotification('Failed to load service', 'error');
+    }
+}
+
+// Close overlapping modal
+function closeOverlappingModal() {
+    document.getElementById('overlappingModal').classList.remove('active');
+}
+
+// Save overlapping service
+async function saveOverlappingService(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('overlappingId').value;
+    const formData = {
+        clientName: document.getElementById('clientName').value,
+        phone: document.getElementById('clientPhone').value,
+        serviceType: document.getElementById('serviceType').value,
+        amount: parseFloat(document.getElementById('serviceAmount').value),
+        dateRequested: document.getElementById('serviceDate').value,
+        description: document.getElementById('serviceDescription').value
+    };
+    
+    try {
+        const url = id ? `/api/overlapping/${id}` : '/api/overlapping';
+        const method = id ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(
+                id ? translate('serviceUpdated') : translate('serviceAdded'),
+                'success'
+            );
+            closeOverlappingModal();
+            loadOverlappingServices();
+        } else {
+            showNotification(data.message || 'Failed to save service', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving service:', error);
+        showNotification('Failed to save service', 'error');
+    }
+}
+
+// Mark service as paid
+async function markAsPaid(id) {
+    if (!confirm(translate('confirmMarkPaid'))) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/overlapping/${id}/mark-paid`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(translate('markedAsPaid'), 'success');
+            loadOverlappingServices();
+        } else {
+            showNotification(data.message || 'Failed to mark as paid', 'error');
+        }
+    } catch (error) {
+        console.error('Error marking as paid:', error);
+        showNotification('Failed to mark as paid', 'error');
+    }
+}
+
+// Cancel service
+async function cancelService(id) {
+    if (!confirm(translate('confirmCancelService'))) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/overlapping/${id}/cancel`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(translate('serviceCancelled'), 'success');
+            loadOverlappingServices();
+        } else {
+            showNotification(data.message || 'Failed to cancel service', 'error');
+        }
+    } catch (error) {
+        console.error('Error cancelling service:', error);
+        showNotification('Failed to cancel service', 'error');
+    }
+}
+
+// Delete overlapping service
+async function deleteOverlappingService(id) {
+    if (!confirm(translate('confirmDeleteService'))) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/overlapping/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(translate('serviceDeleted'), 'success');
+            loadOverlappingServices();
+        } else {
+            showNotification(data.message || 'Failed to delete service', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting service:', error);
+        showNotification('Failed to delete service', 'error');
+    }
+}
+
+// Call client (opens phone dialer)
+function callClient(phone) {
+    window.location.href = `tel:${phone}`;
+}
+
+// ==================== RECEIPT FUNCTIONS ====================
+
+let currentReceiptTransactionId = null;
+let selectedReceiptFile = null;
+
+// Open receipt upload modal
+function openReceiptUpload(transactionId) {
+    currentReceiptTransactionId = transactionId;
+    document.getElementById('receiptTransactionId').value = transactionId;
+    document.getElementById('receiptUploadModal').classList.add('active');
+    clearReceiptFile();
+    initReceiptDropZone();
+}
+
+// Close receipt upload modal
+function closeReceiptUploadModal() {
+    document.getElementById('receiptUploadModal').classList.remove('active');
+    currentReceiptTransactionId = null;
+    selectedReceiptFile = null;
+}
+
+// Initialize drag and drop for receipt upload
+function initReceiptDropZone() {
+    const dropZone = document.getElementById('receiptDropZone');
+    const fileInput = document.getElementById('receiptFileInput');
+    
+    // Click to select file
+    dropZone.onclick = () => fileInput.click();
+    
+    // File input change
+    fileInput.onchange = (e) => {
+        if (e.target.files.length > 0) {
+            handleReceiptFile(e.target.files[0]);
+        }
+    };
+    
+    // Drag and drop events
+    dropZone.ondragover = (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    };
+    
+    dropZone.ondragleave = () => {
+        dropZone.classList.remove('dragover');
+    };
+    
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleReceiptFile(e.dataTransfer.files[0]);
+        }
+    };
+}
+
+// Handle selected receipt file
+function handleReceiptFile(file) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    
+    if (!allowedTypes.includes(file.type)) {
+        showNotification(translate('invalidFileType'), 'error');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification(translate('fileTooLarge'), 'error');
+        return;
+    }
+    
+    selectedReceiptFile = file;
+    
+    // Show preview
+    const preview = document.getElementById('receiptFilePreview');
+    const dropZone = document.getElementById('receiptDropZone');
+    const previewThumb = document.getElementById('receiptPreviewThumb');
+    const previewName = document.getElementById('receiptPreviewName');
+    
+    previewName.textContent = file.name;
+    
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewThumb.src = e.target.result;
+            previewThumb.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewThumb.src = '';
+        previewThumb.style.display = 'none';
+    }
+    
+    dropZone.style.display = 'none';
+    preview.style.display = 'flex';
+    document.getElementById('uploadReceiptBtn').disabled = false;
+}
+
+// Clear selected receipt file
+function clearReceiptFile() {
+    selectedReceiptFile = null;
+    document.getElementById('receiptFileInput').value = '';
+    document.getElementById('receiptFilePreview').style.display = 'none';
+    document.getElementById('receiptDropZone').style.display = 'flex';
+    document.getElementById('uploadReceiptBtn').disabled = true;
+}
+
+// Submit receipt upload
+async function submitReceiptUpload(event) {
+    event.preventDefault();
+    
+    if (!selectedReceiptFile || !currentReceiptTransactionId) {
+        showNotification(translate('noFileSelected'), 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('receipt', selectedReceiptFile);
+    
+    const uploadBtn = document.getElementById('uploadReceiptBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + translate('uploading');
+    
+    try {
+        const response = await fetch(`/api/cash-register/transactions/${currentReceiptTransactionId}/receipt`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(translate('receiptUploaded'), 'success');
+            closeReceiptUploadModal();
+            loadTransactions();
+        } else {
+            showNotification(data.message || translate('uploadFailed'), 'error');
+        }
+    } catch (error) {
+        console.error('Error uploading receipt:', error);
+        showNotification(translate('uploadFailed'), 'error');
+    } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> ' + translate('upload');
+    }
+}
+
+// View receipt in modal
+async function viewReceipt(transactionId) {
+    currentReceiptTransactionId = transactionId;
+    
+    const modal = document.getElementById('receiptModal');
+    const loading = document.getElementById('receiptLoading');
+    const image = document.getElementById('receiptPreviewImage');
+    const pdf = document.getElementById('receiptPreviewPdf');
+    
+    // Reset and show loading
+    image.style.display = 'none';
+    pdf.style.display = 'none';
+    loading.style.display = 'flex';
+    modal.classList.add('active');
+    
+    try {
+        const response = await fetch(`/api/cash-register/transactions/${transactionId}/receipt`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const receipt = data.receipt;
+            
+            // Update info
+            document.getElementById('receiptFileName').textContent = receipt.fileName || '-';
+            document.getElementById('receiptUploadedBy').textContent = receipt.uploadedByName || '-';
+            document.getElementById('receiptUploadedAt').textContent = receipt.uploadedAt 
+                ? new Date(receipt.uploadedAt).toLocaleString() 
+                : '-';
+            
+            // Show image or PDF
+            loading.style.display = 'none';
+            
+            if (receipt.mimeType === 'application/pdf') {
+                pdf.src = `data:application/pdf;base64,${receipt.data}`;
+                pdf.style.display = 'block';
+            } else {
+                image.src = `data:${receipt.mimeType};base64,${receipt.data}`;
+                image.style.display = 'block';
+            }
+        } else {
+            showNotification(data.message || translate('receiptNotFound'), 'error');
+            closeReceiptModal();
+        }
+    } catch (error) {
+        console.error('Error loading receipt:', error);
+        showNotification(translate('loadReceiptFailed'), 'error');
+        closeReceiptModal();
+    }
+}
+
+// Close receipt preview modal
+function closeReceiptModal() {
+    document.getElementById('receiptModal').classList.remove('active');
+    document.getElementById('receiptPreviewImage').src = '';
+    document.getElementById('receiptPreviewPdf').src = '';
+    currentReceiptTransactionId = null;
+}
+
+// Download receipt
+function downloadReceipt(transactionId) {
+    const url = `/api/cash-register/transactions/${transactionId}/receipt/download`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    
+    // Add auth header via fetch and create blob URL
+    fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        link.href = blobUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+    })
+    .catch(error => {
+        console.error('Error downloading receipt:', error);
+        showNotification(translate('downloadFailed'), 'error');
+    });
+}
+
+// Download current receipt from modal
+function downloadCurrentReceipt() {
+    if (currentReceiptTransactionId) {
+        downloadReceipt(currentReceiptTransactionId);
+    }
+}
+
+// Delete receipt from current transaction
+async function deleteCurrentReceipt() {
+    if (!currentReceiptTransactionId) return;
+    
+    if (!confirm(translate('confirmDeleteReceipt'))) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/cash-register/transactions/${currentReceiptTransactionId}/receipt`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(translate('receiptDeleted'), 'success');
+            closeReceiptModal();
+            loadTransactions();
+        } else {
+            showNotification(data.message || translate('deleteFailed'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting receipt:', error);
+        showNotification(translate('deleteFailed'), 'error');
+    }
+}

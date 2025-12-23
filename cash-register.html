@@ -65,6 +65,9 @@
             <button class="tab-btn" data-tab="transactions">
                 <i class="fas fa-list"></i> <span data-translate="tabTransactions">Transactions</span>
             </button>
+            <button class="tab-btn" data-tab="overlapping" id="overlappingTab">
+                <i class="fas fa-exclamation-circle"></i> <span data-translate="tabOverlapping">Overlapping</span>
+            </button>
             <button class="tab-btn" data-tab="yearly" id="yearlyTab" style="display: none;">
                 <i class="fas fa-calendar-alt"></i> <span data-translate="tabYearly">Yearly Overview</span>
             </button>
@@ -248,6 +251,76 @@
             </div>
         </div>
 
+        <!-- Overlapping Tab -->
+        <div class="tab-content" id="overlapping">
+            <!-- Stats Cards -->
+            <div class="overlapping-stats">
+                <div class="stat-card unpaid">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-content">
+                        <h4 data-translate="unpaidServices">Unpaid Services</h4>
+                        <p class="stat-value" id="unpaidCount">0</p>
+                        <p class="stat-amount" id="unpaidAmount">0.00 MAD</p>
+                    </div>
+                </div>
+                <div class="stat-card paid">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-content">
+                        <h4 data-translate="paidServices">Paid Services</h4>
+                        <p class="stat-value" id="paidCount">0</p>
+                        <p class="stat-amount" id="paidAmount">0.00 MAD</p>
+                    </div>
+                </div>
+                <div class="stat-card total">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-content">
+                        <h4 data-translate="totalPending">Total Pending</h4>
+                        <p class="stat-value" id="totalPendingAmount">0.00 MAD</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <button class="add-btn" onclick="openOverlappingModal()">
+                    <i class="fas fa-plus"></i> <span data-translate="addUnpaidService">Add Unpaid Service</span>
+                </button>
+                <div class="filter-group">
+                    <select id="overlappingStatusFilter" onchange="loadOverlappingServices()">
+                        <option value="unpaid" data-translate="unpaid">Unpaid</option>
+                        <option value="all" data-translate="allStatus">All Status</option>
+                        <option value="paid" data-translate="paid">Paid</option>
+                        <option value="cancelled" data-translate="cancelled">Cancelled</option>
+                    </select>
+                    <input type="text" id="overlappingSearch" placeholder="Search by name or phone..." 
+                           data-translate-placeholder="searchNamePhone" onkeyup="loadOverlappingServices()">
+                </div>
+            </div>
+
+            <!-- Overlapping Table -->
+            <div class="table-container">
+                <table class="transactions-table overlapping-table">
+                    <thead>
+                        <tr>
+                            <th data-translate="clientName">Client Name</th>
+                            <th data-translate="phone">Phone</th>
+                            <th data-translate="serviceType">Service Type</th>
+                            <th data-translate="amount">Amount</th>
+                            <th data-translate="dateRequested">Date Requested</th>
+                            <th data-translate="age">Age</th>
+                            <th data-translate="status">Status</th>
+                            <th data-translate="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overlappingTableBody">
+                        <tr>
+                            <td colspan="8" class="loading" data-translate="loadingServices">Loading services...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Yearly Overview Tab -->
         <div class="tab-content" id="yearly">
             <div class="yearly-header">
@@ -388,6 +461,156 @@
                         <button type="button" class="cancel-btn" onclick="closeModal()"><span data-translate="cancel">Cancel</span></button>
                         <button type="submit" class="submit-btn">
                             <i class="fas fa-save"></i> <span data-translate="save">Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Overlapping Service Modal -->
+    <div class="modal" id="overlappingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="overlappingModalTitle" data-translate="addUnpaidService">Add Unpaid Service</h2>
+                <button class="close-btn" onclick="closeOverlappingModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="overlappingForm" onsubmit="saveOverlappingService(event)">
+                    <input type="hidden" id="overlappingId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientName" data-translate="clientName">Client Name *</label>
+                            <input type="text" id="clientName" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="clientPhone" data-translate="phone">Phone *</label>
+                            <input type="tel" id="clientPhone" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="serviceType" data-translate="serviceType">Service Type *</label>
+                            <select id="serviceType" required>
+                                <option value="" data-translate="selectService">Select Service</option>
+                                <option value="Paper Translation">Paper Translation</option>
+                                <option value="CV Creation">CV Creation</option>
+                                <option value="Document Legalization">Document Legalization</option>
+                                <option value="Certificate Request">Certificate Request</option>
+                                <option value="Letter Writing">Letter Writing</option>
+                                <option value="Form Filling">Form Filling</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="serviceAmount" data-translate="amount">Amount (MAD) *</label>
+                            <input type="number" id="serviceAmount" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="serviceDate" data-translate="dateRequested">Date Requested *</label>
+                        <input type="date" id="serviceDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="serviceDescription" data-translate="description">Description (Optional)</label>
+                        <textarea id="serviceDescription" rows="3" data-translate-placeholder="descriptionPlaceholder" 
+                                  placeholder="Additional details about the service..."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="closeOverlappingModal()">
+                            <span data-translate="cancel">Cancel</span>
+                        </button>
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save"></i> <span data-translate="save">Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Preview Modal -->
+    <div class="modal" id="receiptModal">
+        <div class="modal-content receipt-modal-content">
+            <div class="modal-header">
+                <h2 id="receiptModalTitle" data-translate="viewReceipt">View Receipt</h2>
+                <button class="close-btn" onclick="closeReceiptModal()">&times;</button>
+            </div>
+            <div class="modal-body receipt-modal-body">
+                <div class="receipt-preview-container">
+                    <img id="receiptPreviewImage" src="" alt="Receipt" style="display: none;">
+                    <iframe id="receiptPreviewPdf" src="" style="display: none;"></iframe>
+                    <div id="receiptLoading" class="receipt-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span data-translate="loadingReceipt">Loading receipt...</span>
+                    </div>
+                </div>
+                <div class="receipt-info">
+                    <p><strong data-translate="fileName">File Name:</strong> <span id="receiptFileName">-</span></p>
+                    <p><strong data-translate="uploadedBy">Uploaded By:</strong> <span id="receiptUploadedBy">-</span></p>
+                    <p><strong data-translate="uploadedAt">Uploaded At:</strong> <span id="receiptUploadedAt">-</span></p>
+                </div>
+                <div class="modal-actions receipt-actions">
+                    <button type="button" class="download-btn" onclick="downloadCurrentReceipt()">
+                        <i class="fas fa-download"></i> <span data-translate="download">Download</span>
+                    </button>
+                    <button type="button" class="delete-receipt-btn" onclick="deleteCurrentReceipt()">
+                        <i class="fas fa-trash"></i> <span data-translate="deleteReceipt">Delete Receipt</span>
+                    </button>
+                    <button type="button" class="cancel-btn" onclick="closeReceiptModal()">
+                        <span data-translate="close">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Upload Modal -->
+    <div class="modal" id="receiptUploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate="uploadReceipt">Upload Receipt</h2>
+                <button class="close-btn" onclick="closeReceiptUploadModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="receiptUploadForm" onsubmit="submitReceiptUpload(event)">
+                    <input type="hidden" id="receiptTransactionId">
+                    
+                    <div class="upload-area" id="receiptDropZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p data-translate="dragDropReceipt">Drag & drop receipt image here</p>
+                        <p class="upload-hint" data-translate="orClickToSelect">or click to select file</p>
+                        <input type="file" id="receiptFileInput" accept="image/jpeg,image/png,application/pdf" hidden>
+                    </div>
+                    
+                    <div class="file-preview" id="receiptFilePreview" style="display: none;">
+                        <img id="receiptPreviewThumb" src="" alt="Preview">
+                        <div class="file-info">
+                            <span id="receiptPreviewName">filename.jpg</span>
+                            <button type="button" class="remove-file-btn" onclick="clearReceiptFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="upload-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span data-translate="receiptUploadNote">Supported formats: JPEG, PNG, PDF. Max size: 5MB. Images will be optimized automatically.</span>
+                    </p>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="closeReceiptUploadModal()">
+                            <span data-translate="cancel">Cancel</span>
+                        </button>
+                        <button type="submit" class="submit-btn" id="uploadReceiptBtn" disabled>
+                            <i class="fas fa-upload"></i> <span data-translate="upload">Upload</span>
                         </button>
                     </div>
                 </form>

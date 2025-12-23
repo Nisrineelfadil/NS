@@ -3,6 +3,11 @@ const AdminAttendance = {
     currentPage: 1,
     limit: 20,
     filters: {},
+    
+    // Sessions pagination
+    sessionsCurrentPage: 1,
+    sessionsLimit: 5,
+    allSessions: [],
 
     // Get token from localStorage
     getToken() {
@@ -206,8 +211,8 @@ const AdminAttendance = {
         try {
             let url = `/api/attendance/admin/records?page=${this.currentPage}&limit=${this.limit}&`;
             Object.keys(this.filters).forEach(key => {
-                if (this.filters[key] && key !== 'search') {
-                    url += `${key}=${this.filters[key]}&`;
+                if (this.filters[key]) {
+                    url += `${key}=${encodeURIComponent(this.filters[key])}&`;
                 }
             });
 
@@ -231,19 +236,9 @@ const AdminAttendance = {
         const container = document.getElementById('attendanceRecordsContainer');
         if (!container) return;
 
-        // Filter by search if needed
-        let filteredRecords = records;
-        if (this.filters.search) {
-            const search = this.filters.search.toLowerCase();
-            filteredRecords = records.filter(r => 
-                r.studentName.toLowerCase().includes(search) ||
-                r.studentEmail.toLowerCase().includes(search) ||
-                r.groupName.toLowerCase().includes(search) ||
-                r.teacherName.toLowerCase().includes(search)
-            );
-        }
+        // Records are now filtered server-side, no need for client-side filtering
 
-        if (filteredRecords.length === 0) {
+        if (records.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: var(--text-light);">
                     <i class="fas fa-calendar-times" style="font-size: 3rem; color: var(--primary-color); opacity: 0.3; margin-bottom: 15px;"></i>
@@ -280,7 +275,7 @@ const AdminAttendance = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${filteredRecords.map((record, index) => `
+                            ${records.map((record, index) => `
                                 <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#fafafa'}; transition: all 0.2s; cursor: pointer;" onmouseover="this.style.background='#fff8e1'; this.style.transform='scale(1.005)'" onmouseout="this.style.background='${index % 2 === 0 ? '#ffffff' : '#fafafa'}'; this.style.transform='scale(1)'">
                                     <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; color: #374151; font-weight: 500;">${new Date(record.date).toLocaleDateString()}</td>
                                     <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; color: #1f2937; font-weight: 600;">${record.studentName}</td>
@@ -497,26 +492,30 @@ const AdminAttendance = {
     // Load Sessions
     async loadSessions() {
         try {
-            const today = new Date().toISOString().split('T')[0];
-            const response = await fetch(`/api/attendance/admin/sessions?startDate=${today}&limit=10`, {
+            // Load all sessions (we'll paginate client-side for better UX)
+            const response = await fetch(`/api/attendance/admin/sessions?limit=100`, {
                 headers: { 'Authorization': `Bearer ${this.getToken()}` }
             });
 
             if (!response.ok) throw new Error('Failed to load sessions');
 
             const data = await response.json();
-            this.displaySessions(data.sessions);
+            this.allSessions = data.sessions || [];
+            this.sessionsCurrentPage = 1;
+            this.displaySessions();
 
         } catch (error) {
             console.error('Error loading sessions:', error);
         }
     },
 
-    // Display Sessions
-    displaySessions(sessions) {
+    // Display Sessions with pagination
+    displaySessions() {
         const sessionsContainer = document.getElementById('recentSessionsContainer');
         if (!sessionsContainer) return;
 
+        const sessions = this.allSessions;
+        
         if (sessions.length === 0) {
             sessionsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #6b7280;">
@@ -524,10 +523,19 @@ const AdminAttendance = {
                     <p>${t('noRecentSessions')}</p>
                 </div>
             `;
+            // Clear pagination
+            const paginationContainer = document.getElementById('sessionsPagination');
+            if (paginationContainer) paginationContainer.innerHTML = '';
             return;
         }
 
-        sessionsContainer.innerHTML = sessions.map(session => {
+        // Calculate pagination
+        const totalPages = Math.ceil(sessions.length / this.sessionsLimit);
+        const startIndex = (this.sessionsCurrentPage - 1) * this.sessionsLimit;
+        const endIndex = startIndex + this.sessionsLimit;
+        const paginatedSessions = sessions.slice(startIndex, endIndex);
+
+        sessionsContainer.innerHTML = paginatedSessions.map(session => {
             const attendanceRate = session.totalStudents > 0 
                 ? ((session.presentCount + session.lateCount) / session.totalStudents * 100).toFixed(1)
                 : 0;
@@ -566,6 +574,97 @@ const AdminAttendance = {
                 </div>
             `;
         }).join('');
+
+        // Display pagination
+        this.displaySessionsPagination(totalPages);
+    },
+
+    // Display Sessions Pagination (matching payment reminders style)
+    displaySessionsPagination(totalPages) {
+        const paginationContainer = document.getElementById('sessionsPagination');
+        if (!paginationContainer) return;
+
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '<div class="sessions-pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; padding: 15px;">';
+
+        // Previous button
+        paginationHTML += `
+            <button onclick="AdminAttendance.goToSessionsPage(${this.sessionsCurrentPage - 1})" 
+                    ${this.sessionsCurrentPage === 1 ? 'disabled' : ''} 
+                    style="display: flex; align-items: center; gap: 5px; padding: 8px 16px; border: 1px solid #e5e7eb; background: white; border-radius: 8px; cursor: ${this.sessionsCurrentPage === 1 ? 'not-allowed' : 'pointer'}; color: ${this.sessionsCurrentPage === 1 ? '#9ca3af' : '#374151'}; font-weight: 500; transition: all 0.2s;">
+                <i class="fas fa-chevron-left" style="font-size: 12px;"></i> Previous
+            </button>
+        `;
+
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, this.sessionsCurrentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // First page + ellipsis
+        if (startPage > 1) {
+            paginationHTML += `
+                <button onclick="AdminAttendance.goToSessionsPage(1)" 
+                        style="min-width: 40px; height: 40px; border: 1px solid #e5e7eb; background: white; border-radius: 8px; cursor: pointer; color: #374151; font-weight: 500;">
+                    1
+                </button>
+            `;
+            if (startPage > 2) {
+                paginationHTML += '<span style="color: #9ca3af; padding: 0 5px;">...</span>';
+            }
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            const isActive = i === this.sessionsCurrentPage;
+            paginationHTML += `
+                <button onclick="AdminAttendance.goToSessionsPage(${i})" 
+                        style="min-width: 40px; height: 40px; border: ${isActive ? 'none' : '1px solid #e5e7eb'}; background: ${isActive ? 'linear-gradient(135deg, #FFCC00 0%, #FF9500 100%)' : 'white'}; border-radius: 8px; cursor: pointer; color: ${isActive ? '#1f2937' : '#374151'}; font-weight: ${isActive ? '700' : '500'}; box-shadow: ${isActive ? '0 2px 8px rgba(255, 149, 0, 0.3)' : 'none'};">
+                    ${i}
+                </button>
+            `;
+        }
+
+        // Last page + ellipsis
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += '<span style="color: #9ca3af; padding: 0 5px;">...</span>';
+            }
+            paginationHTML += `
+                <button onclick="AdminAttendance.goToSessionsPage(${totalPages})" 
+                        style="min-width: 40px; height: 40px; border: 1px solid #e5e7eb; background: white; border-radius: 8px; cursor: pointer; color: #374151; font-weight: 500;">
+                    ${totalPages}
+                </button>
+            `;
+        }
+
+        // Next button
+        paginationHTML += `
+            <button onclick="AdminAttendance.goToSessionsPage(${this.sessionsCurrentPage + 1})" 
+                    ${this.sessionsCurrentPage === totalPages ? 'disabled' : ''} 
+                    style="display: flex; align-items: center; gap: 5px; padding: 8px 16px; border: 1px solid #e5e7eb; background: white; border-radius: 8px; cursor: ${this.sessionsCurrentPage === totalPages ? 'not-allowed' : 'pointer'}; color: ${this.sessionsCurrentPage === totalPages ? '#9ca3af' : '#374151'}; font-weight: 500; transition: all 0.2s;">
+                Next <i class="fas fa-chevron-right" style="font-size: 12px;"></i>
+            </button>
+        `;
+
+        paginationHTML += '</div>';
+        paginationContainer.innerHTML = paginationHTML;
+    },
+
+    // Go to Sessions Page
+    goToSessionsPage(page) {
+        const totalPages = Math.ceil(this.allSessions.length / this.sessionsLimit);
+        if (page < 1 || page > totalPages) return;
+        this.sessionsCurrentPage = page;
+        this.displaySessions();
     },
 
     // Export to Excel

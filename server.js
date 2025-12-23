@@ -23,10 +23,12 @@ const branchGroupsRoutes = require('./routes/branchGroups');
 const systemStatsRoutes = require('./routes/systemStats');
 const adminActivityRoutes = require('./routes/adminActivity');
 const cashRegisterRoutes = require('./routes/cashRegister');
+const overlappingRoutes = require('./routes/overlapping');
 const appointmentsRoutes = require('./routes/appointments');
 const ratingsRoutes = require('./routes/ratings');
 const notificationsRoutes = require('./routes/notifications');
 const seasonBackupRoutes = require('./routes/seasonBackup');
+const jobApplicationsRoutes = require('./routes/jobApplications');
 // const pushNotificationsRoutes = require('./routes/pushNotifications'); // DISABLED - Push notifications temporarily disabled
 
 // Import services
@@ -301,9 +303,11 @@ app.use('/api/branch-groups', dbMiddleware, branchGroupsRoutes);
 app.use('/api/system-stats', dbMiddleware, systemStatsRoutes);
 app.use('/api/admin-activity', dbMiddleware, adminActivityRoutes);
 app.use('/api/cash-register', dbMiddleware, cashRegisterRoutes);
+app.use('/api/overlapping', dbMiddleware, overlappingRoutes);
 app.use('/api/appointments', dbMiddleware, appointmentsRoutes);
 app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
+app.use('/api/job-applications', dbMiddleware, jobApplicationsRoutes);
 app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
   req.io = io; // Pass Socket.IO instance to routes
   next();

@@ -94,20 +94,6 @@ document.getElementById('applyForm').addEventListener('submit', async (e) => {
     const messageEl = document.getElementById('formMessage');
     const formData = new FormData(e.target);
 
-    // Build request data
-    const data = {
-        serviceType: 'applying',
-        fullName: formData.get('fullName'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
-        applyingDetails: {
-            jobType: formData.get('jobType') || '',
-            targetCompany: formData.get('targetCompany') || '',
-            deadline: formData.get('deadline') || '',
-            notes: formData.get('notes') || ''
-        }
-    };
-
     // Show loading state
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
@@ -115,31 +101,51 @@ document.getElementById('applyForm').addEventListener('submit', async (e) => {
     messageEl.textContent = '';
 
     try {
-        // Create FormData for file upload
-        const uploadFormData = new FormData();
-        uploadFormData.append('serviceType', data.serviceType);
-        uploadFormData.append('fullName', data.fullName);
-        uploadFormData.append('phone', data.phone);
-        uploadFormData.append('email', data.email);
-        uploadFormData.append('applyingDetails', JSON.stringify(data.applyingDetails));
-
-        // Add file if exists
+        // Check file size before uploading (5MB limit)
         const fileInput = document.getElementById('file');
         if (fileInput.files.length > 0) {
-            uploadFormData.append('file', fileInput.files[0]);
+            const fileSize = fileInput.files[0].size;
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (fileSize > maxSize) {
+                throw new Error('FILE_TOO_LARGE');
+            }
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/services/upload`, {
+        // Create FormData for file upload to new job applications API
+        const uploadFormData = new FormData();
+        uploadFormData.append('fullName', formData.get('fullName'));
+        uploadFormData.append('phone', formData.get('phone'));
+        uploadFormData.append('email', formData.get('email'));
+        uploadFormData.append('requestedJobType', formData.get('jobType') || 'Not specified');
+        uploadFormData.append('notes', formData.get('notes') || '');
+
+        // Add file if exists
+        if (fileInput.files.length > 0) {
+            uploadFormData.append('document', fileInput.files[0]);
+        }
+
+        // Submit to new job applications public endpoint
+        const response = await fetch(`${API_BASE_URL}/api/job-applications/public`, {
             method: 'POST',
             body: uploadFormData
         });
 
-        const result = await response.json();
+        // Try to parse JSON response
+        let result;
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            // If JSON parsing fails, check status code
+            if (response.status === 413 || response.status === 400) {
+                throw new Error('FILE_TOO_LARGE');
+            }
+            throw new Error('Server error. Please try again.');
+        }
 
         if (result.success) {
             // Show success message
             messageEl.className = 'form-message success show';
-            messageEl.innerHTML = '<i class="fas fa-check-circle"></i> Application request submitted successfully! We will contact you soon.';
+            messageEl.innerHTML = '<i class="fas fa-check-circle"></i> Application submitted successfully! Our team will review it and contact you soon.';
 
             // Reset form after delay
             setTimeout(() => {
@@ -148,13 +154,30 @@ document.getElementById('applyForm').addEventListener('submit', async (e) => {
                 window.location.href = '/';
             }, 3000);
         } else {
-            throw new Error(result.message || 'Submission failed');
+            // Show specific error message from server
+            let errorMessage = result.message || 'Submission failed';
+            
+            // Check for file too large error
+            if (result.errorType === 'FILE_TOO_LARGE') {
+                throw new Error('FILE_TOO_LARGE');
+            } else if (result.errorType === 'UPLOAD_ERROR') {
+                errorMessage = result.message || 'File upload failed. Please try again with a different file.';
+            }
+            
+            throw new Error(errorMessage);
         }
 
     } catch (error) {
         console.error('Submission error:', error);
         messageEl.className = 'form-message error show';
-        messageEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.';
+        
+        // Check for file too large error
+        let displayMessage = error.message || 'Something went wrong. Please try again.';
+        if (error.message === 'FILE_TOO_LARGE') {
+            displayMessage = 'The file you uploaded is too large. Maximum file size is 5MB. Please upload a smaller file.';
+        }
+        
+        messageEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${displayMessage}`;
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application Request';

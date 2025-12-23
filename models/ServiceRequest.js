@@ -29,9 +29,16 @@ const serviceRequestSchema = new mongoose.Schema({
         education: String,
         skills: String,
         additionalInfo: String,
+        notes: String,
         fileName: String,
         fileSize: Number,
-        dropboxPath: String
+        dropboxPath: String,
+        documentCount: Number,
+        files: [{
+            fileName: String,
+            fileSize: Number,
+            dropboxPath: String
+        }]
     },
     // Applying Service specific fields
     applyingDetails: {
@@ -46,15 +53,24 @@ const serviceRequestSchema = new mongoose.Schema({
     },
     // Translation Service specific fields
     translationDetails: {
+        languages: String,
         sourceLanguage: String,
         targetLanguage: String,
         documentType: String,
         pageCount: Number,
         urgency: String,
+        deadline: String,
+        notes: String,
         additionalInfo: String,
         fileName: String,
         fileSize: Number,
-        dropboxPath: String
+        dropboxPath: String,
+        documentCount: Number,
+        files: [{
+            fileName: String,
+            fileSize: Number,
+            dropboxPath: String
+        }]
     },
     status: {
         type: String,

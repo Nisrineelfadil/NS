@@ -1872,15 +1872,17 @@ function displayPaymentReminders(reminders) {
         const student = reminder.student;
         const daysUntil = reminder.daysUntilPayment;
         
-        // Skip paid students
+        // Skip paid students and overdue (negative days)
         if (student.paymentStatus === 'paid') return;
+        if (daysUntil < 0) return; // Skip overdue - they appear in the overdue section
         
-        // Categorize based on days until payment
-        if (daysUntil <= 1 && daysUntil >= 0) {
+        // Categorize based on days until payment (upcoming only)
+        if (daysUntil <= 1) {
             dueTomorrow.push(student);
-        } else if (daysUntil <= 7 && daysUntil > 1) {
+        } else if (daysUntil <= 7) {
             due7Days.push(student);
-        } else if (daysUntil <= 15 && daysUntil > 7) {
+        } else if (daysUntil <= 30) {
+            // Extended to 30 days to show more upcoming payments
             due15Days.push(student);
         }
     });
@@ -1903,9 +1905,9 @@ function renderPaymentRemindersSections() {
     
     let html = '';
     
-    // Section 1: Due in 15 days
+    // Section 1: Due in 8-30 days
     html += createReminderSection(
-        'Due in 15 Days',
+        'Due in 8-30 Days',
         'due-15',
         due15Days,
         '#3b82f6'
