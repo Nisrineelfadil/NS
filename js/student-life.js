@@ -10,6 +10,8 @@ class StudentLife {
         this.setupPhotosSlider();
         this.setupVideosSlider();
         this.setupMobileTouch();
+        this.setupVideoThumbnails();
+        this.setupGalleryCards();
     }
 
     setupTabs() {
@@ -252,6 +254,93 @@ class StudentLife {
         // Mobile touch functionality is now handled in setupPhotosSwipe
         // Videos are embedded iframes that handle their own interactions
         console.log('Mobile touch support initialized for photos slider');
+    }
+
+    setupVideoThumbnails() {
+        const videoThumbs = document.querySelectorAll('.video-thumb-btn');
+        const mainVideo = document.getElementById('mainVideo');
+        
+        if (!mainVideo || videoThumbs.length === 0) return;
+
+        videoThumbs.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                const videoSrc = thumb.getAttribute('data-video');
+                const posterSrc = thumb.getAttribute('data-poster');
+                
+                if (videoSrc) {
+                    // Update main video source
+                    mainVideo.src = videoSrc;
+                    mainVideo.poster = posterSrc || '';
+                    mainVideo.load();
+                    
+                    // Update active state
+                    videoThumbs.forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                }
+            });
+        });
+    }
+
+    setupGalleryCards() {
+        const galleryCards = document.querySelectorAll('.gallery-card');
+        const featuredImage = document.getElementById('featuredImage');
+        const featuredLabel = document.getElementById('featuredLabel');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        
+        if (galleryCards.length === 0) return;
+
+        // All images data
+        const images = [
+            { src: 'Img/1.png', label: 'Certificate Achievement', i18n: 'students.card1' },
+            { src: 'Img/2.png', label: 'German Graduate', i18n: 'students.card2' },
+            { src: 'Img/3.png', label: 'Nursing Training', i18n: 'students.card3' },
+            { src: 'Img/4.png', label: 'Hotel Training', i18n: 'students.card4' },
+            { src: 'Img/5.png', label: 'Student Success', i18n: 'students.card5' },
+            { src: 'Img/6.png', label: 'Language Practice', i18n: 'students.card6' },
+            { src: 'Img/7.png', label: 'Cultural Exchange', i18n: 'students.card7' },
+            { src: 'Img/8.png', label: 'Graduation Day', i18n: 'students.card8' },
+            { src: 'Img/9.png', label: 'Career Start', i18n: 'students.card9' }
+        ];
+
+        let currentStartIndex = 0;
+
+        // Update cards display
+        const updateCards = () => {
+            galleryCards.forEach((card, i) => {
+                const imgIndex = (currentStartIndex + i) % images.length;
+                const img = card.querySelector('img');
+                const label = card.querySelector('.card-label');
+                
+                if (img) img.src = images[imgIndex].src;
+                if (label) label.textContent = images[imgIndex].label;
+                card.setAttribute('data-index', imgIndex);
+            });
+        };
+
+        // Click on card to show in featured
+        galleryCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const index = parseInt(card.getAttribute('data-index'));
+                if (featuredImage) featuredImage.src = images[index].src;
+                if (featuredLabel) featuredLabel.textContent = images[index].label;
+            });
+        });
+
+        // Navigation arrows
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                currentStartIndex = (currentStartIndex - 1 + images.length) % images.length;
+                updateCards();
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                currentStartIndex = (currentStartIndex + 1) % images.length;
+                updateCards();
+            });
+        }
     }
 
     trackVideoView(title) {

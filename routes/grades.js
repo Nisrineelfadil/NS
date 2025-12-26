@@ -999,7 +999,7 @@ router.get('/student/grades-by-level', verifyStudentToken, async (req, res) => {
 // Get all teachers (Super Admin only)
 router.get('/admin/teachers', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'super_admin') {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'dev') {
             return res.status(403).json({ message: 'Access denied. Super admin only.' });
         }
         
@@ -1019,7 +1019,7 @@ router.get('/admin/teachers', verifyToken, async (req, res) => {
 // Create teacher (Super Admin only)
 router.post('/admin/teachers', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'super_admin') {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'dev') {
             return res.status(403).json({ message: 'Access denied. Super admin only.' });
         }
         
@@ -1082,7 +1082,7 @@ router.post('/admin/teachers', verifyToken, async (req, res) => {
 // Update teacher (Super Admin only)
 router.put('/admin/teachers/:id', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'super_admin') {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'dev') {
             return res.status(403).json({ message: 'Access denied. Super admin only.' });
         }
         
@@ -1111,7 +1111,7 @@ router.put('/admin/teachers/:id', verifyToken, async (req, res) => {
 // Reset teacher password (Super Admin only)
 router.put('/admin/teachers/:id/password', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'super_admin') {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'dev') {
             return res.status(403).json({ message: 'Access denied. Super admin only.' });
         }
         
@@ -1135,7 +1135,7 @@ router.put('/admin/teachers/:id/password', verifyToken, async (req, res) => {
 // Delete teacher (Super Admin only)
 router.delete('/admin/teachers/:id', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'super_admin') {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'dev') {
             return res.status(403).json({ message: 'Access denied. Super admin only.' });
         }
         

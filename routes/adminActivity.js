@@ -4,6 +4,22 @@ const AdminActivity = require('../models/AdminActivity');
 const Admin = require('../models/Admin');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
 
+// Cache dev admin IDs to avoid repeated DB queries (refresh every 5 minutes)
+let cachedDevAdminIds = null;
+let devAdminCacheTime = 0;
+const DEV_ADMIN_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function getDevAdminIds() {
+    const now = Date.now();
+    if (cachedDevAdminIds && (now - devAdminCacheTime < DEV_ADMIN_CACHE_DURATION)) {
+        return cachedDevAdminIds;
+    }
+    const devAdmins = await Admin.find({ role: 'dev' }).select('_id').lean();
+    cachedDevAdminIds = devAdmins.map(a => a._id);
+    devAdminCacheTime = now;
+    return cachedDevAdminIds;
+}
+
 // Get all activity logs (Super Admin only)
 router.get('/logs', authenticateAdmin, requireSuperAdmin, async (req, res) => {
     try {
@@ -18,7 +34,10 @@ router.get('/logs', authenticateAdmin, requireSuperAdmin, async (req, res) => {
             page = 1
         } = req.query;
 
-        const filter = {};
+        // Get cached dev admin IDs to exclude from results
+        const devAdminIds = await getDevAdminIds();
+
+        const filter = { adminId: { $nin: devAdminIds } };
         
         if (adminId) filter.adminId = adminId;
         if (action) filter.action = action;
@@ -59,7 +78,10 @@ router.get('/summary', authenticateAdmin, requireSuperAdmin, async (req, res) =>
     try {
         const { startDate, endDate } = req.query;
         
-        const filter = {};
+        // Get cached dev admin IDs to exclude from results
+        const devAdminIds = await getDevAdminIds();
+        
+        const filter = { adminId: { $nin: devAdminIds } };
         if (startDate || endDate) {
             filter.timestamp = {};
             if (startDate) filter.timestamp.$gte = new Date(startDate);
@@ -119,7 +141,10 @@ router.get('/recent', authenticateAdmin, requireSuperAdmin, async (req, res) => 
     try {
         const limit = parseInt(req.query.limit) || 10;
 
-        const activities = await AdminActivity.find()
+        // Get cached dev admin IDs to exclude from results
+        const devAdminIds = await getDevAdminIds();
+
+        const activities = await AdminActivity.find({ adminId: { $nin: devAdminIds } })
             .sort({ timestamp: -1 })
             .limit(limit)
             .lean();
@@ -137,13 +162,19 @@ router.get('/sessions', authenticateAdmin, requireSuperAdmin, async (req, res) =
         const { limit = 50, page = 1 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        const sessions = await AdminActivity.find({ action: 'login' })
-            .sort({ timestamp: -1 })
-            .limit(parseInt(limit))
-            .skip(skip)
-            .lean();
+        // Get cached dev admin IDs to exclude from results
+        const devAdminIds = await getDevAdminIds();
+        const filter = { action: 'login', adminId: { $nin: devAdminIds } };
 
-        const total = await AdminActivity.countDocuments({ action: 'login' });
+        // Run both queries in parallel for better performance
+        const [sessions, total] = await Promise.all([
+            AdminActivity.find(filter)
+                .sort({ timestamp: -1 })
+                .limit(parseInt(limit))
+                .skip(skip)
+                .lean(),
+            AdminActivity.countDocuments(filter)
+        ]);
 
         res.json({
             sessions,

@@ -66,11 +66,12 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         if (data.success) {
             authToken = data.token;
             localStorage.setItem('adminToken', authToken);
-            // Check if user is super admin
-            const isSuperAdmin = data.admin && data.admin.role === 'super_admin';
+            // Check if user is super admin or dev
+            const isSuperAdmin = data.admin && (data.admin.role === 'super_admin' || data.admin.role === 'dev');
             localStorage.setItem('isSuperAdmin', isSuperAdmin);
-            // Store username
+            // Store username and role
             localStorage.setItem('adminUsername', data.admin.username);
+            localStorage.setItem('adminRole', data.admin.role);
             showDashboard();
         } else {
             showError(data.message || 'Login failed');
@@ -86,6 +87,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('isSuperAdmin');
     localStorage.removeItem('adminUsername');
+    localStorage.removeItem('adminRole');
     location.reload();
 });
 
@@ -132,6 +134,12 @@ async function showDashboard() {
         document.getElementById('activityMenuItem')?.classList.remove('hidden');
         document.getElementById('sessionsMenuItem')?.classList.remove('hidden');
         document.getElementById('settingsMenuItem')?.classList.remove('hidden');
+    }
+    
+    // Check if Dev account - show EXAM section with Telc
+    const adminRole = localStorage.getItem('adminRole');
+    if (adminRole === 'dev') {
+        document.getElementById('examSection')?.classList.remove('hidden');
     }
 }
 
@@ -758,11 +766,20 @@ document.querySelectorAll('.menu-item').forEach(item => {
         
         // Load tab-specific data
         if (tab === 'messages') loadMessages();
-        if (tab === 'services') loadServices();
+        if (tab === 'services') {
+            // Services now uses the new service type selection (job-applications.js)
+            // Load service type counts instead of old loadServices
+            if (typeof loadServiceTypeCounts === 'function') {
+                loadServiceTypeCounts();
+            }
+        }
         if (tab === 'employees') {
-            loadEmployees();
-            loadEmployeePerformance();
-            loadEmployeeActivity();
+            // Load all employee data in parallel for better performance
+            Promise.all([
+                loadEmployees(),
+                loadEmployeePerformance(),
+                loadEmployeeActivity()
+            ]);
         }
         if (tab === 'activity') loadActivityLogs();
         if (tab === 'sessions') loadLoginSessions();
@@ -928,12 +945,17 @@ document.querySelectorAll('.language-option').forEach(option => {
     });
 });
 
-// Set initial active language
+// Set initial active language and update button text
 document.querySelectorAll('.language-option').forEach(option => {
     if (option.getAttribute('data-lang') === currentLanguage) {
         option.classList.add('active');
     }
 });
+
+// Update button text to match saved language on page load
+if (currentLangText) {
+    currentLangText.textContent = currentLanguage.toUpperCase();
+}
 
 // Load Messages
 async function loadMessages() {

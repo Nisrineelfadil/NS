@@ -416,8 +416,8 @@ router.get('/credit-history', authenticateAdmin, async (req, res) => {
 // POST /api/admin-registration/adjust-credits - Super admin can adjust credits (super admin only)
 router.post('/adjust-credits', authenticateAdmin, async (req, res) => {
     try {
-        // Check if user is super admin
-        if (req.admin.role !== 'super_admin') {
+        // Check if user is super admin or dev
+        if (req.admin.role !== 'super_admin' && req.admin.role !== 'dev') {
             return res.status(403).json({
                 success: false,
                 message: 'Only super admin can adjust credits'
@@ -489,8 +489,8 @@ router.post('/adjust-credits', authenticateAdmin, async (req, res) => {
 // GET /api/admin-registration/all-stats - Super admin view of all registrations (super admin only)
 router.get('/all-stats', authenticateAdmin, async (req, res) => {
     try {
-        // Check if user is super admin
-        if (req.admin.role !== 'super_admin') {
+        // Check if user is super admin or dev
+        if (req.admin.role !== 'super_admin' && req.admin.role !== 'dev') {
             return res.status(403).json({
                 success: false,
                 message: 'Only super admin can view all statistics'
@@ -545,8 +545,8 @@ router.get('/all-stats', authenticateAdmin, async (req, res) => {
 // POST /api/admin-registration/reset-all-credits - Super admin resets all credits (DANGEROUS)
 router.post('/reset-all-credits', authenticateAdmin, async (req, res) => {
     try {
-        // Only super admin can reset all credits
-        if (req.admin.role !== 'super_admin') {
+        // Only super admin or dev can reset all credits
+        if (req.admin.role !== 'super_admin' && req.admin.role !== 'dev') {
             return res.status(403).json({ 
                 success: false, 
                 message: 'Only super admins can reset all credits' 

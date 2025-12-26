@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initApplyingTabs();
     initJobFieldCards();
     loadServiceTypeCounts();
+    initCVDragDrop();
 });
 
 // Open a specific service type
@@ -842,6 +843,12 @@ function openAddApplicationModal(type) {
     document.getElementById('customFieldGroup').style.display = 'none';
     document.getElementById('diplomaDetailsGroup').style.display = 'none';
     
+    // Reset CV upload area
+    const cvUploadContent = document.querySelector('.cv-upload-content');
+    const cvFilePreview = document.getElementById('cvFilePreview');
+    if (cvUploadContent) cvUploadContent.style.display = 'flex';
+    if (cvFilePreview) cvFilePreview.style.display = 'none';
+    
     document.getElementById('jobApplicationModal').classList.add('active');
 }
 
@@ -864,50 +871,192 @@ function toggleDiplomaDetails() {
         (type === 'diploma' || type === 'certificate') ? 'block' : 'none';
 }
 
+// Handle CV file selection
+function handleCVFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    processSelectedCVFile(file);
+}
+
+// Process selected CV file (used by both click and drag-drop)
+function processSelectedCVFile(file) {
+    // Check file size (5MB max)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+        showNotification('File size exceeds 5MB limit', 'error');
+        return false;
+    }
+    
+    // Check file type
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+        showNotification('Only PDF, DOC, and DOCX files are allowed', 'error');
+        return false;
+    }
+    
+    // Show file preview
+    document.getElementById('cvFileName').textContent = file.name;
+    document.getElementById('cvFileSize').textContent = formatFileSize(file.size);
+    document.querySelector('.cv-upload-content').style.display = 'none';
+    document.getElementById('cvFilePreview').style.display = 'flex';
+    
+    // Update icon based on file type
+    const iconEl = document.querySelector('.cv-file-icon');
+    if (file.type === 'application/pdf') {
+        iconEl.className = 'fas fa-file-pdf cv-file-icon';
+        iconEl.style.color = '#ef4444';
+    } else {
+        iconEl.className = 'fas fa-file-word cv-file-icon';
+        iconEl.style.color = '#3b82f6';
+    }
+    
+    return true;
+}
+
+// Initialize drag and drop for CV upload
+function initCVDragDrop() {
+    const uploadArea = document.getElementById('cvUploadArea');
+    if (!uploadArea) return;
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => {
+            uploadArea.classList.add('drag-over');
+        }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => {
+            uploadArea.classList.remove('drag-over');
+        }, false);
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            const file = files[0];
+            if (processSelectedCVFile(file)) {
+                // Create a DataTransfer to set the file input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('appDocument').files = dataTransfer.files;
+            }
+        }
+    }, false);
+}
+
+// Remove selected CV file
+function removeCVFile() {
+    document.getElementById('appDocument').value = '';
+    document.querySelector('.cv-upload-content').style.display = 'flex';
+    document.getElementById('cvFilePreview').style.display = 'none';
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 // Save application
 async function saveApplication(event) {
     event.preventDefault();
     
     const applicationId = document.getElementById('applicationId').value;
     const applicationType = document.getElementById('applicationTypeInput').value;
+    const fileInput = document.getElementById('appDocument');
+    const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
     
-    const applicationData = {
-        fullName: document.getElementById('appFullName').value,
-        phone: document.getElementById('appPhone').value,
-        email: document.getElementById('appEmail').value,
-        applicationType: applicationType,
-        jobField: document.getElementById('appJobField').value,
-        customJobField: document.getElementById('appCustomField').value,
-        languageLevel: document.getElementById('appLanguageLevel').value || null,
-        status: document.getElementById('appStatus').value,
-        experience: document.getElementById('appExperience').value,
-        qualifications: document.getElementById('appQualifications').value,
-        notes: document.getElementById('appNotes').value
-    };
-    
-    // Handle diploma
-    const diplomaType = document.getElementById('appDiplomaType').value;
-    if (diplomaType) {
-        applicationData.hasDiploma = diplomaType === 'diploma';
-        applicationData.diplomaType = diplomaType;
-        applicationData.diplomaDetails = document.getElementById('appDiplomaDetails').value;
-    }
+    // Show loading state
+    const saveBtn = document.getElementById('saveApplicationBtn');
+    const originalBtnText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     
     try {
-        const url = applicationId 
-            ? `/api/job-applications/${applicationId}`
-            : '/api/job-applications/admin/create';
+        let response;
         
-        const method = applicationId ? 'PUT' : 'POST';
-        
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-            },
-            body: JSON.stringify(applicationData)
-        });
+        if (applicationId) {
+            // Update existing application (JSON)
+            const applicationData = {
+                fullName: document.getElementById('appFullName').value,
+                phone: document.getElementById('appPhone').value,
+                email: document.getElementById('appEmail').value,
+                applicationType: applicationType,
+                jobField: document.getElementById('appJobField').value,
+                customJobField: document.getElementById('appCustomField').value,
+                languageLevel: document.getElementById('appLanguageLevel').value || null,
+                status: document.getElementById('appStatus').value,
+                experience: document.getElementById('appExperience').value,
+                qualifications: document.getElementById('appQualifications').value,
+                notes: document.getElementById('appNotes').value
+            };
+            
+            // Handle diploma
+            const diplomaType = document.getElementById('appDiplomaType').value;
+            if (diplomaType) {
+                applicationData.hasDiploma = diplomaType === 'diploma';
+                applicationData.diplomaType = diplomaType;
+                applicationData.diplomaDetails = document.getElementById('appDiplomaDetails').value;
+            }
+            
+            response = await fetch(`/api/job-applications/${applicationId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                },
+                body: JSON.stringify(applicationData)
+            });
+        } else {
+            // Create new application (FormData for file upload)
+            const formData = new FormData();
+            formData.append('fullName', document.getElementById('appFullName').value);
+            formData.append('phone', document.getElementById('appPhone').value);
+            formData.append('email', document.getElementById('appEmail').value);
+            formData.append('applicationType', applicationType);
+            formData.append('jobField', document.getElementById('appJobField').value);
+            formData.append('customJobField', document.getElementById('appCustomField').value || '');
+            formData.append('languageLevel', document.getElementById('appLanguageLevel').value || '');
+            formData.append('status', document.getElementById('appStatus').value);
+            formData.append('experience', document.getElementById('appExperience').value || '');
+            formData.append('qualifications', document.getElementById('appQualifications').value || '');
+            formData.append('notes', document.getElementById('appNotes').value || '');
+            
+            // Handle diploma
+            const diplomaType = document.getElementById('appDiplomaType').value;
+            if (diplomaType) {
+                formData.append('hasDiploma', diplomaType === 'diploma');
+                formData.append('diplomaType', diplomaType);
+                formData.append('diplomaDetails', document.getElementById('appDiplomaDetails').value || '');
+            }
+            
+            // Add file if selected
+            if (hasFile) {
+                formData.append('document', fileInput.files[0]);
+            }
+            
+            response = await fetch('/api/job-applications/admin/create', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                },
+                body: formData
+            });
+        }
         
         const data = await response.json();
         
@@ -921,6 +1070,9 @@ async function saveApplication(event) {
     } catch (error) {
         console.error('Error saving application:', error);
         showNotification('Failed to save application', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnText;
     }
 }
 
@@ -940,7 +1092,7 @@ async function viewApplication(id) {
         if (data.success) {
             const app = data.application;
             
-            // Fill details
+            // Fill basic details
             document.getElementById('detailName').textContent = app.fullName;
             document.getElementById('detailPhone').innerHTML = `<a href="tel:${app.phone}">${app.phone}</a>`;
             document.getElementById('detailEmail').innerHTML = `<a href="mailto:${app.email}">${app.email}</a>`;
@@ -949,6 +1101,21 @@ async function viewApplication(id) {
                 : FIELD_LABELS[app.jobField] || app.jobField;
             document.getElementById('detailLanguage').textContent = app.languageLevel || 'Not specified';
             document.getElementById('detailDiploma').innerHTML = getDiplomaBadge(app);
+            
+            // Fill additional details (Experience, Qualifications, Notes)
+            document.getElementById('detailExperience').textContent = app.experience || 'Not provided';
+            document.getElementById('detailQualifications').textContent = app.qualifications || 'Not provided';
+            document.getElementById('detailNotes').textContent = app.notes || 'No notes';
+            
+            // Show/hide additional details section based on content
+            const hasAdditionalInfo = app.experience || app.qualifications || app.notes;
+            const additionalSection = document.getElementById('additionalDetailsSection');
+            if (additionalSection) {
+                additionalSection.style.display = hasAdditionalInfo ? 'block' : 'none';
+            }
+            
+            // Fill documents section
+            displayApplicationDocuments(app.documents, id);
             
             // Update status select
             document.getElementById('detailStatusSelect').value = app.status;
@@ -968,6 +1135,45 @@ async function viewApplication(id) {
         console.error('Error loading application:', error);
         showNotification('Failed to load application', 'error');
     }
+}
+
+// Display application documents
+function displayApplicationDocuments(documents, applicationId) {
+    const container = document.getElementById('detailDocuments');
+    if (!container) return;
+    
+    if (!documents || documents.length === 0) {
+        container.innerHTML = `
+            <div class="no-documents">
+                <i class="fas fa-folder-open"></i>
+                <span>No documents uploaded</span>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = documents.map(doc => {
+        const fileIcon = doc.fileName?.endsWith('.pdf') ? 'fa-file-pdf' : 
+                        (doc.fileName?.endsWith('.doc') || doc.fileName?.endsWith('.docx')) ? 'fa-file-word' : 'fa-file';
+        const iconColor = doc.fileName?.endsWith('.pdf') ? '#ef4444' : '#3b82f6';
+        const fileSize = doc.fileSize ? formatFileSize(doc.fileSize) : '';
+        const uploadDate = doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : '';
+        
+        return `
+            <div class="document-item">
+                <div class="document-info">
+                    <i class="fas ${fileIcon}" style="color: ${iconColor}; font-size: 24px;"></i>
+                    <div class="document-details">
+                        <span class="document-name">${escapeHtml(doc.fileName || 'Document')}</span>
+                        <span class="document-meta">${fileSize}${fileSize && uploadDate ? ' • ' : ''}${uploadDate}</span>
+                    </div>
+                </div>
+                <button class="action-btn btn-info btn-sm" onclick="downloadApplicationDocument('${applicationId}')" title="Download">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        `;
+    }).join('');
 }
 
 // Update pipeline visualization

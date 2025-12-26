@@ -21,7 +21,7 @@ const adminSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['super_admin', 'employee'],
+        enum: ['dev', 'super_admin', 'employee'],
         default: 'employee'
     },
     isActive: {
@@ -67,5 +67,10 @@ adminSchema.pre('save', async function(next) {
 adminSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Indexes for faster queries
+adminSchema.index({ role: 1 });
+adminSchema.index({ isActive: 1 });
+adminSchema.index({ role: 1, isActive: 1 });
 
 module.exports = mongoose.model('Admin', adminSchema);

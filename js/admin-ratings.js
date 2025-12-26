@@ -53,6 +53,19 @@
                 loadRatings();
             });
         }
+        
+        // Re-render ratings when language changes
+        document.querySelectorAll('.language-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Re-render ratings if we have data loaded
+                if (allPendingRatings.length > 0 || allApprovedRatings.length > 0) {
+                    setTimeout(() => {
+                        displayPendingRatings();
+                        displayApprovedRatings();
+                    }, 100);
+                }
+            });
+        });
     });
 
     // Load all ratings

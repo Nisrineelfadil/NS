@@ -55,12 +55,13 @@ const authenticateAdmin = async (req, res, next) => {
     }
 };
 
-// Middleware to check if admin is super admin
+// Middleware to check if admin is super admin or dev
 const requireSuperAdmin = async (req, res, next) => {
     try {
         const admin = await Admin.findById(req.adminId);
         
-        if (!admin || admin.role !== 'super_admin') {
+        // Dev role has all super_admin privileges
+        if (!admin || (admin.role !== 'super_admin' && admin.role !== 'dev')) {
             return res.status(403).json({ 
                 success: false, 
                 message: 'Access denied. Super admin only.' 

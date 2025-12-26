@@ -318,8 +318,25 @@ router.get('/:id/download-documents', authenticateAdmin, async (req, res) => {
             });
         }
 
-        const details = service.translationDetails || service.cvDetails || service.applyingDetails || {};
+        // Get details based on service type (prioritize the correct one)
+        let details = {};
+        if (service.serviceType === 'cv') {
+            details = service.cvDetails || {};
+        } else if (service.serviceType === 'translation') {
+            details = service.translationDetails || {};
+        } else if (service.serviceType === 'applying') {
+            details = service.applyingDetails || {};
+        } else {
+            details = service.translationDetails || service.cvDetails || service.applyingDetails || {};
+        }
+        
         const files = details.files || [];
+        
+        console.log(`📄 Download request for ${service.serviceType} service:`, {
+            hasFiles: files.length > 0,
+            hasDropboxPath: !!details.dropboxPath,
+            fileName: details.fileName
+        });
         
         // If only one file or no files array, use single file path
         if (files.length === 0 && details.dropboxPath) {

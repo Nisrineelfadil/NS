@@ -287,7 +287,7 @@ const AdminAttendance = {
                                             ${record.status === 'present' ? `<i class="fas fa-check-circle"></i> ${t('present')}` : record.status === 'late' ? `<i class="fas fa-clock"></i> ${t('late')}` : `<i class="fas fa-times-circle"></i> ${t('absent')}`}
                                         </span>
                                     </td>
-                                    <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; color: #6b7280; font-family: 'Courier New', monospace;">${record.scanTime ? new Date(record.scanTime).toLocaleTimeString() : '-'}</td>
+                                    <td style="padding: 16px; border-bottom: 1px solid #f0f0f0; color: #6b7280; font-family: 'Courier New', monospace;">${record.deviceInfo === 'Admin Manual Entry' ? '<span style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;"><i class="fas fa-hand-paper" style="margin-right: 4px;"></i>Manual</span>' : (record.scanTime ? new Date(record.scanTime).toLocaleTimeString() : '-')}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -811,6 +811,456 @@ const AdminAttendance = {
     }
 };
 
+// ==================== MANUAL ATTENDANCE FUNCTIONS ====================
+
+// Store data for manual attendance
+let manualAttendanceData = {
+    teachers: [],
+    groups: [],
+    students: [],
+    selectedTeacher: null,
+    selectedGroup: null,
+    selectedFormation: null
+};
+
+// Open Manual Attendance Modal
+async function openManualAttendanceModal() {
+    const modal = document.getElementById('manualAttendanceModal');
+    modal.style.display = 'flex';
+    
+    // Reset to step 1
+    document.getElementById('manualAttendanceStep1').style.display = 'block';
+    document.getElementById('manualAttendanceStep2').style.display = 'none';
+    
+    // Set default date to today
+    document.getElementById('manualDateSelect').value = new Date().toISOString().split('T')[0];
+    
+    // Load teachers
+    await loadTeachersForManualAttendance();
+    
+    // Load groups (filtered by active season)
+    await loadGroupsForManualAttendance();
+}
+
+// Close Manual Attendance Modal
+function closeManualAttendanceModal() {
+    document.getElementById('manualAttendanceModal').style.display = 'none';
+    
+    // Reset form
+    document.getElementById('manualTeacherSelect').value = '';
+    document.getElementById('manualGroupSelect').value = '';
+    document.getElementById('manualFormationSelect').innerHTML = '<option value="">-- Select a Formation --</option>';
+    document.getElementById('manualDateSelect').value = '';
+    document.getElementById('manualStartTime').value = '09:00';
+    document.getElementById('manualEndTime').value = '11:00';
+    document.getElementById('manualStudentsList').innerHTML = '';
+    
+    // Reset data
+    manualAttendanceData.students = [];
+    manualAttendanceData.selectedTeacher = null;
+    manualAttendanceData.selectedGroup = null;
+    manualAttendanceData.selectedFormation = null;
+}
+
+// Load teachers for dropdown
+async function loadTeachersForManualAttendance() {
+    try {
+        const response = await fetch('/api/attendance/admin/teachers', {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load teachers');
+        
+        const data = await response.json();
+        manualAttendanceData.teachers = data.teachers || [];
+        
+        const select = document.getElementById('manualTeacherSelect');
+        select.innerHTML = '<option value="">-- Select a Teacher --</option>';
+        
+        manualAttendanceData.teachers.forEach(teacher => {
+            const option = document.createElement('option');
+            option.value = teacher._id;
+            option.textContent = `${teacher.fullName} (${teacher.formations.join(', ')})`;
+            option.dataset.formations = JSON.stringify(teacher.formations);
+            option.dataset.groups = JSON.stringify(teacher.groups);
+            select.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error loading teachers:', error);
+        showNotification('Failed to load teachers', 'error');
+    }
+}
+
+// Load groups for dropdown (filtered by active season)
+async function loadGroupsForManualAttendance() {
+    try {
+        // Get active season first
+        const seasonsResponse = await fetch('/api/seasons/current', {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        const activeSeason = await seasonsResponse.json();
+        
+        // Load groups filtered by active season
+        const groupsResponse = await fetch(`/api/student-management/groups?season=${activeSeason._id}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        const groupsData = await groupsResponse.json();
+        
+        manualAttendanceData.groups = groupsData.groups || [];
+        
+        const select = document.getElementById('manualGroupSelect');
+        select.innerHTML = '<option value="">-- Select a Group --</option>';
+        
+        manualAttendanceData.groups.forEach(group => {
+            const option = document.createElement('option');
+            option.value = group._id;
+            option.textContent = group.name;
+            select.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error loading groups:', error);
+        showNotification('Failed to load groups', 'error');
+    }
+}
+
+// When teacher is selected, update formations and groups dropdowns
+function onManualTeacherChange() {
+    const teacherSelect = document.getElementById('manualTeacherSelect');
+    const selectedOption = teacherSelect.options[teacherSelect.selectedIndex];
+    
+    if (!selectedOption.value) {
+        document.getElementById('manualFormationSelect').innerHTML = '<option value="">-- Select a Formation --</option>';
+        document.getElementById('manualGroupSelect').innerHTML = '<option value="">-- Select a Group --</option>';
+        return;
+    }
+    
+    // Update formations dropdown based on teacher's formations
+    const formations = JSON.parse(selectedOption.dataset.formations || '[]');
+    const formationSelect = document.getElementById('manualFormationSelect');
+    formationSelect.innerHTML = '<option value="">-- Select a Formation --</option>';
+    
+    formations.forEach(formation => {
+        const option = document.createElement('option');
+        option.value = formation;
+        option.textContent = formation;
+        formationSelect.appendChild(option);
+    });
+    
+    // Update groups dropdown based on teacher's assigned groups
+    const teacherGroupIds = JSON.parse(selectedOption.dataset.groups || '[]');
+    const groupSelect = document.getElementById('manualGroupSelect');
+    groupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
+    
+    // Filter groups to only show teacher's assigned groups
+    const teacherGroups = manualAttendanceData.groups.filter(group => 
+        teacherGroupIds.includes(group._id)
+    );
+    
+    teacherGroups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group._id;
+        option.textContent = group.name;
+        groupSelect.appendChild(option);
+    });
+    
+    manualAttendanceData.selectedTeacher = manualAttendanceData.teachers.find(t => t._id === selectedOption.value);
+}
+
+// When group is selected
+function onManualGroupChange() {
+    const groupSelect = document.getElementById('manualGroupSelect');
+    manualAttendanceData.selectedGroup = manualAttendanceData.groups.find(g => g._id === groupSelect.value);
+}
+
+// Load students for manual attendance marking
+async function loadStudentsForManualAttendance() {
+    const teacherId = document.getElementById('manualTeacherSelect').value;
+    const groupId = document.getElementById('manualGroupSelect').value;
+    const formation = document.getElementById('manualFormationSelect').value;
+    const date = document.getElementById('manualDateSelect').value;
+    
+    // Validation
+    if (!teacherId) {
+        showNotification('Please select a teacher', 'warning');
+        return;
+    }
+    if (!groupId) {
+        showNotification('Please select a group', 'warning');
+        return;
+    }
+    if (!formation) {
+        showNotification('Please select a formation', 'warning');
+        return;
+    }
+    if (!date) {
+        showNotification('Please select a date', 'warning');
+        return;
+    }
+    
+    try {
+        // Show loading
+        const loadBtn = document.querySelector('#manualAttendanceStep1 button[onclick="loadStudentsForManualAttendance()"]');
+        const originalText = loadBtn ? loadBtn.innerHTML : '';
+        if (loadBtn) {
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            loadBtn.disabled = true;
+        }
+        
+        // Fetch students for this group and formation
+        const response = await fetch(`/api/attendance/admin/group-students/${groupId}?formation=${encodeURIComponent(formation)}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load students');
+        
+        const data = await response.json();
+        manualAttendanceData.students = data.students || [];
+        manualAttendanceData.selectedFormation = formation;
+        
+        if (manualAttendanceData.students.length === 0) {
+            showNotification('No students found for this group and formation', 'warning');
+            if (loadBtn) {
+                loadBtn.innerHTML = originalText;
+                loadBtn.disabled = false;
+            }
+            return;
+        }
+        
+        // Show step 2
+        document.getElementById('manualAttendanceStep1').style.display = 'none';
+        document.getElementById('manualAttendanceStep2').style.display = 'block';
+        
+        // Display session summary
+        const teacherName = document.getElementById('manualTeacherSelect').options[document.getElementById('manualTeacherSelect').selectedIndex].textContent.split(' (')[0];
+        const groupName = document.getElementById('manualGroupSelect').options[document.getElementById('manualGroupSelect').selectedIndex].textContent;
+        
+        document.getElementById('manualSessionSummary').innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                <div>
+                    <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 3px;"><i class="fas fa-chalkboard-teacher"></i> Teacher</div>
+                    <div style="font-weight: 600; color: #1f2937;">${teacherName}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 3px;"><i class="fas fa-users"></i> Group</div>
+                    <div style="font-weight: 600; color: #1f2937;">${groupName}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 3px;"><i class="fas fa-graduation-cap"></i> Formation</div>
+                    <div style="font-weight: 600; color: #1f2937;">${formation}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 3px;"><i class="fas fa-calendar"></i> Date</div>
+                    <div style="font-weight: 600; color: #1f2937;">${new Date(date).toLocaleDateString()}</div>
+                </div>
+            </div>
+        `;
+        
+        // Display students list
+        displayManualStudentsList();
+        
+        // Reset button
+        if (loadBtn) {
+            loadBtn.innerHTML = originalText;
+            loadBtn.disabled = false;
+        }
+        
+    } catch (error) {
+        console.error('Error loading students:', error);
+        showNotification('Failed to load students: ' + error.message, 'error');
+        
+        const loadBtn = document.querySelector('#manualAttendanceStep1 button[onclick="loadStudentsForManualAttendance()"]');
+        if (loadBtn) {
+            loadBtn.innerHTML = 'Load Students <i class="fas fa-arrow-right"></i>';
+            loadBtn.disabled = false;
+        }
+    }
+}
+
+// Display students list with attendance options
+function displayManualStudentsList() {
+    const container = document.getElementById('manualStudentsList');
+    
+    container.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
+                    <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">#</th>
+                    <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">Student Name</th>
+                    <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${manualAttendanceData.students.map((student, index) => `
+                    <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#fafafa'};" data-student-id="${student._id}">
+                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; color: #6b7280;">${index + 1}</td>
+                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: 500; color: #1f2937;">${student.fullName}</td>
+                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; text-align: center;">
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button type="button" class="attendance-btn present-btn" data-student="${student._id}" data-status="present" onclick="setStudentStatus('${student._id}', 'present')" style="padding: 6px 12px; border: 2px solid #10b981; background: white; color: #10b981; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
+                                    <i class="fas fa-check"></i> Present
+                                </button>
+                                <button type="button" class="attendance-btn late-btn" data-student="${student._id}" data-status="late" onclick="setStudentStatus('${student._id}', 'late')" style="padding: 6px 12px; border: 2px solid #f59e0b; background: white; color: #f59e0b; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
+                                    <i class="fas fa-clock"></i> Late
+                                </button>
+                                <button type="button" class="attendance-btn absent-btn" data-student="${student._id}" data-status="absent" onclick="setStudentStatus('${student._id}', 'absent')" style="padding: 6px 12px; border: 2px solid #ef4444; background: white; color: #ef4444; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
+                                    <i class="fas fa-times"></i> Absent
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    // Initialize all students as "not selected" (will need to select status)
+    manualAttendanceData.students.forEach(student => {
+        student.status = null;
+    });
+    
+    updateManualAttendanceSummary();
+}
+
+// Set individual student status
+function setStudentStatus(studentId, status) {
+    // Update data
+    const student = manualAttendanceData.students.find(s => s._id === studentId);
+    if (student) {
+        student.status = status;
+    }
+    
+    // Update UI - reset all buttons for this student
+    const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+    if (row) {
+        const buttons = row.querySelectorAll('.attendance-btn');
+        buttons.forEach(btn => {
+            const btnStatus = btn.dataset.status;
+            if (btnStatus === 'present') {
+                btn.style.background = status === 'present' ? '#10b981' : 'white';
+                btn.style.color = status === 'present' ? 'white' : '#10b981';
+            } else if (btnStatus === 'late') {
+                btn.style.background = status === 'late' ? '#f59e0b' : 'white';
+                btn.style.color = status === 'late' ? 'white' : '#f59e0b';
+            } else if (btnStatus === 'absent') {
+                btn.style.background = status === 'absent' ? '#ef4444' : 'white';
+                btn.style.color = status === 'absent' ? 'white' : '#ef4444';
+            }
+        });
+    }
+    
+    updateManualAttendanceSummary();
+}
+
+// Mark all students with a specific status
+function markAllAs(status) {
+    manualAttendanceData.students.forEach(student => {
+        setStudentStatus(student._id, status);
+    });
+}
+
+// Update attendance summary counts
+function updateManualAttendanceSummary() {
+    const presentCount = manualAttendanceData.students.filter(s => s.status === 'present').length;
+    const lateCount = manualAttendanceData.students.filter(s => s.status === 'late').length;
+    const absentCount = manualAttendanceData.students.filter(s => s.status === 'absent').length;
+    const totalCount = manualAttendanceData.students.length;
+    
+    document.getElementById('manualPresentCount').textContent = presentCount;
+    document.getElementById('manualLateCount').textContent = lateCount;
+    document.getElementById('manualAbsentCount').textContent = absentCount;
+    document.getElementById('manualTotalCount').textContent = totalCount;
+}
+
+// Go back to step 1
+function goBackToStep1() {
+    document.getElementById('manualAttendanceStep1').style.display = 'block';
+    document.getElementById('manualAttendanceStep2').style.display = 'none';
+}
+
+// Submit manual attendance
+async function submitManualAttendance() {
+    // Validate all students have a status
+    const unselectedStudents = manualAttendanceData.students.filter(s => !s.status);
+    if (unselectedStudents.length > 0) {
+        showNotification(`Please mark attendance for all students. ${unselectedStudents.length} student(s) not marked.`, 'warning');
+        return;
+    }
+    
+    const teacherId = document.getElementById('manualTeacherSelect').value;
+    const groupId = document.getElementById('manualGroupSelect').value;
+    const formation = document.getElementById('manualFormationSelect').value;
+    const date = document.getElementById('manualDateSelect').value;
+    const startTime = document.getElementById('manualStartTime').value;
+    const endTime = document.getElementById('manualEndTime').value;
+    
+    // Build attendance records
+    const attendanceRecords = manualAttendanceData.students.map(student => ({
+        studentId: student._id,
+        status: student.status
+    }));
+    
+    // Build class times
+    const classStartTime = startTime ? `${date}T${startTime}:00` : null;
+    const classEndTime = endTime ? `${date}T${endTime}:00` : null;
+    
+    try {
+        // Show loading
+        const submitBtn = document.querySelector('#manualAttendanceStep2 button[onclick="submitManualAttendance()"]');
+        const originalText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+        }
+        
+        const response = await fetch('/api/attendance/admin/manual-attendance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AdminAttendance.getToken()}`
+            },
+            body: JSON.stringify({
+                teacherId,
+                groupId,
+                formation,
+                date,
+                classStartTime,
+                classEndTime,
+                attendanceRecords
+            })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to save attendance');
+        }
+        
+        const data = await response.json();
+        
+        // Success!
+        showNotification(`✅ Manual attendance saved successfully!\n${data.session.presentCount} present, ${data.session.lateCount} late, ${data.session.absentCount} absent`, 'success');
+        
+        // Close modal and refresh data
+        closeManualAttendanceModal();
+        
+        // Refresh attendance records and sessions
+        await AdminAttendance.loadRecords();
+        await AdminAttendance.loadStats();
+        await AdminAttendance.loadSessions();
+        
+    } catch (error) {
+        console.error('Error saving manual attendance:', error);
+        showNotification('Failed to save attendance: ' + error.message, 'error');
+        
+        const submitBtn = document.querySelector('#manualAttendanceStep2 button[onclick="submitManualAttendance()"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Attendance';
+            submitBtn.disabled = false;
+        }
+    }
+}
+
 // Make it globally accessible
 window.AdminAttendance = AdminAttendance;
 
@@ -853,11 +1303,654 @@ function clearRecentSessions() {
 }
 
 function clearAllPresences() {
-    AdminAttendance.clearAllFilteredPresences();
+    // Open the new Edit Presences modal instead of the old confirm dialog
+    openEditPresencesModal();
 }
 
 function clearAllAbsences() {
-    AdminAttendance.clearAllFilteredAbsences();
+    // Open the new Clear Absences modal instead of the old confirm dialog
+    openClearAbsencesModal();
+}
+
+// ==================== CLEAR ABSENCES MODAL FUNCTIONS ====================
+
+let clearAbsencesCurrentGroupId = null;
+let clearAbsencesStudentsData = [];
+
+// Open the Clear Absences modal
+async function openClearAbsencesModal() {
+    const modal = document.getElementById('clearAbsencesModal');
+    modal.style.display = 'flex';
+    
+    // Reset state
+    clearAbsencesCurrentGroupId = null;
+    clearAbsencesStudentsData = [];
+    
+    // Show step 1, hide step 2
+    document.getElementById('clearAbsencesStep1').style.display = 'block';
+    document.getElementById('clearAbsencesStep2').style.display = 'none';
+    document.getElementById('clearAbsencesBackBtn').style.display = 'none';
+    
+    // Load groups from active season
+    await loadClearAbsencesGroups();
+}
+
+// Close the Clear Absences modal
+function closeClearAbsencesModal() {
+    document.getElementById('clearAbsencesModal').style.display = 'none';
+    clearAbsencesCurrentGroupId = null;
+    clearAbsencesStudentsData = [];
+}
+
+// Load groups from active season for the dropdown
+async function loadClearAbsencesGroups() {
+    const groupSelect = document.getElementById('clearAbsencesGroupSelect');
+    groupSelect.innerHTML = '<option value="">-- Select a group --</option>';
+    
+    try {
+        // Get active season first
+        const seasonsResponse = await fetch('/api/seasons/current', {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!seasonsResponse.ok) {
+            console.error('Failed to fetch active season:', seasonsResponse.status);
+            groupSelect.innerHTML = '<option value="">Error loading season</option>';
+            return;
+        }
+        
+        const activeSeason = await seasonsResponse.json();
+        console.log('Active season:', activeSeason);
+        
+        if (!activeSeason || !activeSeason._id) {
+            groupSelect.innerHTML = '<option value="">No active season found</option>';
+            return;
+        }
+        
+        // Load groups filtered by active season
+        const groupsResponse = await fetch(`/api/student-management/groups?season=${activeSeason._id}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!groupsResponse.ok) {
+            console.error('Failed to fetch groups:', groupsResponse.status);
+            groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+            return;
+        }
+        
+        const groupsData = await groupsResponse.json();
+        console.log('Groups data:', groupsData);
+        
+        if (groupsData.groups && groupsData.groups.length > 0) {
+            // Build options HTML
+            let optionsHTML = '<option value="">-- Select a group --</option>';
+            groupsData.groups.forEach(group => {
+                optionsHTML += `<option value="${group._id}">${group.name}</option>`;
+            });
+            groupSelect.innerHTML = optionsHTML;
+            console.log(`Loaded ${groupsData.groups.length} groups`);
+        } else {
+            groupSelect.innerHTML = '<option value="">No groups in active season</option>';
+        }
+    } catch (error) {
+        console.error('Error loading groups for clear absences:', error);
+        groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+    }
+}
+
+// Load students with absences for the selected group
+async function loadStudentsWithAbsences() {
+    const groupId = document.getElementById('clearAbsencesGroupSelect').value;
+    
+    if (!groupId) {
+        document.getElementById('clearAbsencesStep2').style.display = 'none';
+        document.getElementById('clearAbsencesStep1').style.display = 'block';
+        document.getElementById('clearAbsencesBackBtn').style.display = 'none';
+        return;
+    }
+    
+    clearAbsencesCurrentGroupId = groupId;
+    
+    // Show step 2
+    document.getElementById('clearAbsencesStep1').style.display = 'none';
+    document.getElementById('clearAbsencesStep2').style.display = 'block';
+    document.getElementById('clearAbsencesBackBtn').style.display = 'inline-flex';
+    
+    // Show loading
+    document.getElementById('clearAbsencesLoading').style.display = 'block';
+    document.getElementById('clearAbsencesEmpty').style.display = 'none';
+    document.getElementById('clearAbsencesStudentsList').innerHTML = '';
+    
+    try {
+        const response = await fetch(`/api/attendance/admin/students-with-absences?groupId=${groupId}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load students with absences');
+        }
+        
+        const data = await response.json();
+        clearAbsencesStudentsData = data.students || [];
+        
+        // Hide loading
+        document.getElementById('clearAbsencesLoading').style.display = 'none';
+        
+        // Update total badge
+        const totalAbsences = data.totalAbsences || 0;
+        document.getElementById('clearAbsencesTotalBadge').innerHTML = 
+            `<i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>${totalAbsences} total absence${totalAbsences !== 1 ? 's' : ''}`;
+        
+        if (clearAbsencesStudentsData.length === 0) {
+            // Show empty state
+            document.getElementById('clearAbsencesEmpty').style.display = 'block';
+        } else {
+            // Render students list
+            renderClearAbsencesStudentsList();
+        }
+    } catch (error) {
+        console.error('Error loading students with absences:', error);
+        document.getElementById('clearAbsencesLoading').style.display = 'none';
+        document.getElementById('clearAbsencesStudentsList').innerHTML = `
+            <div style="text-align: center; padding: 60px 40px; background: white; border-radius: 12px; color: #ef4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">Error loading students with absences</p>
+            </div>
+        `;
+    }
+}
+
+// Render the students list with absences
+function renderClearAbsencesStudentsList() {
+    const container = document.getElementById('clearAbsencesStudentsList');
+    
+    if (clearAbsencesStudentsData.length === 0) {
+        container.innerHTML = '';
+        document.getElementById('clearAbsencesEmpty').style.display = 'block';
+        return;
+    }
+    
+    document.getElementById('clearAbsencesEmpty').style.display = 'none';
+    
+    container.innerHTML = clearAbsencesStudentsData.map((student, index) => `
+        <div class="clear-absence-student-card" style="background: white; border: 2px solid #e5e7eb; border-radius: 16px; padding: 20px; margin-bottom: 16px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; flex-wrap: wrap;">
+                <!-- Student Info -->
+                <div style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 250px;">
+                    <div style="width: 55px; height: 55px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                        ${student.studentName.charAt(0).toUpperCase()}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700; color: #1f2937; font-size: 1.1rem; margin-bottom: 4px;">${student.studentName}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">${student.studentEmail}</div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); color: #dc2626; padding: 10px 18px; border-radius: 25px; font-weight: 700; font-size: 1rem; border: 2px solid #fecaca; white-space: nowrap;">
+                        <i class="fas fa-times-circle" style="margin-right: 6px;"></i>
+                        ${student.absenceCount} ${student.absenceCount === 1 ? 'absence' : 'absences'}
+                    </div>
+                    <button onclick="deleteStudentAbsences('${student.studentId}', '${student.studentName.replace(/'/g, "\\'")}')" 
+                            style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); white-space: nowrap;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.25)'"
+                            title="Clear all absences for ${student.studentName}">
+                        <i class="fas fa-trash-alt"></i>
+                        Clear All
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Expandable absences list -->
+            <div id="absencesList_${index}" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #e5e7eb;">
+                <div style="font-size: 0.95rem; color: #374151; margin-bottom: 12px; font-weight: 600;">
+                    <i class="fas fa-calendar-times" style="margin-right: 8px; color: #ef4444;"></i>
+                    Absence Records:
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${student.absences.map(absence => `
+                        <div style="background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%); padding: 10px 16px; border-radius: 10px; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 10px; border: 2px solid #fecaca; transition: all 0.2s;">
+                            <span style="color: #991b1b; font-weight: 600;">${new Date(absence.date).toLocaleDateString()}</span>
+                            <span style="color: #d1d5db;">•</span>
+                            <span style="color: #dc2626; font-weight: 500;">${absence.formation}</span>
+                            <button onclick="deleteSingleAbsence('${student.studentId}', '${absence._id}', '${student.studentName.replace(/'/g, "\\'")}')" 
+                                    style="background: #dc2626; color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#b91c1c'; this.style.transform='scale(1.1)'"
+                                    onmouseout="this.style.background='#dc2626'; this.style.transform='scale(1)'"
+                                    title="Delete this absence">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- Toggle Button -->
+            <button onclick="toggleAbsencesList(${index})" 
+                    style="background: #f3f4f6; border: 2px solid #e5e7eb; color: #4b5563; cursor: pointer; font-size: 0.9rem; margin-top: 15px; padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; transition: all 0.2s;"
+                    onmouseover="this.style.background='#e5e7eb'"
+                    onmouseout="this.style.background='#f3f4f6'"
+                    id="toggleBtn_${index}">
+                <i class="fas fa-chevron-down" id="toggleIcon_${index}"></i>
+                Show Details
+            </button>
+        </div>
+    `).join('');
+}
+
+// Toggle absences list visibility
+function toggleAbsencesList(index) {
+    const list = document.getElementById(`absencesList_${index}`);
+    const btn = document.getElementById(`toggleBtn_${index}`);
+    
+    if (list.style.display === 'none') {
+        list.style.display = 'block';
+        btn.innerHTML = `<i class="fas fa-chevron-up" id="toggleIcon_${index}"></i> Hide Details`;
+    } else {
+        list.style.display = 'none';
+        btn.innerHTML = `<i class="fas fa-chevron-down" id="toggleIcon_${index}"></i> Show Details`;
+    }
+}
+
+// Delete all absences for a student
+async function deleteStudentAbsences(studentId, studentName) {
+    const confirmed = confirm(
+        `⚠️ Delete all absences for ${studentName}?\n\n` +
+        `This will reset their absence count to 0.\n` +
+        `The student will see the updated count in their app.\n\n` +
+        `This action cannot be undone!`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch(`/api/attendance/admin/student-absences/${studentId}?groupId=${clearAbsencesCurrentGroupId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to delete absences');
+        }
+        
+        const data = await response.json();
+        
+        // Show success notification
+        showNotification(`✅ ${data.deletedCount} absence(s) deleted for ${studentName}`, 'success');
+        
+        // Reload the students list
+        await loadStudentsWithAbsences();
+        
+        // Reload attendance records in the background
+        AdminAttendance.loadStats();
+        AdminAttendance.loadRecords();
+        
+    } catch (error) {
+        console.error('Error deleting student absences:', error);
+        showNotification(`❌ Error deleting absences: ${error.message}`, 'error');
+    }
+}
+
+// Delete a single absence record
+async function deleteSingleAbsence(studentId, absenceId, studentName) {
+    const confirmed = confirm(
+        `Delete this absence record for ${studentName}?\n\n` +
+        `The student will see the updated count in their app.`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch(`/api/attendance/admin/student-absences/${studentId}?absenceIds=${absenceId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to delete absence');
+        }
+        
+        // Show success notification
+        showNotification(`✅ Absence deleted for ${studentName}`, 'success');
+        
+        // Reload the students list
+        await loadStudentsWithAbsences();
+        
+        // Reload attendance records in the background
+        AdminAttendance.loadStats();
+        AdminAttendance.loadRecords();
+        
+    } catch (error) {
+        console.error('Error deleting single absence:', error);
+        showNotification(`❌ Error deleting absence: ${error.message}`, 'error');
+    }
+}
+
+// Go back to step 1 in the Clear Absences modal
+function goBackToClearAbsencesStep1() {
+    document.getElementById('clearAbsencesStep1').style.display = 'block';
+    document.getElementById('clearAbsencesStep2').style.display = 'none';
+    document.getElementById('clearAbsencesBackBtn').style.display = 'none';
+    document.getElementById('clearAbsencesGroupSelect').value = '';
+    clearAbsencesCurrentGroupId = null;
+}
+
+// ==================== EDIT PRESENCES MODAL ====================
+
+// State for Edit Presences modal
+let editPresencesCurrentGroupId = null;
+let editPresencesStudentsData = [];
+
+// Replace the clearPresences function to open the modal
+function clearPresences() {
+    openEditPresencesModal();
+}
+
+// Open the Edit Presences modal
+async function openEditPresencesModal() {
+    const modal = document.getElementById('editPresencesModal');
+    modal.style.display = 'flex';
+    
+    // Reset state
+    editPresencesCurrentGroupId = null;
+    editPresencesStudentsData = [];
+    
+    // Show step 1, hide step 2
+    document.getElementById('editPresencesStep1').style.display = 'block';
+    document.getElementById('editPresencesStep2').style.display = 'none';
+    document.getElementById('editPresencesBackBtn').style.display = 'none';
+    
+    // Load groups from active season
+    await loadEditPresencesGroups();
+}
+
+// Close the Edit Presences modal
+function closeEditPresencesModal() {
+    document.getElementById('editPresencesModal').style.display = 'none';
+    editPresencesCurrentGroupId = null;
+    editPresencesStudentsData = [];
+}
+
+// Load groups from active season for the dropdown
+async function loadEditPresencesGroups() {
+    const groupSelect = document.getElementById('editPresencesGroupSelect');
+    groupSelect.innerHTML = '<option value="">-- Select a group --</option>';
+    
+    try {
+        // Get active season first
+        const seasonsResponse = await fetch('/api/seasons/current', {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!seasonsResponse.ok) {
+            console.error('Failed to fetch active season:', seasonsResponse.status);
+            groupSelect.innerHTML = '<option value="">Error loading season</option>';
+            return;
+        }
+        
+        const activeSeason = await seasonsResponse.json();
+        
+        if (!activeSeason || !activeSeason._id) {
+            groupSelect.innerHTML = '<option value="">No active season found</option>';
+            return;
+        }
+        
+        // Load groups filtered by active season
+        const groupsResponse = await fetch(`/api/student-management/groups?season=${activeSeason._id}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!groupsResponse.ok) {
+            console.error('Failed to fetch groups:', groupsResponse.status);
+            groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+            return;
+        }
+        
+        const groupsData = await groupsResponse.json();
+        
+        if (groupsData.groups && groupsData.groups.length > 0) {
+            let optionsHTML = '<option value="">-- Select a group --</option>';
+            groupsData.groups.forEach(group => {
+                optionsHTML += `<option value="${group._id}">${group.name}</option>`;
+            });
+            groupSelect.innerHTML = optionsHTML;
+        } else {
+            groupSelect.innerHTML = '<option value="">No groups in active season</option>';
+        }
+    } catch (error) {
+        console.error('Error loading groups for edit presences:', error);
+        groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+    }
+}
+
+// Load students with presences for the selected group
+async function loadStudentsWithPresences() {
+    const groupId = document.getElementById('editPresencesGroupSelect').value;
+    
+    if (!groupId) {
+        document.getElementById('editPresencesStep2').style.display = 'none';
+        document.getElementById('editPresencesStep1').style.display = 'block';
+        document.getElementById('editPresencesBackBtn').style.display = 'none';
+        return;
+    }
+    
+    editPresencesCurrentGroupId = groupId;
+    
+    // Show step 2
+    document.getElementById('editPresencesStep1').style.display = 'none';
+    document.getElementById('editPresencesStep2').style.display = 'block';
+    document.getElementById('editPresencesBackBtn').style.display = 'inline-flex';
+    
+    // Show loading
+    document.getElementById('editPresencesLoading').style.display = 'block';
+    document.getElementById('editPresencesEmpty').style.display = 'none';
+    document.getElementById('editPresencesStudentsList').innerHTML = '';
+    
+    try {
+        const response = await fetch(`/api/attendance/admin/students-with-presences?groupId=${groupId}`, {
+            headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load students with presences');
+        }
+        
+        const data = await response.json();
+        editPresencesStudentsData = data.students || [];
+        
+        // Hide loading
+        document.getElementById('editPresencesLoading').style.display = 'none';
+        
+        // Update badges
+        document.getElementById('editPresencesPresentBadge').innerHTML = 
+            `<i class="fas fa-check-circle" style="margin-right: 6px;"></i>${data.totalPresent || 0} present`;
+        document.getElementById('editPresencesLateBadge').innerHTML = 
+            `<i class="fas fa-clock" style="margin-right: 6px;"></i>${data.totalLate || 0} late`;
+        
+        if (editPresencesStudentsData.length === 0) {
+            document.getElementById('editPresencesEmpty').style.display = 'block';
+        } else {
+            renderEditPresencesStudentsList();
+        }
+    } catch (error) {
+        console.error('Error loading students with presences:', error);
+        document.getElementById('editPresencesLoading').style.display = 'none';
+        document.getElementById('editPresencesStudentsList').innerHTML = `
+            <div style="text-align: center; padding: 60px 40px; background: white; border-radius: 12px; color: #ef4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">Error loading students with attendance records</p>
+            </div>
+        `;
+    }
+}
+
+// Render the students list with presences
+function renderEditPresencesStudentsList() {
+    const container = document.getElementById('editPresencesStudentsList');
+    
+    if (editPresencesStudentsData.length === 0) {
+        container.innerHTML = '';
+        document.getElementById('editPresencesEmpty').style.display = 'block';
+        return;
+    }
+    
+    document.getElementById('editPresencesEmpty').style.display = 'none';
+    
+    container.innerHTML = editPresencesStudentsData.map((student, index) => `
+        <div class="edit-presence-student-card" style="background: white; border: 2px solid #e5e7eb; border-radius: 16px; padding: 20px; margin-bottom: 16px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; flex-wrap: wrap;">
+                <!-- Student Info -->
+                <div style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 250px;">
+                    <div style="width: 55px; height: 55px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        ${student.studentName.charAt(0).toUpperCase()}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700; color: #1f2937; font-size: 1.1rem; margin-bottom: 4px;">${student.studentName}</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">${student.studentEmail}</div>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); color: #059669; padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 2px solid #bbf7d0; white-space: nowrap;">
+                        <i class="fas fa-check" style="margin-right: 4px;"></i>${student.presentCount} present
+                    </div>
+                    <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); color: #d97706; padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 2px solid #fde68a; white-space: nowrap;">
+                        <i class="fas fa-clock" style="margin-right: 4px;"></i>${student.lateCount} late
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Expandable records list -->
+            <div id="presencesList_${index}" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #e5e7eb;">
+                <div style="font-size: 0.95rem; color: #374151; margin-bottom: 12px; font-weight: 600;">
+                    <i class="fas fa-calendar-check" style="margin-right: 8px; color: #10b981;"></i>
+                    Attendance Records:
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${student.records.map(record => `
+                        <div style="background: ${record.status === 'present' ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)'}; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 15px; border: 2px solid ${record.status === 'present' ? '#bbf7d0' : '#fde68a'}; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="color: #374151; font-weight: 600;">${new Date(record.date).toLocaleDateString()}</span>
+                                <span style="color: #9ca3af;">•</span>
+                                <span style="color: #6b7280;">${record.formation}</span>
+                                <span style="background: ${record.status === 'present' ? '#10b981' : '#f59e0b'}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                                    ${record.status}
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                ${record.status === 'present' ? `
+                                    <button onclick="updateRecordStatus('${record._id}', 'late', '${student.studentName.replace(/'/g, "\\'")}')" 
+                                            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                                            onmouseover="this.style.transform='translateY(-2px)'"
+                                            onmouseout="this.style.transform='translateY(0)'"
+                                            title="Change to Late">
+                                        <i class="fas fa-clock"></i> Mark Late
+                                    </button>
+                                ` : `
+                                    <button onclick="updateRecordStatus('${record._id}', 'present', '${student.studentName.replace(/'/g, "\\'")}')" 
+                                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                                            onmouseover="this.style.transform='translateY(-2px)'"
+                                            onmouseout="this.style.transform='translateY(0)'"
+                                            title="Change to Present">
+                                        <i class="fas fa-check"></i> Mark Present
+                                    </button>
+                                `}
+                                <button onclick="updateRecordStatus('${record._id}', 'absent', '${student.studentName.replace(/'/g, "\\'")}')" 
+                                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                                        onmouseover="this.style.transform='translateY(-2px)'"
+                                        onmouseout="this.style.transform='translateY(0)'"
+                                        title="Change to Absent">
+                                    <i class="fas fa-times"></i> Mark Absent
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- Toggle Button -->
+            <button onclick="togglePresencesList(${index})" 
+                    style="background: #f3f4f6; border: 2px solid #e5e7eb; color: #4b5563; cursor: pointer; font-size: 0.9rem; margin-top: 15px; padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; transition: all 0.2s;"
+                    onmouseover="this.style.background='#e5e7eb'"
+                    onmouseout="this.style.background='#f3f4f6'"
+                    id="togglePresenceBtn_${index}">
+                <i class="fas fa-chevron-down" id="togglePresenceIcon_${index}"></i>
+                Show Records (${student.totalCount})
+            </button>
+        </div>
+    `).join('');
+}
+
+// Toggle presences list visibility
+function togglePresencesList(index) {
+    const list = document.getElementById(`presencesList_${index}`);
+    const btn = document.getElementById(`togglePresenceBtn_${index}`);
+    const student = editPresencesStudentsData[index];
+    
+    if (list.style.display === 'none') {
+        list.style.display = 'block';
+        btn.innerHTML = `<i class="fas fa-chevron-up" id="togglePresenceIcon_${index}"></i> Hide Records`;
+    } else {
+        list.style.display = 'none';
+        btn.innerHTML = `<i class="fas fa-chevron-down" id="togglePresenceIcon_${index}"></i> Show Records (${student.totalCount})`;
+    }
+}
+
+// Update a single attendance record status
+async function updateRecordStatus(recordId, newStatus, studentName) {
+    const statusLabels = { present: 'Present', late: 'Late', absent: 'Absent' };
+    
+    const confirmed = confirm(
+        `Change attendance status to "${statusLabels[newStatus]}" for ${studentName}?\n\n` +
+        `The student will see the updated status in their app.`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch(`/api/attendance/admin/update-status/${recordId}`, {
+            method: 'PATCH',
+            headers: { 
+                'Authorization': `Bearer ${AdminAttendance.getToken()}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ newStatus })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update status');
+        }
+        
+        const data = await response.json();
+        
+        showNotification(`✅ Status updated to ${statusLabels[newStatus]} for ${studentName}`, 'success');
+        
+        // Reload the students list
+        await loadStudentsWithPresences();
+        
+        // Reload attendance records in the background
+        AdminAttendance.loadStats();
+        AdminAttendance.loadRecords();
+        
+    } catch (error) {
+        console.error('Error updating attendance status:', error);
+        showNotification(`❌ Error updating status: ${error.message}`, 'error');
+    }
+}
+
+// Go back to step 1 in the Edit Presences modal
+function goBackToEditPresencesStep1() {
+    document.getElementById('editPresencesStep1').style.display = 'block';
+    document.getElementById('editPresencesStep2').style.display = 'none';
+    document.getElementById('editPresencesBackBtn').style.display = 'none';
+    document.getElementById('editPresencesGroupSelect').value = '';
+    editPresencesCurrentGroupId = null;
 }
 
 // Export Modal Functions

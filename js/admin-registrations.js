@@ -29,8 +29,8 @@ function checkAuth() {
         const payload = JSON.parse(atob(token.split('.')[1]));
         currentAdmin = payload;
         
-        // Show super admin section if user is super admin
-        if (payload.role === 'super_admin') {
+        // Show super admin section if user is super admin or dev
+        if (payload.role === 'super_admin' || payload.role === 'dev') {
             document.getElementById('superAdminSection')?.classList.remove('hidden');
             document.getElementById('superAdminSection').style.display = 'block';
         }

@@ -434,41 +434,60 @@ function drawPieChart(doc, x, y, radius, data, colors) {
   });
 }
 
-// Helper function to draw color legend with transaction details in 2x2 grid on the RIGHT
+// Helper function to draw COMPACT color legend (category-based, max 10 items)
 function drawColorLegend(doc, x, y, data, colors) {
-  // Legend title aligned to the right side
-  doc.fontSize(11).fillColor('#000000').font('Helvetica-Bold')
-     .text('Légende des Couleurs:', x, y, { width: 250, align: 'left', underline: true });
-  doc.font('Helvetica');
-  
-  const startY = y + 25;
-  const columns = 2; // Display 2 items per row (2x2 grid)
-  const columnWidth = 125; // Width for each column
-  const rowHeight = 40; // Height for each row
+  // Group by category for a cleaner legend
+  const categoryTotals = {};
+  let grandTotal = 0;
   
   data.forEach((item, index) => {
-    const col = index % columns; // Column position (0-1)
-    const row = Math.floor(index / columns); // Row position
+    const key = `${item.type}-${item.category}`;
+    if (!categoryTotals[key]) {
+      categoryTotals[key] = {
+        category: item.category,
+        type: item.type,
+        total: 0,
+        colorIndex: Object.keys(categoryTotals).length
+      };
+    }
+    categoryTotals[key].total += item.value;
+    grandTotal += item.value;
+  });
+  
+  const categories = Object.values(categoryTotals).slice(0, 8); // Max 8 categories
+  
+  if (categories.length === 0) return y;
+  
+  // Legend title
+  doc.fontSize(9).fillColor('#000000').font('Helvetica-Bold')
+     .text('Légende:', x, y, { width: 200, align: 'left' });
+  doc.font('Helvetica');
+  
+  const startY = y + 15;
+  const columns = 2;
+  const columnWidth = 120;
+  const rowHeight = 18;
+  
+  categories.forEach((cat, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
     
     const itemX = x + (col * columnWidth);
     const itemY = startY + (row * rowHeight);
     
     // Draw color box
-    doc.rect(itemX, itemY, 14, 14).fillAndStroke(colors[index % colors.length], '#000000');
+    doc.rect(itemX, itemY, 10, 10).fillAndStroke(colors[cat.colorIndex % colors.length], '#000000');
     
-    // Draw label with transaction title and percentage
-    const percentage = ((item.value / item.total) * 100).toFixed(1);
-    const typeIndicator = item.type === 'income' ? '(Rev)' : '(Dép)';
+    // Draw label
+    const percentage = ((cat.total / grandTotal) * 100).toFixed(1);
+    const typeIndicator = cat.type === 'income' ? '↑' : '↓';
     
-    doc.fontSize(7).fillColor('#000000').font('Helvetica-Bold')
-       .text(`${item.label}`, itemX + 20, itemY, { width: 100, lineBreak: false });
-    doc.fontSize(6).fillColor('#666666').font('Helvetica')
-       .text(`${typeIndicator} ${percentage}%`, itemX + 20, itemY + 10, { width: 100, lineBreak: false });
+    doc.fontSize(6).fillColor('#000000')
+       .text(`${typeIndicator} ${cat.category} (${percentage}%)`, itemX + 14, itemY + 1, { width: 105, lineBreak: false });
   });
   
-  // Return the total height used by the legend
-  const totalRows = Math.ceil(data.length / columns);
-  return startY + (totalRows * rowHeight);
+  const totalRows = Math.ceil(categories.length / columns);
+  return startY + (totalRows * rowHeight) + 10;
 }
 
 // Export monthly report as PDF
@@ -562,103 +581,111 @@ router.get('/export/pdf', requireSuperAdmin, async (req, res) => {
     
     doc.y = summaryTableTop;
     
-    // Pie Chart - CENTERED layout with title
+    // Pie Chart - COMPACT layout with category-based data
     const pageWidth = 515; // A4 page width minus margins
-    const pieChartCenterX = 40 + pageWidth / 2; // Center of page
     const summaryTableBottom = summaryTableTop + 60; // Summary table ends at +60px
-    const pieChartY = summaryTableBottom + 80; // Start 80px AFTER summary table
     
-    // Prepare individual transactions for pie chart (both income and expenses)
-    const allTransactions = transactions.map(t => ({
-      title: t.title,
-      amount: t.amount,
-      type: t.type,
-      category: t.category
-    }));
+    // Group transactions by category for cleaner pie chart
+    const categoryData = {};
+    let totalAmount = 0;
     
-    const totalAmount = allTransactions.reduce((sum, t) => sum + t.amount, 0);
+    transactions.forEach(t => {
+      const key = `${t.type}-${t.category}`;
+      if (!categoryData[key]) {
+        categoryData[key] = {
+          label: t.category,
+          value: 0,
+          type: t.type,
+          category: t.category
+        };
+      }
+      categoryData[key].value += t.amount;
+      totalAmount += t.amount;
+    });
     
-    if (allTransactions.length > 0 && totalAmount > 0) {
-      // Title for pie chart - CENTERED, positioned AFTER summary table
-      doc.fontSize(11).fillColor('#ef4444').font('Helvetica-Bold')
-         .text('Répartition des Transactions', 40, summaryTableBottom + 15, { width: pageWidth, align: 'center', underline: true });
+    const pieData = Object.values(categoryData);
+    pieData.forEach(item => item.total = totalAmount);
+    
+    if (pieData.length > 0 && totalAmount > 0) {
+      // Title for pie chart
+      doc.fontSize(10).fillColor('#ef4444').font('Helvetica-Bold')
+         .text('Répartition par Catégorie', 40, summaryTableBottom + 10, { width: pageWidth, align: 'center', underline: true });
       doc.font('Helvetica');
       
-      // Prepare pie chart data - each transaction is a separate slice
-      const pieData = allTransactions.map(t => ({
-        label: t.title,
-        value: t.amount,
-        total: totalAmount,
-        type: t.type,
-        category: t.category
-      }));
-      
-      // Extended color palette for more transactions (20 colors)
+      // Color palette (10 colors for categories)
       const colors = [
-        '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', 
-        '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', 
-        '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-        '#ec4899', '#f43f5e', '#fb7185', '#fb923c', '#fbbf24'
+        '#ef4444', '#f97316', '#f59e0b', '#22c55e', '#10b981', 
+        '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1'
       ];
       
-      // CENTERED LAYOUT: Pie on LEFT, Legend on RIGHT
-      const pieRadius = 80; // Bigger pie
-      const totalLayoutWidth = 450; // Total width of pie + legend
-      const layoutStartX = 40 + (pageWidth - totalLayoutWidth) / 2; // Center the layout
+      // Compact layout: Pie on LEFT, Legend on RIGHT
+      const pieRadius = 60; // Smaller pie
+      const pieChartY = summaryTableBottom + 90;
+      const pieChartCenterX = 140;
+      const legendStartX = 280;
       
-      const pieChartCenterX = layoutStartX + 100; // Pie center position
-      const legendStartX = layoutStartX + 230; // Legend start position (after pie)
+      // Draw pie chart
+      drawPieChart(doc, pieChartCenterX, pieChartY, pieRadius, pieData, colors);
       
-      // Draw pie chart CENTERED on the LEFT with BIGGER size
-      drawPieChart(doc, pieChartCenterX, pieChartY + 50, pieRadius, pieData, colors);
+      // Draw compact legend
+      const legendEndY = drawColorLegend(doc, legendStartX, summaryTableBottom + 50, pieData, colors);
       
-      // Draw color legend on the RIGHT (2x2 grid)
-      const legendEndY = drawColorLegend(doc, legendStartX, pieChartY + 30, pieData, colors);
-      
-      // Calculate dynamic spacing based on legend height
-      const minSpacing = 50; // Minimum 50px gap between legend and table
-      const tableStartY = Math.max(summaryTableTop + 280, legendEndY + minSpacing);
+      // Set position for transactions table
+      const tableStartY = Math.max(summaryTableBottom + 180, legendEndY + 20);
       doc.y = tableStartY;
     } else {
       // No transactions, use default spacing
-      doc.y = summaryTableTop + 280;
+      doc.y = summaryTableBottom + 20;
     }
     
     // Transactions Table (below everything) - Dynamic spacing based on legend height
-    doc.fontSize(11).fillColor('#ef4444').font('Helvetica-Bold').text('Transactions Mensuelles', 40, doc.y, { underline: true });
+    doc.fontSize(10).fillColor('#ef4444').font('Helvetica-Bold').text('Transactions Mensuelles', 40, doc.y, { underline: true });
     doc.font('Helvetica');
-    doc.moveDown(0.5);
+    doc.moveDown(0.3);
     
     if (transactions.length === 0) {
-      doc.fontSize(9).fillColor('#666666').text('Aucune transaction enregistrée pour ce mois.');
+      doc.fontSize(8).fillColor('#666666').text('Aucune transaction enregistrée pour ce mois.');
     } else {
-      const tableTop = doc.y;
       const tableLeft = 40;
-      const col1Width = 60;
-      const col2Width = 50;
-      const col3Width = 140;
-      const col4Width = 70;
-      const col5Width = 140;
-      const rowHeight = 18;
+      const col1Width = 55;  // Date
+      const col2Width = 45;  // Type
+      const col3Width = 150; // Titre
+      const col4Width = 65;  // Montant
+      const col5Width = 145; // Remarques
+      const totalWidth = col1Width + col2Width + col3Width + col4Width + col5Width;
+      const rowHeight = 14;  // Smaller rows
+      const pageBottom = 750; // Leave space for footer
       
-      // Table header with background
-      doc.rect(tableLeft, tableTop, col1Width + col2Width + col3Width + col4Width + col5Width, rowHeight).fillAndStroke('#f0f0f0', '#000000');
+      let currentY = doc.y;
+      let isFirstPage = true;
       
-      doc.fontSize(8).fillColor('#000000');
-      doc.text('Date', tableLeft + 5, tableTop + 5, { width: col1Width - 10 });
-      doc.text('Type', tableLeft + col1Width + 5, tableTop + 5, { width: col2Width - 10 });
-      doc.text('Titre', tableLeft + col1Width + col2Width + 5, tableTop + 5, { width: col3Width - 10 });
-      doc.text('Montant', tableLeft + col1Width + col2Width + col3Width + 5, tableTop + 5, { width: col4Width - 10 });
-      doc.text('Remarques', tableLeft + col1Width + col2Width + col3Width + col4Width + 5, tableTop + 5, { width: col5Width - 10 });
+      // Function to draw table header
+      const drawTableHeader = (y) => {
+        doc.rect(tableLeft, y, totalWidth, rowHeight).fillAndStroke('#f0f0f0', '#000000');
+        doc.fontSize(7).fillColor('#000000').font('Helvetica-Bold');
+        doc.text('Date', tableLeft + 3, y + 3, { width: col1Width - 6 });
+        doc.text('Type', tableLeft + col1Width + 3, y + 3, { width: col2Width - 6 });
+        doc.text('Titre', tableLeft + col1Width + col2Width + 3, y + 3, { width: col3Width - 6 });
+        doc.text('Montant', tableLeft + col1Width + col2Width + col3Width + 3, y + 3, { width: col4Width - 6 });
+        doc.text('Remarques', tableLeft + col1Width + col2Width + col3Width + col4Width + 3, y + 3, { width: col5Width - 6 });
+        doc.font('Helvetica');
+        return y + rowHeight;
+      };
       
-      let currentY = tableTop + rowHeight;
-      let rowCount = 0;
-      const maxRows = 20; // Limit rows to fit on one page
+      // Draw initial header
+      currentY = drawTableHeader(currentY);
       
-      // Table rows with borders
-      transactions.slice(0, maxRows).forEach((transaction, index) => {
+      // ALL transactions - no truncation
+      transactions.forEach((transaction, index) => {
+        // Check if we need a new page
+        if (currentY + rowHeight > pageBottom) {
+          doc.addPage();
+          currentY = 40;
+          currentY = drawTableHeader(currentY);
+        }
+        
         // Draw row border
-        doc.rect(tableLeft, currentY, col1Width + col2Width + col3Width + col4Width + col5Width, rowHeight).stroke();
+        doc.rect(tableLeft, currentY, totalWidth, rowHeight).stroke();
         
         // Vertical lines
         doc.moveTo(tableLeft + col1Width, currentY).lineTo(tableLeft + col1Width, currentY + rowHeight).stroke();
@@ -669,23 +696,18 @@ router.get('/export/pdf', requireSuperAdmin, async (req, res) => {
         const typeText = transaction.type === 'income' ? 'Revenu' : 'Dépense';
         const typeColor = transaction.type === 'income' ? '#10b981' : '#ef4444';
         
-        doc.fontSize(7).fillColor('#000000');
-        doc.text(new Date(transaction.date).toLocaleDateString('fr-FR'), tableLeft + 3, currentY + 5, { width: col1Width - 6 });
-        doc.fillColor(typeColor).text(typeText, tableLeft + col1Width + 3, currentY + 5, { width: col2Width - 6 });
+        doc.fontSize(6).fillColor('#000000');
+        doc.text(new Date(transaction.date).toLocaleDateString('fr-FR'), tableLeft + 2, currentY + 4, { width: col1Width - 4 });
+        doc.fillColor(typeColor).text(typeText, tableLeft + col1Width + 2, currentY + 4, { width: col2Width - 4 });
         doc.fillColor('#000000');
-        doc.text(transaction.title, tableLeft + col1Width + col2Width + 3, currentY + 5, { width: col3Width - 6 });
-        doc.text(`${transaction.amount.toFixed(2)} MAD`, tableLeft + col1Width + col2Width + col3Width + 3, currentY + 5, { width: col4Width - 6 });
-        doc.text(transaction.remarks || '-', tableLeft + col1Width + col2Width + col3Width + col4Width + 3, currentY + 5, { width: col5Width - 6 });
+        doc.text(transaction.title.substring(0, 35), tableLeft + col1Width + col2Width + 2, currentY + 4, { width: col3Width - 4 });
+        doc.text(`${transaction.amount.toFixed(2)} MAD`, tableLeft + col1Width + col2Width + col3Width + 2, currentY + 4, { width: col4Width - 4 });
+        doc.text((transaction.remarks || '-').substring(0, 30), tableLeft + col1Width + col2Width + col3Width + col4Width + 2, currentY + 4, { width: col5Width - 4 });
         
         currentY += rowHeight;
-        rowCount++;
       });
       
-      if (transactions.length > maxRows) {
-        doc.fontSize(7).fillColor('#666666').text(`... et ${transactions.length - maxRows} autres transactions`, tableLeft, currentY + 5);
-      }
-      
-      doc.y = currentY;
+      doc.y = currentY + 10;
     }
     
     // Footer at bottom of page with dynamic year

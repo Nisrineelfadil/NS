@@ -12,7 +12,7 @@ const loginSessionSchema = new mongoose.Schema({
     },
     adminRole: {
         type: String,
-        enum: ['super_admin', 'employee'],
+        enum: ['dev', 'super_admin', 'employee'],
         required: true
     },
     loginTime: {

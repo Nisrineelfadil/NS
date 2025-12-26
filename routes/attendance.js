@@ -836,6 +836,96 @@ router.delete('/admin/clear-presences', authenticateAdmin, async (req, res) => {
     }
 });
 
+// Get students with absences for a specific group - Admin only
+router.get('/admin/students-with-absences', authenticateAdmin, async (req, res) => {
+    try {
+        const { groupId } = req.query;
+
+        if (!groupId) {
+            return res.status(400).json({ success: false, message: 'Group ID is required' });
+        }
+
+        // Get all absence records for this group
+        const absenceRecords = await AttendanceRecord.find({
+            groupId: groupId,
+            status: 'absent'
+        }).sort({ date: -1 });
+
+        // Group by student
+        const studentAbsences = {};
+        absenceRecords.forEach(record => {
+            const studentId = record.studentId.toString();
+            if (!studentAbsences[studentId]) {
+                studentAbsences[studentId] = {
+                    studentId: studentId,
+                    studentName: record.studentName,
+                    studentEmail: record.studentEmail,
+                    absenceCount: 0,
+                    absences: []
+                };
+            }
+            studentAbsences[studentId].absenceCount++;
+            studentAbsences[studentId].absences.push({
+                _id: record._id,
+                date: record.date,
+                formation: record.formation,
+                teacherName: record.teacherName
+            });
+        });
+
+        // Convert to array and sort by absence count (descending)
+        const students = Object.values(studentAbsences).sort((a, b) => b.absenceCount - a.absenceCount);
+
+        res.json({
+            success: true,
+            students,
+            totalAbsences: absenceRecords.length
+        });
+
+    } catch (error) {
+        console.error('Error fetching students with absences:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch students with absences', error: error.message });
+    }
+});
+
+// Delete specific absence record(s) for a student - Admin only
+router.delete('/admin/student-absences/:studentId', authenticateAdmin, async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const { groupId, absenceIds } = req.query;
+
+        let query = {
+            studentId: studentId,
+            status: 'absent'
+        };
+
+        // If specific absence IDs provided, delete only those
+        if (absenceIds) {
+            const ids = absenceIds.split(',');
+            query._id = { $in: ids };
+        }
+
+        // If groupId provided, limit to that group
+        if (groupId) {
+            query.groupId = groupId;
+        }
+
+        const result = await AttendanceRecord.deleteMany(query);
+
+        console.log(`🗑️ Admin deleted ${result.deletedCount} absence record(s) for student ${studentId}`);
+
+        res.json({
+            success: true,
+            message: `${result.deletedCount} absence record(s) deleted`,
+            deletedCount: result.deletedCount
+        });
+
+    } catch (error) {
+        console.error('Error deleting student absences:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete absences', error: error.message });
+    }
+});
+
 // Clear all absence records (with optional filters) - Admin only - DELETE
 router.delete('/admin/clear-absences', authenticateAdmin, async (req, res) => {
     try {
@@ -910,6 +1000,145 @@ router.post('/clear-presences', authenticateAdmin, async (req, res) => {
             message: 'Failed to clear presence records', 
             error: error.message 
         });
+    }
+});
+
+// Get students with presences (present/late) for a specific group - Admin only
+router.get('/admin/students-with-presences', authenticateAdmin, async (req, res) => {
+    try {
+        const { groupId } = req.query;
+
+        if (!groupId) {
+            return res.status(400).json({ success: false, message: 'Group ID is required' });
+        }
+
+        // Get all presence records (present or late) for this group
+        const presenceRecords = await AttendanceRecord.find({
+            groupId: groupId,
+            status: { $in: ['present', 'late'] }
+        }).sort({ date: -1 });
+
+        // Group by student
+        const studentPresences = {};
+        presenceRecords.forEach(record => {
+            const studentId = record.studentId.toString();
+            if (!studentPresences[studentId]) {
+                studentPresences[studentId] = {
+                    studentId: studentId,
+                    studentName: record.studentName,
+                    studentEmail: record.studentEmail,
+                    presentCount: 0,
+                    lateCount: 0,
+                    totalCount: 0,
+                    records: []
+                };
+            }
+            if (record.status === 'present') {
+                studentPresences[studentId].presentCount++;
+            } else if (record.status === 'late') {
+                studentPresences[studentId].lateCount++;
+            }
+            studentPresences[studentId].totalCount++;
+            studentPresences[studentId].records.push({
+                _id: record._id,
+                date: record.date,
+                formation: record.formation,
+                status: record.status,
+                teacherName: record.teacherName
+            });
+        });
+
+        // Convert to array and sort by total count (descending)
+        const students = Object.values(studentPresences).sort((a, b) => b.totalCount - a.totalCount);
+
+        res.json({
+            success: true,
+            students,
+            totalPresent: presenceRecords.filter(r => r.status === 'present').length,
+            totalLate: presenceRecords.filter(r => r.status === 'late').length,
+            totalRecords: presenceRecords.length
+        });
+
+    } catch (error) {
+        console.error('Error fetching students with presences:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch students with presences', error: error.message });
+    }
+});
+
+// Update attendance record status - Admin only
+router.patch('/admin/update-status/:recordId', authenticateAdmin, async (req, res) => {
+    try {
+        const { recordId } = req.params;
+        const { newStatus } = req.body;
+
+        if (!newStatus || !['present', 'late', 'absent'].includes(newStatus)) {
+            return res.status(400).json({ success: false, message: 'Valid status (present, late, absent) is required' });
+        }
+
+        const record = await AttendanceRecord.findById(recordId);
+        if (!record) {
+            return res.status(404).json({ success: false, message: 'Attendance record not found' });
+        }
+
+        const oldStatus = record.status;
+        record.status = newStatus;
+        await record.save();
+
+        console.log(`✏️ Admin updated attendance record ${recordId}: ${oldStatus} → ${newStatus}`);
+
+        res.json({
+            success: true,
+            message: `Status updated from ${oldStatus} to ${newStatus}`,
+            record: {
+                _id: record._id,
+                studentName: record.studentName,
+                date: record.date,
+                oldStatus,
+                newStatus
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating attendance status:', error);
+        res.status(500).json({ success: false, message: 'Failed to update status', error: error.message });
+    }
+});
+
+// Bulk update attendance status for a student - Admin only
+router.patch('/admin/bulk-update-status/:studentId', authenticateAdmin, async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const { recordIds, newStatus, groupId } = req.body;
+
+        if (!newStatus || !['present', 'late', 'absent'].includes(newStatus)) {
+            return res.status(400).json({ success: false, message: 'Valid status (present, late, absent) is required' });
+        }
+
+        let query = { studentId: studentId };
+
+        // If specific record IDs provided, update only those
+        if (recordIds && recordIds.length > 0) {
+            query._id = { $in: recordIds };
+        }
+
+        // If groupId provided, limit to that group
+        if (groupId) {
+            query.groupId = groupId;
+        }
+
+        const result = await AttendanceRecord.updateMany(query, { $set: { status: newStatus } });
+
+        console.log(`✏️ Admin bulk updated ${result.modifiedCount} record(s) for student ${studentId} to ${newStatus}`);
+
+        res.json({
+            success: true,
+            message: `${result.modifiedCount} record(s) updated to ${newStatus}`,
+            modifiedCount: result.modifiedCount
+        });
+
+    } catch (error) {
+        console.error('Error bulk updating attendance status:', error);
+        res.status(500).json({ success: false, message: 'Failed to bulk update status', error: error.message });
     }
 });
 
@@ -1577,6 +1806,235 @@ router.get('/export/group/:groupId', authenticateAdmin, async (req, res) => {
             error: 'Failed to export attendance', 
             message: error.message 
         });
+    }
+});
+
+// ==================== ADMIN MANUAL ATTENDANCE (BACKUP SYSTEM) ====================
+
+// Get teachers for manual attendance dropdown
+router.get('/admin/teachers', authenticateAdmin, async (req, res) => {
+    try {
+        const teachers = await Teacher.find({ status: 'active' })
+            .select('_id fullName email formations groups')
+            .sort({ fullName: 1 });
+        
+        res.json({ success: true, teachers });
+    } catch (error) {
+        console.error('Error fetching teachers:', error);
+        res.status(500).json({ error: 'Failed to fetch teachers', details: error.message });
+    }
+});
+
+// Get students for a group (for manual attendance marking)
+router.get('/admin/group-students/:groupId', authenticateAdmin, async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { formation } = req.query;
+        
+        let query = {
+            group: groupId,
+            status: 'active'
+        };
+        
+        // Filter by formation if provided
+        if (formation) {
+            const isBranch = ['Gériatrie', 'Aide soignant', 'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Cuisine', 'Informatique', 'Gestion hôtelière'].includes(formation);
+            if (isBranch) {
+                query.filiere = formation;
+            } else {
+                query.formation = formation;
+            }
+        }
+        
+        const students = await ManagedStudent.find(query)
+            .select('_id fullName schoolEmail formation filiere')
+            .sort({ fullName: 1 });
+        
+        res.json({ success: true, students });
+    } catch (error) {
+        console.error('Error fetching group students:', error);
+        res.status(500).json({ error: 'Failed to fetch students', details: error.message });
+    }
+});
+
+// Create manual attendance session (Admin backup when PWA doesn't work)
+router.post('/admin/manual-attendance', authenticateAdmin, async (req, res) => {
+    try {
+        const { 
+            teacherId, 
+            groupId, 
+            formation, 
+            date, 
+            classStartTime, 
+            classEndTime,
+            attendanceRecords // Array of { studentId, status: 'present'|'late'|'absent' }
+        } = req.body;
+        
+        // Validate required fields
+        if (!teacherId || !groupId || !formation || !date || !attendanceRecords || !Array.isArray(attendanceRecords)) {
+            return res.status(400).json({ error: 'Missing required fields: teacherId, groupId, formation, date, attendanceRecords' });
+        }
+        
+        // Get teacher details
+        const teacher = await Teacher.findById(teacherId);
+        if (!teacher) {
+            return res.status(404).json({ error: 'Teacher not found' });
+        }
+        
+        // Get group details
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+        
+        // Create session ID for manual attendance
+        const sessionId = 'MANUAL-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+        const sessionDate = new Date(date);
+        const now = new Date();
+        
+        // Set default times if not provided
+        const startTime = classStartTime ? new Date(classStartTime) : new Date(sessionDate.setHours(9, 0, 0, 0));
+        const endTime = classEndTime ? new Date(classEndTime) : new Date(sessionDate.setHours(11, 0, 0, 0));
+        
+        // Create the attendance session
+        const session = new AttendanceSession({
+            sessionId,
+            groupId,
+            groupName: group.name,
+            teacherId: teacher._id,
+            teacherName: teacher.fullName,
+            formation,
+            date: new Date(date),
+            classStartTime: startTime,
+            classEndTime: endTime,
+            qrGeneratedAt: now,
+            qrExpiresAt: now, // Already expired since it's manual
+            lateThresholdMinutes: 0,
+            status: 'completed', // Mark as completed immediately
+            totalStudents: attendanceRecords.length,
+            presentCount: attendanceRecords.filter(r => r.status === 'present').length,
+            lateCount: attendanceRecords.filter(r => r.status === 'late').length,
+            absentCount: attendanceRecords.filter(r => r.status === 'absent').length
+        });
+        
+        await session.save();
+        
+        // Create attendance records for each student
+        const recordsToInsert = [];
+        
+        for (const record of attendanceRecords) {
+            const student = await ManagedStudent.findById(record.studentId);
+            if (!student) continue;
+            
+            recordsToInsert.push({
+                sessionId,
+                session: session._id,
+                studentId: student._id,
+                studentName: student.fullName,
+                studentEmail: student.schoolEmail,
+                groupId,
+                groupName: group.name,
+                teacherId: teacher._id,
+                teacherName: teacher.fullName,
+                formation,
+                date: new Date(date),
+                status: record.status,
+                scanTime: record.status !== 'absent' ? now : null,
+                qrGeneratedAt: now,
+                qrExpiresAt: now,
+                markedAbsentAutomatically: false,
+                notes: 'Manually entered by admin',
+                deviceInfo: 'Admin Manual Entry'
+            });
+        }
+        
+        if (recordsToInsert.length > 0) {
+            await AttendanceRecord.insertMany(recordsToInsert);
+        }
+        
+        console.log(`📋 Admin created manual attendance session ${sessionId}`);
+        console.log(`   Teacher: ${teacher.fullName}`);
+        console.log(`   Group: ${group.name}`);
+        console.log(`   Formation: ${formation}`);
+        console.log(`   Date: ${date}`);
+        console.log(`   Records: ${recordsToInsert.length} students`);
+        console.log(`   Present: ${session.presentCount}, Late: ${session.lateCount}, Absent: ${session.absentCount}`);
+        
+        res.json({
+            success: true,
+            message: 'Manual attendance session created successfully',
+            session: {
+                sessionId,
+                groupName: group.name,
+                teacherName: teacher.fullName,
+                formation,
+                date,
+                totalStudents: recordsToInsert.length,
+                presentCount: session.presentCount,
+                lateCount: session.lateCount,
+                absentCount: session.absentCount
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error creating manual attendance:', error);
+        res.status(500).json({ error: 'Failed to create manual attendance', details: error.message });
+    }
+});
+
+// Update individual attendance record (Admin can modify existing records)
+router.patch('/admin/records/:recordId', authenticateAdmin, async (req, res) => {
+    try {
+        const { recordId } = req.params;
+        const { status, notes } = req.body;
+        
+        if (!status || !['present', 'late', 'absent'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status. Must be present, late, or absent' });
+        }
+        
+        const record = await AttendanceRecord.findById(recordId);
+        if (!record) {
+            return res.status(404).json({ error: 'Attendance record not found' });
+        }
+        
+        const oldStatus = record.status;
+        record.status = status;
+        record.notes = notes || record.notes;
+        record.scanTime = status !== 'absent' ? new Date() : null;
+        await record.save();
+        
+        // Update session counts
+        const session = await AttendanceSession.findById(record.session);
+        if (session) {
+            // Decrement old status count
+            if (oldStatus === 'present') session.presentCount = Math.max(0, session.presentCount - 1);
+            else if (oldStatus === 'late') session.lateCount = Math.max(0, session.lateCount - 1);
+            else if (oldStatus === 'absent') session.absentCount = Math.max(0, session.absentCount - 1);
+            
+            // Increment new status count
+            if (status === 'present') session.presentCount += 1;
+            else if (status === 'late') session.lateCount += 1;
+            else if (status === 'absent') session.absentCount += 1;
+            
+            await session.save();
+        }
+        
+        console.log(`📝 Admin updated attendance record ${recordId}: ${oldStatus} → ${status}`);
+        
+        res.json({
+            success: true,
+            message: `Attendance updated to ${status}`,
+            record: {
+                _id: record._id,
+                studentName: record.studentName,
+                status: record.status,
+                notes: record.notes
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating attendance record:', error);
+        res.status(500).json({ error: 'Failed to update attendance record', details: error.message });
     }
 });
 

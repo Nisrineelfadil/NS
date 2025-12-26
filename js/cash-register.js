@@ -8,6 +8,11 @@ let yearlyChart = null;
 let allTransactions = [];
 let allCategories = [];
 
+// Pagination state
+const ITEMS_PER_PAGE = 8;
+let transactionsPagination = { currentPage: 1, data: [] };
+let overlappingPagination = { currentPage: 1, data: [] };
+
 // Predefined Categories
 const INCOME_CATEGORIES = [
     'Tuition Fees',
@@ -76,7 +81,7 @@ async function checkAuth() {
         document.getElementById('userName').textContent = currentUser.username || 'Admin';
 
         // Show/hide tabs based on role
-        if (currentUser.role === 'super_admin' || currentUser.role === 'superadmin') {
+        if (currentUser.role === 'super_admin' || currentUser.role === 'superadmin' || currentUser.role === 'dev') {
             // Super admin sees everything: Dashboard, Transactions, Overlapping, Yearly Overview
             document.getElementById('yearlyTab').style.display = 'flex';
             document.getElementById('overlappingTab').style.display = 'flex';
@@ -468,13 +473,35 @@ async function loadTransactions() {
 
 function displayTransactions(transactions) {
     const tbody = document.getElementById('transactionsTableBody');
+    const paginationContainer = document.getElementById('transactionsPagination');
     
     if (transactions.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="loading">No transactions found</td></tr>';
+        if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
     
-    tbody.innerHTML = transactions.map(t => {
+    // Store data and reset to page 1 if new data
+    transactionsPagination.data = transactions;
+    if (transactionsPagination.currentPage > Math.ceil(transactions.length / ITEMS_PER_PAGE)) {
+        transactionsPagination.currentPage = 1;
+    }
+    
+    renderTransactionsPage();
+}
+
+function renderTransactionsPage() {
+    const tbody = document.getElementById('transactionsTableBody');
+    const paginationContainer = document.getElementById('transactionsPagination');
+    const transactions = transactionsPagination.data;
+    const currentPage = transactionsPagination.currentPage;
+    
+    const totalPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const pageData = transactions.slice(startIndex, endIndex);
+    
+    tbody.innerHTML = pageData.map(t => {
         const typeIcon = t.type === 'income' ? '🟢' : '🔴';
         const statusClass = t.status === 'completed' ? 'completed' : 'pending';
         const hasReceipt = t.receiptImage && t.receiptImage.data;
@@ -524,6 +551,21 @@ function displayTransactions(transactions) {
             </tr>
         `;
     }).join('');
+    
+    // Render pagination
+    if (paginationContainer && totalPages > 1) {
+        paginationContainer.innerHTML = createPaginationHTML('transactions', currentPage, totalPages, transactions.length);
+    } else if (paginationContainer) {
+        paginationContainer.innerHTML = '';
+    }
+}
+
+// Change transactions page
+window.changeTransactionsPage = function(newPage) {
+    const totalPages = Math.ceil(transactionsPagination.data.length / ITEMS_PER_PAGE);
+    if (newPage < 1 || newPage > totalPages) return;
+    transactionsPagination.currentPage = newPage;
+    renderTransactionsPage();
 }
 
 // Categories
@@ -892,7 +934,7 @@ function updateCashFlowTimeline(overview) {
 
 // PDF Export
 async function exportPDF() {
-    if (currentUser.role !== 'super_admin' && currentUser.role !== 'superadmin') {
+    if (currentUser.role !== 'super_admin' && currentUser.role !== 'superadmin' && currentUser.role !== 'dev') {
         showNotification('Only super admin can export PDF', 'error');
         return;
     }
@@ -1033,13 +1075,35 @@ async function loadOverlappingServices() {
 // Display overlapping services in table
 function displayOverlappingServices(services) {
     const tbody = document.getElementById('overlappingTableBody');
+    const paginationContainer = document.getElementById('overlappingPaginationContainer');
     
     if (!services || services.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="loading">${translate('noServicesFound')}</td></tr>`;
+        if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
     
-    tbody.innerHTML = services.map(s => {
+    // Store data and reset to page 1 if new data
+    overlappingPagination.data = services;
+    if (overlappingPagination.currentPage > Math.ceil(services.length / ITEMS_PER_PAGE)) {
+        overlappingPagination.currentPage = 1;
+    }
+    
+    renderOverlappingPage();
+}
+
+function renderOverlappingPage() {
+    const tbody = document.getElementById('overlappingTableBody');
+    const paginationContainer = document.getElementById('overlappingPaginationContainer');
+    const services = overlappingPagination.data;
+    const currentPage = overlappingPagination.currentPage;
+    
+    const totalPages = Math.ceil(services.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const pageData = services.slice(startIndex, endIndex);
+    
+    tbody.innerHTML = pageData.map(s => {
         const statusClass = s.status;
         const statusIcon = s.status === 'paid' ? '✓' : s.status === 'cancelled' ? '✕' : '⏳';
         
@@ -1101,6 +1165,21 @@ function displayOverlappingServices(services) {
             </tr>
         `;
     }).join('');
+    
+    // Render pagination
+    if (paginationContainer && totalPages > 1) {
+        paginationContainer.innerHTML = createPaginationHTML('overlapping', currentPage, totalPages, services.length);
+    } else if (paginationContainer) {
+        paginationContainer.innerHTML = '';
+    }
+}
+
+// Change overlapping page
+window.changeOverlappingPage = function(newPage) {
+    const totalPages = Math.ceil(overlappingPagination.data.length / ITEMS_PER_PAGE);
+    if (newPage < 1 || newPage > totalPages) return;
+    overlappingPagination.currentPage = newPage;
+    renderOverlappingPage();
 }
 
 // Load overlapping stats
@@ -1553,6 +1632,67 @@ function downloadCurrentReceipt() {
     if (currentReceiptTransactionId) {
         downloadReceipt(currentReceiptTransactionId);
     }
+}
+
+// Create pagination HTML (matching system design)
+function createPaginationHTML(type, currentPage, totalPages, totalItems) {
+    const maxVisiblePages = 5;
+    const changeFn = type === 'transactions' ? 'changeTransactionsPage' : 'changeOverlappingPage';
+    
+    let html = '<div class="cash-pagination">';
+    
+    // Previous button
+    html += `
+        <button class="pagination-nav-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                onclick="${changeFn}(${currentPage - 1})"
+                ${currentPage === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i> Previous
+        </button>
+    `;
+    
+    // Calculate which pages to show
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // First page + ellipsis
+    if (startPage > 1) {
+        html += `<button class="pagination-page-btn" onclick="${changeFn}(1)">1</button>`;
+        if (startPage > 2) {
+            html += `<span class="pagination-ellipsis">...</span>`;
+        }
+    }
+    
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        html += `
+            <button class="pagination-page-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="${changeFn}(${i})">${i}</button>
+        `;
+    }
+    
+    // Last page + ellipsis
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            html += `<span class="pagination-ellipsis">...</span>`;
+        }
+        html += `<button class="pagination-page-btn" onclick="${changeFn}(${totalPages})">${totalPages}</button>`;
+    }
+    
+    // Next button
+    html += `
+        <button class="pagination-nav-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                onclick="${changeFn}(${currentPage + 1})"
+                ${currentPage === totalPages ? 'disabled' : ''}>
+            Next <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
+    
+    html += '</div>';
+    return html;
 }
 
 // Delete receipt from current transaction

@@ -298,8 +298,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         currentUser = data;
         
-        // Show Teachers menu item only for super admin
-        if (currentUser.role === 'super_admin') {
+        // Show Teachers menu item only for super admin or dev
+        if (currentUser.role === 'super_admin' || currentUser.role === 'dev') {
             const teachersMenuItem = document.getElementById('teachersMenuItem');
             if (teachersMenuItem) {
                 teachersMenuItem.style.display = 'block';
@@ -1128,14 +1128,47 @@ function displayStudents(students, pendingStudents = []) {
     });
 }
 
-// Create pagination controls for students (matching ratings design)
+// Create pagination controls for students (modern design with prev/next)
 function createStudentPaginationControls(currentPage, totalPages, position) {
     const startItem = ((currentPage - 1) * STUDENTS_PER_PAGE) + 1;
     const endItem = Math.min(currentPage * STUDENTS_PER_PAGE, totalStudents);
     
-    // Generate page number buttons with span for animations
+    // Generate smart page numbers (show limited pages with ellipsis)
     let pageButtons = '';
-    for (let i = 1; i <= totalPages; i++) {
+    const maxVisiblePages = 5;
+    
+    // Previous button
+    pageButtons += `
+        <button class="pagination-nav-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                onclick="changeStudentPage(${currentPage - 1})"
+                ${currentPage === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    `;
+    
+    // Calculate which pages to show
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust if we're near the end
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // First page + ellipsis
+    if (startPage > 1) {
+        pageButtons += `
+            <button class="pagination-page-btn" onclick="changeStudentPage(1)">
+                <span>1</span>
+            </button>
+        `;
+        if (startPage > 2) {
+            pageButtons += `<span class="pagination-ellipsis">...</span>`;
+        }
+    }
+    
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
         pageButtons += `
             <button class="pagination-page-btn ${i === currentPage ? 'active' : ''}" 
                     onclick="changeStudentPage(${i})">
@@ -1143,6 +1176,27 @@ function createStudentPaginationControls(currentPage, totalPages, position) {
             </button>
         `;
     }
+    
+    // Last page + ellipsis
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            pageButtons += `<span class="pagination-ellipsis">...</span>`;
+        }
+        pageButtons += `
+            <button class="pagination-page-btn" onclick="changeStudentPage(${totalPages})">
+                <span>${totalPages}</span>
+            </button>
+        `;
+    }
+    
+    // Next button
+    pageButtons += `
+        <button class="pagination-nav-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                onclick="changeStudentPage(${currentPage + 1})"
+                ${currentPage === totalPages ? 'disabled' : ''}>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
     
     return `
         <div class="student-pagination-controls" style="grid-column: 1 / -1; margin-top: ${position === 'bottom' ? '20px' : '0'}; margin-bottom: ${position === 'top' ? '20px' : '0'};">
