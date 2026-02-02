@@ -26,6 +26,27 @@ const settingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    // TELC Settings
+    isTelcRegistrationOpen: {
+        type: Boolean,
+        default: true
+    },
+    telcSuperAdminEmail: {
+        type: String,
+        default: ''
+    },
+    telcAutoOverflow: {
+        type: Boolean,
+        default: true
+    },
+    telcDefaultMaxCapacity: {
+        type: Number,
+        default: 150
+    },
+    telcDefaultEmergencyReserve: {
+        type: Number,
+        default: 50
+    },
     updatedAt: {
         type: Date,
         default: Date.now

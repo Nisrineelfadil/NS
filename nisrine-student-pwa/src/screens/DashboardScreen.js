@@ -6,6 +6,8 @@ import { animations } from '../gradients';
 import Icon from '../components/Icon';
 import { API_URL } from '../config';
 import './DashboardScreen.css';
+import { getStudentData, clearAuthData } from '../services/authService';
+import notificationService from '../services/notificationPollingService';
 
 const DashboardScreen = () => {
   const navigate = useNavigate();
@@ -14,13 +16,21 @@ const DashboardScreen = () => {
 
   useEffect(() => {
     loadStudentData();
+    
+    // Start notification polling when dashboard loads
+    notificationService.start();
+    
+    // Cleanup: stop polling when component unmounts
+    return () => {
+      notificationService.stop();
+    };
   }, []);
 
-  const loadStudentData = () => {
+  const loadStudentData = async () => {
     try {
-      const data = localStorage.getItem('studentData');
+      const data = await getStudentData();
       if (data) {
-        setStudentData(JSON.parse(data));
+        setStudentData(data);
       } else {
         navigate('/login');
       }
@@ -30,10 +40,15 @@ const DashboardScreen = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      localStorage.clear();
-      navigate('/login');
+      // Stop notification polling
+      notificationService.stop();
+      
+      // Clear auth data from IndexedDB and localStorage
+      await clearAuthData();
+      
+      navigate('/login', { replace: true });
     }
   };
 

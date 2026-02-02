@@ -1660,39 +1660,367 @@
                         </div>
                     </div>
 
-                    <!-- Telc Tab (Dev Only) -->
+                    <!-- Telc Tab -->
                     <div class="tab-content" id="telcTab">
-                        <div class="coming-soon-container">
-                            <div class="coming-soon-card">
-                                <div class="coming-soon-logo">
-                                    <img src="Img/telc-logo.png" alt="Telc" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="telc-fallback-icon" style="display: none;">
+                        <!-- TELC Welcome Header -->
+                        <div class="telc-welcome-header">
+                            <div class="telc-welcome-content">
+                                <div class="telc-logo-section">
+                                    <div class="telc-logo-icon">
                                         <i class="fas fa-certificate"></i>
                                     </div>
-                                </div>
-                                <h1 class="coming-soon-title" data-i18n="admin.telc.coming_soon">Coming Soon</h1>
-                                <p class="coming-soon-subtitle" data-i18n="admin.telc.description">Telc exam management and certification features are under development.</p>
-                                <div class="coming-soon-features">
-                                    <div class="feature-item">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        <span data-i18n="admin.telc.feature_scheduling">Exam Scheduling</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-users"></i>
-                                        <span data-i18n="admin.telc.feature_registration">Student Registration</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-chart-bar"></i>
-                                        <span data-i18n="admin.telc.feature_results">Results Management</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-award"></i>
-                                        <span data-i18n="admin.telc.feature_certificates">Certificate Generation</span>
+                                    <div class="telc-welcome-text">
+                                        <h1 data-i18n="admin.telc.header_title">TELC Exam Management</h1>
+                                        <p data-i18n="admin.telc.header_subtitle">Manage candidates, exam dates and certificates</p>
                                     </div>
                                 </div>
-                                <div class="coming-soon-badge">
-                                    <i class="fas fa-tools"></i>
-                                    <span data-i18n="admin.telc.in_development">In Development</span>
+                                <div class="telc-quick-stats">
+                                    <div class="telc-quick-stat">
+                                        <span class="stat-value" id="telcTotalCandidates">0</span>
+                                        <span class="stat-label" data-i18n="admin.telc.candidates">Candidates</span>
+                                    </div>
+                                    <div class="telc-quick-stat success">
+                                        <span class="stat-value" id="telcPassedCount">0</span>
+                                        <span class="stat-label" data-i18n="admin.telc.passed">Passed</span>
+                                    </div>
+                                    <div class="telc-quick-stat danger">
+                                        <span class="stat-value" id="telcFailedCount">0</span>
+                                        <span class="stat-label" data-i18n="admin.telc.failed_short">Failed</span>
+                                    </div>
+                                    <div class="telc-quick-stat warning">
+                                        <span class="stat-value" id="telcPartialCount">0</span>
+                                        <span class="stat-label" data-i18n="admin.telc.partial_short">Partial</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TELC Main Navigation Cards -->
+                        <div class="telc-nav-cards">
+                            <div class="telc-nav-card" data-telc-nav="planning">
+                                <div class="nav-card-icon blue">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="nav-card-content">
+                                    <h3 data-i18n="admin.telc.nav_planning">Monthly Planning</h3>
+                                    <p data-i18n="admin.telc.nav_planning_desc">Create exam months and manage capacities</p>
+                                </div>
+                                <i class="fas fa-chevron-right nav-card-arrow"></i>
+                            </div>
+                            <div class="telc-nav-card" data-telc-nav="candidates">
+                                <div class="nav-card-icon green">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <div class="nav-card-content">
+                                    <h3 data-i18n="admin.telc.nav_candidates">Candidates</h3>
+                                    <p data-i18n="admin.telc.nav_candidates_desc">Add, edit and manage candidates</p>
+                                </div>
+                                <i class="fas fa-chevron-right nav-card-arrow"></i>
+                            </div>
+                            <div class="telc-nav-card" data-telc-nav="results">
+                                <div class="nav-card-icon orange">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <div class="nav-card-content">
+                                    <h3 data-i18n="admin.telc.nav_results">Results & Certificates</h3>
+                                    <p data-i18n="admin.telc.nav_results_desc">Enter results and send emails</p>
+                                </div>
+                                <i class="fas fa-chevron-right nav-card-arrow"></i>
+                            </div>
+                            <div class="telc-nav-card" data-telc-nav="settings">
+                                <div class="nav-card-icon purple">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <div class="nav-card-content">
+                                    <h3 data-i18n="admin.telc.nav_settings">Settings</h3>
+                                    <p data-i18n="admin.telc.nav_settings_desc">Email templates and system settings</p>
+                                </div>
+                                <i class="fas fa-chevron-right nav-card-arrow"></i>
+                            </div>
+                        </div>
+
+                        <!-- TELC Content Sections (hidden by default, shown when nav card clicked) -->
+                        
+                        <!-- Monthly Planning Section -->
+                        <div class="telc-section" id="telcPlanningSection" style="display: none;">
+                            <div class="telc-section-header">
+                                <button class="telc-back-btn" onclick="showTelcHome()">
+                                    <i class="fas fa-arrow-left"></i> <span data-i18n="admin.telc.back">Back</span>
+                                </button>
+                                <h2><i class="fas fa-calendar-alt"></i> <span data-i18n="admin.telc.nav_planning">Monthly Planning</span></h2>
+                            </div>
+                            
+                            <div class="telc-action-bar">
+                                <div class="telc-year-selector">
+                                    <label data-i18n="admin.telc.year">Year:</label>
+                                    <select id="telcYearFilter" onchange="loadTelcMonths()">
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026" selected>2026</option>
+                                        <option value="2027">2027</option>
+                                        <option value="2028">2028</option>
+                                        <option value="2029">2029</option>
+                                        <option value="2030">2030</option>
+                                    </select>
+                                </div>
+                                <button class="telc-secondary-btn" onclick="refreshTelcMonths(this)" title="Refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="telc-primary-btn" onclick="openCreateMonthModal()">
+                                    <i class="fas fa-plus-circle"></i> <span data-i18n="admin.telc.create_new_month">Create New Month</span>
+                                </button>
+                            </div>
+                            
+                            <div class="telc-months-grid" id="telcMonthsGrid">
+                                <div class="telc-loading" id="telcMonthsLoading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span data-i18n="admin.telc.loading_months">Loading months...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Candidates Section -->
+                        <div class="telc-section" id="telcCandidatesSection" style="display: none;">
+                            <div class="telc-section-header">
+                                <button class="telc-back-btn" onclick="showTelcHome()">
+                                    <i class="fas fa-arrow-left"></i> <span data-i18n="admin.telc.back">Back</span>
+                                </button>
+                                <h2><i class="fas fa-user-graduate"></i> <span data-i18n="admin.telc.manage_candidates">Candidate Management</span></h2>
+                            </div>
+                            
+                            <div class="telc-action-bar">
+                                <button class="telc-primary-btn" onclick="openAddCandidateModal()">
+                                    <i class="fas fa-user-plus"></i> <span data-i18n="admin.telc.add_new_candidate">Add New Candidate</span>
+                                </button>
+                                <button class="telc-secondary-btn" onclick="loadTelcCandidates()">
+                                    <i class="fas fa-sync-alt"></i> <span data-i18n="admin.telc.refresh">Refresh</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Filters -->
+                            <div class="telc-filters-bar">
+                                <div class="telc-filter">
+                                    <label><i class="fas fa-calendar"></i> <span data-i18n="admin.telc.month">Month</span></label>
+                                    <select id="telcCandidateMonthFilter" onchange="loadTelcCandidates()">
+                                        <option value="" data-i18n="admin.telc.all_months">All Months</option>
+                                    </select>
+                                </div>
+                                <div class="telc-filter">
+                                    <label><i class="fas fa-layer-group"></i> <span data-i18n="admin.telc.level">Level</span></label>
+                                    <select id="telcCandidateLevelFilter" onchange="loadTelcCandidates()">
+                                        <option value="" data-i18n="admin.telc.all_levels">All Levels</option>
+                                        <option value="A1">A1</option>
+                                        <option value="A2">A2</option>
+                                        <option value="B1">B1</option>
+                                        <option value="B2">B2</option>
+                                        <option value="C1">C1</option>
+                                        <option value="C2">C2</option>
+                                    </select>
+                                </div>
+                                <div class="telc-filter">
+                                    <label><i class="fas fa-check-circle"></i> <span data-i18n="admin.telc.result">Result</span></label>
+                                    <select id="telcCandidateResultFilter" onchange="loadTelcCandidates()">
+                                        <option value="" data-i18n="admin.telc.all_results">All Results</option>
+                                        <option value="null" data-i18n="admin.telc.pending">Pending</option>
+                                        <option value="passed" data-i18n="admin.telc.passed">Passed</option>
+                                        <option value="failed" data-i18n="admin.telc.failed">Failed</option>
+                                        <option value="partial" data-i18n="admin.telc.partial">Partial</option>
+                                    </select>
+                                </div>
+                                <div class="telc-filter search">
+                                    <label><i class="fas fa-search"></i> <span data-i18n="admin.telc.search">Search</span></label>
+                                    <input type="text" id="telcCandidateSearch" data-i18n-placeholder="admin.telc.search_placeholder" placeholder="Name, email, phone..." onkeyup="debounceSearch(loadTelcCandidates, 300)">
+                                </div>
+                            </div>
+                            
+                            <!-- Candidates Table -->
+                            <div class="telc-table-wrapper">
+                                <table class="telc-data-table" id="telcCandidatesTable">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="admin.telc.name">Name</th>
+                                            <th data-i18n="admin.telc.email">Email</th>
+                                            <th data-i18n="admin.telc.phone">Phone</th>
+                                            <th data-i18n="admin.telc.level">Level</th>
+                                            <th data-i18n="admin.telc.month">Month</th>
+                                            <th data-i18n="admin.telc.result">Result</th>
+                                            <th data-i18n="admin.telc.certificate">Certificate</th>
+                                            <th data-i18n="admin.telc.email">Email</th>
+                                            <th data-i18n="admin.telc.actions">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="telcCandidatesTableBody">
+                                        <tr><td colspan="9" class="telc-loading"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="admin.telc.loading_candidates">Loading candidates...</span></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Results Section -->
+                        <div class="telc-section" id="telcResultsSection" style="display: none;">
+                            <div class="telc-section-header">
+                                <button class="telc-back-btn" onclick="showTelcHome()">
+                                    <i class="fas fa-arrow-left"></i> <span data-i18n="admin.telc.back">Back</span>
+                                </button>
+                                <h2><i class="fas fa-award"></i> <span data-i18n="admin.telc.nav_results">Results & Certificates</span></h2>
+                            </div>
+                            
+                            <div class="telc-action-bar">
+                                <div class="telc-month-selector">
+                                    <label data-i18n="admin.telc.exam_month">Exam Month:</label>
+                                    <select id="telcResultsMonthSelect" onchange="loadResultsForMonth()">
+                                        <option value="" data-i18n="admin.telc.select_month_placeholder">-- Select month --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="telc-results-grid" id="telcResultsCategories" style="display: none;">
+                                <!-- Passed Category -->
+                                <div class="telc-result-card passed">
+                                    <div class="result-card-header">
+                                        <div class="result-icon"><i class="fas fa-check-circle"></i></div>
+                                        <div class="result-info">
+                                            <h3 data-i18n="admin.telc.passed">Passed</h3>
+                                            <span class="result-count"><span id="telcPassedCategoryCount">0</span> <span data-i18n="admin.telc.candidates">Candidates</span></span>
+                                        </div>
+                                    </div>
+                                    <div class="result-card-body">
+                                        <p data-i18n="admin.telc.passed_both">Written & Oral passed</p>
+                                        <div class="result-stats">
+                                            <span><i class="fas fa-file-pdf"></i> <span id="telcPassedWithCert">0</span> <span data-i18n="admin.telc.with_certificate">with certificate</span></span>
+                                            <span><i class="fas fa-envelope"></i> <span id="telcPassedReadyEmail">0</span> <span data-i18n="admin.telc.ready">ready</span></span>
+                                        </div>
+                                        <button class="telc-action-btn success" onclick="sendBulkEmails('passed')">
+                                            <i class="fas fa-paper-plane"></i> <span data-i18n="admin.telc.send_emails">Send Emails</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Failed Category -->
+                                <div class="telc-result-card failed">
+                                    <div class="result-card-header">
+                                        <div class="result-icon"><i class="fas fa-times-circle"></i></div>
+                                        <div class="result-info">
+                                            <h3 data-i18n="admin.telc.failed">Failed</h3>
+                                            <span class="result-count"><span id="telcFailedCategoryCount">0</span> <span data-i18n="admin.telc.candidates">Candidates</span></span>
+                                        </div>
+                                    </div>
+                                    <div class="result-card-body">
+                                        <p data-i18n="admin.telc.failed_both">Both exams failed</p>
+                                        <div class="result-stats">
+                                            <span><i class="fas fa-envelope"></i> <span id="telcFailedReadyEmail">0</span> <span data-i18n="admin.telc.ready">ready</span></span>
+                                        </div>
+                                        <button class="telc-action-btn danger" onclick="sendBulkEmails('failed')">
+                                            <i class="fas fa-paper-plane"></i> <span data-i18n="admin.telc.send_emails">Send Emails</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Partial Category -->
+                                <div class="telc-result-card partial">
+                                    <div class="result-card-header">
+                                        <div class="result-icon"><i class="fas fa-adjust"></i></div>
+                                        <div class="result-info">
+                                            <h3 data-i18n="admin.telc.partial">Partial Pass</h3>
+                                            <span class="result-count"><span id="telcPartialCategoryCount">0</span> <span data-i18n="admin.telc.candidates">Candidates</span></span>
+                                        </div>
+                                    </div>
+                                    <div class="result-card-body">
+                                        <p data-i18n="admin.telc.partial_one">One exam passed</p>
+                                        <div class="result-stats">
+                                            <span><i class="fas fa-file-pdf"></i> <span id="telcPartialWithCert">0</span> <span data-i18n="admin.telc.with_certificate">with certificate</span></span>
+                                            <span><i class="fas fa-envelope"></i> <span id="telcPartialReadyEmail">0</span> <span data-i18n="admin.telc.ready">ready</span></span>
+                                        </div>
+                                        <button class="telc-action-btn warning" onclick="sendBulkEmails('partial')">
+                                            <i class="fas fa-paper-plane"></i> <span data-i18n="admin.telc.send_emails">Send Emails</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Section -->
+                        <div class="telc-section" id="telcSettingsSection" style="display: none;">
+                            <div class="telc-section-header">
+                                <button class="telc-back-btn" onclick="showTelcHome()">
+                                    <i class="fas fa-arrow-left"></i> <span data-i18n="admin.telc.back">Back</span>
+                                </button>
+                                <h2><i class="fas fa-cog"></i> <span data-i18n="admin.telc.nav_settings">Settings</span></h2>
+                            </div>
+                            
+                            <!-- Registration Settings -->
+                            <div class="telc-settings-card">
+                                <h3><i class="fas fa-user-check"></i> <span data-i18n="admin.telc.registration">Registration</span></h3>
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <span class="setting-label" data-i18n="admin.telc.online_registration">Online Registration Active</span>
+                                        <span class="setting-desc" data-i18n="admin.telc.online_registration_desc">Candidates can register online</span>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="telcRegistrationToggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <span class="setting-label" data-i18n="admin.telc.auto_overflow">Auto-Overflow</span>
+                                        <span class="setting-desc" data-i18n="admin.telc.auto_overflow_desc">Automatically move to next month when full</span>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="telcAutoOverflow" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <span class="setting-label" data-i18n="admin.telc.admin_email">Admin Email for Notifications</span>
+                                    </div>
+                                    <input type="email" id="telcSuperAdminEmail" placeholder="admin@example.com" class="setting-input">
+                                </div>
+                                <button class="telc-primary-btn" onclick="saveTelcSettings()" style="margin-top: 15px;">
+                                    <i class="fas fa-save"></i> <span data-i18n="admin.telc.save_settings">Save Settings</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Email Templates -->
+                            <div class="telc-settings-card">
+                                <h3><i class="fas fa-envelope-open-text"></i> <span data-i18n="admin.telc.email_templates">Email Templates</span></h3>
+                                <div class="template-tabs">
+                                    <button class="template-tab active" data-template="passed">
+                                        <i class="fas fa-check-circle"></i> <span data-i18n="admin.telc.passed">Passed</span>
+                                    </button>
+                                    <button class="template-tab" data-template="failed">
+                                        <i class="fas fa-times-circle"></i> <span data-i18n="admin.telc.failed">Failed</span>
+                                    </button>
+                                    <button class="template-tab" data-template="partial">
+                                        <i class="fas fa-adjust"></i> <span data-i18n="admin.telc.partial">Partial</span>
+                                    </button>
+                                </div>
+                                <div class="template-editor">
+                                    <div class="form-group">
+                                        <label data-i18n="admin.telc.email_subject">Subject</label>
+                                        <input type="text" id="telcTemplateSubject" data-i18n-placeholder="admin.telc.email_subject_placeholder" placeholder="Email subject...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label data-i18n="admin.telc.email_body">Content (HTML)</label>
+                                        <textarea id="telcTemplateBody" rows="10" data-i18n-placeholder="admin.telc.email_body_placeholder" placeholder="Email content..."></textarea>
+                                    </div>
+                                    <div class="template-placeholders">
+                                        <span class="placeholder-title" data-i18n="admin.telc.placeholders">Placeholders:</span>
+                                        <code>{{candidateName}}</code> <code>{{examLevel}}</code> <code>{{examMonth}}</code>
+                                        <code>{{schriftlichResult}}</code> <code>{{muendlichResult}}</code>
+                                    </div>
+                                    <div class="template-actions">
+                                        <button class="telc-primary-btn" onclick="saveTelcTemplate()">
+                                            <i class="fas fa-save"></i> <span data-i18n="admin.telc.save">Save</span>
+                                        </button>
+                                        <button class="telc-secondary-btn" onclick="resetTelcTemplate()">
+                                            <i class="fas fa-undo"></i> <span data-i18n="admin.telc.reset">Reset</span>
+                                        </button>
+                                        <button class="telc-secondary-btn" onclick="previewTelcTemplate()">
+                                            <i class="fas fa-eye"></i> <span data-i18n="admin.telc.preview">Preview</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2237,6 +2565,326 @@
         </div>
     </div>
 
+    <!-- TELC Add/Edit Candidate Modal -->
+    <div class="modal-overlay" id="telcCandidateModal">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> <span id="telcCandidateModalTitle" data-i18n="admin.telc.add_candidate">Add Candidate</span></h2>
+                <button class="modal-close" onclick="closeTelcCandidateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="telcCandidateForm" onsubmit="saveTelcCandidate(event)">
+                    <input type="hidden" id="telcCandidateId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> <span data-i18n="admin.telc.full_name">Full Name</span> *</label>
+                            <input type="text" id="telcCandidateName" required placeholder="Enter full name...">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-id-card"></i> <span data-i18n="admin.telc.cin">CIN</span></label>
+                            <input type="text" id="telcCandidateCin" placeholder="e.g., AB123456">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> <span data-i18n="admin.telc.email">Email</span> *</label>
+                            <input type="email" id="telcCandidateEmail" required placeholder="email@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> <span data-i18n="admin.telc.phone">Phone</span> *</label>
+                            <input type="tel" id="telcCandidatePhone" required placeholder="06XXXXXXXX">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-graduation-cap"></i> <span data-i18n="admin.telc.exam_level">Exam Level</span> *</label>
+                            <select id="telcCandidateLevel" required>
+                                <option value="A1">A1</option>
+                                <option value="A2">A2</option>
+                                <option value="B1" selected>B1</option>
+                                <option value="B2">B2</option>
+                                <option value="C1">C1</option>
+                                <option value="C2">C2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> <span data-i18n="admin.telc.exam_month">Exam Month</span> *</label>
+                            <select id="telcCandidateMonth" required>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> <span data-i18n="admin.telc.city">City</span></label>
+                            <input type="text" id="telcCandidateCity" placeholder="City...">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-credit-card"></i> <span data-i18n="admin.telc.payment_status">Payment Status</span></label>
+                            <select id="telcCandidatePayment">
+                                <option value="pending" data-i18n="admin.telc.pending">Pending</option>
+                                <option value="paid" data-i18n="admin.telc.paid">Paid</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> <span data-i18n="admin.telc.notes">Notes</span></label>
+                        <textarea id="telcCandidateNotes" rows="2" placeholder="Additional notes..."></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="action-btn btn-success">
+                            <i class="fas fa-save"></i> <span data-i18n="admin.telc.save">Save</span>
+                        </button>
+                        <button type="button" class="action-btn btn-secondary" onclick="closeTelcCandidateModal()">
+                            <i class="fas fa-times"></i> <span data-i18n="admin.telc.cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELC Create Month Modal -->
+    <div class="modal-overlay" id="telcMonthModal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-plus"></i> <span id="telcMonthModalTitle" data-i18n="admin.telc.create_month">Create Exam Month</span></h2>
+                <button class="modal-close" onclick="closeTelcMonthModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="telcMonthForm" onsubmit="saveTelcMonth(event)">
+                    <input type="hidden" id="telcMonthId" value="">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> <span data-i18n="admin.telc.month">Month</span> *</label>
+                            <select id="telcMonthSelect" required>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt"></i> <span data-i18n="admin.telc.year">Year</span> *</label>
+                            <select id="telcYearSelect" required>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026" selected>2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                                <option value="2030">2030</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> <span data-i18n="admin.telc.exam_date">Exam Date (optional)</span></label>
+                        <input type="date" id="telcExamDate">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-users"></i> <span data-i18n="admin.telc.max_capacity">Max Capacity</span></label>
+                            <input type="number" id="telcMaxCapacity" value="150" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-shield-alt"></i> <span data-i18n="admin.telc.emergency_reserve">Emergency Reserve</span></label>
+                            <input type="number" id="telcEmergencyReserve" value="50" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> <span data-i18n="admin.telc.notes">Notes</span></label>
+                        <textarea id="telcMonthNotes" rows="2" placeholder="Notes about this exam month..."></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="action-btn btn-success">
+                            <i class="fas fa-save"></i> <span data-i18n="admin.telc.create">Create</span>
+                        </button>
+                        <button type="button" class="action-btn btn-secondary" onclick="closeTelcMonthModal()">
+                            <i class="fas fa-times"></i> <span data-i18n="admin.telc.cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELC Set Result Modal -->
+    <div class="modal-overlay" id="telcResultModal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-check"></i> <span data-i18n="admin.telc.set_result">Set Result</span></h2>
+                <button class="modal-close" onclick="closeTelcResultModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="result-candidate-info" id="resultCandidateInfo">
+                    <h4 id="resultCandidateName">-</h4>
+                    <p><span id="resultCandidateLevel">-</span> | <span id="resultCandidateMonth">-</span></p>
+                </div>
+                
+                <form id="telcResultForm" onsubmit="saveTelcResult(event)">
+                    <input type="hidden" id="resultCandidateId">
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-award"></i> <span data-i18n="admin.telc.result_category">Result Category</span> *</label>
+                        <select id="resultCategory" required onchange="togglePartialFields()">
+                            <option value="passed" data-i18n="admin.telc.passed">Passed</option>
+                            <option value="failed" data-i18n="admin.telc.failed">Failed</option>
+                            <option value="partial" data-i18n="admin.telc.partial">Partial Pass</option>
+                        </select>
+                    </div>
+                    
+                    <div id="partialResultFields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-pen"></i> <span data-i18n="admin.telc.schriftlich">Schriftlich (Written)</span></label>
+                                <select id="resultSchriftlich">
+                                    <option value="passed" data-i18n="admin.telc.passed">Passed</option>
+                                    <option value="failed" data-i18n="admin.telc.failed">Failed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-comments"></i> <span data-i18n="admin.telc.muendlich">Mündlich (Oral)</span></label>
+                                <select id="resultMuendlich">
+                                    <option value="passed" data-i18n="admin.telc.passed">Passed</option>
+                                    <option value="failed" data-i18n="admin.telc.failed">Failed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> <span data-i18n="admin.telc.result_notes">Result Notes</span></label>
+                        <textarea id="resultNotes" rows="2" placeholder="Notes about the result..."></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="action-btn btn-success">
+                            <i class="fas fa-save"></i> <span data-i18n="admin.telc.save_result">Save Result</span>
+                        </button>
+                        <button type="button" class="action-btn btn-secondary" onclick="closeTelcResultModal()">
+                            <i class="fas fa-times"></i> <span data-i18n="admin.telc.cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELC Upload Certificate Modal -->
+    <div class="modal-overlay" id="telcCertificateModal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-pdf"></i> <span data-i18n="admin.telc.upload_certificate">Upload Certificate</span></h2>
+                <button class="modal-close" onclick="closeTelcCertificateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="cert-candidate-info" id="certCandidateInfo">
+                    <h4 id="certCandidateName">-</h4>
+                    <p><span id="certCandidateLevel">-</span> | <span id="certCandidateResult">-</span></p>
+                </div>
+                
+                <form id="telcCertificateForm" onsubmit="uploadTelcCertificate(event)">
+                    <input type="hidden" id="certCandidateId">
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-file-upload"></i> <span data-i18n="admin.telc.certificate_file">Certificate PDF</span> *</label>
+                        <div class="cert-upload-area" id="certUploadArea">
+                            <input type="file" id="certFile" accept=".pdf" style="display: none;" onchange="handleCertFileSelect(this)">
+                            <div class="cert-upload-content" onclick="document.getElementById('certFile').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p data-i18n="admin.telc.click_to_upload">Click to upload PDF</p>
+                                <small data-i18n="admin.telc.max_size">Max 5MB</small>
+                            </div>
+                            <div class="cert-file-preview" id="certFilePreview" style="display: none;">
+                                <i class="fas fa-file-pdf"></i>
+                                <span id="certFileName">certificate.pdf</span>
+                                <button type="button" onclick="removeCertFile()"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="action-btn btn-success">
+                            <i class="fas fa-upload"></i> <span data-i18n="admin.telc.upload">Upload</span>
+                        </button>
+                        <button type="button" class="action-btn btn-secondary" onclick="closeTelcCertificateModal()">
+                            <i class="fas fa-times"></i> <span data-i18n="admin.telc.cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELC Move Candidate Modal -->
+    <div class="modal-overlay" id="telcMoveModal">
+        <div class="modal-container" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-exchange-alt"></i> <span data-i18n="admin.telc.move_candidate">Move Candidate</span></h2>
+                <button class="modal-close" onclick="closeTelcMoveModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="move-candidate-info">
+                    <h4 id="moveCandidateName">-</h4>
+                    <p><span data-i18n="admin.telc.current_month">Current Month:</span> <strong id="moveCurrentMonth">-</strong></p>
+                </div>
+                
+                <form id="telcMoveForm" onsubmit="moveTelcCandidate(event)">
+                    <input type="hidden" id="moveCandidateId">
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> <span data-i18n="admin.telc.target_month">Move to Month</span> *</label>
+                        <select id="moveTargetMonth" required>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> <span data-i18n="admin.telc.move_reason">Reason (optional)</span></label>
+                        <input type="text" id="moveReason" placeholder="Reason for moving...">
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="action-btn btn-warning">
+                            <i class="fas fa-exchange-alt"></i> <span data-i18n="admin.telc.move">Move</span>
+                        </button>
+                        <button type="button" class="action-btn btn-secondary" onclick="closeTelcMoveModal()">
+                            <i class="fas fa-times"></i> <span data-i18n="admin.telc.cancel">Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="js/system-stats.js"></script>
     <script src="js/admin-dashboard.js"></script>
@@ -2246,5 +2894,6 @@
     <script src="js/job-applications.js"></script>
     <script src="js/translation-admin.js"></script>
     <script src="js/cv-admin.js"></script>
+    <script src="js/telc.js"></script>
 </body>
 </html>

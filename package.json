@@ -36,6 +36,7 @@
     "mongoose": "^8.19.0",
     "multer": "^2.0.2",
     "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.8",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.17.2",
     "qrcode": "^1.5.3",

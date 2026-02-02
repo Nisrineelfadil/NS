@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -7,6 +7,7 @@ import logo from '../Logo/logo.png';
 import { useInstallPWA } from '../hooks/useInstallPWA';
 import { API_URL } from '../config';
 import { animations } from '../gradients';
+import { saveAuthData, isLoggedIn } from '../services/authService';
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -18,8 +19,20 @@ const LoginScreen = () => {
   // PWA install hook
   const { handleInstall, platform, isInstalled, canInstall } = useInstallPWA();
   
+  // Check if already logged in
+  useEffect(() => {
+    async function checkLogin() {
+      const loggedIn = await isLoggedIn();
+      if (loggedIn) {
+        console.log('✅ Already logged in, redirecting to dashboard...');
+        navigate('/dashboard', { replace: true });
+      }
+    }
+    checkLogin();
+  }, [navigate]);
+  
   // Check API connectivity on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAPI = async () => {
       try {
         console.log('🔍 Checking API connectivity...');
@@ -75,15 +88,13 @@ const LoginScreen = () => {
       });
 
       if (response.data.token && response.data.student) {
-        // Store login data (don't clear everything - causes issues)
-        localStorage.setItem('studentToken', response.data.token);
-        localStorage.setItem('studentData', JSON.stringify(response.data.student));
-        localStorage.setItem('loginTimestamp', Date.now().toString());
+        // Store login data persistently (survives cache clear)
+        await saveAuthData(response.data.token, response.data.student);
         
         console.log('✅ Login successful, navigating to dashboard...');
         
         // Use React Router navigate instead of window.location
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       } else {
         alert(response.data.message || 'Invalid credentials');
       }
