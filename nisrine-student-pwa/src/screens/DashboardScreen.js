@@ -8,6 +8,7 @@ import { API_URL } from '../config';
 import './DashboardScreen.css';
 import { getStudentData, clearAuthData } from '../services/authService';
 import notificationService from '../services/notificationPollingService';
+import { registerBackgroundSync, unregisterBackgroundSync } from '../utils/backgroundSync';
 
 const DashboardScreen = () => {
   const navigate = useNavigate();
@@ -19,6 +20,9 @@ const DashboardScreen = () => {
     
     // Start notification polling when dashboard loads
     notificationService.start();
+    
+    // Register background sync for PWA
+    registerBackgroundSync();
     
     // Cleanup: stop polling when component unmounts
     return () => {
@@ -44,6 +48,9 @@ const DashboardScreen = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       // Stop notification polling
       notificationService.stop();
+      
+      // Unregister background sync
+      await unregisterBackgroundSync();
       
       // Clear auth data from IndexedDB and localStorage
       await clearAuthData();

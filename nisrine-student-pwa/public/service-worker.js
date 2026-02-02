@@ -97,3 +97,143 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// Background sync for notifications
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-notifications') {
+    event.waitUntil(checkForNotifications());
+  }
+});
+
+// Periodic background sync (if supported)
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'check-notifications') {
+    event.waitUntil(checkForNotifications());
+  }
+});
+
+async function checkForNotifications() {
+  try {
+    // Get auth data from IndexedDB
+    const db = await openAuthDB();
+    const authData = await getAuthFromDB(db);
+    
+    if (!authData || !authData.token) {
+      return;
+    }
+
+    const API_URL = self.location.origin.includes('localhost') 
+      ? 'http://localhost:3000' 
+      : 'https://nisrine-school.vercel.app';
+
+    // Check for new messages
+    const messagesRes = await fetch(`${API_URL}/api/grades/student/messages`, {
+      headers: { 'Authorization': `Bearer ${authData.token}` }
+    });
+    
+    if (messagesRes.ok) {
+      const messages = await messagesRes.json();
+      const unreadMessages = messages.filter(m => !m.isRead);
+      
+      if (unreadMessages.length > 0) {
+        const lastChecked = await getLastChecked('messages');
+        const newMessages = unreadMessages.filter(m => 
+          new Date(m.createdAt) > new Date(lastChecked)
+        );
+        
+        if (newMessages.length > 0) {
+          await self.registration.showNotification('💬 New Message', {
+            body: newMessages[0].message.substring(0, 100),
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            tag: 'new-message',
+            requireInteraction: true,
+            data: { url: '/pwa/messages' }
+          });
+          await setLastChecked('messages', new Date().toISOString());
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Background notification check failed:', error);
+  }
+}
+
+function openAuthDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('nisrine-auth-db', 1);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getAuthFromDB(db) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['auth-store'], 'readonly');
+    const store = transaction.objectStore('auth-store');
+    const request = store.get('auth-data');
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getLastChecked(type) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('nisrine-notifications-db', 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('last-checked')) {
+        db.createObjectStore('last-checked');
+      }
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['last-checked'], 'readonly');
+      const store = transaction.objectStore('last-checked');
+      const getRequest = store.get(type);
+      getRequest.onsuccess = () => resolve(getRequest.result || new Date(0).toISOString());
+      getRequest.onerror = () => reject(getRequest.error);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function setLastChecked(type, timestamp) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('nisrine-notifications-db', 1);
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['last-checked'], 'readwrite');
+      const store = transaction.objectStore('last-checked');
+      const putRequest = store.put(timestamp, type);
+      putRequest.onsuccess = () => resolve();
+      putRequest.onerror = () => reject(putRequest.error);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/pwa/';
+  
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if there's already a window open
+        for (const client of clientList) {
+          if (client.url.includes('/pwa/') && 'focus' in client) {
+            client.focus();
+            client.navigate(urlToOpen);
+            return;
+          }
+        }
+        // No window open, open a new one
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});

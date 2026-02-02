@@ -12,5 +12,5 @@ root.render(
   </React.StrictMode>
 );
 
-// Temporarily unregister service worker to clear cache
-serviceWorkerRegistration.unregister();
+// Register service worker for PWA features
+serviceWorkerRegistration.register();
