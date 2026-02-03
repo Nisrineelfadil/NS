@@ -36,17 +36,46 @@ class NotificationPollingService {
     return false;
   }
 
-  // Show browser notification
-  showNotification(title, options = {}) {
+  // Detect if running on iOS
+  isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  // Check if running as installed PWA
+  isInstalledPWA() {
+    return window.matchMedia('(display-mode: standalone)').matches || 
+      window.navigator.standalone === true;
+  }
+
+  // Show browser notification (iOS-compatible)
+  async showNotification(title, options = {}) {
     if (this.notificationPermission !== 'granted') {
       console.log('⚠️ Notification permission not granted');
       return;
     }
 
     try {
+      // For iOS PWA, use service worker's showNotification
+      if (this.isIOS() && this.isInstalledPWA() && 'serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification(title, {
+          body: options.body || '',
+          icon: '/pwa/icon-192.png',
+          badge: '/pwa/icon-192.png',
+          tag: options.tag || 'nisrine-notification',
+          renotify: true,
+          requireInteraction: false,
+          data: options.data || {},
+        });
+        console.log('✅ iOS notification shown via service worker:', title);
+        return;
+      }
+
+      // For other browsers, use standard Notification API
       const notification = new Notification(title, {
-        icon: '/pwa/logo192.png',
-        badge: '/pwa/logo192.png',
+        icon: '/pwa/icon-192.png',
+        badge: '/pwa/icon-192.png',
         vibrate: [200, 100, 200],
         requireInteraction: false,
         ...options,
@@ -66,7 +95,35 @@ class NotificationPollingService {
       console.log('✅ Notification shown:', title);
     } catch (error) {
       console.error('❌ Error showing notification:', error);
+      // Fallback: show in-app notification
+      this.showInAppNotification(title, options.body);
     }
+  }
+
+  // Fallback in-app notification for iOS
+  showInAppNotification(title, body) {
+    const banner = document.createElement('div');
+    banner.id = 'in-app-notification';
+    banner.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        z-index: 10000;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease;
+      ">
+        <strong style="display: block; margin-bottom: 4px;">${title}</strong>
+        <span style="opacity: 0.9;">${body || ''}</span>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 5000);
   }
 
   // Check for new messages
