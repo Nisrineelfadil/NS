@@ -36,6 +36,12 @@ class NotificationPollingService {
     return false;
   }
 
+  // Detect if running on mobile device (iOS or Android)
+  isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
   // Detect if running on iOS
   isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -48,31 +54,41 @@ class NotificationPollingService {
       window.navigator.standalone === true;
   }
 
-  // Show browser notification (iOS-compatible)
+  // Show browser notification (mobile-compatible using service worker)
   async showNotification(title, options = {}) {
     if (this.notificationPermission !== 'granted') {
       console.log('⚠️ Notification permission not granted');
+      // Show in-app notification as fallback
+      this.showInAppNotification(title, options.body);
       return;
     }
 
     try {
-      // For iOS PWA, use service worker's showNotification
-      if (this.isIOS() && this.isInstalledPWA() && 'serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.ready;
-        await registration.showNotification(title, {
-          body: options.body || '',
-          icon: '/pwa/icon-192.png',
-          badge: '/pwa/icon-192.png',
-          tag: options.tag || 'nisrine-notification',
-          renotify: true,
-          requireInteraction: false,
-          data: options.data || {},
-        });
-        console.log('✅ iOS notification shown via service worker:', title);
-        return;
+      // For ALL mobile devices (Android + iOS), use service worker's showNotification
+      // This is more reliable on mobile browsers
+      if (this.isMobile() && 'serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          await registration.showNotification(title, {
+            body: options.body || '',
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            tag: options.tag || 'nisrine-notification',
+            renotify: true,
+            requireInteraction: false,
+            vibrate: [200, 100, 200],
+            data: options.data || {},
+          });
+          console.log('✅ Mobile notification shown via service worker:', title);
+          // Also show in-app notification for immediate feedback
+          this.showInAppNotification(title, options.body);
+          return;
+        } catch (swError) {
+          console.warn('⚠️ Service worker notification failed, trying fallback:', swError);
+        }
       }
 
-      // For other browsers, use standard Notification API
+      // For desktop browsers, use standard Notification API
       const notification = new Notification(title, {
         icon: '/pwa/icon-192.png',
         badge: '/pwa/icon-192.png',
@@ -92,7 +108,7 @@ class NotificationPollingService {
       // Auto-close after 10 seconds
       setTimeout(() => notification.close(), 10000);
 
-      console.log('✅ Notification shown:', title);
+      console.log('✅ Desktop notification shown:', title);
     } catch (error) {
       console.error('❌ Error showing notification:', error);
       // Fallback: show in-app notification
