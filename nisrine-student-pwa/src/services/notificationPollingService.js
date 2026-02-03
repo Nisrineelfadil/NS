@@ -56,63 +56,72 @@ class NotificationPollingService {
 
   // Show browser notification (mobile-compatible using service worker)
   async showNotification(title, options = {}) {
+    console.log('🔔 Attempting to show notification:', title);
+    console.log('📋 Current permission:', this.notificationPermission);
+    
+    // Re-check permission status
+    if ('Notification' in window) {
+      this.notificationPermission = Notification.permission;
+    }
+    
     if (this.notificationPermission !== 'granted') {
-      console.log('⚠️ Notification permission not granted');
-      // Show in-app notification as fallback
+      console.log('⚠️ Notification permission not granted, showing in-app only');
       this.showInAppNotification(title, options.body);
       return;
     }
 
+    // Always show in-app notification first for immediate feedback
+    this.showInAppNotification(title, options.body);
+
     try {
-      // For ALL mobile devices (Android + iOS), use service worker's showNotification
-      // This is more reliable on mobile browsers
-      if (this.isMobile() && 'serviceWorker' in navigator) {
+      // Try service worker notification (works on both mobile and desktop)
+      if ('serviceWorker' in navigator) {
         try {
           const registration = await navigator.serviceWorker.ready;
+          console.log('📱 Service worker ready, showing notification...');
+          
           await registration.showNotification(title, {
             body: options.body || '',
             icon: '/pwa/icon-192.png',
             badge: '/pwa/icon-192.png',
-            tag: options.tag || 'nisrine-notification',
+            tag: options.tag || 'nisrine-notification-' + Date.now(),
             renotify: true,
             requireInteraction: false,
+            silent: false,
             vibrate: [200, 100, 200],
-            data: options.data || {},
+            data: options.data || { url: '/pwa/messages' },
           });
-          console.log('✅ Mobile notification shown via service worker:', title);
-          // Also show in-app notification for immediate feedback
-          this.showInAppNotification(title, options.body);
+          
+          console.log('✅ Service worker notification shown:', title);
           return;
         } catch (swError) {
-          console.warn('⚠️ Service worker notification failed, trying fallback:', swError);
+          console.warn('⚠️ Service worker notification failed:', swError);
         }
       }
 
-      // For desktop browsers, use standard Notification API
-      const notification = new Notification(title, {
-        icon: '/pwa/icon-192.png',
-        badge: '/pwa/icon-192.png',
-        vibrate: [200, 100, 200],
-        requireInteraction: false,
-        ...options,
-      });
+      // Fallback: Direct Notification API (desktop)
+      if (!this.isMobile()) {
+        const notification = new Notification(title, {
+          icon: '/pwa/icon-192.png',
+          badge: '/pwa/icon-192.png',
+          vibrate: [200, 100, 200],
+          requireInteraction: false,
+          body: options.body || '',
+        });
 
-      notification.onclick = () => {
-        window.focus();
-        if (options.onClick) {
-          options.onClick();
-        }
-        notification.close();
-      };
+        notification.onclick = () => {
+          window.focus();
+          if (options.onClick) {
+            options.onClick();
+          }
+          notification.close();
+        };
 
-      // Auto-close after 10 seconds
-      setTimeout(() => notification.close(), 10000);
-
-      console.log('✅ Desktop notification shown:', title);
+        setTimeout(() => notification.close(), 10000);
+        console.log('✅ Desktop notification shown:', title);
+      }
     } catch (error) {
       console.error('❌ Error showing notification:', error);
-      // Fallback: show in-app notification
-      this.showInAppNotification(title, options.body);
     }
   }
 
@@ -146,7 +155,12 @@ class NotificationPollingService {
   async checkMessages() {
     try {
       const token = await getToken();
-      if (!token) return;
+      if (!token) {
+        console.log('⚠️ No token available for message check');
+        return;
+      }
+
+      console.log('📬 Checking for new messages...');
 
       const response = await axios.get(
         `${API_URL}/api/grades/student/messages`,
@@ -157,30 +171,41 @@ class NotificationPollingService {
       );
 
       if (response.data.success) {
-        const messages = response.data.messages;
+        const messages = response.data.messages || [];
         const unreadMessages = messages.filter(m => !m.isRead);
-
-        // Check if there are new unread messages since last check
-        const lastCount = localStorage.getItem('lastUnreadCount');
         const currentCount = unreadMessages.length;
 
-        if (lastCount !== null && currentCount > parseInt(lastCount)) {
-          const newCount = currentCount - parseInt(lastCount);
+        console.log(`📨 Found ${currentCount} unread messages`);
+
+        // Get last known message IDs to detect truly new messages
+        const lastMessageIds = JSON.parse(localStorage.getItem('lastMessageIds') || '[]');
+        const currentMessageIds = unreadMessages.map(m => m._id);
+        
+        // Find messages that are new (not in last known list)
+        const newMessageIds = currentMessageIds.filter(id => !lastMessageIds.includes(id));
+        
+        if (newMessageIds.length > 0) {
+          const newestMessage = unreadMessages.find(m => m._id === newMessageIds[0]);
+          
+          console.log(`🆕 Found ${newMessageIds.length} NEW messages!`);
           
           // Show notification for new messages
-          this.showNotification(
-            `💬 ${newCount} New Message${newCount > 1 ? 's' : ''}`,
+          await this.showNotification(
+            `💬 ${newMessageIds.length} New Message${newMessageIds.length > 1 ? 's' : ''}`,
             {
-              body: unreadMessages[0]?.message?.substring(0, 100) || 'You have new messages',
-              tag: 'new-messages',
+              body: newestMessage?.message?.substring(0, 100) || 'You have new messages',
+              tag: 'new-messages-' + Date.now(),
               onClick: () => {
                 window.location.href = '/pwa/messages';
               },
             }
           );
+        } else {
+          console.log('📭 No new messages since last check');
         }
 
-        localStorage.setItem('lastUnreadCount', currentCount.toString());
+        // Store current message IDs for next comparison
+        localStorage.setItem('lastMessageIds', JSON.stringify(currentMessageIds));
         this.lastChecked.messages = Date.now();
       }
     } catch (error) {
