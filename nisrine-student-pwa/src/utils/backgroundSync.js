@@ -1,47 +1,64 @@
 // Background Sync Utility for PWA Notifications
-// Registers periodic background sync when supported
+// Enables notifications when app is in background or closed
 
-export const registerBackgroundSync = async () => {
-  if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
-    try {
+// Register background sync for notifications
+export async function registerBackgroundSync() {
+  try {
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
       const registration = await navigator.serviceWorker.ready;
       
       // Register one-time sync
       await registration.sync.register('sync-notifications');
       console.log('✅ Background sync registered');
       
-      // Register periodic sync if supported (Chrome 80+, Edge 80+)
+      // Try to register periodic sync (Chrome only, every 15 minutes minimum)
       if ('periodicSync' in registration) {
         try {
           await registration.periodicSync.register('check-notifications', {
-            minInterval: 60 * 1000, // 60 seconds
+            minInterval: 15 * 60 * 1000, // 15 minutes (minimum allowed)
           });
-          console.log('✅ Periodic background sync registered (60 seconds)');
+          console.log('✅ Periodic sync registered (every 15 minutes)');
         } catch (error) {
-          console.log('⚠️ Periodic sync not available:', error.message);
+          console.warn('⚠️ Periodic sync not supported or permission denied:', error);
         }
       }
-    } catch (error) {
-      console.error('❌ Background sync registration failed:', error);
     }
-  } else {
-    console.log('⚠️ Background sync not supported');
+  } catch (error) {
+    console.error('❌ Error registering background sync:', error);
   }
-};
+}
 
-export const unregisterBackgroundSync = async () => {
-  if ('serviceWorker' in navigator && 'periodicSync' in ServiceWorkerRegistration.prototype) {
-    try {
+// Unregister background sync (logout)
+export async function unregisterBackgroundSync() {
+  try {
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
       const registration = await navigator.serviceWorker.ready;
-      const tags = await registration.periodicSync.getTags();
       
-      for (const tag of tags) {
-        await registration.periodicSync.unregister(tag);
+      // Unregister periodic sync
+      if ('periodicSync' in registration) {
+        const tags = await registration.periodicSync.getTags();
+        for (const tag of tags) {
+          if (tag === 'check-notifications') {
+            await registration.periodicSync.unregister(tag);
+            console.log('✅ Periodic sync unregistered');
+          }
+        }
       }
-      
-      console.log('✅ Background sync unregistered');
-    } catch (error) {
-      console.error('❌ Background sync unregister failed:', error);
     }
+  } catch (error) {
+    console.error('❌ Error unregistering background sync:', error);
   }
-};
+}
+
+// Trigger immediate background sync (for testing)
+export async function triggerBackgroundSync() {
+  try {
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.sync.register('sync-notifications');
+      console.log('✅ Manual background sync triggered');
+    }
+  } catch (error) {
+    console.error('❌ Error triggering background sync:', error);
+  }
+}

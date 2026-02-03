@@ -232,35 +232,27 @@ export async function extendSession() {
     const authData = await getAuthData();
     
     if (authData) {
-      authData.expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000); // Extend by 30 days
+      const newExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+      authData.expiresAt = newExpiry;
       
+      // Update all storage
       const db = await initDB();
       await db.put(STORE_NAME, authData, 'auth');
+      localStorage.setItem('authExpiry', newExpiry.toString());
       
-      localStorage.setItem('authExpiry', authData.expiresAt.toString());
+      const cookieData = JSON.stringify({
+        token: authData.token,
+        studentId: authData.studentData?._id || authData.studentData?.id,
+        studentName: authData.studentData?.fullName,
+        expiresAt: newExpiry
+      });
+      setCookie(COOKIE_NAME, cookieData, COOKIE_DAYS);
       
+      console.log('✅ Session extended');
       return true;
     }
-    
-    return false;
   } catch (error) {
     console.error('❌ Error extending session:', error);
-    return false;
   }
-}
-
-// Auto-login on app start
-export async function autoLogin() {
-  const authData = await getAuthData();
-  
-  if (authData && authData.expiresAt > Date.now()) {
-    console.log('✅ Auto-login successful');
-    return {
-      token: authData.token,
-      student: authData.studentData,
-    };
-  }
-  
-  console.log('⚠️ No valid session found');
-  return null;
+  return false;
 }
