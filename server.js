@@ -30,7 +30,7 @@ const notificationsRoutes = require('./routes/notifications');
 const seasonBackupRoutes = require('./routes/seasonBackup');
 const jobApplicationsRoutes = require('./routes/jobApplications');
 const telcRoutes = require('./routes/telc');
-const fcmRoutes = require('./routes/fcm');
+// const fcmRoutes = require('./routes/fcm'); // DISABLED - Missing authenticateStudent middleware
 // const pushNotificationsRoutes = require('./routes/pushNotifications'); // DISABLED - Push notifications temporarily disabled
 
 // Import services
@@ -311,7 +311,7 @@ app.use('/api/ratings', dbMiddleware, ratingsRoutes);
 app.use('/api/notifications', dbMiddleware, notificationsRoutes);
 app.use('/api/job-applications', dbMiddleware, jobApplicationsRoutes);
 app.use('/api/telc', dbMiddleware, telcRoutes);
-app.use('/api/fcm', dbMiddleware, fcmRoutes);
+// app.use('/api/fcm', dbMiddleware, fcmRoutes); // DISABLED
 app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
   req.io = io; // Pass Socket.IO instance to routes
   next();
