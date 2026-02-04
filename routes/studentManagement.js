@@ -12,7 +12,6 @@ const fs = require('fs').promises;
 const bcrypt = require('bcryptjs');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
 const { notifyAdminMessage } = require('../services/notificationService');
-const Student = require('../models/Student');
 
 // Lazy load Firebase Admin to prevent server crash
 let firebaseAdmin = null;
@@ -37,8 +36,8 @@ async function sendFCMNotification(studentId, title, body) {
             return;
         }
 
-        // Find the student to get their FCM tokens
-        const student = await Student.findOne({ managedStudentId: studentId });
+        // Find the ManagedStudent to get their FCM tokens
+        const student = await ManagedStudent.findById(studentId);
         
         if (!student || !student.fcmTokens || student.fcmTokens.length === 0) {
             console.log('⚠️ No FCM tokens found for student');

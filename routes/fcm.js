@@ -3,14 +3,14 @@
 
 const express = require('express');
 const router = express.Router();
-const Student = require('../models/Student');
+const ManagedStudent = require('../models/ManagedStudent');
 const { authenticateStudent } = require('../middleware/authMiddleware');
 
 // Register FCM token for student
 router.post('/register-token', authenticateStudent, async (req, res) => {
   try {
     const { fcmToken } = req.body;
-    const managedStudentId = req.student._id; // This is ManagedStudent ID from token
+    const studentId = req.student._id;
 
     if (!fcmToken) {
       return res.status(400).json({
@@ -19,15 +19,13 @@ router.post('/register-token', authenticateStudent, async (req, res) => {
       });
     }
 
-    // Find or create Student record linked to ManagedStudent
-    let student = await Student.findOne({ managedStudentId: managedStudentId });
+    // Find the ManagedStudent directly
+    const student = await ManagedStudent.findById(studentId);
     
     if (!student) {
-      // Create new Student record for FCM tokens
-      student = new Student({
-        managedStudentId: managedStudentId,
-        fullName: req.student.fullName,
-        fcmTokens: []
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
       });
     }
 
@@ -40,7 +38,7 @@ router.post('/register-token', authenticateStudent, async (req, res) => {
     if (!student.fcmTokens.includes(fcmToken)) {
       student.fcmTokens.push(fcmToken);
       await student.save();
-      console.log(`✅ FCM token registered for student: ${student.fullName || req.student.fullName}`);
+      console.log(`✅ FCM token registered for: ${student.fullName}`);
     }
 
     res.json({
@@ -61,7 +59,7 @@ router.post('/register-token', authenticateStudent, async (req, res) => {
 router.post('/delete-token', authenticateStudent, async (req, res) => {
   try {
     const { fcmToken } = req.body;
-    const managedStudentId = req.student._id; // This is ManagedStudent ID from token
+    const studentId = req.student._id;
 
     if (!fcmToken) {
       return res.status(400).json({
@@ -70,21 +68,19 @@ router.post('/delete-token', authenticateStudent, async (req, res) => {
       });
     }
 
-    // Find Student record linked to ManagedStudent
-    const student = await Student.findOne({ managedStudentId: managedStudentId });
+    const student = await ManagedStudent.findById(studentId);
     
     if (!student) {
-      // No Student record exists, nothing to delete
       return res.json({
         success: true,
-        message: 'No FCM token to delete'
+        message: 'Student not found'
       });
     }
 
     if (student.fcmTokens) {
       student.fcmTokens = student.fcmTokens.filter(token => token !== fcmToken);
       await student.save();
-      console.log(`✅ FCM token deleted for student: ${student.fullName}`);
+      console.log(`✅ FCM token deleted for: ${student.fullName}`);
     }
 
     res.json({

@@ -203,6 +203,11 @@ const managedStudentSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    // FCM tokens for push notifications
+    fcmTokens: {
+        type: [String],
+        default: []
     }
 });
 
