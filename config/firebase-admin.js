@@ -1,18 +1,39 @@
 // Firebase Admin SDK Configuration
 // For sending push notifications from backend
 
-const admin = require('firebase-admin');
-const path = require('path');
-
+let admin = null;
 let firebaseApp = null;
+let firebaseInitialized = false;
+let firebaseError = null;
+
+// Lazy load firebase-admin to prevent server crash
+function getAdmin() {
+  if (!admin) {
+    try {
+      admin = require('firebase-admin');
+    } catch (error) {
+      console.warn('⚠️ firebase-admin not available:', error.message);
+      return null;
+    }
+  }
+  return admin;
+}
 
 function initializeFirebaseAdmin() {
-  if (firebaseApp) {
+  if (firebaseInitialized) {
     return firebaseApp;
   }
 
+  firebaseInitialized = true;
+
   try {
-    let serviceAccount;
+    const adminModule = getAdmin();
+    if (!adminModule) {
+      console.warn('⚠️ Firebase Admin module not available, push notifications disabled');
+      return null;
+    }
+
+    let serviceAccount = null;
 
     // Try to get service account from environment variable (Vercel)
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -20,25 +41,39 @@ function initializeFirebaseAdmin() {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         console.log('📦 Using Firebase service account from environment variable');
       } catch (parseError) {
-        console.error('❌ Error parsing FIREBASE_SERVICE_ACCOUNT env var:', parseError);
+        console.warn('⚠️ Error parsing FIREBASE_SERVICE_ACCOUNT env var:', parseError.message);
+        firebaseError = parseError;
         return null;
       }
     } else {
       // Fallback to local file (development)
-      const serviceAccountPath = path.join(__dirname, '..', 'firebase-service-account.json');
-      serviceAccount = require(serviceAccountPath);
-      console.log('📦 Using Firebase service account from local file');
+      try {
+        const path = require('path');
+        const serviceAccountPath = path.join(__dirname, '..', 'firebase-service-account.json');
+        serviceAccount = require(serviceAccountPath);
+        console.log('📦 Using Firebase service account from local file');
+      } catch (fileError) {
+        console.warn('⚠️ Firebase service account file not found, push notifications disabled');
+        firebaseError = fileError;
+        return null;
+      }
     }
 
-    firebaseApp = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+    if (!serviceAccount) {
+      console.warn('⚠️ No Firebase service account available, push notifications disabled');
+      return null;
+    }
+
+    firebaseApp = adminModule.initializeApp({
+      credential: adminModule.credential.cert(serviceAccount),
       projectId: 'nisrine-school'
     });
 
     console.log('✅ Firebase Admin SDK initialized');
     return firebaseApp;
   } catch (error) {
-    console.error('❌ Error initializing Firebase Admin SDK:', error);
+    console.warn('⚠️ Error initializing Firebase Admin SDK:', error.message);
+    firebaseError = error;
     return null;
   }
 }
@@ -74,7 +109,11 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
       }
     };
 
-    const response = await admin.messaging().send(message);
+    const adminModule = getAdmin();
+    if (!adminModule) {
+      return null;
+    }
+    const response = await adminModule.messaging().send(message);
     console.log('✅ Push notification sent:', response);
     return response;
   } catch (error) {
@@ -114,7 +153,11 @@ async function sendPushNotificationToMultiple(fcmTokens, title, body, data = {})
       }
     };
 
-    const response = await admin.messaging().sendEachForMulticast(message);
+    const adminModule = getAdmin();
+    if (!adminModule) {
+      return null;
+    }
+    const response = await adminModule.messaging().sendEachForMulticast(message);
     console.log(`✅ Push notifications sent: ${response.successCount}/${fcmTokens.length}`);
     return response;
   } catch (error) {
