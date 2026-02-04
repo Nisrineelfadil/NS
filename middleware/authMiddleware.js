@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const ManagedStudent = require('../models/ManagedStudent');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
 
@@ -98,8 +99,58 @@ const checkActiveStatus = async (req, res, next) => {
     }
 };
 
+// Middleware to verify student JWT token (for PWA)
+const authenticateStudent = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ 
+            success: false, 
+            message: 'No token provided' 
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // Check if this is a student token
+        if (decoded.role !== 'student') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Access denied. Students only.' 
+            });
+        }
+        
+        // Find the student
+        const student = await ManagedStudent.findById(decoded.id);
+        
+        if (!student) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Student not found'
+            });
+        }
+        
+        // Set student data for use in routes
+        req.student = {
+            _id: student._id,
+            id: student._id.toString(),
+            fullName: student.fullName,
+            email: student.schoolEmail
+        };
+        
+        next();
+    } catch (error) {
+        return res.status(401).json({ 
+            success: false, 
+            message: 'Invalid token' 
+        });
+    }
+};
+
 module.exports = { 
     authenticateAdmin, 
     requireSuperAdmin,
-    checkActiveStatus
+    checkActiveStatus,
+    authenticateStudent
 };
