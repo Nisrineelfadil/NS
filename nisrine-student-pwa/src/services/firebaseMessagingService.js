@@ -34,10 +34,23 @@ class FirebaseMessagingService {
 
       console.log('✅ Notification permission granted');
 
-      // Get FCM token
+      // Register Firebase messaging service worker explicitly
+      let swRegistration;
+      try {
+        // Try to register Firebase-specific service worker
+        swRegistration = await navigator.serviceWorker.register('/pwa/firebase-messaging-sw.js', {
+          scope: '/pwa/'
+        });
+        console.log('✅ Firebase SW registered:', swRegistration.scope);
+      } catch (swError) {
+        console.warn('⚠️ Could not register Firebase SW, using default:', swError);
+        swRegistration = await navigator.serviceWorker.ready;
+      }
+
+      // Get FCM token with explicit service worker
       const token = await getToken(messaging, { 
         vapidKey: VAPID_KEY,
-        serviceWorkerRegistration: await navigator.serviceWorker.ready
+        serviceWorkerRegistration: swRegistration
       });
 
       if (token) {
