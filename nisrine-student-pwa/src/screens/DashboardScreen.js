@@ -10,6 +10,7 @@ import { getStudentData, clearAuthData } from '../services/authService';
 import notificationService from '../services/notificationPollingService';
 import { registerBackgroundSync, unregisterBackgroundSync } from '../utils/backgroundSync';
 import NotificationPermission from '../components/NotificationPermission';
+import firebaseMessagingService from '../services/firebaseMessagingService';
 
 const DashboardScreen = () => {
   const navigate = useNavigate();
@@ -19,7 +20,10 @@ const DashboardScreen = () => {
   useEffect(() => {
     loadStudentData();
     
-    // Start notification polling when dashboard loads
+    // Initialize Firebase Cloud Messaging
+    initializeFirebaseMessaging();
+    
+    // Start notification polling when dashboard loads (fallback)
     notificationService.start();
     
     // Register background sync for PWA
@@ -30,6 +34,22 @@ const DashboardScreen = () => {
       notificationService.stop();
     };
   }, []);
+
+  const initializeFirebaseMessaging = async () => {
+    try {
+      // Request FCM permission and get token
+      const token = await firebaseMessagingService.requestPermissionAndGetToken();
+      
+      if (token) {
+        console.log('✅ Firebase Messaging initialized successfully');
+        
+        // Setup foreground message handler
+        firebaseMessagingService.setupForegroundMessageHandler();
+      }
+    } catch (error) {
+      console.error('❌ Error initializing Firebase Messaging:', error);
+    }
+  };
 
   const loadStudentData = async () => {
     try {
@@ -49,6 +69,9 @@ const DashboardScreen = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       // Stop notification polling
       notificationService.stop();
+      
+      // Delete FCM token from backend
+      await firebaseMessagingService.deleteTokenFromBackend();
       
       // Unregister background sync
       await unregisterBackgroundSync();

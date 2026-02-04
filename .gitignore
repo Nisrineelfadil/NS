@@ -12,6 +12,10 @@ desktop-app/dist/
 .env
 .env.local
 
+# Firebase service account (NEVER commit this!)
+firebase-service-account.json
+*firebase-adminsdk*.json
+
 # Editor directories and files
 .vscode/
 .idea/

@@ -12,6 +12,33 @@ const fs = require('fs').promises;
 const bcrypt = require('bcryptjs');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
 const { notifyAdminMessage } = require('../services/notificationService');
+const { sendPushNotification } = require('../config/firebase-admin');
+const Student = require('../models/Student');
+
+// Helper function to send FCM notification to student
+async function sendFCMNotification(studentId, title, body) {
+    try {
+        // Find the student to get their FCM tokens
+        const student = await Student.findOne({ managedStudentId: studentId });
+        
+        if (!student || !student.fcmTokens || student.fcmTokens.length === 0) {
+            console.log('⚠️ No FCM tokens found for student');
+            return;
+        }
+
+        // Send notification to all registered devices
+        for (const token of student.fcmTokens) {
+            await sendPushNotification(token, title, body, {
+                type: 'message',
+                url: '/pwa/messages'
+            });
+        }
+
+        console.log(`✅ FCM notification sent to ${student.fcmTokens.length} device(s)`);
+    } catch (error) {
+        console.error('❌ Error sending FCM notification:', error);
+    }
+}
 
 // Multer configuration for student photos
 // Use memory storage for Vercel compatibility (serverless doesn't support disk storage)
@@ -1407,6 +1434,11 @@ router.post('/students/:id/send-message', authenticateAdmin, async (req, res) =>
         // Send push notification to student
         notifyAdminMessage(req.params.id, newMessage).catch(err => 
             console.error('Failed to send admin message notification:', err)
+        );
+        
+        // Send FCM push notification
+        sendFCMNotification(req.params.id, messageTitle, message).catch(err =>
+            console.error('Failed to send FCM notification:', err)
         );
         
         res.json({ 

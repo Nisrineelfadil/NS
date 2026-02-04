@@ -143,6 +143,11 @@ const studentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ManagedStudent',
         default: null
+    },
+    // Firebase Cloud Messaging tokens for push notifications
+    fcmTokens: {
+        type: [String],
+        default: []
     }
 });
 

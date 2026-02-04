@@ -5,6 +5,7 @@
   "homepage": "/pwa",
   "dependencies": {
     "axios": "^1.12.2",
+    "firebase": "^12.8.0",
     "framer-motion": "^10.16.16",
     "idb": "^7.1.1",
     "react": "^18.2.0",
