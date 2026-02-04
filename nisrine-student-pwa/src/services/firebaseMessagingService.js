@@ -77,9 +77,11 @@ class FirebaseMessagingService {
       const authToken = localStorage.getItem('studentToken');
       if (!authToken) {
         console.warn('⚠️ No auth token, cannot save FCM token');
-        return;
+        return false;
       }
 
+      console.log('📤 Sending FCM token to backend...');
+      
       const response = await axios.post(
         `${API_URL}/api/fcm/register-token`,
         { fcmToken: token },
@@ -87,10 +89,15 @@ class FirebaseMessagingService {
       );
 
       if (response.data.success) {
-        console.log('✅ FCM token saved to backend');
+        console.log('✅ FCM token saved to backend successfully');
+        return true;
+      } else {
+        console.warn('⚠️ Backend rejected token:', response.data.message);
+        return false;
       }
     } catch (error) {
-      console.error('❌ Error saving FCM token to backend:', error);
+      console.error('❌ Error saving FCM token to backend:', error.response?.data || error.message);
+      return false;
     }
   }
 
