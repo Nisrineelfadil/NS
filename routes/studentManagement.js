@@ -12,12 +12,31 @@ const fs = require('fs').promises;
 const bcrypt = require('bcryptjs');
 const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMiddleware');
 const { notifyAdminMessage } = require('../services/notificationService');
-const { sendPushNotification } = require('../config/firebase-admin');
 const Student = require('../models/Student');
+
+// Lazy load Firebase Admin to prevent server crash
+let firebaseAdmin = null;
+function getFirebaseAdmin() {
+    if (firebaseAdmin === null) {
+        try {
+            firebaseAdmin = require('../config/firebase-admin');
+        } catch (error) {
+            console.warn('⚠️ Firebase Admin not available:', error.message);
+            firebaseAdmin = { sendPushNotification: () => null };
+        }
+    }
+    return firebaseAdmin;
+}
 
 // Helper function to send FCM notification to student
 async function sendFCMNotification(studentId, title, body) {
     try {
+        const { sendPushNotification } = getFirebaseAdmin();
+        if (!sendPushNotification) {
+            console.warn('⚠️ Push notifications not available');
+            return;
+        }
+
         // Find the student to get their FCM tokens
         const student = await Student.findOne({ managedStudentId: studentId });
         
