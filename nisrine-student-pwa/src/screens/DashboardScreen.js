@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from '../translations/translations';
 import { animations } from '../gradients';
 import Icon from '../components/Icon';
 import { API_URL } from '../config';
@@ -15,6 +17,8 @@ import firebaseMessagingService from '../services/firebaseMessagingService';
 const DashboardScreen = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation(currentLanguage);
   const [studentData, setStudentData] = useState(null);
 
   useEffect(() => {
@@ -66,7 +70,10 @@ const DashboardScreen = () => {
   };
 
   const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to logout?')) {
+    const confirmMessage = currentLanguage === 'fr' ? 'Êtes-vous sûr de vouloir vous déconnecter?' : 
+                          currentLanguage === 'ar' ? 'هل أنت متأكد أنك تريد تسجيل الخروج؟' : 
+                          'Are you sure you want to logout?';
+    if (window.confirm(confirmMessage)) {
       // Stop notification polling
       notificationService.stop();
       
@@ -84,46 +91,46 @@ const DashboardScreen = () => {
   };
 
   const largeCard = {
-    title: 'My Grades',
-    icon: '📊', // Will be replaced with SVG icon
+    title: t('myGrades'),
+    icon: '📊',
     iconType: 'chart',
     gradient: 'linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%)',
     path: '/grades',
-    description: 'View your exam results',
+    description: t('viewExamResults'),
   };
 
   const gridItems = [
     {
-      title: 'Scan Attendance',
+      title: t('scanAttendance'),
       icon: '📱',
       iconType: 'smartphone',
       gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E9E 100%)',
       path: '/attendance',
-      description: 'Scan QR code for attendance',
+      description: t('scanQRCode'),
     },
     {
-      title: 'Payment Status',
+      title: t('paymentStatus'),
       icon: '💳',
       iconType: 'credit-card',
       gradient: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
       path: '/payment',
-      description: 'Check payment information',
+      description: t('checkPaymentInfo'),
     },
     {
-      title: 'Messages',
+      title: t('messages'),
       icon: '✉️',
       iconType: 'mail',
       gradient: 'linear-gradient(135deg, #FF6B9D 0%, #FF8E9E 100%)',
       path: '/messages',
-      description: 'Announcements & notifications',
+      description: t('announcementsNotifications'),
     },
     {
-      title: 'Settings',
+      title: t('settings'),
       icon: '⚙️',
       iconType: 'settings',
       gradient: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
       path: '/settings',
-      description: 'Theme & language preferences',
+      description: t('themeLanguagePreferences'),
     },
   ];
 
@@ -142,7 +149,7 @@ const DashboardScreen = () => {
         transition={{ delay: 0.1, duration: 0.4 }}
       >
         <div className="header-text">
-          <p className="welcome-text-new">Welcome back</p>
+          <p className="welcome-text-new">{t('welcomeBack')}</p>
           <h2 className="student-name-new">{studentData?.fullName || 'Student'}</h2>
           <p className="student-email-new">{studentData?.schoolEmail}</p>
         </div>
@@ -224,14 +231,13 @@ const DashboardScreen = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
       >
-        Logout
+        {t('logout')}
       </motion.button>
 
       <div className="dashboard-footer">
         <p>Nisrine School Mobile App v1.0.1</p>
       </div>
 
-      {/* Notification Permission Banner for Mobile */}
       <NotificationPermission />
     </motion.div>
   );

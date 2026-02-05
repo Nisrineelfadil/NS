@@ -1,6 +1,6 @@
 .grades-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+  background: var(--bg-color, #F5F7FA);
   padding-bottom: 20px;
 }
 
@@ -10,7 +10,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+  background: var(--bg-color, #F5F7FA);
 }
 
 .spinner {
@@ -29,7 +29,7 @@
 .grades-loading p {
   margin-top: 10px;
   font-size: 16px;
-  color: #6b7280;
+  color: var(--text-light, #6b7280);
 }
 
 .grades-header {
@@ -37,7 +37,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #FFFFFF;
+  background: var(--card-bg, #FFFFFF);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid #E5E7EB;
 }
@@ -64,14 +64,14 @@
 .grades-header h1 {
   font-size: 20px;
   font-weight: bold;
-  color: #1f2937;
+  color: var(--text-color, #1f2937);
   margin: 0;
 }
 
 .toggle-container {
   display: flex;
   margin: 16px;
-  background: #F3F4F6;
+  background: var(--border-color, #F3F4F6);
   border-radius: 12px;
   padding: 4px;
   gap: 4px;

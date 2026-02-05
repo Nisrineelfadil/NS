@@ -2,7 +2,7 @@
 
 .payment-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+  background: var(--bg-color, #F5F7FA);
   padding: 20px;
   padding-bottom: 30px;
   max-width: 600px;
@@ -15,7 +15,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+  background: var(--bg-color, #F5F7FA);
 }
 
 .spinner {
@@ -34,7 +34,7 @@
 .payment-loading p {
   margin-top: 16px;
   font-size: 16px;
-  color: #6B7280;
+  color: var(--text-light, #6B7280);
   font-weight: 500;
 }
 
@@ -44,7 +44,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #FFFFFF;
+  background: var(--card-bg, #FFFFFF);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   margin-bottom: 20px;
@@ -53,13 +53,13 @@
 .payment-header h1 {
   font-size: 24px;
   font-weight: 700;
-  color: #1D1D1F;
+  color: var(--text-color, #1D1D1F);
   margin: 0;
   letter-spacing: -0.5px;
 }
 
 .back-button, .refresh-button {
-  background: #F3F4F6;
+  background: var(--border-color, #F3F4F6);
   border: none;
   padding: 10px 16px;
   border-radius: 10px;
@@ -67,7 +67,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  color: #1D1D1F;
+  color: var(--text-color, #1D1D1F);
 }
 
 .back-button:hover, .refresh-button:hover {

@@ -4,11 +4,17 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import Icon from '../components/Icon';
 import { animations } from '../gradients';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from '../translations/translations';
 import './PaymentScreen.css';
 import { API_URL } from '../config';
 
 const PaymentScreen = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation(currentLanguage);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -102,7 +108,7 @@ const PaymentScreen = () => {
         animate={{ opacity: 1 }}
       >
         <div className="spinner"></div>
-        <p>Loading payment information...</p>
+        <p>{t('loadingPayment')}</p>
       </motion.div>
     );
   }
@@ -129,9 +135,9 @@ const PaymentScreen = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ← Back
+          {t('back')}
         </motion.button>
-        <h1>Payment Status</h1>
+        <h1>{t('paymentStatus')}</h1>
         <motion.button 
           className="refresh-button" 
           onClick={handleRefresh} 
@@ -156,7 +162,7 @@ const PaymentScreen = () => {
         <div className="status-icon-wrapper">
           <Icon type={paymentStatus.icon} size={40} color="#FFFFFF" />
         </div>
-        <h2 className="status-title">Payment Status</h2>
+        <h2 className="status-title">{t('paymentStatus')}</h2>
         <p className="status-text">
           {paymentStatus.status}
         </p>
@@ -168,12 +174,12 @@ const PaymentScreen = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.4 }}
       >
-        <h3 className="card-title">Payment Information</h3>
+        <h3 className="card-title">{t('paymentInformation')}</h3>
 
         <div className="detail-row">
           <div className="detail-label">
             <div className="detail-icon money">💰</div>
-            <span>Amount</span>
+            <span>{t('amount')}</span>
           </div>
           <span className="detail-value">
             {paymentInfo?.paymentAmount ? `${paymentInfo.paymentAmount} MAD` : 'N/A'}
@@ -185,7 +191,7 @@ const PaymentScreen = () => {
         <div className="detail-row">
           <div className="detail-label">
             <div className="detail-icon calendar">📅</div>
-            <span>Due Date</span>
+            <span>{t('dueDate')}</span>
           </div>
           <span className="detail-value">
             {paymentInfo?.paymentDate
@@ -200,7 +206,7 @@ const PaymentScreen = () => {
             <div className="detail-row">
               <div className="detail-label">
                 <div className="detail-icon timer">⏳</div>
-                <span>Days Until Due</span>
+                <span>{t('daysUntilDue')}</span>
               </div>
               <span
                 className="detail-value"
@@ -222,12 +228,12 @@ const PaymentScreen = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.4 }}
       >
-        <h3 className="card-title">Student Information</h3>
+        <h3 className="card-title">{t('studentInformation')}</h3>
 
         <div className="detail-row">
           <div className="detail-label">
             <div className="detail-icon user">👤</div>
-            <span>Full Name</span>
+            <span>{t('fullName')}</span>
           </div>
           <span className="detail-value">{paymentInfo?.fullName || 'N/A'}</span>
         </div>
@@ -237,7 +243,7 @@ const PaymentScreen = () => {
         <div className="detail-row">
           <div className="detail-label">
             <div className="detail-icon email">✉️</div>
-            <span>Email</span>
+            <span>{t('email')}</span>
           </div>
           <span className="detail-value detail-value-small">
             {paymentInfo?.schoolEmail || 'N/A'}
@@ -249,7 +255,7 @@ const PaymentScreen = () => {
         <div className="detail-row">
           <div className="detail-label">
             <div className="detail-icon formation">🎓</div>
-            <span>Formation</span>
+            <span>{t('formation')}</span>
           </div>
           <span className="detail-value">
             {paymentInfo?.formation?.join(', ') || 'N/A'}
@@ -264,7 +270,7 @@ const PaymentScreen = () => {
         transition={{ delay: 0.4, duration: 0.4 }}
       >
         <span className="help-icon">ℹ️</span>
-        <p>For payment inquiries, please contact the school administration office.</p>
+        <p>{t('paymentHelp')}</p>
       </motion.div>
     </motion.div>
   );

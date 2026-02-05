@@ -4,11 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import Icon from '../components/Icon';
 import { animations } from '../gradients';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from '../translations/translations';
 import './AttendanceScreen.css';
 import { API_URL } from '../config';
 
 const AttendanceScreen = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation(currentLanguage);
   const [sessionId, setSessionId] = useState('');
   const [loading, setLoading] = useState(false);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
@@ -131,9 +137,9 @@ const AttendanceScreen = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ← Back
+          {t('back')}
         </motion.button>
-        <h1>Scan Attendance</h1>
+        <h1>{t('scanAttendance')}</h1>
         <motion.button 
           className="refresh-button" 
           onClick={handleRefresh} 
@@ -157,11 +163,11 @@ const AttendanceScreen = () => {
           <div className="scanner-icon-wrapper">
             <Icon type="smartphone" size={24} color="#FFFFFF" />
           </div>
-          <h2>Scan Attendance QR Code</h2>
+          <h2>{t('scanAttendanceQR')}</h2>
         </div>
         
         <p className="scanner-description">
-          Enter the Session ID from the QR code displayed by your teacher
+          {t('enterSessionId')}
         </p>
 
         <form onSubmit={handleManualEntry}>
@@ -170,7 +176,7 @@ const AttendanceScreen = () => {
             <input
               type="text"
               className="session-input"
-              placeholder="Enter Session ID"
+              placeholder={t('enterSessionIdPlaceholder')}
               value={sessionId}
               onChange={(e) => setSessionId(e.target.value)}
               disabled={loading}
@@ -185,11 +191,11 @@ const AttendanceScreen = () => {
             whileTap={{ scale: 0.98 }}
           >
             {loading ? (
-              <span>Marking...</span>
+              <span>{t('marking')}</span>
             ) : (
               <>
                 <span>✓</span>
-                <span>Mark Attendance</span>
+                <span>{t('markAttendance')}</span>
               </>
             )}
           </motion.button>
@@ -197,7 +203,7 @@ const AttendanceScreen = () => {
 
         <div className="info-box">
           <span className="info-icon">ℹ️</span>
-          <p>You'll be marked as Present if on time, or Late if after the grace period</p>
+          <p>{t('attendanceInfo')}</p>
         </div>
       </motion.div>
 
@@ -208,7 +214,7 @@ const AttendanceScreen = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <h3 className="stats-title">Attendance Statistics</h3>
+          <h3 className="stats-title">{t('attendanceStats')}</h3>
           
           <div className="stats-grid">
             <div className="stat-item">
@@ -216,7 +222,7 @@ const AttendanceScreen = () => {
                 <span>✅</span>
               </div>
               <p className="stat-value">{stats.present}</p>
-              <p className="stat-label">Present</p>
+              <p className="stat-label">{t('present')}</p>
             </div>
 
             <div className="stat-item">
@@ -224,7 +230,7 @@ const AttendanceScreen = () => {
                 <span>⏰</span>
               </div>
               <p className="stat-value">{stats.late}</p>
-              <p className="stat-label">Late</p>
+              <p className="stat-label">{t('late')}</p>
             </div>
 
             <div className="stat-item">
@@ -232,7 +238,7 @@ const AttendanceScreen = () => {
                 <span>❌</span>
               </div>
               <p className="stat-value">{stats.absent}</p>
-              <p className="stat-label">Absent</p>
+              <p className="stat-label">{t('absent')}</p>
             </div>
 
             <div className="stat-item">
@@ -240,7 +246,7 @@ const AttendanceScreen = () => {
                 <span>📊</span>
               </div>
               <p className="stat-value">{stats.attendanceRate}%</p>
-              <p className="stat-label">Rate</p>
+              <p className="stat-label">{t('rate')}</p>
             </div>
           </div>
         </motion.div>
@@ -252,13 +258,13 @@ const AttendanceScreen = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.4 }}
       >
-        <h3 className="history-title">Attendance History</h3>
+        <h3 className="history-title">{t('attendanceHistory')}</h3>
         
         {attendanceHistory.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon">📅</span>
-            <h4>No attendance records yet</h4>
-            <p>Your attendance history will appear here</p>
+            <h4>{t('noAttendanceRecords')}</h4>
+            <p>{t('attendanceHistoryAppear')}</p>
           </div>
         ) : (
           attendanceHistory.map((record, index) => (

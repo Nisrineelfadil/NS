@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Icon from '../components/Icon';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from '../translations/translations';
 import './GradesScreen.css';
 import { API_URL } from '../config';
 
@@ -10,6 +13,9 @@ const BRANCH_FORMATIONS = ['Informatique', 'Gériatrie', 'Aide soignant', 'Agent
 
 const GradesScreen = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation(currentLanguage);
   const [grades, setGrades] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -167,7 +173,7 @@ const GradesScreen = () => {
     return (
       <div className="grades-loading">
         <div className="spinner"></div>
-        <p>Loading grades...</p>
+        <p>{t('loadingGrades')}</p>
       </div>
     );
   }
@@ -178,9 +184,9 @@ const GradesScreen = () => {
     <div className="grades-container">
       <div className="grades-header">
         <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back
+          {t('back')}
         </button>
-        <h1>My Grades</h1>
+        <h1>{t('myGrades')}</h1>
         <button className="refresh-button" onClick={handleRefresh} disabled={refreshing}>
           {refreshing ? '⟳' : '↻'}
         </button>
@@ -199,7 +205,7 @@ const GradesScreen = () => {
           }}
         >
           <Icon type="globe" size={20} color={viewMode === 'languages' ? '#1D1D1F' : '#6B7280'} />
-          Languages
+          {t('languages')}
         </button>
         
         <button
@@ -213,14 +219,14 @@ const GradesScreen = () => {
           }}
         >
           <Icon type="graduation-cap" size={20} color={viewMode === 'branches' ? '#1D1D1F' : '#6B7280'} />
-          Subjects
+          {t('subjects')}
         </button>
       </div>
 
       {availableFormations.length > 0 && (
         <div className="selector-container">
           <label className="selector-label">
-            Select {viewMode === 'languages' ? 'Language' : 'Subject'}:
+            {viewMode === 'languages' ? t('selectLanguage') : t('selectSubject')}:
           </label>
           <div className="chip-scroll">
             {availableFormations.map((formation) => (
@@ -244,7 +250,7 @@ const GradesScreen = () => {
 
       {selectedFormation && viewMode === 'languages' && (
         <div className="selector-container">
-          <label className="selector-label">Language Level:</label>
+          <label className="selector-label">{t('languageLevel')}:</label>
           <div className="chip-scroll">
             {['A1', 'A2', 'B1', 'B2'].map((level) => (
               <button
@@ -265,7 +271,7 @@ const GradesScreen = () => {
 
       {selectedFormation && viewMode === 'languages' && selectedLevel && (
         <div className="selector-container">
-          <label className="selector-label">Test Type:</label>
+          <label className="selector-label">{t('testType')}:</label>
           <div className="chip-scroll">
             <button
               className={`chip ${selectedTestType === 'miniTest' ? 'active' : ''}`}
@@ -274,7 +280,7 @@ const GradesScreen = () => {
                 setSelectedExamNumber(1); // Auto-select Test 1 when switching to Mini Tests
               }}
             >
-              Mini Tests
+              {t('miniTests')}
             </button>
             <button
               className={`chip ${selectedTestType === 'finalExam' ? 'active' : ''}`}
@@ -283,7 +289,7 @@ const GradesScreen = () => {
                 setSelectedExamNumber(null); // Reset test number when changing test type
               }}
             >
-              Final Exam
+              {t('finalExam')}
             </button>
           </div>
         </div>
@@ -291,7 +297,7 @@ const GradesScreen = () => {
 
       {selectedFormation && viewMode === 'languages' && selectedTestType === 'miniTest' && (
         <div className="selector-container">
-          <label className="selector-label">Mini Test Number:</label>
+          <label className="selector-label">{t('miniTestNumber')}:</label>
           <div className="chip-scroll">
             {[1, 2, 3, 4].map((num) => (
               <button
@@ -299,7 +305,7 @@ const GradesScreen = () => {
                 className={`chip ${selectedExamNumber === num ? 'active' : ''}`}
                 onClick={() => setSelectedExamNumber(num)}
               >
-                Test {num}
+                {t('test')} {num}
               </button>
             ))}
           </div>
@@ -308,7 +314,7 @@ const GradesScreen = () => {
 
       {selectedFormation && viewMode === 'branches' && (
         <div className="selector-container">
-          <label className="selector-label">Exam Number:</label>
+          <label className="selector-label">{t('examNumber')}:</label>
           <div className="chip-scroll">
             {[...Array(getExamCount(selectedFormation))].map((_, index) => {
               const examNum = index + 1;
@@ -318,7 +324,7 @@ const GradesScreen = () => {
                   className={`chip ${selectedExamNumber === examNum ? 'active' : ''}`}
                   onClick={() => setSelectedExamNumber(examNum)}
                 >
-                  Exam {examNum}
+                  {t('exam')} {examNum}
                 </button>
               );
             })}
@@ -328,7 +334,7 @@ const GradesScreen = () => {
 
       {viewMode === 'branches' && (
         <div className="selector-container">
-          <label className="selector-label">Semester:</label>
+          <label className="selector-label">{t('semester')}:</label>
           <div className="chip-scroll">
             {['Semester 1', 'Semester 2'].map((semester) => (
               <button
@@ -348,7 +354,7 @@ const GradesScreen = () => {
           <div className="stat-item">
             <span className="stat-icon">📄</span>
             <p className="stat-value">{stats.totalGrades}</p>
-            <p className="stat-label">Total Grades</p>
+            <p className="stat-label">{t('totalGrades')}</p>
           </div>
           <div className="stat-divider"></div>
           <div className="stat-item">
@@ -356,7 +362,7 @@ const GradesScreen = () => {
             <p className="stat-value" style={{ color: '#10b981' }}>
               {stats.averageScore ? Number(stats.averageScore).toFixed(1) : '0.0'}%
             </p>
-            <p className="stat-label">Average Score</p>
+            <p className="stat-label">{t('averageScore')}</p>
           </div>
         </div>
       )}
@@ -365,11 +371,11 @@ const GradesScreen = () => {
         {grades.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon">🎓</span>
-            <h3>No grades available</h3>
+            <h3>{t('noGradesAvailable')}</h3>
             <p>
               {selectedFormation 
-                ? `No grades found for ${selectedFormation}` 
-                : `Select a ${viewMode === 'languages' ? 'language' : 'subject'} to view grades`}
+                ? `${t('noGradesFound')} ${selectedFormation}` 
+                : t('selectToView')}
             </p>
           </div>
         ) : (
@@ -410,9 +416,7 @@ const GradesScreen = () => {
 
                   <div className="detail-row">
                     <span className="detail-icon">🏆</span>
-                    <span className="detail-text">
-                      Score: {grade.score}/{grade.maxScore} ({percentage.toFixed(1)}%)
-                    </span>
+                    <span className="detail-text">{t('score')}: {grade.score}/{grade.maxScore} ({percentage.toFixed(1)}%)</span>
                   </div>
 
                   <div className="detail-row">
@@ -431,7 +435,7 @@ const GradesScreen = () => {
 
                   {(grade.autoComment || grade.comments) && (
                     <div className="comments-container">
-                      <p className="comments-label">Comments:</p>
+                      <p className="comments-label">{t('comments')}:</p>
                       <p className="comments-text" style={{ fontStyle: isLanguage ? 'italic' : 'normal' }}>
                         {grade.autoComment || grade.comments}
                       </p>

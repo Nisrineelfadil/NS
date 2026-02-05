@@ -4,11 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import Icon from '../components/Icon';
 import { animations } from '../gradients';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from '../translations/translations';
 import './MessagesScreen.css';
 import { API_URL } from '../config';
 
 const MessagesScreen = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation(currentLanguage);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -67,7 +73,7 @@ const MessagesScreen = () => {
   };
 
   const deleteMessage = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this message?')) {
+    if (!window.confirm(t('confirmDelete'))) {
       return;
     }
 
@@ -127,7 +133,7 @@ const MessagesScreen = () => {
         animate={{ opacity: 1 }}
       >
         <div className="spinner"></div>
-        <p>Loading messages...</p>
+        <p>{t('loadingMessages')}</p>
       </motion.div>
     );
   }
@@ -151,9 +157,9 @@ const MessagesScreen = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ← Back
+          {t('back')}
         </motion.button>
-        <h1>Messages</h1>
+        <h1>{t('messages')}</h1>
         <motion.button 
           className="refresh-button" 
           onClick={handleRefresh} 
@@ -178,7 +184,7 @@ const MessagesScreen = () => {
             <Icon type="mail" size={28} color="#667EEA" />
           </div>
           <p className="stat-value">{messages.length}</p>
-          <p className="stat-label">Total</p>
+          <p className="stat-label">{t('total')}</p>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-item">
@@ -187,7 +193,7 @@ const MessagesScreen = () => {
             {unreadCount > 0 && <div className="badge-dot"></div>}
           </div>
           <p className="stat-value">{unreadCount}</p>
-          <p className="stat-label">Unread</p>
+          <p className="stat-label">{t('unread')}</p>
         </div>
       </motion.div>
 
@@ -204,8 +210,8 @@ const MessagesScreen = () => {
               transition={{ delay: 0.2 }}
             >
               <div className="empty-icon">📭</div>
-              <h3>No messages yet</h3>
-              <p>You'll receive announcements and notifications here</p>
+              <h3>{t('noMessagesYet')}</h3>
+              <p>{t('receiveAnnouncements')}</p>
             </motion.div>
           ) : (
             messages.map((message, index) => (
@@ -251,7 +257,7 @@ const MessagesScreen = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span>Delete</span>
+                  <span>{t('deleteMessage')}</span>
                 </motion.button>
               </div>
             </motion.div>

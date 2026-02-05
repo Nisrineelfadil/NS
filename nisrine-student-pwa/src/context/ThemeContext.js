@@ -33,6 +33,17 @@ export const ThemeProvider = ({ children }) => {
     loadTheme();
   }, []);
 
+  // Apply CSS variables globally whenever theme changes
+  useEffect(() => {
+    document.documentElement.style.setProperty('--bg-color', theme.background);
+    document.documentElement.style.setProperty('--card-bg', theme.cardBg);
+    document.documentElement.style.setProperty('--text-color', theme.text);
+    document.documentElement.style.setProperty('--text-light', theme.textLight);
+    document.documentElement.style.setProperty('--border-color', theme.borderColor);
+    document.documentElement.style.setProperty('--primary-color', theme.primary);
+    document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+  }, [theme]);
+
   const loadTheme = () => {
     try {
       const savedTheme = localStorage.getItem('appTheme');

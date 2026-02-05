@@ -1,6 +1,6 @@
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #F5F7FA 0%, #E8ECEF 100%);
+  background: var(--bg-color, #F5F7FA);
   padding: 20px;
   padding-bottom: 30px;
   /* Hardware acceleration for smooth animations */
@@ -23,7 +23,7 @@
 
 .welcome-text-new {
   font-size: 16px;
-  color: #6B7280;
+  color: var(--text-light, #6B7280);
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -31,7 +31,7 @@
 .student-name-new {
   font-size: 32px;
   font-weight: 700;
-  color: #1D1D1F;
+  color: var(--text-color, #1D1D1F);
   margin: 0 0 8px 0;
   letter-spacing: -0.8px;
   line-height: 1.2;
@@ -39,7 +39,7 @@
 
 .student-email-new {
   font-size: 15px;
-  color: #6B7280;
+  color: var(--text-light, #6B7280);
   margin: 0;
   font-weight: 500;
 }
@@ -179,7 +179,7 @@
 .dashboard-footer p {
   font-size: 12px;
   margin: 0;
-  color: #9CA3AF;
+  color: var(--text-light, #9CA3AF);
   font-weight: 500;
 }
 
