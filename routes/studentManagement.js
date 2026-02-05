@@ -28,33 +28,59 @@ function getFirebaseAdmin() {
 }
 
 // Helper function to send FCM notification to student
-async function sendFCMNotification(studentId, title, body) {
+async function sendFCMNotification(studentId, title, body, extraData = {}) {
     try {
         const { sendPushNotification } = getFirebaseAdmin();
         if (!sendPushNotification) {
             console.warn('⚠️ Push notifications not available');
-            return;
+            return { sent: 0, failed: 0 };
         }
 
         // Find the ManagedStudent to get their FCM tokens
         const student = await ManagedStudent.findById(studentId);
         
         if (!student || !student.fcmTokens || student.fcmTokens.length === 0) {
-            console.log('⚠️ No FCM tokens found for student');
-            return;
+            console.log('⚠️ No FCM tokens found for student:', studentId);
+            return { sent: 0, failed: 0 };
         }
+
+        let sent = 0;
+        let failed = 0;
+        const invalidTokens = [];
 
         // Send notification to all registered devices
         for (const token of student.fcmTokens) {
-            await sendPushNotification(token, title, body, {
-                type: 'message',
-                url: '/pwa/messages'
+            const result = await sendPushNotification(token, title, body, {
+                type: extraData.type || 'message',
+                url: extraData.url || '/pwa/messages',
+                ...extraData
             });
+
+            if (result) {
+                if (result.error === 'invalid_token') {
+                    // Mark token for removal
+                    invalidTokens.push(token);
+                    failed++;
+                } else {
+                    sent++;
+                }
+            } else {
+                failed++;
+            }
         }
 
-        console.log(`✅ FCM notification sent to ${student.fcmTokens.length} device(s)`);
+        // Clean up invalid tokens
+        if (invalidTokens.length > 0) {
+            student.fcmTokens = student.fcmTokens.filter(t => !invalidTokens.includes(t));
+            await student.save();
+            console.log(`🗑️ Removed ${invalidTokens.length} invalid FCM token(s) for ${student.fullName}`);
+        }
+
+        console.log(`✅ FCM notification: ${sent} sent, ${failed} failed for ${student.fullName}`);
+        return { sent, failed };
     } catch (error) {
         console.error('❌ Error sending FCM notification:', error);
+        return { sent: 0, failed: 0, error: error.message };
     }
 }
 

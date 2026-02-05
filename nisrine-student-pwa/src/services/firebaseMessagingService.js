@@ -1,5 +1,6 @@
 // Firebase Cloud Messaging Service
 // Handles device token registration and foreground notifications
+// Works for both Android and iOS PWA
 
 import { messaging, VAPID_KEY, getToken, onMessage } from '../firebase/config';
 import { API_URL } from '../config';
@@ -9,11 +10,24 @@ class FirebaseMessagingService {
   constructor() {
     this.currentToken = null;
     this.isSupported = !!messaging;
+    this.tokenRefreshInterval = null;
   }
 
   // Check if FCM is supported
   isMessagingSupported() {
     return this.isSupported && 'Notification' in window && 'serviceWorker' in navigator;
+  }
+
+  // Detect iOS device
+  isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  // Check if running as installed PWA (added to home screen)
+  isInstalledPWA() {
+    return window.matchMedia('(display-mode: standalone)').matches || 
+      window.navigator.standalone === true;
   }
 
   // Request notification permission and get FCM token
@@ -24,11 +38,23 @@ class FirebaseMessagingService {
     }
 
     try {
-      // Request notification permission
-      const permission = await Notification.requestPermission();
+      // Check current permission state first
+      const currentPermission = Notification.permission;
+      console.log('🔔 Current notification permission:', currentPermission);
+
+      // iOS PWA specific warning
+      if (this.isIOS() && !this.isInstalledPWA()) {
+        console.warn('⚠️ iOS: PWA must be added to Home Screen for push notifications');
+      }
+
+      // Request notification permission if not already granted
+      let permission = currentPermission;
+      if (currentPermission === 'default') {
+        permission = await Notification.requestPermission();
+      }
       
       if (permission !== 'granted') {
-        console.log('⚠️ Notification permission denied');
+        console.log('⚠️ Notification permission denied or blocked');
         return null;
       }
 
@@ -37,11 +63,22 @@ class FirebaseMessagingService {
       // Register Firebase messaging service worker explicitly
       let swRegistration;
       try {
-        // Try to register Firebase-specific service worker
+        // Unregister old service workers first for clean state
+        const existingRegistrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of existingRegistrations) {
+          if (reg.scope.includes('/pwa/') && !reg.active?.scriptURL?.includes('firebase-messaging-sw.js')) {
+            console.log('🧹 Found non-Firebase SW, will use Firebase SW instead');
+          }
+        }
+
+        // Register Firebase-specific service worker
         swRegistration = await navigator.serviceWorker.register('/pwa/firebase-messaging-sw.js', {
           scope: '/pwa/'
         });
-        console.log('✅ Firebase SW registered:', swRegistration.scope);
+        
+        // Wait for the service worker to be ready
+        await navigator.serviceWorker.ready;
+        console.log('✅ Firebase SW registered and ready:', swRegistration.scope);
       } catch (swError) {
         console.warn('⚠️ Could not register Firebase SW, using default:', swError);
         swRegistration = await navigator.serviceWorker.ready;
@@ -58,17 +95,56 @@ class FirebaseMessagingService {
         this.currentToken = token;
         
         // Save token to backend
-        await this.saveTokenToBackend(token);
+        const saved = await this.saveTokenToBackend(token);
+        
+        if (saved) {
+          // Set up periodic token refresh (tokens can expire)
+          this.setupTokenRefresh();
+        }
         
         return token;
       } else {
-        console.warn('⚠️ No FCM token available');
+        console.warn('⚠️ No FCM token available - this may be normal on iOS Safari');
         return null;
       }
     } catch (error) {
       console.error('❌ Error getting FCM token:', error);
+      // Provide helpful error messages
+      if (error.code === 'messaging/permission-blocked') {
+        console.error('🚫 Notifications are blocked. User must enable in browser settings.');
+      } else if (error.code === 'messaging/unsupported-browser') {
+        console.error('📱 This browser does not support push notifications');
+      }
       return null;
     }
+  }
+
+  // Set up periodic token refresh
+  setupTokenRefresh() {
+    // Clear any existing interval
+    if (this.tokenRefreshInterval) {
+      clearInterval(this.tokenRefreshInterval);
+    }
+
+    // Refresh token every 6 hours (FCM tokens can expire)
+    this.tokenRefreshInterval = setInterval(async () => {
+      console.log('🔄 Refreshing FCM token...');
+      try {
+        const swRegistration = await navigator.serviceWorker.ready;
+        const newToken = await getToken(messaging, { 
+          vapidKey: VAPID_KEY,
+          serviceWorkerRegistration: swRegistration
+        });
+        
+        if (newToken && newToken !== this.currentToken) {
+          console.log('🆕 FCM Token refreshed');
+          this.currentToken = newToken;
+          await this.saveTokenToBackend(newToken);
+        }
+      } catch (error) {
+        console.error('❌ Token refresh failed:', error);
+      }
+    }, 6 * 60 * 60 * 1000); // 6 hours
   }
 
   // Save FCM token to backend
@@ -82,14 +158,31 @@ class FirebaseMessagingService {
 
       console.log('📤 Sending FCM token to backend...');
       
+      // Include device info for debugging
+      const deviceInfo = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        isIOS: this.isIOS(),
+        isPWA: this.isInstalledPWA(),
+        timestamp: new Date().toISOString()
+      };
+      
       const response = await axios.post(
         `${API_URL}/api/fcm/register-token`,
-        { fcmToken: token },
-        { headers: { Authorization: `Bearer ${authToken}` } }
+        { 
+          fcmToken: token,
+          deviceInfo: JSON.stringify(deviceInfo)
+        },
+        { 
+          headers: { Authorization: `Bearer ${authToken}` },
+          timeout: 10000
+        }
       );
 
       if (response.data.success) {
         console.log('✅ FCM token saved to backend successfully');
+        // Store locally to detect changes
+        localStorage.setItem('fcmToken', token);
         return true;
       } else {
         console.warn('⚠️ Backend rejected token:', response.data.message);
@@ -97,7 +190,31 @@ class FirebaseMessagingService {
       }
     } catch (error) {
       console.error('❌ Error saving FCM token to backend:', error.response?.data || error.message);
+      // Retry once after a delay
+      setTimeout(() => this.retrySaveToken(token), 5000);
       return false;
+    }
+  }
+
+  // Retry saving token
+  async retrySaveToken(token) {
+    try {
+      const authToken = localStorage.getItem('studentToken');
+      if (!authToken) return;
+
+      console.log('🔄 Retrying FCM token save...');
+      const response = await axios.post(
+        `${API_URL}/api/fcm/register-token`,
+        { fcmToken: token },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+
+      if (response.data.success) {
+        console.log('✅ FCM token saved on retry');
+        localStorage.setItem('fcmToken', token);
+      }
+    } catch (error) {
+      console.error('❌ Retry failed:', error.message);
     }
   }
 
