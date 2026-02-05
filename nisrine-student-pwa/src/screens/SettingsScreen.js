@@ -1,179 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslation } from '../translations/translations';
 import Icon from '../components/Icon';
 import { animations } from '../gradients';
 import './SettingsScreen.css';
 
-const LANGUAGES = [
-  { key: 'en', name: 'English', flag: '🇬🇧', gradient: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)' },
-  { key: 'fr', name: 'Français', flag: '🇫🇷', gradient: 'linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%)' },
-  { key: 'ar', name: 'العربية', flag: '🇲🇦', gradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)' },
-];
-
 const SettingsScreen = () => {
   const navigate = useNavigate();
   const { theme, currentTheme, changeTheme, themes } = useTheme();
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationStatus, setNotificationStatus] = useState('checking');
+  const { currentLanguage, changeLanguage, languages } = useLanguage();
+  const { t } = useTranslation(currentLanguage);
 
   useEffect(() => {
-    loadLanguage();
-    checkNotificationStatus();
-  }, []);
+    // Apply theme colors to CSS variables
+    document.documentElement.style.setProperty('--bg-color', theme.background);
+    document.documentElement.style.setProperty('--card-bg', theme.cardBg);
+    document.documentElement.style.setProperty('--text-color', theme.text);
+    document.documentElement.style.setProperty('--text-light', theme.textLight);
+  }, [theme]);
 
-  const checkNotificationStatus = async () => {
-    try {
-      // Check basic support
-      if (!('Notification' in window)) {
-        setNotificationStatus('unsupported');
-        return;
-      }
-
-      // For iOS, service worker might not be ready yet, so just check permission
-      const permission = Notification.permission;
-      
-      if ('serviceWorker' in navigator) {
-        try {
-          const registration = await navigator.serviceWorker.ready;
-          if (permission === 'granted' && registration.pushManager) {
-            const subscription = await registration.pushManager.getSubscription();
-            setNotificationsEnabled(!!subscription);
-            setNotificationStatus(subscription ? 'enabled' : 'granted');
-          } else {
-            setNotificationStatus(permission);
-          }
-        } catch (error) {
-          // Service worker not ready yet, just show the button
-          console.log('Service worker not ready, showing enable button');
-          setNotificationStatus(permission === 'granted' ? 'granted' : 'default');
-        }
-      } else {
-        // No service worker support, but still allow trying
-        setNotificationStatus('default');
-      }
-    } catch (error) {
-      console.error('Error checking notification status:', error);
-      setNotificationStatus('default');
-    }
-  };
-
-  const urlBase64ToUint8Array = (base64String) => {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  };
-
-  const handleEnableNotifications = async () => {
-    try {
-      setNotificationStatus('requesting');
-      
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Please allow notifications to receive updates!');
-        setNotificationStatus('denied');
-        return;
-      }
-
-      const response = await fetch('/api/push-notifications/vapid-public-key');
-      const { publicKey } = await response.json();
-
-      const registration = await navigator.serviceWorker.ready;
-      let subscription = await registration.pushManager.getSubscription();
-      
-      if (subscription) {
-        await subscription.unsubscribe();
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
-      });
-
-      const token = localStorage.getItem('token');
-      const result = await fetch('/api/push-notifications/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ subscription })
-      });
-
-      const data = await result.json();
-      if (data.success) {
-        setNotificationsEnabled(true);
-        setNotificationStatus('enabled');
-        alert('✅ Notifications enabled! You will receive updates about grades, attendance, messages, and payments.');
-      } else {
-        throw new Error(data.error || 'Failed to subscribe');
-      }
-    } catch (error) {
-      console.error('Error enabling notifications:', error);
-      alert('Failed to enable notifications. Please try again or check your browser settings.');
-      setNotificationStatus('error');
-    }
-  };
-
-  const handleDisableNotifications = async () => {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      
-      if (subscription) {
-        await subscription.unsubscribe();
-        const token = localStorage.getItem('token');
-        await fetch('/api/push-notifications/unsubscribe', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ endpoint: subscription.endpoint })
-        });
-      }
-      
-      setNotificationsEnabled(false);
-      setNotificationStatus('default');
-      alert('Notifications disabled');
-    } catch (error) {
-      console.error('Error disabling notifications:', error);
-    }
-  };
-
-  const loadLanguage = () => {
-    try {
-      const language = localStorage.getItem('appLanguage');
-      if (language && LANGUAGES[language]) {
-        setSelectedLanguage(language);
-      }
-    } catch (error) {
-      console.error('Error loading language:', error);
-    }
-  };
-
-  const saveLanguage = (languageKey) => {
-    try {
-      localStorage.setItem('appLanguage', languageKey);
-      setSelectedLanguage(languageKey);
-      // Success feedback with animation
-    } catch (error) {
-      console.error('Error saving language:', error);
-      alert('Failed to save language');
-    }
-  };
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
+    const confirmMessage = currentLanguage === 'fr' ? 'Êtes-vous sûr de vouloir vous déconnecter?' : 
+                          currentLanguage === 'ar' ? 'هل أنت متأكد أنك تريد تسجيل الخروج؟' : 
+                          'Are you sure you want to logout?';
+    if (window.confirm(confirmMessage)) {
       // Clear ALL data
       localStorage.clear();
       sessionStorage.clear();
@@ -209,9 +63,9 @@ const SettingsScreen = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ← Back
+          {t('back')}
         </motion.button>
-        <h1>Settings</h1>
+        <h1>{t('settingsTitle')}</h1>
         <div style={{ width: '60px' }}></div>
       </motion.div>
 
@@ -225,8 +79,8 @@ const SettingsScreen = () => {
           <Icon type="settings" size={32} color="#667EEA" />
         </div>
         <div className="intro-text">
-          <h2>Settings</h2>
-          <p>Customize your app experience</p>
+          <h2>{t('settingsTitle')}</h2>
+          <p>{t('customizeExperience')}</p>
         </div>
       </motion.div>
 
@@ -240,10 +94,10 @@ const SettingsScreen = () => {
           <div className="section-icon-wrapper">
             <span className="section-icon">🎨</span>
           </div>
-          <h3>Theme</h3>
+          <h3>{t('theme')}</h3>
         </div>
         <p className="section-description">
-          Choose your preferred color theme
+          {t('chooseTheme')}
         </p>
 
         <div className="theme-grid">
@@ -268,7 +122,7 @@ const SettingsScreen = () => {
                   {themeKey === 'bright' ? '☀️' : '🌙'}
                 </span>
               </div>
-              <h4>{themes[themeKey].name}</h4>
+              <h4>{themeKey === 'bright' ? t('brightMode') : t('darkMode')}</h4>
               <div className="theme-colors">
                 <motion.div 
                   className="color-dot" 
@@ -291,7 +145,7 @@ const SettingsScreen = () => {
                     transition={{ type: "spring", stiffness: 500, damping: 25 }}
                   >
                     <span>✓</span>
-                    <span>Active</span>
+                    <span>{t('active')}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -310,19 +164,23 @@ const SettingsScreen = () => {
           <div className="section-icon-wrapper">
             <span className="section-icon">🌐</span>
           </div>
-          <h3>Language</h3>
+          <h3>{t('language')}</h3>
         </div>
         <p className="section-description">
-          Select your preferred language
+          {t('selectLanguage')}
         </p>
 
         <div className="language-grid">
-          {LANGUAGES.map((lang, index) => (
+          {Object.values(languages).map((lang, index) => (
             <motion.div
                 key={lang.key}
-                className={`language-card ${selectedLanguage === lang.key ? 'selected' : ''}`}
-                style={{ background: lang.gradient }}
-                onClick={() => saveLanguage(lang.key)}
+                className={`language-card ${currentLanguage === lang.key ? 'selected' : ''}`}
+                style={{ 
+                  background: lang.key === 'en' ? 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)' :
+                             lang.key === 'fr' ? 'linear-gradient(135deg, #FF6B9D 0%, #C471ED 100%)' :
+                             'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)'
+                }}
+                onClick={() => changeLanguage(lang.key)}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ 
@@ -339,7 +197,7 @@ const SettingsScreen = () => {
                   {lang.name}
                 </h4>
                 <AnimatePresence>
-                  {selectedLanguage === lang.key && (
+                  {currentLanguage === lang.key && (
                     <motion.div 
                       className="language-check"
                       initial={{ scale: 0, rotate: -180 }}
@@ -354,7 +212,7 @@ const SettingsScreen = () => {
                 <motion.div 
                   className="language-ripple"
                   initial={{ scale: 0, opacity: 0.5 }}
-                  animate={selectedLanguage === lang.key ? {
+                  animate={currentLanguage === lang.key ? {
                     scale: [1, 1.5, 2],
                     opacity: [0.5, 0.3, 0]
                   } : { scale: 0, opacity: 0 }}
@@ -369,83 +227,13 @@ const SettingsScreen = () => {
         className="settings-section"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.4 }}
-      >
-        <div className="section-header">
-          <div className="section-icon-wrapper">
-            <span className="section-icon">🔔</span>
-          </div>
-          <h3>Push Notifications</h3>
-        </div>
-        <p className="section-description">
-          Receive notifications about grades, attendance, messages, and payments
-        </p>
-
-        {notificationStatus === 'unsupported' && (
-          <div style={{ padding: '15px', background: '#fee', borderRadius: '10px', color: '#c00' }}>
-            ❌ Push notifications are not supported on this device
-          </div>
-        )}
-
-        {notificationStatus !== 'unsupported' && (
-          <motion.button
-            className="logout-button-gradient"
-            onClick={notificationsEnabled ? handleDisableNotifications : handleEnableNotifications}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            style={{
-              background: notificationsEnabled 
-                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-            }}
-          >
-            {notificationStatus === 'requesting' && '⏳ Requesting...'}
-            {notificationStatus === 'checking' && '🔍 Checking...'}
-            {notificationStatus === 'enabled' && '🔔 Notifications Enabled'}
-            {notificationStatus === 'granted' && '🔔 Enable Notifications'}
-            {notificationStatus === 'default' && '🔔 Enable Notifications'}
-            {notificationStatus === 'denied' && '❌ Permission Denied'}
-            {notificationStatus === 'error' && '⚠️ Enable Notifications'}
-          </motion.button>
-        )}
-
-        {notificationsEnabled && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              marginTop: '15px',
-              padding: '15px',
-              background: '#d1fae5',
-              borderRadius: '10px',
-              color: '#065f46'
-            }}
-          >
-            ✅ You will receive notifications for:
-            <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
-              <li>📊 New grades</li>
-              <li>✅ Attendance codes</li>
-              <li>💬 Admin messages</li>
-              <li>💰 Payment reminders</li>
-            </ul>
-          </motion.div>
-        )}
-      </motion.div>
-
-      <motion.div 
-        className="settings-section"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.4 }}
       >
         <div className="section-header">
           <div className="section-icon-wrapper">
-            <span className="section-icon">🚪</span>
+            <span className="section-icon">�</span>
           </div>
-          <h3>Account</h3>
+          <h3>{t('account')}</h3>
         </div>
         <motion.button
           className="logout-button-gradient"
@@ -456,7 +244,7 @@ const SettingsScreen = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
         >
-          Logout
+          {t('logout')}
         </motion.button>
       </motion.div>
 
@@ -467,7 +255,7 @@ const SettingsScreen = () => {
         transition={{ delay: 0.8 }}
       >
         <p>Nisrine School Student App</p>
-        <p>Version 1.1.0</p>
+        <p>{t('version')} 1.1.0</p>
       </motion.div>
     </motion.div>
   );

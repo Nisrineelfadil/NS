@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { checkVersion } from './version';
 
 // Screens
@@ -22,22 +23,24 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <BrowserRouter basename="/pwa">
-        <InstallPrompt />
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/dashboard" element={<DashboardScreen />} />
-          <Route path="/grades" element={<GradesScreen />} />
-          <Route path="/attendance" element={<AttendanceScreen />} />
-          <Route path="/payment" element={<PaymentScreen />} />
-          <Route path="/messages" element={<MessagesScreen />} />
-          <Route path="/settings" element={<SettingsScreen />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <BrowserRouter basename="/pwa">
+          <InstallPrompt />
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/dashboard" element={<DashboardScreen />} />
+            <Route path="/grades" element={<GradesScreen />} />
+            <Route path="/attendance" element={<AttendanceScreen />} />
+            <Route path="/payment" element={<PaymentScreen />} />
+            <Route path="/messages" element={<MessagesScreen />} />
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
 
