@@ -28,9 +28,22 @@ const SettingsScreen = () => {
                           currentLanguage === 'ar' ? 'هل أنت متأكد أنك تريد تسجيل الخروج؟' : 
                           'Are you sure you want to logout?';
     if (window.confirm(confirmMessage)) {
-      // Clear ALL data
-      localStorage.clear();
+      // Preserve user preferences before clearing
+      const savedTheme = localStorage.getItem('appTheme');
+      const savedLanguage = localStorage.getItem('appLanguage');
+      
+      // Clear session data but NOT preferences
+      localStorage.removeItem('studentToken');
+      localStorage.removeItem('studentData');
+      localStorage.removeItem('cachedGrades');
+      localStorage.removeItem('cachedAttendance');
+      localStorage.removeItem('cachedPayments');
+      localStorage.removeItem('cachedMessages');
       sessionStorage.clear();
+      
+      // Restore preferences
+      if (savedTheme) localStorage.setItem('appTheme', savedTheme);
+      if (savedLanguage) localStorage.setItem('appLanguage', savedLanguage);
       
       // Clear service worker caches
       if ('caches' in window) {
