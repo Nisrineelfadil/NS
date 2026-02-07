@@ -11,6 +11,50 @@ import { API_URL } from '../config';
 const LANGUAGE_FORMATIONS = ['Allemand', 'Anglais', 'Français', 'Ausbildung'];
 const BRANCH_FORMATIONS = ['Informatique', 'Gériatrie', 'Aide soignant', 'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Cuisine', 'Gestion hôtelière'];
 
+// Branch module field labels (key → display name)
+const FIELD_LABELS = {
+  'connaissancesTechniques': 'Connaissances techniques / théorie',
+  'projetPratique': 'Projet pratique / codage',
+  'resolutionProblemes': 'Résolution de problèmes',
+  'documentationRapport': 'Documentation & rapport',
+  'participationRegularite': 'Participation & régularité',
+  'hygieneSecurite': 'Hygiène et sécurité',
+  'communicationPatients': 'Communication avec les patients',
+  'techniquesSoins': 'Techniques de soins',
+  'stagePratique': 'Stage pratique / application',
+  'comportementAssiduite': 'Comportement & assiduité',
+  'maitriseGestes': 'Maîtrise des gestes techniques',
+  'respectProtocoles': "Respect des protocoles d'hygiène",
+  'relationPatient': 'Relation patient / écoute',
+  'rapportDossier': 'Rapport ou dossier pratique',
+  'participationPonctualite': 'Participation et ponctualité',
+  'connaissanceBesoins': 'Connaissance des besoins sociaux',
+  'communicationInteraction': 'Communication & interaction',
+  'organisationActivites': "Organisation d'activités éducatives",
+  'dossierProjet': 'Dossier / projet de terrain',
+  'presenceComportement': 'Présence & comportement',
+  'analyseCas': 'Analyse de cas sociaux',
+  'communicationEcoute': 'Communication & écoute active',
+  'rapportTerrain': 'Rapport de terrain',
+  'implicationPro': 'Implication & professionnalisme',
+  'ethiqueRespect': 'Éthique & respect',
+  'techniquesCulinaires': 'Techniques culinaires / service',
+  'hygieneAlimentaire': 'Hygiène & sécurité alimentaire',
+  'travailEquipe': "Travail d'équipe",
+  'creativitePresentation': 'Créativité & présentation',
+  'disciplinePonctualite': 'Discipline & ponctualité',
+  'accueilService': 'Accueil & service client',
+  'gestionStocks': 'Gestion des stocks / commandes',
+  'communicationEquipe': "Communication d'équipe",
+  'presentationPlats': 'Présentation des plats',
+  'organisationSalle': 'Organisation de la salle',
+  'gestionReservations': 'Gestion des réservations',
+  'comptabiliteBase': 'Comptabilité de base',
+  'marketingHotelier': 'Marketing hôtelier',
+  'gestionPersonnel': 'Gestion du personnel',
+  'qualiteService': 'Qualité de service'
+};
+
 const GradesScreen = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -389,7 +433,7 @@ const GradesScreen = () => {
                 <div className="grade-header">
                   <div className="grade-info">
                     <h3 className="exam-type">
-                      {grade.examType}
+                      {FIELD_LABELS[grade.examType] || grade.examType}
                       {isLanguage && grade.languageLevel && ` - ${grade.languageLevel}`}
                       {isLanguage && grade.testType === 'miniTest' && grade.testNumber && ` - Test ${grade.testNumber}`}
                       {isLanguage && grade.testType === 'finalExam' && ' - Final Exam'}

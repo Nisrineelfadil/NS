@@ -2869,6 +2869,50 @@ function displayStudentGrades(grades) {
                         <tbody>
         `;
         
+        // Branch module field labels (key → display name)
+        const fieldLabels = {
+            'connaissancesTechniques': 'Connaissances techniques / théorie',
+            'projetPratique': 'Projet pratique / codage',
+            'resolutionProblemes': 'Résolution de problèmes',
+            'documentationRapport': 'Documentation & rapport',
+            'participationRegularite': 'Participation & régularité',
+            'hygieneSecurite': 'Hygiène et sécurité',
+            'communicationPatients': 'Communication avec les patients',
+            'techniquesSoins': 'Techniques de soins',
+            'stagePratique': 'Stage pratique / application',
+            'comportementAssiduite': 'Comportement & assiduité',
+            'maitriseGestes': 'Maîtrise des gestes techniques',
+            'respectProtocoles': "Respect des protocoles d'hygiène",
+            'relationPatient': 'Relation patient / écoute',
+            'rapportDossier': 'Rapport ou dossier pratique',
+            'participationPonctualite': 'Participation et ponctualité',
+            'connaissanceBesoins': 'Connaissance des besoins sociaux',
+            'communicationInteraction': 'Communication & interaction',
+            'organisationActivites': "Organisation d'activités éducatives",
+            'dossierProjet': 'Dossier / projet de terrain',
+            'presenceComportement': 'Présence & comportement',
+            'analyseCas': 'Analyse de cas sociaux',
+            'communicationEcoute': 'Communication & écoute active',
+            'rapportTerrain': 'Rapport de terrain',
+            'implicationPro': 'Implication & professionnalisme',
+            'ethiqueRespect': 'Éthique & respect',
+            'techniquesCulinaires': 'Techniques culinaires / service',
+            'hygieneAlimentaire': 'Hygiène & sécurité alimentaire',
+            'travailEquipe': "Travail d'équipe",
+            'creativitePresentation': 'Créativité & présentation',
+            'disciplinePonctualite': 'Discipline & ponctualité',
+            'accueilService': 'Accueil & service client',
+            'gestionStocks': 'Gestion des stocks / commandes',
+            'communicationEquipe': "Communication d'équipe",
+            'presentationPlats': 'Présentation des plats',
+            'organisationSalle': 'Organisation de la salle',
+            'gestionReservations': 'Gestion des réservations',
+            'comptabiliteBase': 'Comptabilité de base',
+            'marketingHotelier': 'Marketing hôtelier',
+            'gestionPersonnel': 'Gestion du personnel',
+            'qualiteService': 'Qualité de service'
+        };
+
         gradesList.forEach(grade => {
             const percentage = ((grade.score / grade.maxScore) * 100).toFixed(2);
             const examDate = new Date(grade.examDate).toLocaleDateString('en-US', {
@@ -2876,6 +2920,8 @@ function displayStudentGrades(grades) {
                 month: 'short',
                 day: 'numeric'
             });
+            
+            const examTypeLabel = fieldLabels[grade.examType] || grade.examType;
             
             let gradeDisplay;
             if (isLanguage) {
@@ -2898,7 +2944,7 @@ function displayStudentGrades(grades) {
             
             html += `
                 <tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 12px;"><span style="background: rgba(255, 204, 0, 0.1); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">${grade.examType}</span></td>
+                    <td style="padding: 12px;"><span style="background: rgba(255, 204, 0, 0.1); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">${examTypeLabel}</span></td>
                     <td style="padding: 12px;"><strong>${grade.score}/${grade.maxScore}</strong></td>
                     <td style="padding: 12px;">${percentage}%</td>
                     <td style="padding: 12px;">${gradeDisplay}</td>
