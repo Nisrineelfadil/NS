@@ -144,6 +144,7 @@ const cinUpload = multer({
 // Import CIN validation middleware
 const { validateCINUpload, validateCINFormat } = require('../middleware/cinValidationMiddleware');
 const imageOptimizer = require('../utils/imageOptimizer');
+const imageStorageService = require('../services/imageStorageService');
 const { generatePaymentJournalPDF } = require('../services/paymentJournalGenerator');
 
 // Use imported authentication middleware from authMiddleware.js
@@ -591,20 +592,12 @@ router.post('/students',
         console.log('Formation array:', formationArray);
         console.log('Filiere array:', filiereArray);
         
-        // Handle photo upload - using memory storage, so convert to base64 for both environments
+        // Handle photo upload - upload to Mega.nz instead of storing base64 in MongoDB
         let photoPath = null;
         const photoFile = req.files && req.files['photo'] ? req.files['photo'][0] : null;
+        // We'll upload photo after saving student to get the ID
         
-        if (photoFile) {
-            // Since we're using cinUpload with memoryStorage, convert to base64
-            const base64Image = photoFile.buffer.toString('base64');
-            photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
-            console.log('Photo converted to base64 and stored in database');
-        } else {
-            console.log('No photo uploaded - photoPath will be null');
-        }
-        
-        // Handle CIN card upload
+        // Handle CIN card upload - will upload to Mega after saving
         let cinCardData = {
             front: null,
             back: null,
@@ -615,26 +608,6 @@ router.post('/students',
             reminderSent: false,
             lastReminderDate: null
         };
-        
-        // If CIN validation passed and files exist
-        if (req.cinValidation && !req.cinValidation.addLater) {
-            if (req.cinValidation.front) {
-                const buffer = req.cinValidation.front.optimizedBuffer || req.cinValidation.front.buffer;
-                cinCardData.front = imageOptimizer.imageToBase64(buffer, 'jpeg');
-            }
-            if (req.cinValidation.back) {
-                const buffer = req.cinValidation.back.optimizedBuffer || req.cinValidation.back.buffer;
-                cinCardData.back = imageOptimizer.imageToBase64(buffer, 'jpeg');
-            }
-            
-            if (cinCardData.front || cinCardData.back) {
-                cinCardData.uploadedAt = new Date();
-                cinCardData.uploadedBy = req.adminId;
-                cinCardData.uploadedByName = admin.username;
-                cinCardData.addLater = false;
-                console.log('CIN card uploaded and optimized');
-            }
-        }
         
         // Don't hash password here - let the pre-save hook handle it
         console.log('Creating student object...');
@@ -666,6 +639,68 @@ router.post('/students',
         console.log('Saving student to database...');
         await student.save();
         console.log('Student saved successfully!');
+        
+        // Now upload images to Mega.nz using the student ID
+        const studentId = student._id.toString();
+        let needsUpdate = false;
+        
+        // Upload photo to Mega
+        if (photoFile) {
+            try {
+                const optimized = await imageOptimizer.optimizeStudentPhoto(photoFile.buffer);
+                student.photoPath = await imageStorageService.uploadStudentPhoto(optimized.buffer, studentId);
+                needsUpdate = true;
+                console.log('Photo uploaded to Mega:', student.photoPath);
+            } catch (megaErr) {
+                console.error('⚠️ Mega photo upload failed, falling back to base64:', megaErr.message);
+                const base64Image = photoFile.buffer.toString('base64');
+                student.photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
+                needsUpdate = true;
+            }
+        }
+        
+        // Upload CIN cards to Mega
+        if (req.cinValidation && !req.cinValidation.addLater) {
+            if (req.cinValidation.front) {
+                try {
+                    const buffer = req.cinValidation.front.optimizedBuffer || req.cinValidation.front.buffer;
+                    cinCardData.front = await imageStorageService.uploadCINImage(buffer, studentId, 'front');
+                    console.log('CIN front uploaded to Mega');
+                } catch (megaErr) {
+                    console.error('⚠️ Mega CIN front upload failed, falling back to base64:', megaErr.message);
+                    const buffer = req.cinValidation.front.optimizedBuffer || req.cinValidation.front.buffer;
+                    cinCardData.front = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                }
+            }
+            if (req.cinValidation.back) {
+                try {
+                    const buffer = req.cinValidation.back.optimizedBuffer || req.cinValidation.back.buffer;
+                    cinCardData.back = await imageStorageService.uploadCINImage(buffer, studentId, 'back');
+                    console.log('CIN back uploaded to Mega');
+                } catch (megaErr) {
+                    console.error('⚠️ Mega CIN back upload failed, falling back to base64:', megaErr.message);
+                    const buffer = req.cinValidation.back.optimizedBuffer || req.cinValidation.back.buffer;
+                    cinCardData.back = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                }
+            }
+            
+            if (cinCardData.front || cinCardData.back) {
+                cinCardData.uploadedAt = new Date();
+                cinCardData.uploadedBy = req.adminId;
+                cinCardData.uploadedByName = admin.username;
+                cinCardData.addLater = false;
+                student.cinCard = cinCardData;
+                needsUpdate = true;
+            }
+        }
+        
+        // Save again if images were uploaded
+        if (needsUpdate) {
+            student.markModified('cinCard');
+            student.markModified('photoPath');
+            await student.save();
+            console.log('Student updated with image paths');
+        }
         
         // Update group student count
         console.log('Updating group count...');
@@ -858,16 +893,21 @@ router.put('/students/:id',
             }
         }
         
-        // Update photo if provided - using memory storage, so convert to base64
+        // Update photo if provided - upload to Mega.nz
         const photoFile = req.files && req.files['photo'] ? req.files['photo'][0] : null;
         if (photoFile) {
-            // Since we're using cinUpload with memoryStorage, convert to base64
-            const base64Image = photoFile.buffer.toString('base64');
-            student.photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
-            console.log('Photo updated and converted to base64');
+            try {
+                const optimized = await imageOptimizer.optimizeStudentPhoto(photoFile.buffer);
+                student.photoPath = await imageStorageService.uploadStudentPhoto(optimized.buffer, req.params.id);
+                console.log('Photo uploaded to Mega:', student.photoPath);
+            } catch (megaErr) {
+                console.error('⚠️ Mega photo upload failed, falling back to base64:', megaErr.message);
+                const base64Image = photoFile.buffer.toString('base64');
+                student.photoPath = `data:${photoFile.mimetype};base64,${base64Image}`;
+            }
         }
         
-        // Handle CIN card update
+        // Handle CIN card update - upload to Mega.nz
         if (req.cinValidation && !req.cinValidation.addLater) {
             // Initialize cinCard if it doesn't exist
             if (!student.cinCard) {
@@ -889,7 +929,12 @@ router.put('/students/:id',
             // Update front if provided
             if (req.cinValidation.front) {
                 const buffer = req.cinValidation.front.optimizedBuffer || req.cinValidation.front.buffer;
-                student.cinCard.front = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                try {
+                    student.cinCard.front = await imageStorageService.uploadCINImage(buffer, req.params.id, 'front');
+                } catch (megaErr) {
+                    console.error('⚠️ Mega CIN front upload failed, falling back to base64:', megaErr.message);
+                    student.cinCard.front = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                }
                 student.cinCard.uploadedAt = new Date();
                 student.cinCard.uploadedBy = req.adminId;
                 student.cinCard.uploadedByName = admin.username;
@@ -900,7 +945,12 @@ router.put('/students/:id',
             // Update back if provided
             if (req.cinValidation.back) {
                 const buffer = req.cinValidation.back.optimizedBuffer || req.cinValidation.back.buffer;
-                student.cinCard.back = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                try {
+                    student.cinCard.back = await imageStorageService.uploadCINImage(buffer, req.params.id, 'back');
+                } catch (megaErr) {
+                    console.error('⚠️ Mega CIN back upload failed, falling back to base64:', megaErr.message);
+                    student.cinCard.back = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                }
                 student.cinCard.uploadedAt = new Date();
                 student.cinCard.uploadedBy = req.adminId;
                 student.cinCard.uploadedByName = admin.username;
@@ -996,14 +1046,27 @@ router.delete('/students/:id', authenticateAdmin, async (req, res) => {
             await group.save();
         }
         
-        // Delete student photo if exists (only if it's a file path, not base64)
-        if (student.photoPath && !student.photoPath.startsWith('data:')) {
-            try {
-                const photoPath = path.join(__dirname, '..', student.photoPath);
-                await fs.unlink(photoPath);
-                console.log('Photo file deleted from disk');
-            } catch (err) {
-                console.error('Error deleting photo:', err);
+        // Delete student images from Mega.nz (and legacy file paths)
+        if (student.photoPath) {
+            if (imageStorageService.isMediaPath(student.photoPath)) {
+                await imageStorageService.deleteStudentImages(req.params.id);
+            } else if (!student.photoPath.startsWith('data:')) {
+                try {
+                    const photoPath = path.join(__dirname, '..', student.photoPath);
+                    await fs.unlink(photoPath);
+                    console.log('Photo file deleted from disk');
+                } catch (err) {
+                    console.error('Error deleting photo:', err);
+                }
+            }
+        }
+        // Also try to delete CIN images from Mega
+        if (student.cinCard) {
+            if (imageStorageService.isMediaPath(student.cinCard.front)) {
+                await imageStorageService.deleteImage('student-cin', `${req.params.id}-front.jpg`);
+            }
+            if (imageStorageService.isMediaPath(student.cinCard.back)) {
+                await imageStorageService.deleteImage('student-cin', `${req.params.id}-back.jpg`);
             }
         }
         
@@ -1789,24 +1852,34 @@ router.post('/students/:id/upload-cin',
             // Get admin info
             const admin = await Admin.findById(req.adminId);
 
-            // Convert optimized images to base64 for storage
-            let frontBase64 = null;
-            let backBase64 = null;
+            // Upload optimized images to Mega.nz
+            let frontPath = null;
+            let backPath = null;
 
             if (req.cinValidation.front) {
                 const buffer = req.cinValidation.front.optimizedBuffer || req.cinValidation.front.buffer;
-                frontBase64 = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                try {
+                    frontPath = await imageStorageService.uploadCINImage(buffer, req.params.id, 'front');
+                } catch (megaErr) {
+                    console.error('⚠️ Mega CIN front upload failed, falling back to base64:', megaErr.message);
+                    frontPath = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                }
             }
 
             if (req.cinValidation.back) {
                 const buffer = req.cinValidation.back.optimizedBuffer || req.cinValidation.back.buffer;
-                backBase64 = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                try {
+                    backPath = await imageStorageService.uploadCINImage(buffer, req.params.id, 'back');
+                } catch (megaErr) {
+                    console.error('⚠️ Mega CIN back upload failed, falling back to base64:', megaErr.message);
+                    backPath = imageOptimizer.imageToBase64(buffer, 'jpeg');
+                }
             }
 
             // Update student with CIN card data
             student.cinCard = {
-                front: frontBase64,
-                back: backBase64,
+                front: frontPath,
+                back: backPath,
                 uploadedAt: new Date(),
                 uploadedBy: req.adminId,
                 uploadedByName: admin.username,
@@ -1869,8 +1942,32 @@ router.get('/students/:id/download-cin', authenticateAdmin, async (req, res) => 
 
         if (format === 'pdf') {
             // Combine front and back into a single PDF
-            const frontBuffer = imageOptimizer.base64ToBuffer(student.cinCard.front);
-            const backBuffer = imageOptimizer.base64ToBuffer(student.cinCard.back);
+            // Handle both Mega paths and legacy base64
+            let frontBuffer = null;
+            let backBuffer = null;
+            
+            try {
+                if (student.cinCard.front) {
+                    frontBuffer = await imageStorageService.getImageBuffer(student.cinCard.front);
+                }
+            } catch (err) {
+                console.error('⚠️ Could not fetch CIN front:', err.message);
+            }
+            
+            try {
+                if (student.cinCard.back) {
+                    backBuffer = await imageStorageService.getImageBuffer(student.cinCard.back);
+                }
+            } catch (err) {
+                console.error('⚠️ Could not fetch CIN back:', err.message);
+            }
+            
+            if (!frontBuffer && !backBuffer) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Could not retrieve CIN card images'
+                });
+            }
 
             const pdfBuffer = await imageOptimizer.combineCINToPDF(frontBuffer, backBuffer);
 
@@ -1882,7 +1979,7 @@ router.get('/students/:id/download-cin', authenticateAdmin, async (req, res) => 
             res.send(pdfBuffer);
 
         } else if (format === 'images') {
-            // Return both images as JSON with base64
+            // Return both images as JSON - return paths (URLs or base64)
             res.json({
                 success: true,
                 student: {

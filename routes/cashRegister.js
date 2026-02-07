@@ -6,6 +6,7 @@ const { authenticateAdmin, requireSuperAdmin } = require('../middleware/authMidd
 const PDFDocument = require('pdfkit');
 const multer = require('multer');
 const imageOptimizer = require('../utils/imageOptimizer');
+const imageStorageService = require('../services/imageStorageService');
 
 // Configure multer for receipt uploads (memory storage)
 const receiptUpload = multer({
@@ -750,8 +751,9 @@ router.post('/transactions/:id/receipt', receiptUpload.single('receipt'), async 
       });
     }
     
-    let imageData;
     let mimeType = req.file.mimetype;
+    let receiptBuffer;
+    let ext = 'jpg';
     
     // If it's an image (not PDF), optimize it
     if (req.file.mimetype.startsWith('image/')) {
@@ -766,8 +768,9 @@ router.post('/transactions/:id/receipt', receiptUpload.single('receipt'), async 
       
       // Optimize the image (use CIN config for receipts - good balance of quality/size)
       const optimized = await imageOptimizer.optimizeCINImage(req.file.buffer, 'receipt');
-      imageData = optimized.buffer.toString('base64');
-      mimeType = 'image/jpeg'; // Always convert to JPEG for consistency
+      receiptBuffer = optimized.buffer;
+      mimeType = 'image/jpeg';
+      ext = 'jpg';
       
       console.log(`📄 Receipt optimized: ${imageOptimizer.formatBytes(req.file.buffer.length)} → ${imageOptimizer.formatBytes(optimized.size)} (${optimized.compressionRatio}% reduction)`);
     } else {
@@ -778,12 +781,22 @@ router.post('/transactions/:id/receipt', receiptUpload.single('receipt'), async 
           message: 'PDF file too large. Maximum size is 2MB.'
         });
       }
-      imageData = req.file.buffer.toString('base64');
+      receiptBuffer = req.file.buffer;
+      ext = 'pdf';
+    }
+    
+    // Upload receipt to Mega.nz
+    let receiptPath;
+    try {
+      receiptPath = await imageStorageService.uploadReceipt(receiptBuffer, req.params.id, ext);
+    } catch (megaErr) {
+      console.error('⚠️ Mega receipt upload failed, falling back to base64:', megaErr.message);
+      receiptPath = receiptBuffer.toString('base64');
     }
     
     // Update transaction with receipt
     transaction.receiptImage = {
-      data: imageData,
+      data: receiptPath,
       mimeType: mimeType,
       fileName: req.file.originalname,
       uploadedAt: new Date(),
@@ -832,11 +845,18 @@ router.get('/transactions/:id/receipt', async (req, res) => {
       });
     }
     
-    // Return as JSON with base64 data for modal display
+    // Return receipt data for modal display
+    // If stored as Mega path, return the URL; if base64, return as-is
+    let receiptData = transaction.receiptImage.data;
+    if (imageStorageService.isMediaPath(receiptData)) {
+      // For Mega-stored receipts, return the URL for the frontend to use as img src
+      receiptData = receiptData; // Already a URL path like /api/media/receipts/xxx.jpg
+    }
+    
     res.json({
       success: true,
       receipt: {
-        data: transaction.receiptImage.data,
+        data: receiptData,
         mimeType: transaction.receiptImage.mimeType,
         fileName: transaction.receiptImage.fileName,
         uploadedAt: transaction.receiptImage.uploadedAt,
@@ -873,7 +893,14 @@ router.get('/transactions/:id/receipt/download', async (req, res) => {
       });
     }
     
-    const buffer = Buffer.from(transaction.receiptImage.data, 'base64');
+    // Handle both Mega paths and legacy base64
+    let buffer;
+    if (imageStorageService.isMediaPath(transaction.receiptImage.data)) {
+      buffer = await imageStorageService.getImageBuffer(transaction.receiptImage.data);
+    } else {
+      buffer = Buffer.from(transaction.receiptImage.data, 'base64');
+    }
+    
     const fileName = transaction.receiptImage.fileName || `receipt_${transaction._id}.jpg`;
     
     // Set appropriate content type
@@ -910,6 +937,12 @@ router.delete('/transactions/:id/receipt', async (req, res) => {
         success: false,
         message: 'No receipt found for this transaction'
       });
+    }
+    
+    // Delete from Mega if stored there
+    if (imageStorageService.isMediaPath(transaction.receiptImage.data)) {
+      const ext = transaction.receiptImage.mimeType === 'application/pdf' ? 'pdf' : 'jpg';
+      await imageStorageService.deleteImage('receipts', `${transaction._id}.${ext}`);
     }
     
     // Clear the receipt data

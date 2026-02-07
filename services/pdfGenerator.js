@@ -2,6 +2,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 const pdfValidator = require('../utils/pdfValidator');
+const imageStorageService = require('./imageStorageService');
 
 /**
  * Generates a registration PDF matching the school's official form
@@ -16,6 +17,16 @@ const pdfValidator = require('../utils/pdfValidator');
  * @returns {Promise<Buffer|string>} - PDF buffer or path to generated PDF
  */
 async function generateRegistrationPDF(studentData, outputPath = null) {
+    // Pre-fetch photo buffer if stored on Mega (must be done before PDF generation starts)
+    let photoBuffer = null;
+    if (studentData.photoPath) {
+        try {
+            photoBuffer = await imageStorageService.getImageBuffer(studentData.photoPath);
+        } catch (err) {
+            console.error('⚠️ Could not fetch photo for PDF:', err.message);
+        }
+    }
+    
     return new Promise((resolve, reject) => {
         try {
             // Create PDF document with optimized settings for size
@@ -71,11 +82,20 @@ async function generateRegistrationPDF(studentData, outputPath = null) {
             drawHeader(doc, studentData);
 
             // Add photo FIRST (before other content) if exists
-            if (studentData.photoPath) {
+            if (photoBuffer) {
                 try {
-                    // Check if it's a base64 data URL
+                    doc.image(photoBuffer, 452, 42, {
+                        fit: [96, 116],
+                        align: 'center',
+                        valign: 'center'
+                    });
+                } catch (photoError) {
+                    console.error('❌ Error adding photo to PDF:', photoError);
+                }
+            } else if (studentData.photoPath && !imageStorageService.isMediaPath(studentData.photoPath)) {
+                try {
+                    // Legacy: Check if it's a base64 data URL
                     if (studentData.photoPath.startsWith('data:')) {
-                        // Base64 image
                         const base64Data = studentData.photoPath.split(',')[1];
                         const imageBuffer = Buffer.from(base64Data, 'base64');
                         doc.image(imageBuffer, 452, 42, {
@@ -87,15 +107,12 @@ async function generateRegistrationPDF(studentData, outputPath = null) {
                         // Try different path formats
                         let photoFullPath = null;
                         
-                        // If it's a relative path like /uploads/photos/...
                         if (studentData.photoPath.startsWith('/uploads/')) {
                             photoFullPath = path.join(__dirname, '..', studentData.photoPath);
                         } 
-                        // If it's already a full path
                         else if (fs.existsSync(studentData.photoPath)) {
                             photoFullPath = studentData.photoPath;
                         }
-                        // Try uploads folder
                         else {
                             const uploadsPath = path.join(__dirname, '..', 'uploads', 'photos', path.basename(studentData.photoPath));
                             if (fs.existsSync(uploadsPath)) {
@@ -103,7 +120,6 @@ async function generateRegistrationPDF(studentData, outputPath = null) {
                             }
                         }
                         
-                        // Add photo if found
                         if (photoFullPath && fs.existsSync(photoFullPath)) {
                             console.log('✅ Adding photo to PDF:', photoFullPath);
                             doc.image(photoFullPath, 452, 42, {

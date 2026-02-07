@@ -290,23 +290,27 @@ class ImageOptimizer {
                 doc.on('error', reject);
 
                 // Add front side
-                doc.fontSize(16).text('CIN Card - Front Side', { align: 'center' });
-                doc.moveDown();
-                doc.image(frontBuffer, {
-                    fit: [500, 350],
-                    align: 'center',
-                    valign: 'center'
-                });
+                if (frontBuffer) {
+                    doc.fontSize(16).text('CIN Card - Front Side', { align: 'center' });
+                    doc.moveDown();
+                    doc.image(frontBuffer, {
+                        fit: [500, 350],
+                        align: 'center',
+                        valign: 'center'
+                    });
+                }
 
                 // Add new page for back side
-                doc.addPage();
-                doc.fontSize(16).text('CIN Card - Back Side', { align: 'center' });
-                doc.moveDown();
-                doc.image(backBuffer, {
-                    fit: [500, 350],
-                    align: 'center',
-                    valign: 'center'
-                });
+                if (backBuffer) {
+                    if (frontBuffer) doc.addPage();
+                    doc.fontSize(16).text('CIN Card - Back Side', { align: 'center' });
+                    doc.moveDown();
+                    doc.image(backBuffer, {
+                        fit: [500, 350],
+                        align: 'center',
+                        valign: 'center'
+                    });
+                }
 
                 doc.end();
             });

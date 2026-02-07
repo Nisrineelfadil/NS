@@ -13,6 +13,8 @@ class MegaService {
         this.password = process.env.MEGA_PASSWORD;
         this.storage = null;
         this.isReady = false;
+        this.lastLoginTime = null;
+        this.SESSION_MAX_AGE = 30 * 60 * 1000; // 30 minutes - force re-login
     }
 
     /**
@@ -45,6 +47,7 @@ class MegaService {
             }).ready;
 
             this.isReady = true;
+            this.lastLoginTime = Date.now();
             console.log('✅ Mega.nz login successful');
             
             return this.storage;
@@ -59,10 +62,25 @@ class MegaService {
      * Ensure we're logged in
      */
     async ensureLoggedIn() {
+        // Force re-login if session is old (Mega sessions can expire)
+        if (this.lastLoginTime && (Date.now() - this.lastLoginTime > this.SESSION_MAX_AGE)) {
+            console.log('🔄 Mega session expired, re-logging in...');
+            this.isReady = false;
+            this.storage = null;
+        }
         if (!this.isReady || !this.storage) {
             await this.login();
         }
         return this.storage;
+    }
+
+    /**
+     * Reset session on error (forces re-login on next call)
+     */
+    resetSession() {
+        this.isReady = false;
+        this.storage = null;
+        this.lastLoginTime = null;
     }
 
     /**
@@ -205,7 +223,7 @@ class MegaService {
      * @param {Buffer} fileBuffer - File buffer
      * @param {string} megaPath - Path like "/ServiceRequests/cv/filename.pdf"
      */
-    async uploadServiceFile(fileBuffer, megaPath) {
+    async uploadServiceFile(fileBuffer, megaPath, _retried = false) {
         try {
             const storage = await this.ensureLoggedIn();
 
@@ -236,6 +254,12 @@ class MegaService {
             };
 
         } catch (error) {
+            // Retry once after session reset for transient errors
+            if (!_retried) {
+                console.warn('⚠️ Mega upload failed, retrying after session reset...');
+                this.resetSession();
+                return this.uploadServiceFile(fileBuffer, megaPath, true);
+            }
             console.error('❌ Mega upload error:', error);
             throw new Error(`Failed to upload file to Mega: ${error.message}`);
         }
@@ -245,7 +269,7 @@ class MegaService {
      * Download file from Mega
      * @param {string} megaPath - Full path to file
      */
-    async downloadServiceFile(megaPath) {
+    async downloadServiceFile(megaPath, _retried = false) {
         try {
             const storage = await this.ensureLoggedIn();
 
@@ -304,6 +328,12 @@ class MegaService {
             };
 
         } catch (error) {
+            // Retry once after session reset for transient errors
+            if (!_retried) {
+                console.warn('⚠️ Mega download failed, retrying after session reset...');
+                this.resetSession();
+                return this.downloadServiceFile(megaPath, true);
+            }
             console.error('❌ Mega download error:', error);
             throw new Error(`Failed to download file from Mega: ${error.message}`);
         }

@@ -1573,12 +1573,26 @@ async function viewReceipt(transactionId) {
             // Show image or PDF
             loading.style.display = 'none';
             
-            if (receipt.mimeType === 'application/pdf') {
-                pdf.src = `data:application/pdf;base64,${receipt.data}`;
-                pdf.style.display = 'block';
+            if (receipt.data) {
+                const isMediaUrl = receipt.data.startsWith('/api/media/');
+                
+                if (receipt.mimeType === 'application/pdf') {
+                    // Handle both Mega URL paths and legacy base64
+                    pdf.src = isMediaUrl 
+                        ? receipt.data 
+                        : `data:application/pdf;base64,${receipt.data}`;
+                    pdf.style.display = 'block';
+                } else {
+                    // Handle both Mega URL paths and legacy base64
+                    image.src = isMediaUrl 
+                        ? receipt.data 
+                        : `data:${receipt.mimeType};base64,${receipt.data}`;
+                    image.style.display = 'block';
+                }
             } else {
-                image.src = `data:${receipt.mimeType};base64,${receipt.data}`;
-                image.style.display = 'block';
+                showNotification(translate('receiptNotFound'), 'error');
+                closeReceiptModal();
+                return;
             }
         } else {
             showNotification(data.message || translate('receiptNotFound'), 'error');

@@ -7,6 +7,7 @@ const Student = require('../models/Student');
 const Settings = require('../models/Settings');
 const { generateRegistrationPDF } = require('../services/pdfGenerator');
 const notificationService = require('../services/notificationService');
+const imageStorageService = require('../services/imageStorageService');
 
 // Configure multer for photo uploads (using memory storage for Vercel compatibility)
 const storage = multer.memoryStorage();
@@ -122,11 +123,7 @@ router.post('/register', upload.single('photo'), async (req, res) => {
             });
         }
 
-        // Convert photo to base64 for database storage (Vercel compatible)
-        const photoBase64 = req.file.buffer.toString('base64');
-        const photoData = `data:${req.file.mimetype};base64,${photoBase64}`;
-
-        // Create new student record
+        // Create new student record first to get the ID
         const student = new Student({
             fullName,
             dateOfBirth,
@@ -139,10 +136,22 @@ router.post('/register', upload.single('photo'), async (req, res) => {
             studyLevel,
             formationChoisie: Array.isArray(formationChoisie) ? formationChoisie : [formationChoisie],
             filiere: Array.isArray(filiere) && filiere.length > 0 ? filiere : [],
-            photoPath: photoData // Store as base64 data URL
+            photoPath: null
         });
 
         await student.save();
+        
+        // Upload photo to Mega.nz
+        try {
+            student.photoPath = await imageStorageService.uploadRegistrationPhoto(req.file.buffer, student._id.toString());
+            await student.save();
+            console.log('Registration photo uploaded to Mega');
+        } catch (megaErr) {
+            console.error('⚠️ Mega photo upload failed, falling back to base64:', megaErr.message);
+            const photoBase64 = req.file.buffer.toString('base64');
+            student.photoPath = `data:${req.file.mimetype};base64,${photoBase64}`;
+            await student.save();
+        }
 
         // Generate PDF (skip on Vercel due to filesystem limitations)
         // PDF will be generated on-demand when admin downloads it

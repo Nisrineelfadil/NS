@@ -7,6 +7,7 @@ const CreditTransaction = require('../models/CreditTransaction');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
 const { logActivity, getClientIp } = require('../utils/activityLogger');
 const { generateRegistrationPDF } = require('../services/pdfGenerator');
+const imageStorageService = require('../services/imageStorageService');
 
 // Configure multer for photo uploads (memory storage)
 const storage = multer.memoryStorage();
@@ -125,14 +126,10 @@ router.post('/register', authenticateAdmin, upload.single('photo'), async (req, 
             });
         }
 
-        // Convert photo to base64
-        const photoBase64 = req.file.buffer.toString('base64');
-        const photoData = `data:${req.file.mimetype};base64,${photoBase64}`;
-
         // Calculate credits for this registration
         const creditsEarned = calculateCredits(formationChoisie);
 
-        // Create new student record with admin tracking
+        // Create new student record first to get the ID
         const student = new Student({
             fullName,
             dateOfBirth,
@@ -145,13 +142,25 @@ router.post('/register', authenticateAdmin, upload.single('photo'), async (req, 
             studyLevel,
             formationChoisie: Array.isArray(formationChoisie) ? formationChoisie : [formationChoisie],
             filiere: Array.isArray(filiere) && filiere.length > 0 ? filiere : [],
-            photoPath: photoData,
+            photoPath: null,
             registeredBy: req.admin.id,
             registeredByName: req.admin.username,
             creditEarned: creditsEarned
         });
 
         await student.save();
+        
+        // Upload photo to Mega.nz
+        try {
+            student.photoPath = await imageStorageService.uploadRegistrationPhoto(req.file.buffer, student._id.toString());
+            await student.save();
+            console.log('Admin registration photo uploaded to Mega');
+        } catch (megaErr) {
+            console.error('⚠️ Mega photo upload failed, falling back to base64:', megaErr.message);
+            const photoBase64 = req.file.buffer.toString('base64');
+            student.photoPath = `data:${req.file.mimetype};base64,${photoBase64}`;
+            await student.save();
+        }
 
         // Update admin's credits and registration count
         const admin = await Admin.findById(req.admin.id);

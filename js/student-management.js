@@ -29,6 +29,11 @@ function normalizePhotoPath(photoPath) {
         return photoPath;
     }
     
+    // If it's a Mega.nz media URL, return as-is
+    if (photoPath.startsWith('/api/media/')) {
+        return photoPath;
+    }
+    
     // If it's a relative path starting with /uploads, return as-is
     if (photoPath.startsWith('/uploads')) {
         return photoPath;

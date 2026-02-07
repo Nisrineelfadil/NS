@@ -31,6 +31,7 @@ const seasonBackupRoutes = require('./routes/seasonBackup');
 const jobApplicationsRoutes = require('./routes/jobApplications');
 const telcRoutes = require('./routes/telc');
 const fcmRoutes = require('./routes/fcm');
+const mediaRoutes = require('./routes/media');
 // const pushNotificationsRoutes = require('./routes/pushNotifications'); // DISABLED - Push notifications temporarily disabled
 
 // Import services
@@ -290,6 +291,9 @@ const dbMiddleware = async (req, res, next) => {
     });
   }
 };
+
+// Media route (no database needed - serves files from Mega.nz with caching)
+app.use('/api/media', mediaRoutes);
 
 // API Routes (with database connection)
 app.use('/api', dbMiddleware, registrationRoutes);

@@ -7,6 +7,7 @@ const TelcEmailTemplate = require('../models/TelcEmailTemplate');
 const Settings = require('../models/Settings');
 const Admin = require('../models/Admin');
 const emailService = require('../services/emailService');
+const imageStorageService = require('../services/imageStorageService');
 
 // Authentication middleware
 const authenticateAdmin = async (req, res, next) => {
@@ -727,9 +728,18 @@ router.post('/candidates/:id/certificate', authenticateAdmin, async (req, res) =
             });
         }
 
-        // Store certificate
+        // Upload certificate to Mega.nz instead of storing base64 in MongoDB
+        let certPath;
+        try {
+            const certBuffer = Buffer.from(certificateData, 'base64');
+            certPath = await imageStorageService.uploadCertificate(certBuffer, req.params.id);
+        } catch (megaErr) {
+            console.error('⚠️ Mega certificate upload failed, falling back to base64:', megaErr.message);
+            certPath = certificateData; // Fall back to base64
+        }
+        
         candidate.certificate = {
-            data: certificateData, // Base64 encoded PDF
+            data: certPath,
             filename: filename || `TELC_${candidate.examLevel}_${candidate.fullName.replace(/\s+/g, '_')}.pdf`,
             uploadedAt: new Date(),
             uploadedBy: req.admin._id,
@@ -768,7 +778,13 @@ router.get('/candidates/:id/certificate', authenticateAdmin, async (req, res) =>
             return res.status(404).json({ success: false, message: 'No certificate uploaded' });
         }
 
-        const buffer = Buffer.from(candidate.certificate.data, 'base64');
+        // Handle both Mega paths and legacy base64
+        let buffer;
+        if (imageStorageService.isMediaPath(candidate.certificate.data)) {
+            buffer = await imageStorageService.getImageBuffer(candidate.certificate.data);
+        } else {
+            buffer = Buffer.from(candidate.certificate.data, 'base64');
+        }
         
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${candidate.certificate.filename}"`);

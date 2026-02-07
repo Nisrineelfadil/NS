@@ -42,7 +42,42 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+  
+  // Start background notification checking
+  startNotificationTimer();
 });
+
+// Timer-based notification checking (fallback for browsers without periodic sync)
+let notificationTimer = null;
+
+function startNotificationTimer() {
+  console.log('⏰ Starting notification timer (every 60 seconds)');
+  
+  // Clear any existing timer
+  if (notificationTimer) {
+    clearInterval(notificationTimer);
+  }
+  
+  // Check notifications every 60 seconds
+  notificationTimer = setInterval(async () => {
+    try {
+      await checkForNotifications();
+    } catch (error) {
+      console.error('❌ Timer notification check failed:', error);
+    }
+  }, 60000);
+  
+  // Check immediately on start
+  setTimeout(checkForNotifications, 5000);
+}
+
+function stopNotificationTimer() {
+  if (notificationTimer) {
+    clearInterval(notificationTimer);
+    notificationTimer = null;
+    console.log('⏹️ Notification timer stopped');
+  }
+}
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
@@ -96,4 +131,162 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// Background sync for notifications
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-notifications') {
+    event.waitUntil(checkForNotifications());
+  }
+});
+
+// Periodic background sync (if supported)
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'check-notifications') {
+    event.waitUntil(checkForNotifications());
+  }
+});
+
+async function checkForNotifications() {
+  try {
+    console.log('🔔 Service worker checking for notifications...');
+    
+    // Get auth data from IndexedDB
+    const db = await openAuthDB();
+    const authData = await getAuthFromDB(db);
+    
+    if (!authData || !authData.token) {
+      console.log('⚠️ No auth token found in service worker');
+      return;
+    }
+
+    const API_URL = self.location.origin.includes('localhost') 
+      ? 'http://localhost:3000' 
+      : 'https://nisrine-school.vercel.app';
+
+    console.log('📡 Checking messages via:', API_URL);
+
+    // Check for new messages
+    const messagesRes = await fetch(`${API_URL}/api/grades/student/messages`, {
+      headers: { 'Authorization': `Bearer ${authData.token}` }
+    });
+    
+    if (messagesRes.ok) {
+      const response = await messagesRes.json();
+      const messages = response.messages || response;
+      const unreadMessages = messages.filter(m => !m.isRead);
+      
+      console.log(`📬 Found ${unreadMessages.length} unread messages`);
+      
+      if (unreadMessages.length > 0) {
+        const lastChecked = await getLastChecked('messages');
+        const newMessages = unreadMessages.filter(m => 
+          new Date(m.createdAt) > new Date(lastChecked)
+        );
+        
+        console.log(`🆔 Found ${newMessages.length} new messages`);
+        
+        if (newMessages.length > 0) {
+          // Show notification with proper mobile support
+          await self.registration.showNotification('💬 New Message', {
+            body: newMessages[0].message?.substring(0, 100) || 'You have a new message',
+            icon: '/pwa/icon-192.png',
+            badge: '/pwa/icon-192.png',
+            tag: 'new-message',
+            renotify: true,
+            requireInteraction: false,
+            silent: false,
+            vibrate: [200, 100, 200],
+            data: { url: '/pwa/messages' }
+          });
+          
+          await setLastChecked('messages', new Date().toISOString());
+          console.log('✅ Notification shown from service worker');
+        }
+      }
+    } else {
+      console.log('❌ Failed to fetch messages:', messagesRes.status);
+    }
+  } catch (error) {
+    console.error('❌ Background notification check failed:', error);
+  }
+}
+
+function openAuthDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('nisrine-auth-db', 1);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getAuthFromDB(db) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['auth-store'], 'readonly');
+    const store = transaction.objectStore('auth-store');
+    const request = store.get('auth'); // Fixed: use 'auth' key instead of 'auth-data'
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getLastChecked(type) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('nisrine-notifications-db', 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('last-checked')) {
+        db.createObjectStore('last-checked');
+      }
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['last-checked'], 'readonly');
+      const store = transaction.objectStore('last-checked');
+      const getRequest = store.get(type);
+      getRequest.onsuccess = () => resolve(getRequest.result || new Date(0).toISOString());
+      getRequest.onerror = () => reject(getRequest.error);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function setLastChecked(type, timestamp) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('nisrine-notifications-db', 1);
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['last-checked'], 'readwrite');
+      const store = transaction.objectStore('last-checked');
+      const putRequest = store.put(timestamp, type);
+      putRequest.onsuccess = () => resolve();
+      putRequest.onerror = () => reject(putRequest.error);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/pwa/';
+  
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if there's already a window open
+        for (const client of clientList) {
+          if (client.url.includes('/pwa/') && 'focus' in client) {
+            client.focus();
+            client.navigate(urlToOpen);
+            return;
+          }
+        }
+        // No window open, open a new one
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(urlToOpen);
+        }
+      })
+  );
 });
