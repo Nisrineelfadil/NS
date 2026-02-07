@@ -203,11 +203,12 @@ app.get('/phase2-test', serveHTML('phase2-test.html'));
 app.get('/login-app', serveHTML('app-redirect.html'));
 app.get('/cash-register', serveHTML('cash-register.html'));
 
-// Serve React portals (student and teacher)
+// Serve React portals (student and teacher) - no-cache headers to prevent stale HTML on Vercel CDN
 app.get('/student-portal', (req, res) => {
   const filePath = path.join(process.cwd(), 'react-portals', 'dist', 'index.html');
-  console.log('Student portal requested. File path:', filePath);
-  console.log('File exists:', fs.existsSync(filePath));
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   res.sendFile(filePath, (err) => {
     if (err) {
       console.error('Error serving student portal:', err.message);
@@ -218,8 +219,9 @@ app.get('/student-portal', (req, res) => {
 
 app.get('/teacher-portal', (req, res) => {
   const filePath = path.join(process.cwd(), 'react-portals', 'dist', 'index.html');
-  console.log('Teacher portal requested. File path:', filePath);
-  console.log('File exists:', fs.existsSync(filePath));
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   res.sendFile(filePath, (err) => {
     if (err) {
       console.error('Error serving teacher portal:', err.message);
