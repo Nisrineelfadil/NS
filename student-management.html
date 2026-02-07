@@ -615,6 +615,563 @@
             border-top: 1px solid var(--border-color);
         }
 
+        /* Teacher Modal Premium Styles */
+        .teacher-modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .teacher-modal-header {
+            text-align: center;
+            padding: 28px 30px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin: -30px -30px 0 -30px;
+            border-radius: 15px 15px 0 0;
+            background: linear-gradient(135deg, #fefce8 0%, #fff 50%);
+            position: relative;
+        }
+
+        .teacher-modal-header .header-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+        }
+
+        .teacher-modal-header h2 {
+            font-size: 1.35rem;
+            color: var(--text-dark);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .teacher-modal-header p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .teacher-modal-header .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .teacher-modal-header .modal-close-btn:hover {
+            background: #fef2f2;
+            color: var(--danger-color);
+            border-color: #fecaca;
+        }
+
+        .teacher-modal-section {
+            padding: 20px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .teacher-modal-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .teacher-modal-section .section-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .teacher-modal-section .section-label i {
+            font-size: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .teacher-modal-section .section-label .section-number {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: var(--text-dark);
+            font-size: 0.7rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .teacher-field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .teacher-field-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .teacher-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .teacher-field label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .teacher-field label .required {
+            color: var(--danger-color);
+            margin-left: 2px;
+        }
+
+        .teacher-field .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .teacher-field .input-wrapper .input-icon {
+            position: absolute;
+            left: 14px;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .teacher-field .input-wrapper input,
+        .teacher-field .input-wrapper select {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .teacher-field .input-wrapper input:focus,
+        .teacher-field .input-wrapper select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
+        }
+
+        .teacher-field .input-wrapper input:focus ~ .input-icon,
+        .teacher-field .input-wrapper select:focus ~ .input-icon {
+            color: var(--primary-color);
+        }
+
+        .teacher-field .input-wrapper input[readonly] {
+            background: #f9fafb;
+            color: var(--text-light);
+        }
+
+        .teacher-field .input-wrapper .input-action-btn {
+            position: absolute;
+            right: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary-color);
+            color: var(--text-dark);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .teacher-field .input-wrapper .input-action-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        .teacher-field .field-hint {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .teacher-field .field-hint i {
+            font-size: 0.7rem;
+        }
+
+        /* Formation chips */
+        .formation-category {
+            margin-bottom: 16px;
+        }
+
+        .formation-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .formation-category-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .formation-category-label .cat-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .formation-category-label .cat-icon.lang {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .formation-category-label .cat-icon.branch {
+            background: #f0fdf4;
+            color: #22c55e;
+        }
+
+        .formation-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .formation-chip {
+            position: relative;
+        }
+
+        .formation-chip input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .formation-chip .chip-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .formation-chip .chip-label:hover {
+            border-color: #d1d5db;
+            background: #f9fafb;
+        }
+
+        .formation-chip .chip-label .chip-check {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 1.5px solid #d1d5db;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .formation-chip input[type="checkbox"]:checked + .chip-label {
+            border-color: var(--primary-color);
+            background: #fffbeb;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .formation-chip input[type="checkbox"]:checked + .chip-label .chip-check {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        /* Group filter tabs */
+        .groups-filter-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .groups-filter-tab {
+            flex: 1;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-light);
+        }
+
+        .groups-filter-tab:hover {
+            color: var(--text-dark);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .groups-filter-tab.active {
+            background: white;
+            color: var(--text-dark);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .groups-filter-tab .tab-icon {
+            font-size: 0.78rem;
+        }
+
+        .groups-filter-tab .tab-count {
+            background: var(--border-color);
+            color: var(--text-light);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .groups-filter-tab.active .tab-count {
+            background: var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        .groups-tab-panel {
+            display: none;
+        }
+
+        .groups-tab-panel.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .groups-tab-panel.active::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .groups-tab-panel.active::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        .groups-tab-panel.active::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        /* Compact groups grid (inside modals only) */
+        .modal .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .modal .groups-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal .groups-grid::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        .modal .groups-grid::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        .group-chip {
+            position: relative;
+        }
+
+        .group-chip input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .group-chip .group-chip-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.82rem;
+            color: var(--text-dark);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .group-chip .group-chip-label:hover {
+            border-color: #d1d5db;
+            background: #fafafa;
+        }
+
+        .group-chip .group-chip-label .group-check {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 1.5px solid #d1d5db;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .group-chip input[type="checkbox"]:checked + .group-chip-label {
+            border-color: var(--primary-color);
+            background: #fffbeb;
+        }
+
+        .group-chip input[type="checkbox"]:checked + .group-chip-label .group-check {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        .groups-empty {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* Modal footer actions */
+        .teacher-modal-actions {
+            display: flex;
+            gap: 10px;
+            padding: 20px 0 0;
+            margin-top: 4px;
+        }
+
+        .teacher-modal-actions .btn-teacher-submit {
+            flex: 1;
+            padding: 13px 24px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary-color);
+            color: var(--text-dark);
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+        }
+
+        .teacher-modal-actions .btn-teacher-submit:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
+        }
+
+        .teacher-modal-actions .btn-teacher-cancel {
+            padding: 13px 24px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            background: white;
+            color: var(--text-dark);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .teacher-modal-actions .btn-teacher-cancel:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        @media (max-width: 600px) {
+            .teacher-field-row {
+                grid-template-columns: 1fr;
+            }
+            .teacher-modal-header {
+                padding: 20px 20px 16px;
+                margin: -20px -20px 0 -20px;
+            }
+            .teacher-modal-actions {
+                flex-direction: column-reverse;
+            }
+            .formation-chips {
+                gap: 6px;
+            }
+            .formation-chip .chip-label {
+                padding: 7px 12px;
+                font-size: 0.78rem;
+            }
+        }
+
         /* Search and Filters */
         .search-filters {
             display: flex;

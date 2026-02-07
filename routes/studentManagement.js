@@ -6,6 +6,7 @@ const PaymentReminder = require('../models/PaymentReminder');
 const PaymentHistory = require('../models/PaymentHistory');
 const StudentMessage = require('../models/StudentMessage');
 const Admin = require('../models/Admin');
+const BranchGroup = require('../models/BranchGroup');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
@@ -837,7 +838,41 @@ router.put('/students/:id',
         if (phoneNumber) student.phoneNumber = phoneNumber;
         if (parentPhone) student.parentPhone = parentPhone;
         if (formation) student.formation = Array.isArray(formation) ? formation : [formation];
-        if (filiere) student.filiere = Array.isArray(filiere) ? filiere : [filiere];
+        
+        // Handle filiere (branch) change - clear branchSubgroup if it no longer matches
+        let branchClearedByFiliereChange = false;
+        if (filiere) {
+            const newFiliereArray = Array.isArray(filiere) ? filiere : [filiere];
+            const oldFiliereArray = student.filiere || [];
+            const filiereChanged = JSON.stringify([...newFiliereArray].sort()) !== JSON.stringify([...oldFiliereArray].sort());
+            
+            student.filiere = newFiliereArray;
+            
+            // If filiere changed and student has a branch subgroup, check if it's still valid
+            if (filiereChanged && student.branchSubgroup) {
+                const currentSubgroup = await Group.findById(student.branchSubgroup);
+                let subgroupStillValid = false;
+                
+                if (currentSubgroup && currentSubgroup.branchGroup) {
+                    const currentBranchGroup = await BranchGroup.findById(currentSubgroup.branchGroup);
+                    if (currentBranchGroup && newFiliereArray.includes(currentBranchGroup.formation)) {
+                        subgroupStillValid = true;
+                    }
+                }
+                
+                if (!subgroupStillValid) {
+                    // Clear the branch subgroup - student will appear in pending assignments
+                    console.log(`🔄 Branch changed for ${student.fullName}: clearing branchSubgroup (was ${student.branchSubgroupName})`);
+                    if (currentSubgroup) {
+                        currentSubgroup.currentStudentCount = Math.max(0, currentSubgroup.currentStudentCount - 1);
+                        await currentSubgroup.save();
+                    }
+                    student.branchSubgroup = null;
+                    student.branchSubgroupName = null;
+                    branchClearedByFiliereChange = true;
+                }
+            }
+        }
         if (paymentDate) student.paymentDate = new Date(paymentDate);
         if (paymentAmount) student.paymentAmount = parseFloat(paymentAmount);
         if (paymentStatus) student.paymentStatus = paymentStatus;
@@ -845,7 +880,8 @@ router.put('/students/:id',
         if (notes !== undefined) student.notes = notes;
         
         // Handle branch subgroup assignment/unassignment
-        if (branchSubgroup !== undefined) {
+        // Skip if filiere change already cleared the branch subgroup (form may still send stale value)
+        if (branchSubgroup !== undefined && !branchClearedByFiliereChange) {
             const oldBranchSubgroupId = student.branchSubgroup ? student.branchSubgroup.toString() : null;
             
             if (branchSubgroup === '' || branchSubgroup === null) {

@@ -207,48 +207,60 @@ router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
         
         let studentQuery = { status: 'active' };
         
-        // Filter by season's groups
-        if (targetSeason) {
-            const seasonGroups = await Group.find({ season: targetSeason._id }).select('_id');
-            const seasonGroupIds = seasonGroups.map(g => g._id);
-            
-            // Filter by teacher's assigned groups AND season groups
+        if (isBranch) {
+            // Branch teacher - groupId is a branch subgroup ID
+            // Filter students by their branchSubgroup, not their language group
             if (groupId) {
-                // Check if groupId is in season's groups
-                if (seasonGroupIds.some(id => id.toString() === groupId)) {
-                    studentQuery.group = groupId;
-                } else {
-                    // Group not in this season, return empty
-                    return res.json([]);
-                }
-            } else if (teacher.groups.length > 0) {
-                // Intersect teacher's groups with season's groups
-                const teacherGroupIds = teacher.groups.map(g => g.toString());
-                const validGroupIds = seasonGroupIds.filter(id => 
-                    teacherGroupIds.includes(id.toString())
-                );
-                studentQuery.group = { $in: validGroupIds };
-            } else {
+                studentQuery.branchSubgroup = groupId;
+            }
+            
+            // Filter by filiere (branch formation)
+            if (formation) {
+                studentQuery.filiere = formation;
+            }
+            
+            // Filter by active season via the student's language group
+            if (targetSeason) {
+                const seasonGroups = await Group.find({ season: targetSeason._id }).select('_id');
+                const seasonGroupIds = seasonGroups.map(g => g._id);
                 studentQuery.group = { $in: seasonGroupIds };
             }
-        } else if (teacher.groups.length > 0) {
-            studentQuery.group = { $in: teacher.groups };
-        }
-        
-        // Filter by what the student actually selected
-        if (formation) {
-            if (isBranch) {
-                // Branch teacher - show only students who selected this branch in their filiere array
-                studentQuery.filiere = formation;
-            } else {
-                // Language teacher - show only students who selected this language in their formation array
+        } else {
+            // Language teacher - groupId is a language group ID
+            // Filter by season's groups
+            if (targetSeason) {
+                const seasonGroups = await Group.find({ season: targetSeason._id }).select('_id');
+                const seasonGroupIds = seasonGroups.map(g => g._id);
+                
+                if (groupId) {
+                    if (seasonGroupIds.some(id => id.toString() === groupId)) {
+                        studentQuery.group = groupId;
+                    } else {
+                        return res.json([]);
+                    }
+                } else if (teacher.groups.length > 0) {
+                    const teacherGroupIds = teacher.groups.map(g => g.toString());
+                    const validGroupIds = seasonGroupIds.filter(id => 
+                        teacherGroupIds.includes(id.toString())
+                    );
+                    studentQuery.group = { $in: validGroupIds };
+                } else {
+                    studentQuery.group = { $in: seasonGroupIds };
+                }
+            } else if (teacher.groups.length > 0) {
+                studentQuery.group = { $in: teacher.groups };
+            }
+            
+            // Filter by language formation
+            if (formation) {
                 studentQuery.formation = formation;
             }
         }
         
         const students = await ManagedStudent.find(studentQuery)
             .populate('group', 'name formation branchFormation')
-            .select('fullName schoolEmail formation filiere group groupName photoPath')
+            .populate('branchSubgroup', 'name branchGroupName')
+            .select('fullName schoolEmail formation filiere group groupName branchSubgroup branchSubgroupName photoPath')
             .sort({ fullName: 1 });
         
         res.json(students);
@@ -285,15 +297,47 @@ router.get('/teacher/groups', verifyTeacherToken, async (req, res) => {
         const teacherBranches = teacher.formations.filter(f => branchFormations.includes(f));
         const teacherLanguages = teacher.formations.filter(f => !branchFormations.includes(f));
         
-        let groupQuery = { status: 'active' };
+        // Get active season for filtering
+        const Season = require('../models/Season');
+        const activeSeason = await Season.findOne({ status: 'active' });
         
-        // Branch teachers see ALL groups (since all groups have branchFormation=Mixed)
-        // Language teachers only see groups with their language
         if (teacherBranches.length > 0) {
-            // Branch teacher - show all active groups (no filtering by teacher.groups)
-            // They can grade students from any group who study their branch
-        } else if (teacherLanguages.length > 0) {
-            // Language teacher - filter by assigned groups and formation
+            // Branch teacher - return actual branch subgroups (e.g., "Culinary Arts GROUP 1")
+            const BranchGroup = require('../models/BranchGroup');
+            
+            // Find BranchGroup documents matching the teacher's branch formations
+            const branchGroupDocs = await BranchGroup.find({
+                formation: { $in: teacherBranches },
+                status: 'active'
+            });
+            
+            const branchGroupIds = branchGroupDocs.map(bg => bg._id);
+            
+            // Find branch subgroups (Group documents with groupType='branch')
+            const subgroupQuery = {
+                groupType: 'branch',
+                branchGroup: { $in: branchGroupIds },
+                status: 'active'
+            };
+            
+            // Filter by active season if available
+            if (activeSeason) {
+                subgroupQuery.season = activeSeason._id;
+            }
+            
+            const subgroups = await Group.find(subgroupQuery).sort({ name: 1 });
+            
+            return res.json(subgroups);
+        }
+        
+        // Language teacher - filter by assigned groups and formation
+        let groupQuery = { status: 'active', groupType: 'language' };
+        
+        if (activeSeason) {
+            groupQuery.season = activeSeason._id;
+        }
+        
+        if (teacherLanguages.length > 0) {
             if (teacher.groups.length > 0) {
                 groupQuery._id = { $in: teacher.groups };
             }
@@ -301,25 +345,6 @@ router.get('/teacher/groups', verifyTeacherToken, async (req, res) => {
         }
         
         const groups = await Group.find(groupQuery).sort({ name: 1 });
-        
-        // For branch teachers, filter to show only groups that have students studying their branch
-        if (teacherBranches.length > 0) {
-            const groupsWithStudents = [];
-            
-            for (const group of groups) {
-                const studentCount = await ManagedStudent.countDocuments({
-                    status: 'active',
-                    group: group._id,
-                    filiere: { $in: teacherBranches }
-                });
-                
-                if (studentCount > 0) {
-                    groupsWithStudents.push(group);
-                }
-            }
-            
-            return res.json(groupsWithStudents);
-        }
         
         res.json(groups);
     } catch (error) {
@@ -458,9 +483,15 @@ router.post('/teacher/grades', verifyTeacherToken, async (req, res) => {
             return res.json({ message: 'Grade updated successfully', grade: existingGrade });
         }
         
-        // Get group info
-        const groupId = group || (student.group ? student.group._id : null);
-        const groupName = student.groupName || (student.group ? student.group.name : '');
+        // Get group info - use branch subgroup for branch formations, language group for languages
+        let groupId, groupName;
+        if (isBranch && student.branchSubgroup) {
+            groupId = group || student.branchSubgroup;
+            groupName = student.branchSubgroupName || '';
+        } else {
+            groupId = group || (student.group ? student.group._id : null);
+            groupName = student.groupName || (student.group ? student.group.name : '');
+        }
         
         if (!groupId || !groupName) {
             return res.status(400).json({ message: 'Group information is missing for this student' });

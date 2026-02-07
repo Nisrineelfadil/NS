@@ -1402,15 +1402,20 @@ async function exportStudents() {
 function createModal(title, content) {
     const modal = document.createElement('div');
     modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>${title}</h2>
-                <button class="close-modal" onclick="closeModal()">&times;</button>
+    if (content === undefined) {
+        // Single argument: raw HTML (used by teacher modals)
+        modal.innerHTML = `<div class="modal-content">${title}</div>`;
+    } else {
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>${title}</h2>
+                    <button class="close-modal" onclick="closeModal()">&times;</button>
+                </div>
+                ${content}
             </div>
-            ${content}
-        </div>
-    `;
+        `;
+    }
     return modal;
 }
 
@@ -3156,119 +3161,199 @@ function openAddTeacherModal() {
         return groupSeasonId === legacyCurrentSeasonId;
     });
     
-    // Generate groups checkboxes
-    const groupsHTML = activeSeasonGroups.length > 0 ? 
-        activeSeasonGroups.map(group => `
-            <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px;">
-                <input type="checkbox" name="groups" value="${group._id}">
-                <span>${group.name} (${group.formation})</span>
-            </label>
-        `).join('') : 
-        '<p style="color: var(--text-light); font-style: italic;">No groups available in active season. Create groups first.</p>';
+    // Separate groups into language and branch categories
+    const languageFormations = ['Allemand', 'Anglais', 'Français', 'Ausbildung'];
+    const langGroups = activeSeasonGroups.filter(g => languageFormations.includes(g.formation));
+    const branchGroups = activeSeasonGroups.filter(g => !languageFormations.includes(g.formation));
+    
+    const renderGroupChips = (groups, prefix) => groups.length > 0 ?
+        groups.map(group => `
+            <div class="group-chip">
+                <input type="checkbox" name="groups" value="${group._id}" id="grp-${prefix}-${group._id}">
+                <label class="group-chip-label" for="grp-${prefix}-${group._id}">
+                    <span class="group-check"><i class="fas fa-check"></i></span>
+                    <span>${group.name} <small style="opacity:0.6">(${group.formation})</small></span>
+                </label>
+            </div>
+        `).join('') :
+        '<div class="groups-empty"><i class="fas fa-info-circle"></i> No groups in this category.</div>';
+    
+    const noGroupsAtAll = activeSeasonGroups.length === 0;
     
     const modal = createModal(`
-        <h2 style="color: var(--primary-color); margin-bottom: 25px;"><i class="fas fa-user-plus"></i> Add Teacher</h2>
-        <form onsubmit="addTeacher(event)">
-            <div class="form-group">
-                <label>Full Name *</label>
-                <input type="text" name="fullName" id="teacherFullName" required oninput="generateTeacherEmail()">
+        <div class="teacher-modal-form">
+            <div class="teacher-modal-header">
+                <button type="button" class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                <div class="header-icon"><i class="fas fa-user-plus"></i></div>
+                <h2>Add New Teacher</h2>
+                <p>Fill in the details below to create a teacher account</p>
             </div>
-            <div class="form-group">
-                <label>School Email (Auto-generated) *</label>
-                <input type="email" name="email" id="teacherEmail" required placeholder="Will be generated from name" readonly style="background: #f0f0f0;">
-                <small style="color: var(--text-light);">Email is automatically generated from teacher's name</small>
-            </div>
-            <div class="form-group">
-                <label>Password *</label>
-                <div style="position: relative;">
-                    <input type="password" name="password" id="teacherPassword" minlength="6" required>
-                    <button type="button" onclick="generateTeacherPassword()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--primary-color); border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: white; font-size: 12px;">
-                        <i class="fas fa-key"></i> Generate
-                    </button>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Phone Number *</label>
-                <input type="tel" name="phoneNumber" pattern="0[5-7][0-9]{8}" placeholder="06XXXXXXXX" required>
-            </div>
-            <div class="form-group">
-                <label>Formations * <small style="color: var(--text-light); font-weight: normal;">(Select all that apply)</small></label>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong style="color: var(--primary-color); display: block; margin-bottom: 8px;">📚 Language Formations</strong>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Allemand">
-                            <span>Allemand (German)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Anglais">
-                            <span>Anglais (English)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Français">
-                            <span>Français (French)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Ausbildung">
-                            <span>Ausbildung</span>
-                        </label>
+
+            <form onsubmit="addTeacher(event)" style="padding-top: 4px;">
+                <!-- Section 1: Basic Info -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">1</span> Basic Information</div>
+                    <div class="teacher-field-row">
+                        <div class="teacher-field">
+                            <label>Full Name <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" name="fullName" id="teacherFullName" required placeholder="Enter full name" oninput="generateTeacherEmail()">
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                        </div>
+                        <div class="teacher-field">
+                            <label>Phone Number <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="tel" name="phoneNumber" pattern="0[5-7][0-9]{8}" placeholder="06XXXXXXXX" required>
+                                <i class="fas fa-phone input-icon"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div>
-                    <strong style="color: var(--primary-color); display: block; margin-bottom: 8px;">🎓 Branch Formations (Filières)</strong>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Gériatrie">
-                            <span>Gériatrie</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Aide soignant">
-                            <span>Aide soignant</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Agent socio éducatif">
-                            <span>Agent socio éducatif</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Assistante sociale">
-                            <span>Assistante sociale</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Restauration">
-                            <span>Restauration</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Cuisine">
-                            <span>Cuisine</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Informatique">
-                            <span>Informatique</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Gestion hôtelière">
-                            <span>Gestion hôtelière</span>
-                        </label>
+
+                <!-- Section 2: Credentials -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">2</span> Account Credentials</div>
+                    <div class="teacher-field-row">
+                        <div class="teacher-field">
+                            <label>School Email <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="email" name="email" id="teacherEmail" required placeholder="Auto-generated" readonly>
+                                <i class="fas fa-envelope input-icon"></i>
+                            </div>
+                            <span class="field-hint"><i class="fas fa-info-circle"></i> Auto-generated from name</span>
+                        </div>
+                        <div class="teacher-field">
+                            <label>Password <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="password" name="password" id="teacherPassword" minlength="6" required placeholder="Min. 6 characters">
+                                <i class="fas fa-lock input-icon"></i>
+                                <button type="button" onclick="generateTeacherPassword()" class="input-action-btn">
+                                    <i class="fas fa-key"></i> Generate
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Assign Groups (Optional)</label>
-                <small style="color: var(--text-light); display: block; margin-bottom: 10px;">Select which groups this teacher will manage</small>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light);">
-                    ${groupsHTML}
+
+                <!-- Section 3: Formations -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">3</span> Formations <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(select all that apply)</small></div>
+                    
+                    <div class="formation-category">
+                        <div class="formation-category-label">
+                            <span class="cat-icon lang"><i class="fas fa-language"></i></span>
+                            Language Formations
+                        </div>
+                        <div class="formation-chips">
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Allemand" id="f-add-allemand">
+                                <label class="chip-label" for="f-add-allemand"><span class="chip-check"><i class="fas fa-check"></i></span> Allemand</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Anglais" id="f-add-anglais">
+                                <label class="chip-label" for="f-add-anglais"><span class="chip-check"><i class="fas fa-check"></i></span> Anglais</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Français" id="f-add-francais">
+                                <label class="chip-label" for="f-add-francais"><span class="chip-check"><i class="fas fa-check"></i></span> Français</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Ausbildung" id="f-add-ausbildung">
+                                <label class="chip-label" for="f-add-ausbildung"><span class="chip-check"><i class="fas fa-check"></i></span> Ausbildung</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="formation-category">
+                        <div class="formation-category-label">
+                            <span class="cat-icon branch"><i class="fas fa-graduation-cap"></i></span>
+                            Branch Formations (Filières)
+                        </div>
+                        <div class="formation-chips">
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Gériatrie" id="f-add-geriatrie">
+                                <label class="chip-label" for="f-add-geriatrie"><span class="chip-check"><i class="fas fa-check"></i></span> Gériatrie</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Aide soignant" id="f-add-aidesoignant">
+                                <label class="chip-label" for="f-add-aidesoignant"><span class="chip-check"><i class="fas fa-check"></i></span> Aide soignant</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Agent socio éducatif" id="f-add-agentsocio">
+                                <label class="chip-label" for="f-add-agentsocio"><span class="chip-check"><i class="fas fa-check"></i></span> Agent socio éducatif</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Assistante sociale" id="f-add-assistante">
+                                <label class="chip-label" for="f-add-assistante"><span class="chip-check"><i class="fas fa-check"></i></span> Assistante sociale</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Restauration" id="f-add-restauration">
+                                <label class="chip-label" for="f-add-restauration"><span class="chip-check"><i class="fas fa-check"></i></span> Restauration</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Cuisine" id="f-add-cuisine">
+                                <label class="chip-label" for="f-add-cuisine"><span class="chip-check"><i class="fas fa-check"></i></span> Cuisine</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Informatique" id="f-add-informatique">
+                                <label class="chip-label" for="f-add-informatique"><span class="chip-check"><i class="fas fa-check"></i></span> Informatique</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Gestion hôtelière" id="f-add-gestion">
+                                <label class="chip-label" for="f-add-gestion"><span class="chip-check"><i class="fas fa-check"></i></span> Gestion hôtelière</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" class="btn"><i class="fas fa-save"></i> Add Teacher</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            </div>
-        </form>
+
+                <!-- Section 4: Groups -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">4</span> Assign Groups <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(optional)</small></div>
+                    ${noGroupsAtAll ? '<div class="groups-empty"><i class="fas fa-info-circle"></i> No groups available in active season. Create groups first.</div>' : `
+                    <div class="groups-filter-tabs">
+                        <button type="button" class="groups-filter-tab active" onclick="switchGroupTab(this, 'add-lang')">
+                            <i class="fas fa-language tab-icon"></i> Languages
+                            <span class="tab-count">${langGroups.length}</span>
+                        </button>
+                        <button type="button" class="groups-filter-tab" onclick="switchGroupTab(this, 'add-branch')">
+                            <i class="fas fa-graduation-cap tab-icon"></i> Branches
+                            <span class="tab-count">${branchGroups.length}</span>
+                        </button>
+                    </div>
+                    <div class="groups-tab-panel active" id="add-lang">
+                        ${renderGroupChips(langGroups, 'add')}
+                    </div>
+                    <div class="groups-tab-panel" id="add-branch">
+                        ${renderGroupChips(branchGroups, 'add')}
+                    </div>
+                    `}
+                </div>
+
+                <!-- Actions -->
+                <div class="teacher-modal-actions">
+                    <button type="button" class="btn-teacher-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-teacher-submit"><i class="fas fa-user-plus"></i> Add Teacher</button>
+                </div>
+            </form>
+        </div>
     `);
     document.body.appendChild(modal);
     modal.classList.add('active');
+}
+
+// Switch group tab between Languages and Branches
+function switchGroupTab(btn, panelId) {
+    // Toggle active tab button
+    const tabs = btn.parentElement.querySelectorAll('.groups-filter-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Toggle active panel
+    const section = btn.closest('.teacher-modal-section');
+    const panels = section.querySelectorAll('.groups-tab-panel');
+    panels.forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
 }
 
 // Generate teacher email from name
@@ -3380,113 +3465,173 @@ async function openEditTeacherModal(teacherId) {
         return groupSeasonId === legacyCurrentSeasonId;
     });
     
-    // Generate groups checkboxes with current assignments
+    // Separate groups into language and branch categories
+    const languageFormations = ['Allemand', 'Anglais', 'Français', 'Ausbildung'];
+    const langGroups = activeSeasonGroups.filter(g => languageFormations.includes(g.formation));
+    const branchGroups = activeSeasonGroups.filter(g => !languageFormations.includes(g.formation));
     const teacherGroups = teacher.groups || [];
-    const groupsHTML = activeSeasonGroups.length > 0 ? 
-        activeSeasonGroups.map(group => {
+    
+    const renderEditGroupChips = (groups) => groups.length > 0 ?
+        groups.map(group => {
             const isAssigned = teacherGroups.some(g => (typeof g === 'string' ? g : g._id) === group._id);
             return `
-                <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px;">
-                    <input type="checkbox" name="groups" value="${group._id}" ${isAssigned ? 'checked' : ''}>
-                    <span>${group.name} (${group.formation})</span>
-                </label>
+                <div class="group-chip">
+                    <input type="checkbox" name="groups" value="${group._id}" id="grp-edit-${group._id}" ${isAssigned ? 'checked' : ''}>
+                    <label class="group-chip-label" for="grp-edit-${group._id}">
+                        <span class="group-check"><i class="fas fa-check"></i></span>
+                        <span>${group.name} <small style="opacity:0.6">(${group.formation})</small></span>
+                    </label>
+                </div>
             `;
-        }).join('') : 
-        '<p style="color: var(--text-light); font-style: italic;">No groups available in active season.</p>';
+        }).join('') :
+        '<div class="groups-empty"><i class="fas fa-info-circle"></i> No groups in this category.</div>';
+    
+    const noGroupsAtAll = activeSeasonGroups.length === 0;
     
     const modal = createModal(`
-        <h2 style="color: var(--primary-color); margin-bottom: 25px;"><i class="fas fa-edit"></i> Edit Teacher</h2>
-        <form onsubmit="updateTeacher(event, '${teacherId}')">
-            <div class="form-group">
-                <label>Full Name *</label>
-                <input type="text" name="fullName" value="${teacher.fullName}" required>
+        <div class="teacher-modal-form">
+            <div class="teacher-modal-header">
+                <button type="button" class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                <div class="header-icon"><i class="fas fa-user-edit"></i></div>
+                <h2>Edit Teacher</h2>
+                <p>Update ${teacher.fullName}'s information</p>
             </div>
-            <div class="form-group">
-                <label>Phone Number *</label>
-                <input type="tel" name="phoneNumber" value="${teacher.phoneNumber}" pattern="0[5-7][0-9]{8}" required>
-            </div>
-            <div class="form-group">
-                <label>Formations * <small style="color: var(--text-light); font-weight: normal;">(Select all that apply)</small></label>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong style="color: var(--primary-color); display: block; margin-bottom: 8px;">📚 Language Formations</strong>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Allemand" ${teacher.formations.includes('Allemand') ? 'checked' : ''}>
-                            <span>Allemand (German)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Anglais" ${teacher.formations.includes('Anglais') ? 'checked' : ''}>
-                            <span>Anglais (English)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Français" ${teacher.formations.includes('Français') ? 'checked' : ''}>
-                            <span>Français (French)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Ausbildung" ${teacher.formations.includes('Ausbildung') ? 'checked' : ''}>
-                            <span>Ausbildung</span>
-                        </label>
+
+            <form onsubmit="updateTeacher(event, '${teacherId}')" style="padding-top: 4px;">
+                <!-- Section 1: Basic Info -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">1</span> Basic Information</div>
+                    <div class="teacher-field-row">
+                        <div class="teacher-field">
+                            <label>Full Name <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" name="fullName" value="${teacher.fullName}" required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                        </div>
+                        <div class="teacher-field">
+                            <label>Phone Number <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="tel" name="phoneNumber" value="${teacher.phoneNumber}" pattern="0[5-7][0-9]{8}" required>
+                                <i class="fas fa-phone input-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="teacher-field-row single" style="margin-top: 16px;">
+                        <div class="teacher-field">
+                            <label>Status <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <select name="status" required>
+                                    <option value="active" ${teacher.status === 'active' ? 'selected' : ''}>Active</option>
+                                    <option value="inactive" ${teacher.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                                </select>
+                                <i class="fas fa-toggle-on input-icon"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div>
-                    <strong style="color: var(--primary-color); display: block; margin-bottom: 8px;">🎓 Branch Formations (Filières)</strong>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Gériatrie" ${teacher.formations.includes('Gériatrie') ? 'checked' : ''}>
-                            <span>Gériatrie</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Aide soignant" ${teacher.formations.includes('Aide soignant') ? 'checked' : ''}>
-                            <span>Aide soignant</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Agent socio éducatif" ${teacher.formations.includes('Agent socio éducatif') ? 'checked' : ''}>
-                            <span>Agent socio éducatif</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Assistante sociale" ${teacher.formations.includes('Assistante sociale') ? 'checked' : ''}>
-                            <span>Assistante sociale</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Restauration" ${teacher.formations.includes('Restauration') ? 'checked' : ''}>
-                            <span>Restauration</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Cuisine" ${teacher.formations.includes('Cuisine') ? 'checked' : ''}>
-                            <span>Cuisine</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Informatique" ${teacher.formations.includes('Informatique') ? 'checked' : ''}>
-                            <span>Informatique</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" name="formations" value="Gestion hôtelière" ${teacher.formations.includes('Gestion hôtelière') ? 'checked' : ''}>
-                            <span>Gestion hôtelière</span>
-                        </label>
+
+                <!-- Section 2: Formations -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">2</span> Formations <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(select all that apply)</small></div>
+                    
+                    <div class="formation-category">
+                        <div class="formation-category-label">
+                            <span class="cat-icon lang"><i class="fas fa-language"></i></span>
+                            Language Formations
+                        </div>
+                        <div class="formation-chips">
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Allemand" id="f-edit-allemand" ${teacher.formations.includes('Allemand') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-allemand"><span class="chip-check"><i class="fas fa-check"></i></span> Allemand</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Anglais" id="f-edit-anglais" ${teacher.formations.includes('Anglais') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-anglais"><span class="chip-check"><i class="fas fa-check"></i></span> Anglais</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Français" id="f-edit-francais" ${teacher.formations.includes('Français') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-francais"><span class="chip-check"><i class="fas fa-check"></i></span> Français</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Ausbildung" id="f-edit-ausbildung" ${teacher.formations.includes('Ausbildung') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-ausbildung"><span class="chip-check"><i class="fas fa-check"></i></span> Ausbildung</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="formation-category">
+                        <div class="formation-category-label">
+                            <span class="cat-icon branch"><i class="fas fa-graduation-cap"></i></span>
+                            Branch Formations (Filières)
+                        </div>
+                        <div class="formation-chips">
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Gériatrie" id="f-edit-geriatrie" ${teacher.formations.includes('Gériatrie') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-geriatrie"><span class="chip-check"><i class="fas fa-check"></i></span> Gériatrie</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Aide soignant" id="f-edit-aidesoignant" ${teacher.formations.includes('Aide soignant') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-aidesoignant"><span class="chip-check"><i class="fas fa-check"></i></span> Aide soignant</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Agent socio éducatif" id="f-edit-agentsocio" ${teacher.formations.includes('Agent socio éducatif') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-agentsocio"><span class="chip-check"><i class="fas fa-check"></i></span> Agent socio éducatif</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Assistante sociale" id="f-edit-assistante" ${teacher.formations.includes('Assistante sociale') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-assistante"><span class="chip-check"><i class="fas fa-check"></i></span> Assistante sociale</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Restauration" id="f-edit-restauration" ${teacher.formations.includes('Restauration') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-restauration"><span class="chip-check"><i class="fas fa-check"></i></span> Restauration</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Cuisine" id="f-edit-cuisine" ${teacher.formations.includes('Cuisine') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-cuisine"><span class="chip-check"><i class="fas fa-check"></i></span> Cuisine</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Informatique" id="f-edit-informatique" ${teacher.formations.includes('Informatique') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-informatique"><span class="chip-check"><i class="fas fa-check"></i></span> Informatique</label>
+                            </div>
+                            <div class="formation-chip">
+                                <input type="checkbox" name="formations" value="Gestion hôtelière" id="f-edit-gestion" ${teacher.formations.includes('Gestion hôtelière') ? 'checked' : ''}>
+                                <label class="chip-label" for="f-edit-gestion"><span class="chip-check"><i class="fas fa-check"></i></span> Gestion hôtelière</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Assign Groups (Optional)</label>
-                <small style="color: var(--text-light); display: block; margin-bottom: 10px;">Select which groups this teacher will manage</small>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light);">
-                    ${groupsHTML}
+
+                <!-- Section 3: Groups -->
+                <div class="teacher-modal-section">
+                    <div class="section-label"><span class="section-number">3</span> Assign Groups <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(optional)</small></div>
+                    ${noGroupsAtAll ? '<div class="groups-empty"><i class="fas fa-info-circle"></i> No groups available in active season.</div>' : `
+                    <div class="groups-filter-tabs">
+                        <button type="button" class="groups-filter-tab active" onclick="switchGroupTab(this, 'edit-lang')">
+                            <i class="fas fa-language tab-icon"></i> Languages
+                            <span class="tab-count">${langGroups.length}</span>
+                        </button>
+                        <button type="button" class="groups-filter-tab" onclick="switchGroupTab(this, 'edit-branch')">
+                            <i class="fas fa-graduation-cap tab-icon"></i> Branches
+                            <span class="tab-count">${branchGroups.length}</span>
+                        </button>
+                    </div>
+                    <div class="groups-tab-panel active" id="edit-lang">
+                        ${renderEditGroupChips(langGroups)}
+                    </div>
+                    <div class="groups-tab-panel" id="edit-branch">
+                        ${renderEditGroupChips(branchGroups)}
+                    </div>
+                    `}
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Status *</label>
-                <select name="status" required>
-                    <option value="active" ${teacher.status === 'active' ? 'selected' : ''}>Active</option>
-                    <option value="inactive" ${teacher.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                </select>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" class="btn"><i class="fas fa-save"></i> Update</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            </div>
-        </form>
+
+                <!-- Actions -->
+                <div class="teacher-modal-actions">
+                    <button type="button" class="btn-teacher-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-teacher-submit"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
     `);
     document.body.appendChild(modal);
     modal.classList.add('active');

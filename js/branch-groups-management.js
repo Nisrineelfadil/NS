@@ -58,7 +58,8 @@
             return; // Not on the correct page
         }
         
-        const response = await fetch(API_BASE, {
+        const seasonParam = typeof legacyCurrentSeasonId !== 'undefined' && legacyCurrentSeasonId ? `?season=${legacyCurrentSeasonId}` : '';
+        const response = await fetch(`${API_BASE}${seasonParam}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -87,7 +88,8 @@
             return; // Not on the correct page
         }
         
-        const response = await fetch(`${API_BASE}/pending-assignments/list`, {
+        const seasonParam = typeof legacyCurrentSeasonId !== 'undefined' && legacyCurrentSeasonId ? `?season=${legacyCurrentSeasonId}` : '';
+        const response = await fetch(`${API_BASE}/pending-assignments/list${seasonParam}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -211,8 +213,9 @@
 
     async function manageBranchSubgroups(branchId) {
     try {
-        // Load subgroups for this branch
-        const response = await fetch(`${API_BASE}/${branchId}/subgroups`, {
+        // Load subgroups for this branch (filtered by current season)
+        const seasonParam = typeof legacyCurrentSeasonId !== 'undefined' && legacyCurrentSeasonId ? `?season=${legacyCurrentSeasonId}` : '';
+        const response = await fetch(`${API_BASE}/${branchId}/subgroups${seasonParam}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -322,7 +325,9 @@
             },
             body: JSON.stringify({
                 name: formData.get('name') || null,
-                maxStudents: parseInt(formData.get('maxStudents'))
+                maxStudents: parseInt(formData.get('maxStudents')),
+                season: typeof legacyCurrentSeasonId !== 'undefined' ? legacyCurrentSeasonId : null,
+                seasonName: typeof legacyCurrentSeasonName !== 'undefined' ? legacyCurrentSeasonName : null
             })
         });
         
@@ -345,7 +350,8 @@
 
     async function editSubgroup(branchId, subgroupId) {
     try {
-        const response = await fetch(`${API_BASE}/${branchId}/subgroups`, {
+        const seasonParam = typeof legacyCurrentSeasonId !== 'undefined' && legacyCurrentSeasonId ? `?season=${legacyCurrentSeasonId}` : '';
+        const response = await fetch(`${API_BASE}/${branchId}/subgroups${seasonParam}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         
@@ -465,8 +471,9 @@
             throw new Error('Branch group not found for this subject');
         }
         
-        // Load existing subgroups
-        const response = await fetch(`${API_BASE}/${branchGroup._id}/subgroups`, {
+        // Load existing subgroups (filtered by current season)
+        const seasonParam = typeof legacyCurrentSeasonId !== 'undefined' && legacyCurrentSeasonId ? `?season=${legacyCurrentSeasonId}` : '';
+        const response = await fetch(`${API_BASE}/${branchGroup._id}/subgroups${seasonParam}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         

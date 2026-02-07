@@ -8,14 +8,14 @@ const GroupSelector = ({ groups, selectedGroup, onSelect, formation }) => {
   
   // Filter groups that match the selected formation
   const filteredGroups = groups.filter(group => {
-    // Show all groups for branch formations
-    const isBranchFormation = [
+    const isBranch = [
       'Informatique', 'Gériatrie', 'Cuisine', 'Aide soignant',
       'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Gestion hôtelière'
     ].includes(formation);
 
-    if (isBranchFormation) {
-      return true; // Branch teachers see all groups
+    if (isBranch) {
+      // Branch teachers: only show subgroups matching the selected branch formation
+      return group.formation === formation;
     }
 
     // Language teachers see only their formation groups
