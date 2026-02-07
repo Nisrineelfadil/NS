@@ -3032,7 +3032,19 @@ function displayTeachers(teachers) {
     
     teachers.forEach(teacher => {
         const statusColor = teacher.status === 'active' ? 'var(--success-color)' : 'var(--text-light)';
-        const formations = teacher.formations.join(', ');
+        
+        // Build formations display with custom subject labels
+        const branchFormationsList = ['Gériatrie', 'Aide soignant', 'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Cuisine', 'Informatique', 'Gestion hôtelière'];
+        const customLabelsMap = teacher.customSubjectLabels || {};
+        const hasCustomLabels = Object.keys(customLabelsMap).length > 0;
+        
+        let formations = teacher.formations.join(', ');
+        if (hasCustomLabels) {
+            const customLabelsList = Object.values(customLabelsMap).filter(v => v).join(', ');
+            if (customLabelsList) {
+                formations += `<br><small style="color: var(--primary-color); font-style: italic;" title="Custom subject names set by teacher"><i class="fas fa-tags"></i> ${customLabelsList}</small>`;
+            }
+        }
         
         // Get group names for assigned groups (show ALL groups with season info)
         const teacherGroups = teacher.groups || [];

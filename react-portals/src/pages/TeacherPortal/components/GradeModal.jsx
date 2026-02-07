@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { teacherAPI } from '../../../services/api';
 import { branchGradingConfig, isBranchFormation } from '../../../config/branchGradingConfig';
+import { useLanguage } from '../../../context/LanguageContext';
 import Modal from '../../../components/common/Modal';
 import './GradeModal.css';
 
-const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, examNumber, onSuccess }) => {
+const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, examNumber, onSuccess, customLabels = {} }) => {
+  const { t } = useLanguage();
   // Check if this is a branch formation
   const isBranch = isBranchFormation(formation);
   
@@ -28,8 +30,11 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
     if (isBranchFormation(formation)) {
       const config = branchGradingConfig[formation];
       if (config && config.fields) {
-        // Return objects with both key and label
-        return config.fields.map(field => ({ key: field.key, label: field.label }));
+        // Return objects with both key and label (use custom label if set)
+        return config.fields.map(field => ({
+          key: field.key,
+          label: customLabels[field.key] || field.label
+        }));
       }
       return [];
     }
@@ -41,6 +46,19 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
       { key: 'Schreiben', label: 'Schreiben' },
       { key: 'Sprechen', label: 'Sprechen' }
     ];
+  };
+
+  // Helper to resolve display label for a grade's examType key
+  const getDisplayLabel = (examTypeKey) => {
+    if (customLabels[examTypeKey]) return customLabels[examTypeKey];
+    if (isBranchFormation(formation)) {
+      const config = branchGradingConfig[formation];
+      if (config && config.fields) {
+        const field = config.fields.find(f => f.key === examTypeKey);
+        if (field) return field.label;
+      }
+    }
+    return examTypeKey;
   };
 
   useEffect(() => {
@@ -74,14 +92,21 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
 
   const fetchExistingGrades = async () => {
     try {
-      // Fetch all grades for this formation and filter by student
-      const response = await teacherAPI.getGrades({ formation });
+      // Fetch grades for this formation AND specific exam number
+      const params = { formation };
+      if (isBranch) {
+        params.examNumber = examNumber;
+      }
+      const response = await teacherAPI.getGrades(params);
       const allGrades = Array.isArray(response.data) ? response.data : (response.data.grades || []);
       
-      // Filter grades for this specific student
+      // Filter grades for this specific student AND this exam number
       const studentGrades = allGrades.filter(grade => {
         const gradeStudentId = typeof grade.student === 'string' ? grade.student : grade.student?._id;
-        return gradeStudentId === student._id;
+        const matchesStudent = gradeStudentId === student._id;
+        // For branch formations, also filter by examNumber
+        const matchesExam = isBranch ? (grade.examNumber === examNumber) : true;
+        return matchesStudent && matchesExam;
       });
       
       setExistingGrades(studentGrades);
@@ -113,15 +138,15 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
   };
 
   const handleDeleteGrade = async (gradeId) => {
-    if (!confirm('Are you sure you want to delete this grade?')) return;
+    if (!confirm(t('confirmDeleteGrade'))) return;
 
     try {
       await teacherAPI.deleteGrade(gradeId);
       fetchExistingGrades();
-      alert('Grade deleted successfully');
+      alert(t('gradeDeletedSuccess'));
     } catch (error) {
       console.error('Error deleting grade:', error);
-      alert('Failed to delete grade');
+      alert(t('failedToDeleteGrade'));
     }
   };
 
@@ -130,9 +155,20 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
     setError('');
     setLoading(true);
 
+    // Check for duplicate: if not editing, block submission when this exam type already has a grade
+    if (!editingGrade) {
+      const duplicate = existingGrades.find(g => g.examType === formData.examType);
+      if (duplicate) {
+        setError(t('gradeAlreadyExists').replace('{subject}', getDisplayLabel(formData.examType)));
+        setFormData(prev => ({ ...prev, examType: '' }));
+        setLoading(false);
+        return;
+      }
+    }
+
     // Validation
     if (parseFloat(formData.score) > parseFloat(formData.maxScore)) {
-      setError('Score cannot be greater than max score');
+      setError(t('scoreCannotExceedMax'));
       setLoading(false);
       return;
     }
@@ -156,17 +192,17 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
       
       if (editingGrade) {
         await teacherAPI.updateGrade(editingGrade._id, gradeData);
-        alert('Grade updated successfully');
+        alert(t('gradeUpdatedSuccess'));
       } else {
         await teacherAPI.uploadGrade(gradeData);
-        alert('Grade uploaded successfully');
+        alert(t('gradeUploadedSuccess'));
       }
 
       onSuccess();
     } catch (error) {
       console.error('Error saving grade:', error);
       console.error('Error response:', error.response?.data);
-      setError(error.response?.data?.error || error.response?.data?.message || 'Failed to save grade');
+      setError(error.response?.data?.error || error.response?.data?.message || t('failedToSaveGrade'));
     } finally {
       setLoading(false);
     }
@@ -197,7 +233,7 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
 
   const modalTitle = preselectedExamType 
     ? `${getPreselectedLabel()} - ${student?.fullName}`
-    : `Grade: ${student?.fullName}`;
+    : `${t('grade')}: ${student?.fullName} - ${t('exam')} ${examNumber}`;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="large">
@@ -205,12 +241,12 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
         {/* Existing Grades */}
         {existingGrades.length > 0 && (
           <div className="existing-grades">
-            <h3>Existing Grades</h3>
+            <h3>{t('existingGrades')} - {t('exam')} {examNumber}</h3>
             <div className="grades-list">
               {existingGrades.map((grade) => (
                 <div key={grade._id} className="grade-item">
                   <div className="grade-item-info">
-                    <strong>{grade.examType}</strong>
+                    <strong>{getDisplayLabel(grade.examType)}</strong>
                     <span>{grade.score}/{grade.maxScore} ({((grade.score/grade.maxScore)*100).toFixed(1)}%)</span>
                     <span>Semester {grade.semester} - {grade.academicYear}</span>
                   </div>
@@ -236,10 +272,10 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
 
         {/* Grade Form */}
         <div className="grade-form-section">
-          <h3>{editingGrade ? 'Edit Grade' : 'Upload New Grade'}</h3>
+          <h3>{editingGrade ? t('editGrade') : t('uploadNewGrade')}</h3>
           {editingGrade && (
             <button className="btn-cancel-edit" onClick={resetForm}>
-              <i className="fas fa-times"></i> Cancel Edit
+              <i className="fas fa-times"></i> {t('cancelEdit')}
             </button>
           )}
 
@@ -249,23 +285,28 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
             <div className="form-row">
               {!preselectedExamType && (
                 <div className="form-group">
-                  <label>Exam Type *</label>
+                  <label>{t('examType')} *</label>
                   <select
                     name="examType"
                     value={formData.examType}
                     onChange={handleChange}
                     required
                   >
-                    <option value="">Select exam type</option>
-                    {examTypes.map((type) => (
-                      <option key={type.key} value={type.key}>{type.label}</option>
-                    ))}
+                    <option value="">{t('selectExamType')}</option>
+                    {examTypes.map((type) => {
+                      const alreadyGraded = !editingGrade && existingGrades.some(g => g.examType === type.key);
+                      return (
+                        <option key={type.key} value={type.key} disabled={alreadyGraded}>
+                          {type.label}{alreadyGraded ? ` ✓ (${t('alreadyEntered')})` : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}
 
               <div className="form-group">
-                <label>Score *</label>
+                <label>{t('score')} *</label>
                 <input
                   type="number"
                   name="score"
@@ -279,7 +320,7 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
               </div>
 
               <div className="form-group">
-                <label>Max Score *</label>
+                <label>{t('maxScore')} *</label>
                 <input
                   type="number"
                   name="maxScore"
@@ -290,12 +331,12 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
                   required
                   readOnly={isBranch}
                   disabled={isBranch}
-                  title={isBranch ? 'Branch formations are graded out of 20' : ''}
+                  title={isBranch ? t('branchGradedOutOf20') : ''}
                   style={isBranch ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
                 />
                 {isBranch && (
                   <small style={{ color: '#666', fontSize: '0.85em', marginTop: '4px', display: 'block' }}>
-                    Branch formations are graded out of 20
+                    {t('branchGradedOutOf20')}
                   </small>
                 )}
               </div>
@@ -303,20 +344,20 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
 
             <div className="form-row">
               <div className="form-group">
-                <label>Semester *</label>
+                <label>{t('semester')} *</label>
                 <select
                   name="semester"
                   value={formData.semester}
                   onChange={handleChange}
                   required
                 >
-                  <option value="1">Semester 1</option>
-                  <option value="2">Semester 2</option>
+                  <option value="1">{t('semester')} 1</option>
+                  <option value="2">{t('semester')} 2</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Academic Year *</label>
+                <label>{t('academicYear')} *</label>
                 <input
                   type="text"
                   name="academicYear"
@@ -328,7 +369,7 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
               </div>
 
               <div className="form-group">
-                <label>Exam Date *</label>
+                <label>{t('examDate')} *</label>
                 <input
                   type="date"
                   name="examDate"
@@ -340,32 +381,32 @@ const GradeModal = ({ isOpen, onClose, student, formation, preselectedExamType, 
             </div>
 
             <div className="form-group">
-              <label>Comments (Optional)</label>
+              <label>{t('commentsOptional')}</label>
               <textarea
                 name="comments"
                 value={formData.comments}
                 onChange={handleChange}
                 rows="3"
-                placeholder="Add any comments about this grade..."
+                placeholder={t('addCommentsPlaceholder')}
               />
             </div>
 
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={onClose}>
-                Cancel
+                {t('cancel')}
               </button>
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? (
                   <>
-                    <i className="fas fa-spinner fa-spin"></i> Saving...
+                    <i className="fas fa-spinner fa-spin"></i> {t('saving')}
                   </>
                 ) : editingGrade ? (
                   <>
-                    <i className="fas fa-save"></i> Update Grade
+                    <i className="fas fa-save"></i> {t('updateGrade')}
                   </>
                 ) : (
                   <>
-                    <i className="fas fa-upload"></i> Upload Grade
+                    <i className="fas fa-upload"></i> {t('uploadGrade')}
                   </>
                 )}
               </button>

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { teacherAPI } from '../../../services/api';
+import { useLanguage } from '../../../context/LanguageContext';
 import Modal from '../../../components/common/Modal';
 import './BatchLanguageGradeModal.css';
 
 const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselectedLevel, onSuccess }) => {
+  const { t } = useLanguage();
   const [selectedLevel, setSelectedLevel] = useState(preselectedLevel || 'A1');
   const [selectedTestType, setSelectedTestType] = useState('miniTest');
   const [selectedTestNumber, setSelectedTestNumber] = useState(1);
@@ -100,15 +102,15 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
   };
 
   const handleDeleteGrade = async (gradeId) => {
-    if (!confirm('Are you sure you want to delete this grade?')) return;
+    if (!confirm(t('confirmDeleteGrade'))) return;
 
     try {
       await teacherAPI.deleteGrade(gradeId);
       fetchExistingGrades();
-      alert('Grade deleted successfully');
+      alert(t('gradeDeletedSuccess'));
     } catch (error) {
       console.error('Error deleting grade:', error);
-      alert('Failed to delete grade');
+      alert(t('failedToDeleteGrade'));
     }
   };
 
@@ -130,7 +132,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
         
         // Validation
         if (parseFloat(gradeData.score) > parseFloat(gradeData.maxScore)) {
-          throw new Error(`Score for ${examType} cannot be greater than max score`);
+          throw new Error(`${t('scoreCannotExceedMax')} (${examType})`);
         }
 
         gradesToUpload.push({
@@ -142,7 +144,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
       }
 
       if (gradesToUpload.length === 0) {
-        setError('Please enter at least one grade');
+        setError(t('enterAtLeastOneGrade'));
         setLoading(false);
         return;
       }
@@ -167,7 +169,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
         await teacherAPI.uploadGrade(payload);
       }
 
-      alert(`✅ Successfully uploaded ${gradesToUpload.length} grade(s)!`);
+      alert(`✅ ${t('successfullyUploaded')} ${gradesToUpload.length} ${t('gradesCount')}!`);
       
       if (onSuccess) {
         onSuccess();
@@ -185,7 +187,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
       
     } catch (error) {
       console.error('Error uploading grades:', error);
-      setError(error.message || 'Failed to upload grades');
+      setError(error.message || t('failedToSaveGrade'));
     } finally {
       setLoading(false);
       setUploadingCount(0);
@@ -195,7 +197,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Enter Grades - ${student?.fullName}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`${t('enterGrades')} - ${student?.fullName}`}>
       <div className="batch-language-grade-modal">
         {/* Student Info */}
         <div className="student-info-header">
@@ -206,33 +208,33 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
         {/* Level Display (Non-editable) */}
         <div className="level-display">
           <i className="fas fa-graduation-cap"></i>
-          <span className="level-label">Level:</span>
+          <span className="level-label">{t('level')}:</span>
           <span className="level-value">{selectedLevel}</span>
         </div>
 
         {/* Test Selection */}
         <div className="selection-row">
           <div className="form-group">
-            <label>Test Type</label>
+            <label>{t('testType')}</label>
             <select value={selectedTestType} onChange={(e) => setSelectedTestType(e.target.value)}>
-              <option value="miniTest">Mini Test</option>
-              <option value="finalExam">Final Exam</option>
+              <option value="miniTest">{t('miniTest')}</option>
+              <option value="finalExam">{t('finalExam')}</option>
             </select>
           </div>
 
           {selectedTestType === 'miniTest' && (
             <div className="form-group">
-              <label>Test Number</label>
+              <label>{t('testNumber')}</label>
               <select value={selectedTestNumber} onChange={(e) => setSelectedTestNumber(parseInt(e.target.value))}>
                 {[1, 2, 3, 4].map(num => (
-                  <option key={num} value={num}>Test {num}</option>
+                  <option key={num} value={num}>{t('test')} {num}</option>
                 ))}
               </select>
             </div>
           )}
 
           <div className="form-group">
-            <label>Exam Date</label>
+            <label>{t('examDate')}</label>
             <input
               type="date"
               value={examDate}
@@ -258,7 +260,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
                         type="button"
                         className="btn-delete-grade"
                         onClick={() => handleDeleteGrade(existingGrade._id)}
-                        title="Delete existing grade"
+                        title={t('confirmDeleteGrade')}
                       >
                         <i className="fas fa-trash"></i>
                       </button>
@@ -267,7 +269,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
 
                   <div className="grade-inputs">
                     <div className="input-group">
-                      <label>Score</label>
+                      <label>{t('score')}</label>
                       <input
                         type="number"
                         min="0"
@@ -275,12 +277,12 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
                         step="0.5"
                         value={grades[key].score}
                         onChange={(e) => handleGradeChange(key, 'score', e.target.value)}
-                        placeholder="Enter score"
+                        placeholder={t('score')}
                       />
                     </div>
 
                     <div className="input-group">
-                      <label>Max Score</label>
+                      <label>{t('maxScore')}</label>
                       <input
                         type="number"
                         min="1"
@@ -291,11 +293,11 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
                   </div>
 
                   <div className="input-group">
-                    <label>Comments (Optional)</label>
+                    <label>{t('commentsOptional')}</label>
                     <textarea
                       value={grades[key].comments}
                       onChange={(e) => handleGradeChange(key, 'comments', e.target.value)}
-                      placeholder="Add comments..."
+                      placeholder={t('addCommentsPlaceholder')}
                       rows="2"
                     />
                   </div>
@@ -303,7 +305,7 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
                   {existingGrade && (
                     <div className="existing-grade-badge">
                       <i className="fas fa-check-circle"></i>
-                      Current: {existingGrade.score}/{existingGrade.maxScore}
+                      {t('currentGrade')}: {existingGrade.score}/{existingGrade.maxScore}
                     </div>
                   )}
                 </div>
@@ -316,17 +318,17 @@ const BatchLanguageGradeModal = ({ isOpen, onClose, student, formation, preselec
           {loading && (
             <div className="upload-progress">
               <i className="fas fa-spinner fa-spin"></i>
-              Uploading {uploadingCount} of {Object.values(grades).filter(g => g.score).length} grades...
+              {t('uploading')} {uploadingCount} / {Object.values(grades).filter(g => g.score).length}...
             </div>
           )}
 
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel" disabled={loading}>
-              Cancel
+              {t('cancel')}
             </button>
             <button type="submit" className="btn-submit" disabled={loading}>
               <i className="fas fa-upload"></i>
-              Upload All Grades
+              {t('uploadAllGrades')}
             </button>
           </div>
         </form>

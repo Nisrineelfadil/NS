@@ -108,6 +108,10 @@ export const teacherAPI = {
   
   // Get seasons (for active season detection)
   getSeasons: () => teacherAPI_instance.get('/grades/teacher/seasons'),
+  
+  // Custom subject labels (branch teachers)
+  getSubjectLabels: () => teacherAPI_instance.get('/grades/teacher/subject-labels'),
+  updateSubjectLabels: (labels) => teacherAPI_instance.put('/grades/teacher/subject-labels', { customSubjectLabels: labels }),
 };
 
 // ============================================

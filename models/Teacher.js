@@ -55,6 +55,11 @@ const teacherSchema = new mongoose.Schema({
             'Gestion hôtelière'
         ]
     },
+    customSubjectLabels: {
+        type: Map,
+        of: String,
+        default: new Map()
+    },
     groups: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Group'

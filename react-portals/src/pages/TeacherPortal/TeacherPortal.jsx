@@ -14,6 +14,8 @@ import GradeModal from './components/GradeModal';
 import LanguageGradeModal from './components/LanguageGradeModal';
 import BatchLanguageGradeModal from './components/BatchLanguageGradeModal';
 import AttendanceQR from './components/AttendanceQR';
+import SubjectLabelsEditor from './components/SubjectLabelsEditor';
+import { isBranchFormation } from '../../config/branchGradingConfig';
 import './TeacherPortal.css';
 
 const TeacherPortal = () => {
@@ -30,6 +32,7 @@ const TeacherPortal = () => {
   const [showGradeModal, setShowGradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState('grades'); // 'grades' or 'attendance'
   const [activeSeason, setActiveSeason] = useState(null); // Store active season info
+  const [customLabels, setCustomLabels] = useState({}); // Custom subject labels for branch teachers
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -39,6 +42,7 @@ const TeacherPortal = () => {
       }
       fetchActiveSeason();
       fetchGroups();
+      fetchCustomLabels();
     }
   }, [isAuthenticated, user]);
 
@@ -68,6 +72,15 @@ const TeacherPortal = () => {
       }
     } catch (error) {
       console.error('Error fetching active season:', error);
+    }
+  };
+
+  const fetchCustomLabels = async () => {
+    try {
+      const response = await teacherAPI.getSubjectLabels();
+      setCustomLabels(response.data.customSubjectLabels || {});
+    } catch (error) {
+      console.error('Error fetching custom labels:', error);
     }
   };
 
@@ -207,6 +220,14 @@ const TeacherPortal = () => {
             />
           )}
 
+          {selectedFormation && isBranchFormation(selectedFormation) && (
+            <SubjectLabelsEditor
+              formation={selectedFormation}
+              customLabels={customLabels}
+              onLabelsUpdated={setCustomLabels}
+            />
+          )}
+
           {selectedFormation && selectedGroup && (
             <ExamTabs 
               selectedExam={selectedExam}
@@ -225,6 +246,7 @@ const TeacherPortal = () => {
                 formation={selectedFormation}
                 examNumber={selectedExam}
                 onGradeStudent={handleOpenGradeModal}
+                customLabels={customLabels}
               />
             ) : (
               <div className="empty-state">
@@ -269,6 +291,7 @@ const TeacherPortal = () => {
               preselectedExamType={selectedExamType}
               examNumber={selectedExam}
               onSuccess={handleGradeSubmitted}
+              customLabels={customLabels}
             />
           );
         })()}

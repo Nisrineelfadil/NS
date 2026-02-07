@@ -129,6 +129,57 @@ router.get('/teacher/profile', verifyTeacherToken, async (req, res) => {
     }
 });
 
+// Get teacher custom subject labels
+router.get('/teacher/subject-labels', verifyTeacherToken, async (req, res) => {
+    try {
+        const teacher = await Teacher.findById(req.teacher.id).select('customSubjectLabels formations');
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+        
+        // Convert Map to plain object
+        const labels = teacher.customSubjectLabels ? Object.fromEntries(teacher.customSubjectLabels) : {};
+        res.json({ customSubjectLabels: labels, formations: teacher.formations });
+    } catch (error) {
+        console.error('Get subject labels error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update teacher custom subject labels
+router.put('/teacher/subject-labels', verifyTeacherToken, async (req, res) => {
+    try {
+        const { customSubjectLabels } = req.body;
+        
+        if (!customSubjectLabels || typeof customSubjectLabels !== 'object') {
+            return res.status(400).json({ message: 'customSubjectLabels object is required' });
+        }
+        
+        const teacher = await Teacher.findById(req.teacher.id);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+        
+        // Validate that only branch teachers can set custom labels
+        const branchFormations = ['Gériatrie', 'Aide soignant', 'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Cuisine', 'Informatique', 'Gestion hôtelière'];
+        const teacherBranches = teacher.formations.filter(f => branchFormations.includes(f));
+        
+        if (teacherBranches.length === 0) {
+            return res.status(403).json({ message: 'Only branch teachers can customize subject labels' });
+        }
+        
+        // Update the customSubjectLabels map
+        teacher.customSubjectLabels = new Map(Object.entries(customSubjectLabels));
+        await teacher.save();
+        
+        const labels = Object.fromEntries(teacher.customSubjectLabels);
+        res.json({ message: 'Subject labels updated successfully', customSubjectLabels: labels });
+    } catch (error) {
+        console.error('Update subject labels error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get students for teacher (by groups and formations)
 router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
     try {
@@ -1009,7 +1060,14 @@ router.get('/admin/teachers', verifyToken, async (req, res) => {
             .select('-password')
             .sort({ fullName: 1 });
         
-        res.json(teachers);
+        // Convert Mongoose Maps to plain objects for JSON serialization
+        const teachersData = teachers.map(t => {
+            const obj = t.toObject();
+            obj.customSubjectLabels = t.customSubjectLabels ? Object.fromEntries(t.customSubjectLabels) : {};
+            return obj;
+        });
+        
+        res.json(teachersData);
     } catch (error) {
         console.error('Get teachers error:', error);
         res.status(500).json({ message: 'Server error' });

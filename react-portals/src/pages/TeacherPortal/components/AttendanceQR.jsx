@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTeacherAuth } from '../../../context/TeacherAuthContext';
+import { useLanguage } from '../../../context/LanguageContext';
 import { teacherAPI } from '../../../services/api';
 import QRCode from 'qrcode';
 import './AttendanceQR.css';
 
 const AttendanceQR = () => {
   const { user } = useTeacherAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [groups, setGroups] = useState([]);
   const [selectedFormation, setSelectedFormation] = useState('');
@@ -39,7 +41,7 @@ const AttendanceQR = () => {
         const diff = expiresAt - now;
 
         if (diff <= 0) {
-          setTimeRemaining('Expired');
+          setTimeRemaining(t('expired'));
           clearInterval(timer);
         } else {
           const minutes = Math.floor(diff / 60000);
@@ -68,13 +70,13 @@ const AttendanceQR = () => {
       setGroups(groupsWithCount);
     } catch (error) {
       console.error('Error fetching groups:', error);
-      alert('Failed to load groups');
+      alert(t('failedToLoadGroups'));
     }
   };
 
   const generateQR = async () => {
     if (!selectedFormation || !selectedGroup || !classDate || !startTime || !endTime) {
-      alert('Please fill in all required fields');
+      alert(t('fillAllFields'));
       return;
     }
 
@@ -109,7 +111,7 @@ const AttendanceQR = () => {
       const data = await response.json();
       setQrCodeData(data.qrCode);
       setSession(data.session);
-      alert('QR Code generated successfully!');
+      alert(t('qrGeneratedSuccess'));
 
     } catch (error) {
       console.error('Error generating QR:', error);
@@ -132,14 +134,10 @@ const AttendanceQR = () => {
     if (!session) return;
 
     const confirmed = window.confirm(
-      `⚠️ Cancel this attendance session?\n\n` +
-      `Group: ${session.groupName}\n` +
-      `Formation: ${session.formation}\n\n` +
-      `This will:\n` +
-      `• Cancel the QR code\n` +
-      `• Delete all pending attendance records\n` +
-      `• Students will NOT be marked absent\n\n` +
-      `This action cannot be undone. Continue?`
+      `\u26a0\ufe0f ${t('cancelSessionConfirm')}\n\n` +
+      `${t('group')}: ${session.groupName}\n` +
+      `${t('formation')}: ${session.formation}\n\n` +
+      `${t('cancelSessionWarning')}`
     );
 
     if (!confirmed) return;
@@ -155,11 +153,11 @@ const AttendanceQR = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to cancel session');
+        throw new Error(error.error || t('failedToCancelSession'));
       }
 
       const data = await response.json();
-      alert(`✅ Session cancelled successfully!\n\n${data.deletedRecords} pending record(s) deleted.\nStudents will not be marked absent.`);
+      alert(`\u2705 ${t('sessionCancelledSuccess')}\n\n${data.deletedRecords} ${t('pendingRecordsDeleted')}`);
       
       // Clear the QR code display
       setQrCodeData(null);
@@ -168,7 +166,7 @@ const AttendanceQR = () => {
 
     } catch (error) {
       console.error('Error cancelling session:', error);
-      alert(`❌ Error: ${error.message}`);
+      alert(`\u274c ${t('error')}: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -181,42 +179,42 @@ const AttendanceQR = () => {
       <div className="qr-generator-card">
         <h2>
           <i className="fas fa-qrcode"></i>
-          Generate Attendance QR Code
+          {t('generateAttendanceQR')}
         </h2>
 
         <div className="form-grid">
           <div className="form-group">
             <label>
-              <i className="fas fa-book"></i> Formation
+              <i className="fas fa-book"></i> {t('formation')}
             </label>
             <select
               value={selectedFormation}
               onChange={(e) => setSelectedFormation(e.target.value)}
               disabled={isFormationDisabled}
             >
-              <option value="">Choose Formation...</option>
+              <option value="">{t('chooseFormation')}</option>
               {user?.formations?.map(formation => (
                 <option key={formation} value={formation}>{formation}</option>
               ))}
             </select>
             {isFormationDisabled && (
-              <small className="auto-assigned">(Auto-assigned)</small>
+              <small className="auto-assigned">({t('autoAssigned')})</small>
             )}
           </div>
 
           <div className="form-group">
             <label>
-              <i className="fas fa-users"></i> Group
+              <i className="fas fa-users"></i> {t('group')}
             </label>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
               disabled={!selectedFormation}
             >
-              <option value="">Choose Group...</option>
+              <option value="">{t('chooseGroup')}</option>
               {groups.map(group => (
                 <option key={group._id} value={group._id}>
-                  {group.name} ({group.studentCount || 0} students)
+                  {group.name} ({group.studentCount || 0} {t('students')})
                 </option>
               ))}
             </select>
@@ -224,7 +222,7 @@ const AttendanceQR = () => {
 
           <div className="form-group">
             <label>
-              <i className="fas fa-calendar"></i> Date
+              <i className="fas fa-calendar"></i> {t('date')}
             </label>
             <input
               type="date"
@@ -235,7 +233,7 @@ const AttendanceQR = () => {
 
           <div className="form-group">
             <label>
-              <i className="fas fa-clock"></i> Class Start Time
+              <i className="fas fa-clock"></i> {t('classStartTime')}
             </label>
             <input
               type="time"
@@ -246,7 +244,7 @@ const AttendanceQR = () => {
 
           <div className="form-group">
             <label>
-              <i className="fas fa-clock"></i> Class End Time
+              <i className="fas fa-clock"></i> {t('classEndTime')}
             </label>
             <input
               type="time"
@@ -257,7 +255,7 @@ const AttendanceQR = () => {
 
           <div className="form-group">
             <label>
-              <i className="fas fa-hourglass-half"></i> QR Validity (minutes)
+              <i className="fas fa-hourglass-half"></i> {t('qrValidityMinutes')}
             </label>
             <input
               type="number"
@@ -270,7 +268,7 @@ const AttendanceQR = () => {
 
           <div className="form-group">
             <label>
-              <i className="fas fa-user-clock"></i> Late Threshold (minutes)
+              <i className="fas fa-user-clock"></i> {t('lateThresholdMinutes')}
             </label>
             <input
               type="number"
@@ -289,11 +287,11 @@ const AttendanceQR = () => {
         >
           {loading ? (
             <>
-              <i className="fas fa-spinner fa-spin"></i> Generating...
+              <i className="fas fa-spinner fa-spin"></i> {t('generating')}
             </>
           ) : (
             <>
-              <i className="fas fa-qrcode"></i> Generate QR Code
+              <i className="fas fa-qrcode"></i> {t('generateQRCode')}
             </>
           )}
         </button>
@@ -303,7 +301,7 @@ const AttendanceQR = () => {
         <div className="qr-display-card">
           <h2>
             <i className="fas fa-qrcode"></i>
-            Scan This QR Code
+            {t('scanThisQRCode')}
           </h2>
 
           <div className="qr-info">
@@ -325,15 +323,15 @@ const AttendanceQR = () => {
             </div>
             <div className="info-item">
               <i className="fas fa-user-graduate"></i>
-              <span>{session.totalStudents} students</span>
+              <span>{session.totalStudents} {t('students')}</span>
             </div>
           </div>
 
           <div className="qr-code-container">
             <img src={qrCodeData} alt="Attendance QR Code" />
-            <div className={`qr-timer ${timeRemaining === 'Expired' || (timeRemaining && timeRemaining.startsWith('0:')) ? 'expiring' : ''}`}>
+            <div className={`qr-timer ${timeRemaining === t('expired') || (timeRemaining && timeRemaining.startsWith('0:')) ? 'expiring' : ''}`}>
               <i className="fas fa-hourglass-half"></i>
-              <span>Expires in: {timeRemaining || '--:--'}</span>
+              <span>{t('expiresIn')}: {timeRemaining || '--:--'}</span>
             </div>
           </div>
 
@@ -341,7 +339,7 @@ const AttendanceQR = () => {
           <div className="session-id-card">
             <div className="session-id-header">
               <i className="fas fa-key"></i>
-              <span>Manual Entry Code</span>
+              <span>{t('manualEntryCode')}</span>
             </div>
             <div className="session-id-display">
               <code>{session.sessionId}</code>
@@ -349,30 +347,30 @@ const AttendanceQR = () => {
                 className="btn-copy"
                 onClick={() => {
                   navigator.clipboard.writeText(session.sessionId);
-                  alert('Session ID copied to clipboard!');
+                  alert(t('sessionIdCopied'));
                 }}
-                title="Copy Session ID"
+                title={t('copySessionId')}
               >
                 <i className="fas fa-copy"></i>
               </button>
             </div>
             <p className="session-id-note">
               <i className="fas fa-info-circle"></i>
-              Students can enter this code manually if they can't scan the QR code
+              {t('manualEntryNote')}
             </p>
           </div>
 
           <div className="qr-actions">
             <button className="btn-download" onClick={downloadQR}>
-              <i className="fas fa-download"></i> Download QR
+              <i className="fas fa-download"></i> {t('downloadQR')}
             </button>
             <button 
               className="btn-cancel" 
               onClick={cancelSession}
               disabled={loading}
-              title="Cancel this session if it was created by mistake"
+              title={t('cancelSessionTitle')}
             >
-              <i className="fas fa-times-circle"></i> Cancel Session
+              <i className="fas fa-times-circle"></i> {t('cancelSession')}
             </button>
           </div>
         </div>

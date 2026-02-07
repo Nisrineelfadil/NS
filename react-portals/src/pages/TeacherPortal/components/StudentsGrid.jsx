@@ -5,7 +5,7 @@ import { useLanguage } from '../../../context/LanguageContext';
 import LevelProgressTracker from './LevelProgressTracker';
 import './StudentsGrid.css';
 
-const StudentsGrid = ({ students, formation, examNumber, onGradeStudent }) => {
+const StudentsGrid = ({ students, formation, examNumber, onGradeStudent, customLabels = {} }) => {
   const { t } = useLanguage();
   const [studentsWithGrades, setStudentsWithGrades] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +26,9 @@ const StudentsGrid = ({ students, formation, examNumber, onGradeStudent }) => {
     return ['Lesen', 'Hören', 'Schreiben', 'Sprechen'];
   };
 
-  // Get the display label for an exam type
+  // Get the display label for an exam type (uses custom labels if set)
   const getExamTypeLabel = (formation, examTypeKey) => {
+    if (customLabels[examTypeKey]) return customLabels[examTypeKey];
     if (isBranchFormation(formation)) {
       const config = branchGradingConfig[formation];
       if (config && config.fields) {
@@ -152,7 +153,7 @@ const StudentsGrid = ({ students, formation, examNumber, onGradeStudent }) => {
   const isLanguage = languageFormations.includes(formation);
 
   if (loading) {
-    return <div className="loading-students">Loading grades...</div>;
+    return <div className="loading-students">{t('loadingGrades')}</div>;
   }
 
   return (
@@ -197,13 +198,13 @@ const StudentsGrid = ({ students, formation, examNumber, onGradeStudent }) => {
                   <>
                     <span className="grades-count">
                       <i className="fas fa-check-circle"></i>
-                      {student.grades.length} {student.grades.length === 1 ? 'grade' : 'grades'} entered
+                      {student.grades.length} {student.grades.length === 1 ? t('gradeEntered') : t('gradesEntered')}
                     </span>
                   </>
                 ) : (
                   <span className="no-grades">
                     <i className="fas fa-info-circle"></i>
-                    No grades yet
+                    {t('noGradesYet')}
                   </span>
                 )}
               </div>

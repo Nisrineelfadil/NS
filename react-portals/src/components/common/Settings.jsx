@@ -7,17 +7,9 @@ const Settings = () => {
   const [showSheet, setShowSheet] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
-  const [theme, setTheme] = useState('dark');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { language, changeLanguage: setLanguage, t } = useLanguage();
   const buttonRef = useRef(null);
-
-  // Load saved theme
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
-    document.body.className = savedTheme === 'light' ? 'light-theme' : '';
-  }, []);
 
   // Handle window resize
   useEffect(() => {
@@ -50,17 +42,6 @@ const Settings = () => {
       document.body.style.overflow = '';
     };
   }, [showSheet]);
-
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.body.className = newTheme === 'light' ? 'light-theme' : '';
-  };
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    handleThemeChange(newTheme);
-  };
 
   const handleLanguageChange = (langCode) => {
     setLanguage(langCode);
@@ -131,14 +112,6 @@ const Settings = () => {
           )}
         </div>
 
-        {/* Theme Toggle Button */}
-        <button 
-          className="desktop-theme-toggle"
-          onClick={toggleTheme}
-          title={theme === 'dark' ? t('lightMode') : t('darkMode')}
-        >
-          <i className={`fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
-        </button>
       </div>
     );
   }
@@ -179,32 +152,6 @@ const Settings = () => {
         </div>
 
         <div className="settings-drawer-content">
-          {/* Theme Toggle */}
-          <div className="settings-section">
-            <div className="settings-section-header">
-              <i className="fas fa-palette"></i>
-              <span>{t('appearance')}</span>
-            </div>
-            <div className="theme-options">
-              <button 
-                className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
-                onClick={() => handleThemeChange('dark')}
-              >
-                <i className="fas fa-moon"></i>
-                <span>{t('darkMode')}</span>
-                {theme === 'dark' && <i className="fas fa-check-circle"></i>}
-              </button>
-              <button 
-                className={`theme-option ${theme === 'light' ? 'active' : ''}`}
-                onClick={() => handleThemeChange('light')}
-              >
-                <i className="fas fa-sun"></i>
-                <span>{t('lightMode')}</span>
-                {theme === 'light' && <i className="fas fa-check-circle"></i>}
-              </button>
-            </div>
-          </div>
-
           {/* Language Selector */}
           <div className="settings-section">
             <div className="settings-section-header">
