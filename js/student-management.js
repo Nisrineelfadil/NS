@@ -251,6 +251,31 @@ function changeLanguage(lang) {
     loadGroups();
     loadStudents();
     loadPaymentReminders();
+    
+    // Re-render attendance tab if loaded
+    if (typeof AdminAttendance !== 'undefined' && AdminAttendance.loadFilters) {
+        AdminAttendance.loadFilters();
+        AdminAttendance.loadStats();
+        AdminAttendance.loadRecords();
+    }
+    
+    // Re-render seasons if loaded
+    if (typeof loadSeasons === 'function') {
+        loadSeasons();
+    }
+    
+    // Re-render archive content if loaded
+    if (typeof currentArchiveData !== 'undefined' && currentArchiveData) {
+        renderArchiveStudents();
+        renderArchiveGrades();
+        renderArchiveGroups();
+        renderArchivePayments();
+        renderArchiveAttendance();
+    }
+    // Reload archive list if visible
+    if (document.getElementById('archivesListView')?.style.display !== 'none') {
+        loadArchivedSeasonsList();
+    }
 }
 
 function updateLanguageDisplay() {
@@ -464,7 +489,8 @@ async function switchTab(tabName) {
             (tabName === 'reminders' && itemText.includes('payment')) ||
             (tabName === 'grades' && itemText.includes('grades')) ||
             (tabName === 'attendance' && itemText.includes('attendance')) ||
-            (tabName === 'teachers' && itemText.includes('teachers'))) {
+            (tabName === 'teachers' && itemText.includes('teachers')) ||
+            (tabName === 'archives' && itemText.includes('archiv'))) {
             item.classList.add('active');
         }
     });
@@ -487,7 +513,8 @@ async function switchTab(tabName) {
         'overdue': 'overduePaymentsTitle',
         'grades': 'studentGrades',
         'attendance': 'attendanceMonitoring',
-        'teachers': 'teacherManagement'
+        'teachers': 'teacherManagement',
+        'archives': 'archivedSeasons'
     };
     const pageTitleEl = document.getElementById('pageTitle');
     if (pageTitleEl) {
@@ -510,6 +537,10 @@ async function switchTab(tabName) {
     } else if (tabName === 'attendance') {
         if (typeof initializeAttendance === 'function') {
             initializeAttendance();
+        }
+    } else if (tabName === 'archives') {
+        if (typeof loadArchivedSeasonsList === 'function') {
+            loadArchivedSeasonsList();
         }
     }
     
@@ -894,10 +925,10 @@ function displayStudents(students, pendingStudents = []) {
             <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
                 <h3 style="margin: 0 0 15px 0; color: #856404; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-exclamation-triangle"></i>
-                    Pending Group Assignment (${pendingStudents.length})
+                    ${t('pendingApproval')} (${pendingStudents.length})
                 </h3>
                 <p style="margin: 0 0 20px 0; color: #856404;">
-                    These students have been approved from online registration and need to be assigned to a group.
+                    ${t('pendingBranchAssignmentsDesc')}
                 </p>
                 <div style="display: grid !important; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important; gap: 15px !important;">
                     ${pendingStudents.map(student => createPendingStudentCard(student)).join('')}
@@ -908,7 +939,7 @@ function displayStudents(students, pendingStudents = []) {
     
     // Active Students Section
     if (students.length === 0 && pendingStudents.length === 0) {
-        grid.innerHTML = '<div class="empty-state"><i class="fas fa-user-graduate"></i><h3>No Students Found</h3></div>';
+        grid.innerHTML = `<div class="empty-state"><i class="fas fa-user-graduate"></i><h3>${t('noStudentsFound')}</h3></div>`;
         return;
     }
     
@@ -919,7 +950,7 @@ function displayStudents(students, pendingStudents = []) {
         
         html += `
             <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0; color: #1e293b;">Active Students (${totalStudents})</h3>
+                <h3 style="margin: 0; color: #1e293b;">${t('students')} (${totalStudents})</h3>
                 ${totalPages > 1 ? `
                     <div class="pagination-info" style="color: #64748b; font-size: 0.9rem;">
                         Showing ${startItem}-${endItem} of ${totalStudents}
@@ -1098,16 +1129,16 @@ function displayStudents(students, pendingStudents = []) {
                 </div>` : ''}
                 <div class="student-info">
                     <span class="badge badge-${isPaid ? 'success' : isOverdue ? 'danger' : 'warning'}">
-                        ${student.paymentStatus.toUpperCase()}
+                        ${t(student.paymentStatus).toUpperCase()}
                     </span>
                 </div>
                 <div class="student-card-actions">
-                    <button class="btn btn-small" onclick="viewStudent('${student._id}')" title="View Details"><i class="fas fa-eye"></i></button>
-                    <button class="btn btn-small btn-secondary" onclick="editStudent('${student._id}')" title="Edit Student"><i class="fas fa-edit"></i></button>
-                    ${!isPaid ? `<button class="btn btn-small btn-success" onclick="markAsPaid('${student._id}', '${student.fullName}')" title="Mark as Paid"><i class="fas fa-check"></i></button>` : ''}
-                    <button class="btn btn-small btn-info" onclick="openMessageModal('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')" title="Send Private Message" data-i18n-title="admin.students.send_message_title"><i class="fas fa-envelope"></i></button>
-                    <button class="btn btn-small btn-warning" onclick="clearAbsenceHistory('${student._id}', '${student.fullName}')" title="Clear Absence History"><i class="fas fa-eraser"></i></button>
-                    <button class="btn btn-small btn-danger" onclick="deleteStudent('${student._id}', '${student.fullName}')" title="Delete Student"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-small" onclick="viewStudent('${student._id}')" title="${t('view')}"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-small btn-secondary" onclick="editStudent('${student._id}')" title="${t('editStudent')}"><i class="fas fa-edit"></i></button>
+                    ${!isPaid ? `<button class="btn btn-small btn-success" onclick="markAsPaid('${student._id}', '${student.fullName}')" title="${t('markAsPaid')}"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="btn btn-small btn-info" onclick="openMessageModal('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')" title="${t('sendPrivateMessage')}"><i class="fas fa-envelope"></i></button>
+                    <button class="btn btn-small btn-warning" onclick="clearAbsenceHistory('${student._id}', '${student.fullName}')" title="${t('clearAbsences')}"><i class="fas fa-eraser"></i></button>
+                    <button class="btn btn-small btn-danger" onclick="deleteStudent('${student._id}', '${student.fullName}')" title="${t('delete')}"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
@@ -1247,16 +1278,16 @@ function createPendingStudentCard(student) {
                     <div><i class="fas fa-book"></i> ${student.formation ? student.formation.join(', ') : 'N/A'}</div>
                     ${student.filiere && student.filiere.length > 0 ? `<div><i class="fas fa-graduation-cap"></i> ${student.filiere.join(', ')}</div>` : ''}
                     <div style="color: #dc3545; font-weight: 600;">
-                        <i class="fas fa-exclamation-circle"></i> No Group Assigned
+                        <i class="fas fa-exclamation-circle"></i> ${t('noGroupsInSeason')}
                     </div>
                 </div>
             </div>
             <div class="student-card-actions" style="margin-top: 15px;">
-                <button class="btn btn-small btn-warning" onclick="editStudent('${student._id}')" title="Complete Missing Data & Assign Group">
-                    <i class="fas fa-edit"></i> Complete Setup
+                <button class="btn btn-small btn-warning" onclick="editStudent('${student._id}')" title="${t('edit')}">
+                    <i class="fas fa-edit"></i> ${t('edit')}
                 </button>
-                <button class="btn btn-small btn-primary" onclick="viewStudent('${student._id}')" title="View Details">
-                    <i class="fas fa-eye"></i> View
+                <button class="btn btn-small btn-primary" onclick="viewStudent('${student._id}')" title="${t('view')}">
+                    <i class="fas fa-eye"></i> ${t('view')}
                 </button>
             </div>
         </div>
@@ -1633,11 +1664,11 @@ function openAddStudentModal() {
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Phone *</label>
+                    <label>${t('phone')} *</label>
                     <input type="tel" name="phoneNumber" required placeholder="06XXXXXXXX">
                 </div>
                 <div class="form-group">
-                    <label>Parent Phone *</label>
+                    <label>${t('parentPhone')} *</label>
                     <input type="tel" name="parentPhone" required placeholder="06XXXXXXXX">
                 </div>
             </div>
@@ -1715,11 +1746,11 @@ function openAddStudentModal() {
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Payment Date *</label>
+                    <label>${t('paymentDate')} *</label>
                     <input type="date" name="paymentDate" id="addStudentPaymentDate" required>
                 </div>
                 <div class="form-group">
-                    <label>Amount (MAD) *</label>
+                    <label>${t('amount')} *</label>
                     <input type="number" name="paymentAmount" required min="0" step="0.01">
                 </div>
             </div>
@@ -1971,7 +2002,7 @@ function renderPaymentRemindersSections() {
     
     // Section 1: Due in 8-30 days
     html += createReminderSection(
-        'Due in 8-30 Days',
+        t('dueIn15Days'),
         'due-15',
         due15Days,
         '#3b82f6'
@@ -1979,7 +2010,7 @@ function renderPaymentRemindersSections() {
     
     // Section 2: Due in 7 days
     html += createReminderSection(
-        'Due in 7 Days',
+        t('dueIn7Days'),
         'due-7',
         due7Days,
         '#f59e0b'
@@ -1987,14 +2018,14 @@ function renderPaymentRemindersSections() {
     
     // Section 3: Due Tomorrow
     html += createReminderSection(
-        'Due Tomorrow',
+        t('dueTomorrow'),
         'due-tomorrow',
         dueTomorrow,
         '#ef4444'
     );
     
     if (due15Days.length === 0 && due7Days.length === 0 && dueTomorrow.length === 0) {
-        html = '<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>No Upcoming Payment Reminders</h3><p>All payments are up to date!</p></div>';
+        html = `<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>${t('noUpcomingReminders')}</h3><p>${t('allPaymentsUpToDate')}</p></div>`;
     }
     
     grid.innerHTML = html;
@@ -2311,7 +2342,7 @@ async function openEditStudentModal(student) {
                 </div>
                 ${hasBranches ? `
                 <div class="form-group">
-                    <label>Branch Subgroup <span style="color: #64748b; font-size: 0.85rem;">(Optional)</span></label>
+                    <label>${t('branchSubgroupOptional')}</label>
                     <select name="branchSubgroup" id="branchSubgroupSelect" ${branchSubgroupsLoading ? 'disabled' : ''}>
                         ${branchSubgroupsLoading ? 
                             `<option value="">⏳ Loading subgroups...</option>` :
@@ -2322,28 +2353,33 @@ async function openEditStudentModal(student) {
                         }
                     </select>
                     <small style="color: var(--text-light); display: block; margin-top: 5px;">
-                        <i class="fas fa-info-circle"></i> Assign student to a branch subgroup based on their selected subject
+                        <i class="fas fa-info-circle"></i> ${t('assignBranchDesc')}
                     </small>
                 </div>
                 ` : ''}
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Phone *</label>
+                    <label>${t('phone')} *</label>
                     <input type="tel" name="phoneNumber" value="${student.phoneNumber}" required placeholder="06XXXXXXXX">
                 </div>
                 <div class="form-group">
-                    <label>Parent Phone *</label>
+                    <label>${t('parentPhone')} *</label>
                     <input type="tel" name="parentPhone" value="${student.parentPhone}" required placeholder="06XXXXXXXX">
                 </div>
             </div>
             <div class="form-group">
                 <label>School Email *</label>
                 <input type="email" name="schoolEmail" value="${student.schoolEmail}" required placeholder="name@nisrineschool.com" readonly style="background: #f0f0f0;">
-                <small style="color: var(--text-light);">Email cannot be changed</small>
+                <small style="color: var(--text-light);">${t('emailCannotBeChanged')}</small>
             </div>
             <div class="form-group">
-                <label>Formation choisie (Languages) - Select all that apply *</label>
+                <label>${t('photo')}</label>
+                <input type="file" name="photo" accept="image/*">
+                ${isValidPhotoPath(student.photoPath) ? `<small style="color: var(--text-light);">✓</small>` : ''}
+            </div>
+            <div class="form-group">
+                <label>${t('formation')}</label>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
                     <label style="display: flex; align-items: center; gap: 8px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer;">
                         <input type="checkbox" name="formation" value="Allemand" ${student.formation.includes('Allemand') ? 'checked' : ''} style="width: 18px; height: 18px;">
@@ -2401,7 +2437,7 @@ async function openEditStudentModal(student) {
                 </div>
             </div>
             <div class="form-group">
-                <label>Email Password (Change if needed)</label>
+                <label>${t('emailPassword')}</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="text" name="newPassword" id="newPassword" placeholder="Leave empty to keep current password" style="flex: 1;">
                     <button type="button" class="btn btn-secondary" onclick="generatePassword()">
@@ -2412,35 +2448,35 @@ async function openEditStudentModal(student) {
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Payment Date *</label>
+                    <label>${t('paymentDate')} *</label>
                     <input type="date" name="paymentDate" value="${student.paymentDate ? new Date(student.paymentDate).toISOString().split('T')[0] : ''}" required>
                 </div>
                 <div class="form-group">
-                    <label>Amount (MAD) *</label>
+                    <label>${t('amount')} *</label>
                     <input type="number" name="paymentAmount" value="${student.paymentAmount || ''}" required min="0" step="0.01">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Payment Status *</label>
+                    <label>${t('paymentStatus')} *</label>
                     <select name="paymentStatus" required>
-                        <option value="pending" ${student.paymentStatus === 'pending' ? 'selected' : ''}>Pending</option>
-                        <option value="paid" ${student.paymentStatus === 'paid' ? 'selected' : ''}>Paid</option>
-                        <option value="overdue" ${student.paymentStatus === 'overdue' ? 'selected' : ''}>Overdue</option>
+                        <option value="pending" ${student.paymentStatus === 'pending' ? 'selected' : ''}>${t('pending')}</option>
+                        <option value="paid" ${student.paymentStatus === 'paid' ? 'selected' : ''}>${t('paid')}</option>
+                        <option value="overdue" ${student.paymentStatus === 'overdue' ? 'selected' : ''}>${t('overdue')}</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Status *</label>
+                    <label>${t('status')} *</label>
                     <select name="status" required>
-                        <option value="active" ${student.status === 'active' ? 'selected' : ''}>Active</option>
-                        <option value="inactive" ${student.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                        <option value="graduated" ${student.status === 'graduated' ? 'selected' : ''}>Graduated</option>
-                        <option value="dropped" ${student.status === 'dropped' ? 'selected' : ''}>Dropped</option>
+                        <option value="active" ${student.status === 'active' ? 'selected' : ''}>${t('active')}</option>
+                        <option value="inactive" ${student.status === 'inactive' ? 'selected' : ''}>${t('inactive')}</option>
+                        <option value="graduated" ${student.status === 'graduated' ? 'selected' : ''}>${t('graduated')}</option>
+                        <option value="dropped" ${student.status === 'dropped' ? 'selected' : ''}>${t('dropped')}</option>
                     </select>
                 </div>
             </div>
             <div class="form-group">
-                <label>Update Photo (optional)</label>
+                <label>${t('photo')} (${t('optional')})</label>
                 <input type="file" name="photo" accept="image/*">
                 ${isValidPhotoPath(student.photoPath) ? `<small style="color: var(--text-light);">Current photo will be replaced if you upload a new one</small>` : ''}
             </div>
@@ -3115,7 +3151,7 @@ function displayTeachers(teachers) {
                     return seasonName ? `${g.name} (${seasonName})` : (g.name || null);
                 }
             }).filter(name => name !== null); // Remove null entries
-            groupsDisplay = groupNames.length > 0 ? groupNames.join(', ') : 'None';
+            groupsDisplay = groupNames.length > 0 ? groupNames.join(', ') : '-';
         }
         
         html += `
@@ -3128,13 +3164,13 @@ function displayTeachers(teachers) {
                 <td style="padding: 12px;"><span style="color: ${statusColor}; font-weight: 600;">${t(teacher.status)}</span></td>
                 <td style="padding: 12px;">
                     <div class="action-buttons">
-                        <button class="btn btn-small" onclick="openEditTeacherModal('${teacher._id}')" title="Edit Teacher">
+                        <button class="btn btn-small" onclick="openEditTeacherModal('${teacher._id}')" title="${t('editTeacher')}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-small btn-warning" onclick="resetTeacherPassword('${teacher._id}')" title="Reset Password">
+                        <button class="btn btn-small btn-warning" onclick="resetTeacherPassword('${teacher._id}')" title="${t('password')}">
                             <i class="fas fa-key"></i>
                         </button>
-                        <button class="btn btn-small btn-danger" onclick="deleteTeacher('${teacher._id}')" title="Delete Teacher">
+                        <button class="btn btn-small btn-danger" onclick="deleteTeacher('${teacher._id}')" title="${t('delete')}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -3185,24 +3221,24 @@ function openAddTeacherModal() {
             <div class="teacher-modal-header">
                 <button type="button" class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 <div class="header-icon"><i class="fas fa-user-plus"></i></div>
-                <h2>Add New Teacher</h2>
-                <p>Fill in the details below to create a teacher account</p>
+                <h2>${t('addNewTeacher')}</h2>
+                <p>${t('fillDetailsTeacher')}</p>
             </div>
 
             <form onsubmit="addTeacher(event)" style="padding-top: 4px;">
                 <!-- Section 1: Basic Info -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">1</span> Basic Information</div>
+                    <div class="section-label"><span class="section-number">1</span> ${t('basicInformation')}</div>
                     <div class="teacher-field-row">
                         <div class="teacher-field">
-                            <label>Full Name <span class="required">*</span></label>
+                            <label>${t('fullName')} <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="text" name="fullName" id="teacherFullName" required placeholder="Enter full name" oninput="generateTeacherEmail()">
+                                <input type="text" name="fullName" id="teacherFullName" required placeholder="${t('enterFullName')}" oninput="generateTeacherEmail()">
                                 <i class="fas fa-user input-icon"></i>
                             </div>
                         </div>
                         <div class="teacher-field">
-                            <label>Phone Number <span class="required">*</span></label>
+                            <label>${t('phoneNumber')} <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <input type="tel" name="phoneNumber" pattern="0[5-7][0-9]{8}" placeholder="06XXXXXXXX" required>
                                 <i class="fas fa-phone input-icon"></i>
@@ -3213,23 +3249,23 @@ function openAddTeacherModal() {
 
                 <!-- Section 2: Credentials -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">2</span> Account Credentials</div>
+                    <div class="section-label"><span class="section-number">2</span> ${t('accountCredentials')}</div>
                     <div class="teacher-field-row">
                         <div class="teacher-field">
-                            <label>School Email <span class="required">*</span></label>
+                            <label>${t('schoolEmail')} <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="email" name="email" id="teacherEmail" required placeholder="Auto-generated" readonly>
+                                <input type="email" name="email" id="teacherEmail" required placeholder="${t('autoGenerated')}" readonly>
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
-                            <span class="field-hint"><i class="fas fa-info-circle"></i> Auto-generated from name</span>
+                            <span class="field-hint"><i class="fas fa-info-circle"></i> ${t('autoGeneratedFromName')}</span>
                         </div>
                         <div class="teacher-field">
-                            <label>Password <span class="required">*</span></label>
+                            <label>${t('password')} <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="password" name="password" id="teacherPassword" minlength="6" required placeholder="Min. 6 characters">
+                                <input type="password" name="password" id="teacherPassword" minlength="6" required placeholder="${t('minSixChars')}">
                                 <i class="fas fa-lock input-icon"></i>
                                 <button type="button" onclick="generateTeacherPassword()" class="input-action-btn">
-                                    <i class="fas fa-key"></i> Generate
+                                    <i class="fas fa-key"></i> ${t('generate')}
                                 </button>
                             </div>
                         </div>
@@ -3238,12 +3274,12 @@ function openAddTeacherModal() {
 
                 <!-- Section 3: Formations -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">3</span> Formations <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(select all that apply)</small></div>
+                    <div class="section-label"><span class="section-number">3</span> ${t('formations')} <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">${t('selectAllThatApply')}</small></div>
                     
                     <div class="formation-category">
                         <div class="formation-category-label">
                             <span class="cat-icon lang"><i class="fas fa-language"></i></span>
-                            Language Formations
+                            ${t('languageFormationsLabel')}
                         </div>
                         <div class="formation-chips">
                             <div class="formation-chip">
@@ -3268,7 +3304,7 @@ function openAddTeacherModal() {
                     <div class="formation-category">
                         <div class="formation-category-label">
                             <span class="cat-icon branch"><i class="fas fa-graduation-cap"></i></span>
-                            Branch Formations (Filières)
+                            ${t('branchFormationsLabel')}
                         </div>
                         <div class="formation-chips">
                             <div class="formation-chip">
@@ -3309,7 +3345,7 @@ function openAddTeacherModal() {
 
                 <!-- Section 4: Groups -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">4</span> Assign Groups <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(optional)</small></div>
+                    <div class="section-label"><span class="section-number">4</span> ${t('assignedGroups')} <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(${t('optional')})</small></div>
                     ${noGroupsAtAll ? '<div class="groups-empty"><i class="fas fa-info-circle"></i> No groups available in active season. Create groups first.</div>' : `
                     <div class="groups-filter-tabs">
                         <button type="button" class="groups-filter-tab active" onclick="switchGroupTab(this, 'add-lang')">
@@ -3332,8 +3368,8 @@ function openAddTeacherModal() {
 
                 <!-- Actions -->
                 <div class="teacher-modal-actions">
-                    <button type="button" class="btn-teacher-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-teacher-submit"><i class="fas fa-user-plus"></i> Add Teacher</button>
+                    <button type="button" class="btn-teacher-cancel" onclick="closeModal()">${t('cancel')}</button>
+                    <button type="submit" class="btn-teacher-submit"><i class="fas fa-user-plus"></i> ${t('addTeacher')}</button>
                 </div>
             </form>
         </div>
@@ -3407,7 +3443,7 @@ async function addTeacher(event) {
     formData.getAll('groups').forEach(g => groups.push(g));
     
     if (formations.length === 0) {
-        showNotification('Please select at least one formation', 'error');
+        showNotification(t('selectFormation'), 'error');
         return;
     }
     
@@ -3424,7 +3460,7 @@ async function addTeacher(event) {
     
     // Validate before sending
     if (!teacherData.fullName || !teacherData.password || !teacherData.phoneNumber) {
-        showNotification('Please fill in all required fields', 'error');
+        showNotification(t('selectFormation'), 'error');
         return;
     }
     
@@ -3493,24 +3529,24 @@ async function openEditTeacherModal(teacherId) {
             <div class="teacher-modal-header">
                 <button type="button" class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 <div class="header-icon"><i class="fas fa-user-edit"></i></div>
-                <h2>Edit Teacher</h2>
-                <p>Update ${teacher.fullName}'s information</p>
+                <h2>${t('editTeacher')}</h2>
+                <p>${teacher.fullName}</p>
             </div>
 
             <form onsubmit="updateTeacher(event, '${teacherId}')" style="padding-top: 4px;">
                 <!-- Section 1: Basic Info -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">1</span> Basic Information</div>
+                    <div class="section-label"><span class="section-number">1</span> ${t('basicInformation')}</div>
                     <div class="teacher-field-row">
                         <div class="teacher-field">
-                            <label>Full Name <span class="required">*</span></label>
+                            <label>${t('fullName')} <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <input type="text" name="fullName" value="${teacher.fullName}" required>
                                 <i class="fas fa-user input-icon"></i>
                             </div>
                         </div>
                         <div class="teacher-field">
-                            <label>Phone Number <span class="required">*</span></label>
+                            <label>${t('phoneNumber')} <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <input type="tel" name="phoneNumber" value="${teacher.phoneNumber}" pattern="0[5-7][0-9]{8}" required>
                                 <i class="fas fa-phone input-icon"></i>
@@ -3519,11 +3555,11 @@ async function openEditTeacherModal(teacherId) {
                     </div>
                     <div class="teacher-field-row single" style="margin-top: 16px;">
                         <div class="teacher-field">
-                            <label>Status <span class="required">*</span></label>
+                            <label>${t('status')} <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <select name="status" required>
-                                    <option value="active" ${teacher.status === 'active' ? 'selected' : ''}>Active</option>
-                                    <option value="inactive" ${teacher.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="active" ${teacher.status === 'active' ? 'selected' : ''}>${t('active')}</option>
+                                    <option value="inactive" ${teacher.status === 'inactive' ? 'selected' : ''}>${t('inactive')}</option>
                                 </select>
                                 <i class="fas fa-toggle-on input-icon"></i>
                             </div>
@@ -3533,12 +3569,12 @@ async function openEditTeacherModal(teacherId) {
 
                 <!-- Section 2: Formations -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">2</span> Formations <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(select all that apply)</small></div>
+                    <div class="section-label"><span class="section-number">2</span> ${t('formations')} <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">${t('selectAllThatApply')}</small></div>
                     
                     <div class="formation-category">
                         <div class="formation-category-label">
                             <span class="cat-icon lang"><i class="fas fa-language"></i></span>
-                            Language Formations
+                            ${t('languageFormationsLabel')}
                         </div>
                         <div class="formation-chips">
                             <div class="formation-chip">
@@ -3563,7 +3599,7 @@ async function openEditTeacherModal(teacherId) {
                     <div class="formation-category">
                         <div class="formation-category-label">
                             <span class="cat-icon branch"><i class="fas fa-graduation-cap"></i></span>
-                            Branch Formations (Filières)
+                            ${t('branchFormationsLabel')}
                         </div>
                         <div class="formation-chips">
                             <div class="formation-chip">
@@ -3604,7 +3640,7 @@ async function openEditTeacherModal(teacherId) {
 
                 <!-- Section 3: Groups -->
                 <div class="teacher-modal-section">
-                    <div class="section-label"><span class="section-number">3</span> Assign Groups <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(optional)</small></div>
+                    <div class="section-label"><span class="section-number">3</span> ${t('assignedGroups')} <small style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">(${t('optional')})</small></div>
                     ${noGroupsAtAll ? '<div class="groups-empty"><i class="fas fa-info-circle"></i> No groups available in active season.</div>' : `
                     <div class="groups-filter-tabs">
                         <button type="button" class="groups-filter-tab active" onclick="switchGroupTab(this, 'edit-lang')">
@@ -3627,8 +3663,8 @@ async function openEditTeacherModal(teacherId) {
 
                 <!-- Actions -->
                 <div class="teacher-modal-actions">
-                    <button type="button" class="btn-teacher-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-teacher-submit"><i class="fas fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn-teacher-cancel" onclick="closeModal()">${t('cancel')}</button>
+                    <button type="submit" class="btn-teacher-submit"><i class="fas fa-save"></i> ${t('save')}</button>
                 </div>
             </form>
         </div>
@@ -3649,7 +3685,7 @@ async function updateTeacher(event, teacherId) {
     formData.getAll('groups').forEach(g => groups.push(g));
     
     if (formations.length === 0) {
-        showNotification('Please select at least one formation', 'error');
+        showNotification(t('selectFormation'), 'error');
         return;
     }
     
@@ -3688,7 +3724,7 @@ async function updateTeacher(event, teacherId) {
 
 // Reset teacher password
 async function resetTeacherPassword(teacherId) {
-    const newPassword = prompt('Enter new password (minimum 6 characters):');
+    const newPassword = prompt(t('minSixChars'));
     if (!newPassword || newPassword.length < 6) {
         showNotification('Password must be at least 6 characters', 'error');
         return;
@@ -3719,7 +3755,7 @@ async function resetTeacherPassword(teacherId) {
 
 // Delete teacher
 async function deleteTeacher(teacherId) {
-    if (!confirm('Are you sure you want to delete this teacher? This action cannot be undone.')) {
+    if (!confirm(t('confirmDelete'))) {
         return;
     }
     
@@ -3757,14 +3793,14 @@ window.editGroupWithData = function(group) {
         const groupId = group._id;
         
         // Open modal with group data (INSTANT!)
-        const modal = createModal('Edit Group', `
+        const modal = createModal(t('editGroup'), `
             <form onsubmit="updateGroup(event, '${groupId}')">
                 <div class="form-group">
-                    <label>Group Name *</label>
+                    <label>${t('groupName')} *</label>
                     <input type="text" name="name" value="${groupName}" required>
                 </div>
                 <div class="form-group">
-                    <label>Language Formation *</label>
+                    <label>${t('formation')} *</label>
                     <select name="formation" required>
                         <option value="Mixed" ${groupFormation === 'Mixed' ? 'selected' : ''}>Mixed</option>
                         <option value="Allemand" ${groupFormation === 'Allemand' ? 'selected' : ''}>Allemand</option>
@@ -3774,9 +3810,9 @@ window.editGroupWithData = function(group) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Branch Formation (Filière) <span style="font-size: 11px; color: #888;">- Keep as "Mixed"</span></label>
+                    <label>${t('branchFormationsLabel')}</label>
                     <select name="branchFormation">
-                        <option value="Mixed" ${groupBranchFormation === 'Mixed' ? 'selected' : ''}>All Branches (Mixed) - Recommended</option>
+                        <option value="Mixed" ${groupBranchFormation === 'Mixed' ? 'selected' : ''}>All Branches (Mixed)</option>
                         <option value="None" ${!groupBranchFormation || groupBranchFormation === 'None' ? 'selected' : ''}>None</option>
                         <option value="Gériatrie" ${groupBranchFormation === 'Gériatrie' ? 'selected' : ''}>Gériatrie</option>
                         <option value="Aide soignant" ${groupBranchFormation === 'Aide soignant' ? 'selected' : ''}>Aide soignant</option>
@@ -3787,23 +3823,20 @@ window.editGroupWithData = function(group) {
                         <option value="Informatique" ${groupBranchFormation === 'Informatique' ? 'selected' : ''}>Informatique</option>
                         <option value="Gestion hôtelière" ${groupBranchFormation === 'Gestion hôtelière' ? 'selected' : ''}>Gestion hôtelière</option>
                     </select>
-                    <small style="color: #666; font-size: 11px; display: block; margin-top: 5px;">
-                        ℹ️ Branch teachers will see students from all groups who study their branch
-                    </small>
                 </div>
                 <div class="form-group">
-                    <label>Max Students *</label>
+                    <label>${t('maxStudents')} *</label>
                     <input type="number" name="maxStudents" value="${groupMaxStudents}" min="1" required>
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
+                    <label>${t('status')}</label>
                     <select name="status">
-                        <option value="active" ${groupStatus === 'active' ? 'selected' : ''}>Active</option>
-                        <option value="inactive" ${groupStatus === 'inactive' ? 'selected' : ''}>Inactive</option>
+                        <option value="active" ${groupStatus === 'active' ? 'selected' : ''}>${t('active')}</option>
+                        <option value="inactive" ${groupStatus === 'inactive' ? 'selected' : ''}>${t('inactive')}</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Update Group
+                    <i class="fas fa-save"></i> ${t('save')}
                 </button>
             </form>
         `);
@@ -3838,14 +3871,14 @@ window.editGroup = async function(groupId) {
         const groupStatus = group.status || 'active';
         
         // Open modal with group data
-        const modal = createModal('Edit Group', `
+        const modal = createModal(t('editGroup'), `
             <form onsubmit="updateGroup(event, '${groupId}')">
                 <div class="form-group">
-                    <label>Group Name *</label>
+                    <label>${t('groupName')} *</label>
                     <input type="text" name="name" value="${groupName}" required>
                 </div>
                 <div class="form-group">
-                    <label>Language Formation *</label>
+                    <label>${t('formation')} *</label>
                     <select name="formation" required>
                         <option value="Mixed" ${group.formation === 'Mixed' ? 'selected' : ''}>Mixed</option>
                         <option value="Allemand" ${group.formation === 'Allemand' ? 'selected' : ''}>Allemand</option>
@@ -3855,9 +3888,9 @@ window.editGroup = async function(groupId) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Branch Formation (Filière) <span style="font-size: 11px; color: #888;">- Keep as "Mixed"</span></label>
+                    <label>${t('branchFormationsLabel')}</label>
                     <select name="branchFormation">
-                        <option value="Mixed" ${group.branchFormation === 'Mixed' ? 'selected' : ''}>All Branches (Mixed) - Recommended</option>
+                        <option value="Mixed" ${group.branchFormation === 'Mixed' ? 'selected' : ''}>All Branches (Mixed)</option>
                         <option value="None" ${!group.branchFormation || group.branchFormation === 'None' ? 'selected' : ''}>None</option>
                         <option value="Gériatrie" ${group.branchFormation === 'Gériatrie' ? 'selected' : ''}>Gériatrie</option>
                         <option value="Aide soignant" ${group.branchFormation === 'Aide soignant' ? 'selected' : ''}>Aide soignant</option>
@@ -3868,23 +3901,20 @@ window.editGroup = async function(groupId) {
                         <option value="Informatique" ${group.branchFormation === 'Informatique' ? 'selected' : ''}>Informatique</option>
                         <option value="Gestion hôtelière" ${group.branchFormation === 'Gestion hôtelière' ? 'selected' : ''}>Gestion hôtelière</option>
                     </select>
-                    <small style="color: #666; font-size: 11px; display: block; margin-top: 5px;">
-                        ℹ️ Branch teachers will see students from all groups who study their branch
-                    </small>
                 </div>
                 <div class="form-group">
-                    <label>Max Students *</label>
+                    <label>${t('maxStudents')} *</label>
                     <input type="number" name="maxStudents" value="${groupMaxStudents}" min="1" required>
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
+                    <label>${t('status')}</label>
                     <select name="status">
-                        <option value="active" ${groupStatus === 'active' ? 'selected' : ''}>Active</option>
-                        <option value="inactive" ${groupStatus === 'inactive' ? 'selected' : ''}>Inactive</option>
+                        <option value="active" ${groupStatus === 'active' ? 'selected' : ''}>${t('active')}</option>
+                        <option value="inactive" ${groupStatus === 'inactive' ? 'selected' : ''}>${t('inactive')}</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Update Group
+                    <i class="fas fa-save"></i> ${t('save')}
                 </button>
             </form>
         `);
@@ -3938,7 +3968,7 @@ async function loadOverdueStudents() {
         if (data && data.success && data.students) {
             displayOverdueStudents(data.students);
         } else {
-            overdueContent.innerHTML = '<div class="no-data"><i class="fas fa-check-circle"></i><p>No overdue payments found!</p></div>';
+            overdueContent.innerHTML = `<div class="no-data"><i class="fas fa-check-circle"></i><p>${t('noOverduePayments')}</p></div>`;
         }
     } catch (error) {
         console.error('Error loading overdue students:', error);
@@ -3951,7 +3981,7 @@ function displayOverdueStudents(students) {
     const overdueContent = document.getElementById('overdueContent');
     
     if (!students || students.length === 0) {
-        overdueContent.innerHTML = '<div class="no-data"><i class="fas fa-check-circle"></i><p>No overdue payments found!</p></div>';
+        overdueContent.innerHTML = `<div class="no-data"><i class="fas fa-check-circle"></i><p>${t('noOverduePayments')}</p></div>`;
         return;
     }
     

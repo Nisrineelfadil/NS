@@ -70,7 +70,7 @@ function showSkeletonModal(studentId) {
     modal.innerHTML = `
         <div class="split-modal-container">
             <div class="split-modal-header">
-                <h2><i class="fas fa-user-circle"></i> Loading Student Profile...</h2>
+                <h2><i class="fas fa-user-circle"></i> ${t('loadingAttendanceRecords').split('...')[0]}...</h2>
                 <button class="split-modal-close" onclick="closeStudentProfile()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -115,7 +115,7 @@ function updateModalWithData(student, grades) {
     modal.innerHTML = `
         <div class="split-modal-container">
             <div class="split-modal-header">
-                <h2><i class="fas fa-user-circle"></i> Student Profile - ${student.fullName || 'Student'}</h2>
+                <h2><i class="fas fa-user-circle"></i> ${student.fullName || ''}</h2>
                 <button class="split-modal-close" onclick="closeStudentProfile()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -134,12 +134,12 @@ function updateModalWithData(student, grades) {
             <div class="split-modal-footer">
                 <div class="btn-group">
                     <button type="button" class="btn-split secondary" onclick="editStudentProfile('${student._id}')">
-                        <i class="fas fa-edit"></i> Edit Student
+                        <i class="fas fa-edit"></i> ${t('editStudent')}
                     </button>
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn-split secondary" onclick="closeStudentProfile()">
-                        <i class="fas fa-times"></i> Close
+                        <i class="fas fa-times"></i> ${t('close')}
                     </button>
                 </div>
             </div>
@@ -311,7 +311,7 @@ function renderStudentForm(student) {
                         style="flex: 1; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);"
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
-                    <i class="fas fa-download"></i> Download PDF
+                    <i class="fas fa-download"></i> ${t('archiveDownload')} PDF
                 </button>
                 <button onclick="backupToCloud('${student._id}', '${(student.fullName || 'Student').replace(/'/g, "\\'")}', '${student.schoolEmail}')" 
                         style="flex: 1; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);"
@@ -367,16 +367,16 @@ function renderStudentData(student, grades) {
     // Determine overall status
     let statusClass = 'approved';
     let statusIcon = 'check-circle';
-    let statusText = 'Active & Approved';
+    let statusText = t('active');
     
     if (student.status === 'pending') {
         statusClass = 'pending';
         statusIcon = 'clock';
-        statusText = 'Pending Approval';
+        statusText = t('pending');
     } else if (student.status === 'inactive') {
         statusClass = 'incomplete';
         statusIcon = 'exclamation-circle';
-        statusText = 'Inactive';
+        statusText = t('inactive');
     }
     
     const initial = student.fullName ? student.fullName.charAt(0).toUpperCase() : '?';
@@ -401,18 +401,18 @@ function renderStudentData(student, grades) {
         
         <!-- Contact Information -->
         <div class="preview-section">
-            <div class="preview-section-title">Contact Information</div>
+            <div class="preview-section-title">${t('phoneNumber')}</div>
             <div class="preview-item">
                 <i class="fas fa-envelope"></i>
-                <span>${student.email || 'No personal email'}</span>
+                <span>${student.email || '-'}</span>
             </div>
             <div class="preview-item">
                 <i class="fas fa-phone"></i>
-                <span>${student.phoneNumber || student.phones?.[0] || 'No phone'}</span>
+                <span>${student.phoneNumber || student.phones?.[0] || '-'}</span>
             </div>
             <div class="preview-item">
                 <i class="fas fa-user-friends"></i>
-                <span>${student.parentPhone || student.phones?.[1] || 'No parent phone'}</span>
+                <span>${student.parentPhone || student.phones?.[1] || '-'}</span>
             </div>
             
             <!-- CIN Card Download -->
@@ -422,7 +422,7 @@ function renderStudentData(student, grades) {
                         onclick="downloadStudentCIN('${student._id}')"
                         style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s;">
                     <i class="fas fa-download"></i>
-                    <span>Download CIN Card</span>
+                    <span>${t('archiveDownload')} CIN</span>
                 </button>
                 <div id="cinStatus-${student._id}" style="margin-top: 8px; text-align: center; font-size: 0.85rem;"></div>
             </div>
@@ -430,30 +430,30 @@ function renderStudentData(student, grades) {
         
         <!-- Academic Summary -->
         <div class="preview-section">
-            <div class="preview-section-title">Academic Summary</div>
+            <div class="preview-section-title">${t('academicSummary')}</div>
             <div class="preview-item">
                 <i class="fas fa-calendar-alt"></i>
-                <span>${student.seasonName || student.season?.name || student.season || 'No season'}</span>
+                <span>${student.seasonName || student.season?.name || student.season || '-'}</span>
             </div>
             <div class="preview-item">
                 <i class="fas fa-users"></i>
-                <span>${student.groupName || 'No group'}</span>
+                <span>${student.groupName || '-'}</span>
             </div>
             <div class="preview-item">
                 <i class="fas fa-book"></i>
-                <span>${formations.length} Language${formations.length !== 1 ? 's' : ''}</span>
+                <span>${formations.length} ${t('language')}</span>
             </div>
             ${filieres.length > 0 ? `
             <div class="preview-item">
                 <i class="fas fa-briefcase"></i>
-                <span>${filieres.length} Branch${filieres.length !== 1 ? 'es' : ''}</span>
+                <span>${filieres.length} ${t('branch')}</span>
             </div>
             ` : ''}
         </div>
         
         <!-- Level Tabs and Content -->
         <div class="preview-section">
-            <div class="preview-section-title">ACADEMIC PERFORMANCE</div>
+            <div class="preview-section-title">${t('studentGrades')}</div>
             
             <!-- Level Tabs -->
             <div id="levelTabs-${student._id}" class="level-tabs-container">
@@ -468,28 +468,27 @@ function renderStudentData(student, grades) {
         
         <!-- Quick Actions -->
         <div class="preview-section">
-            <div class="preview-section-title">Quick Actions</div>
+            <div class="preview-section-title">${t('quickActions')}</div>
             <button onclick="editStudentProfile('${student._id}')" 
                     style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px;">
-                <i class="fas fa-edit"></i> Edit Student
+                <i class="fas fa-edit"></i> ${t('editStudent')}
             </button>
             <button onclick="viewStudentGrades('${student._id}')" 
                     style="width: 100%; padding: 12px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px;">
-                <i class="fas fa-chart-bar"></i> View All Grades
+                <i class="fas fa-chart-bar"></i> ${t('viewGrades')}
             </button>
             <button onclick="viewPaymentHistory('${student._id}', '${(student.fullName || 'Student').replace(/'/g, "\\'")}');" 
                     style="width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                <i class="fas fa-history"></i> View Payment History
+                <i class="fas fa-history"></i> ${t('paymentHistory')}
             </button>
             <button onclick="exportPaymentJournal('${student._id}', '${(student.fullName || 'Student').replace(/'/g, "\\'")}');" 
                     style="width: 100%; padding: 12px; background: linear-gradient(135deg, #FFCC00, #FF9500); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);">
-                <i class="fas fa-file-download"></i> Export Payment Journal PDF
+                <i class="fas fa-file-download"></i> ${t('paymentHistory')} PDF
             </button>
             ${student.paymentStatus !== 'paid' ? `
             <button onclick="markStudentAsPaid('${student._id}')" 
                     style="width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                <i class="fas fa-check"></i> Mark as Paid
-            </button>
+                <i class="fas fa-check"></i> ${t('markAsPaid')}
             ` : ''}
         </div>
     `;
@@ -707,7 +706,7 @@ function renderLevelContent(grades, level) {
         <div style="margin-bottom: 30px;">
             <h3 style="color: #FFCC00; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-chart-bar"></i>
-                Grades Overview - ${level}
+                ${t('studentGrades')} - ${level}
             </h3>
             ${renderGradesOverviewForLevel(grades, level)}
         </div>
@@ -716,7 +715,7 @@ function renderLevelContent(grades, level) {
         <div style="margin-bottom: 30px;">
             <h3 style="color: #FFCC00; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-chart-line"></i>
-                Performance Summary - ${level}
+                ${t('academicSummary')} - ${level}
             </h3>
             ${renderPerformanceSummaryForLevel(grades, level)}
         </div>
@@ -732,7 +731,7 @@ function renderGradesOverviewForLevel(grades, level) {
         return `
             <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(255, 204, 0, 0.15);">
                 <i class="fas fa-chart-line" style="font-size: 3rem; color: rgba(255, 204, 0, 0.3); margin-bottom: 12px;"></i>
-                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">No grades for ${level} yet</p>
+                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">-</p>
             </div>
         `;
     }
@@ -749,7 +748,7 @@ function renderPerformanceSummaryForLevel(grades, level) {
         return `
             <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(255, 204, 0, 0.15);">
                 <i class="fas fa-clock" style="font-size: 3rem; color: rgba(255, 204, 0, 0.3); margin-bottom: 12px;"></i>
-                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">No performance data for ${level} yet</p>
+                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">-</p>
             </div>
         `;
     }
@@ -773,7 +772,7 @@ function renderGradesOverview(grades, formations) {
         return `
             <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(255, 204, 0, 0.15);">
                 <i class="fas fa-chart-line" style="font-size: 3rem; color: rgba(255, 204, 0, 0.3); margin-bottom: 12px;"></i>
-                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">No grades uploaded yet</p>
+                <p style="margin: 0; font-size: 0.9rem; color: #94a3b8;">-</p>
             </div>
         `;
     }
@@ -1271,7 +1270,7 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                             <i class="fas fa-receipt"></i>
                         </div>
                         <div>
-                            <h2 style="margin: 0; font-size: 1.75rem; font-weight: 700;">Payment History</h2>
+                            <h2 style="margin: 0; font-size: 1.75rem; font-weight: 700;">${t('paymentHistory')}</h2>
                             <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 1rem;">${studentName}</p>
                         </div>
                     </div>
@@ -1281,21 +1280,21 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                     <!-- Student Info Cards -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px;">
                         <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border: 1px solid #bbf7d0;">
-                            <div style="color: #15803d; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Student Name</div>
+                            <div style="color: #15803d; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${t('studentNameUpper')}</div>
                             <div style="color: #166534; font-size: 1.125rem; font-weight: 700;">${student.fullName || studentName}</div>
                         </div>
                         <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border: 1px solid #bfdbfe;">
-                            <div style="color: #1e40af; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Language Group</div>
+                            <div style="color: #1e40af; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${t('languageGroupUpper')}</div>
                             <div style="color: #1e3a8a; font-size: 1.125rem; font-weight: 700;">${Array.isArray(student.formation) ? student.formation.join(', ') : (student.formation || 'N/A')}</div>
                         </div>
                         ${student.branch ? `
                         <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; border: 1px solid #fcd34d;">
-                            <div style="color: #92400e; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Branch</div>
+                            <div style="color: #92400e; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${t('branchUpper')}</div>
                             <div style="color: #78350f; font-size: 1.125rem; font-weight: 700;">${student.branch}</div>
                         </div>
                         ` : ''}
                         <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); padding: 20px; border-radius: 12px; border: 1px solid #99f6e4;">
-                            <div style="color: #115e59; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Total Payments</div>
+                            <div style="color: #115e59; font-size: 0.813rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${t('totalPayments')}</div>
                             <div style="color: #134e4a; font-size: 1.875rem; font-weight: 800;">${paymentHistory.length}</div>
                         </div>
                     </div>
@@ -1304,8 +1303,8 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                     ${paymentHistory.length === 0 ? `
                         <div style="text-align: center; padding: 48px 24px; color: #64748b;">
                             <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                            <p style="font-size: 1.125rem; font-weight: 600; margin: 0;">No payment history available</p>
-                            <p style="margin: 8px 0 0 0; font-size: 0.875rem;">Payments will appear here once marked as paid</p>
+                            <p style="font-size: 1.125rem; font-weight: 600; margin: 0;">${t('noPaymentHistory')}</p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.875rem;"></p>
                         </div>
                     ` : `
                         <!-- Payment Records -->
@@ -1313,7 +1312,7 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                             <div style="background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 16px 20px; border-bottom: 2px solid #e5e7eb;">
                                 <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #1f2937; display: flex; align-items: center; gap: 8px;">
                                     <i class="fas fa-list-ul" style="color: #10b981;"></i>
-                                    Payment Records
+                                    ${t('paymentHistory')}
                                 </h3>
                             </div>
                             <div style="overflow-x: auto;">
@@ -1332,19 +1331,19 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                                                 <!-- Payment Info -->
                                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
                                                     <div>
-                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Amount</div>
+                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${t('amount')}</div>
                                                         <div style="color: #10b981; font-size: 1.25rem; font-weight: 800;">${payment.amount || 0} MAD</div>
                                                     </div>
                                                     <div>
-                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Date</div>
+                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${t('date')}</div>
                                                         <div style="color: #1f2937; font-size: 0.938rem; font-weight: 600;">${paymentDate}</div>
                                                     </div>
                                                     <div>
-                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Marked As Paid</div>
+                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${t('markAsPaid')}</div>
                                                         <div style="color: #1f2937; font-size: 0.938rem; font-weight: 600;">${markedDate}</div>
                                                     </div>
                                                     <div>
-                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Marked By</div>
+                                                        <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Admin</div>
                                                         <span style="display: inline-block; background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; padding: 6px 14px; border-radius: 8px; font-size: 0.875rem; font-weight: 700; margin-top: 4px;">
                                                             <i class="fas fa-user-shield" style="margin-right: 6px;"></i>${payment.markedByName || 'Admin'}
                                                         </span>
@@ -1366,7 +1365,7 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                                         <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-coins" style="font-size: 20px;"></i>
                                         </div>
-                                        <div style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">Total Paid</div>
+                                        <div style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">${t('totalPayments')}</div>
                                     </div>
                                     <div style="font-size: 2rem; font-weight: 800; line-height: 1;">
                                         ${paymentHistory.reduce((sum, p) => sum + (p.amount || 0), 0).toLocaleString()} MAD
@@ -1380,7 +1379,7 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                                         <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-chart-line" style="font-size: 20px;"></i>
                                         </div>
-                                        <div style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">Average Payment</div>
+                                        <div style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">${t('amount')}</div>
                                     </div>
                                     <div style="font-size: 2rem; font-weight: 800; line-height: 1;">
                                         ${paymentHistory.length > 0 ? Math.round(paymentHistory.reduce((sum, p) => sum + (p.amount || 0), 0) / paymentHistory.length).toLocaleString() : 0} MAD
@@ -1394,7 +1393,7 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                                         <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-hashtag" style="font-size: 20px;"></i>
                                         </div>
-                                        <div style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">Total Payments</div>
+                                        <div style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">${t('total')}</div>
                                     </div>
                                     <div style="font-size: 2rem; font-weight: 800; line-height: 1;">
                                         ${paymentHistory.length}
@@ -1411,13 +1410,13 @@ window.viewPaymentHistory = async function(studentId, studentName) {
                             style="padding: 12px 24px; background: linear-gradient(135deg, #FFCC00, #FF9500); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3); transition: all 0.2s; font-size: 0.938rem;"
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(255, 204, 0, 0.4)'"
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(255, 204, 0, 0.3)'">
-                        <i class="fas fa-file-pdf"></i> Export as PDF
+                        <i class="fas fa-file-pdf"></i> ${t('exportPDF')}
                     </button>
                     <button onclick="closePaymentHistoryModal()" 
                             style="padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.938rem;"
                             onmouseover="this.style.background='#4b5563'"
                             onmouseout="this.style.background='#6b7280'">
-                        Close
+                        ${t('close')}
                     </button>
                 </div>
             </div>

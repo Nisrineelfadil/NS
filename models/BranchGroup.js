@@ -77,66 +77,66 @@ branchGroupSchema.pre('save', function(next) {
 branchGroupSchema.statics.createDefaults = async function(createdBy, createdByName) {
     const defaultBranches = [
         {
-            name: 'IT',
+            name: 'Informatique',
             formation: 'Informatique',
-            displayName: 'Information Technology',
-            description: 'Computer Science and IT programs',
+            displayName: 'Informatique',
+            description: 'Programmes d\'informatique et de technologie',
             icon: '💻',
             color: '#667eea'
         },
         {
-            name: 'Nursing',
+            name: 'Gériatrie',
             formation: 'Gériatrie',
-            displayName: 'Nursing & Geriatrics',
-            description: 'Healthcare and elderly care programs',
+            displayName: 'Gériatrie',
+            description: 'Programmes de soins gériatriques et de santé',
             icon: '🏥',
             color: '#f093fb'
         },
         {
-            name: 'Healthcare Assistant',
+            name: 'Aide Soignant',
             formation: 'Aide soignant',
-            displayName: 'Healthcare Assistant',
-            description: 'Nursing assistant and care programs',
+            displayName: 'Aide Soignant',
+            description: 'Programmes d\'aide soignant et de soins',
             icon: '⚕️',
             color: '#4facfe'
         },
         {
-            name: 'Social Education',
+            name: 'Agent Socio Éducatif',
             formation: 'Agent socio éducatif',
-            displayName: 'Social Education Agent',
-            description: 'Social work and education programs',
+            displayName: 'Agent Socio Éducatif',
+            description: 'Programmes d\'éducation sociale',
             icon: '🤝',
             color: '#43e97b'
         },
         {
-            name: 'Social Work',
+            name: 'Assistante Sociale',
             formation: 'Assistante sociale',
-            displayName: 'Social Work',
-            description: 'Social assistance and counseling programs',
+            displayName: 'Assistante Sociale',
+            description: 'Programmes d\'assistance sociale et de conseil',
             icon: '👥',
             color: '#fa709a'
         },
         {
-            name: 'Hospitality',
+            name: 'Restauration',
             formation: 'Restauration',
-            displayName: 'Restaurant & Hospitality',
-            description: 'Restaurant management and service',
+            displayName: 'Restauration',
+            description: 'Gestion de restaurant et service hôtelier',
             icon: '🍽️',
             color: '#fee140'
         },
         {
-            name: 'Culinary Arts',
+            name: 'Cuisine',
             formation: 'Cuisine',
-            displayName: 'Culinary Arts',
-            description: 'Professional cooking and culinary programs',
+            displayName: 'Cuisine',
+            description: 'Programmes de cuisine professionnelle et arts culinaires',
             icon: '👨‍🍳',
             color: '#f6d365'
         },
         {
-            name: 'Hotel Management',
+            name: 'Gestion Hôtelière',
             formation: 'Gestion hôtelière',
-            displayName: 'Hotel Management',
-            description: 'Hotel and hospitality management',
+            displayName: 'Gestion Hôtelière',
+            description: 'Gestion hôtelière et hébergement',
             icon: '🏨',
             color: '#fbc2eb'
         }

@@ -563,11 +563,11 @@ router.get('/pending-assignments/list', authenticateAdmin, async (req, res) => {
             .populate('group', 'name season seasonName');
         
         // Filter by season if provided (filter after populate since season is in group)
+        // Include carry-over students (group: null) who still need assignment
         if (req.query.season) {
             pendingStudents = pendingStudents.filter(student => 
-                student.group && 
-                student.group.season && 
-                student.group.season.toString() === req.query.season
+                !student.group ||
+                (student.group.season && student.group.season.toString() === req.query.season)
             );
         }
         

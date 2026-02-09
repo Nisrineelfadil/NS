@@ -155,18 +155,72 @@ router.delete('/:id', authenticateAdmin, requireSuperAdmin, async (req, res) => 
         if (!season) {
             return res.status(404).json({ error: 'Season not found' });
         }
-        
-        // Check if season has groups
+
+        const force = req.query.force === 'true';
         const groupCount = await Group.countDocuments({ season: season._id });
-        if (groupCount > 0) {
-            return res.status(400).json({ 
-                error: `Cannot delete season with ${groupCount} groups. Archive it instead.` 
+
+        // If season has groups and force is not set, return info for the warning modal
+        if (groupCount > 0 && !force) {
+            return res.status(400).json({
+                error: `Season has ${groupCount} groups. Use force=true to delete everything.`,
+                groupCount,
+                needsForce: true
             });
         }
-        
+
+        let purged = {};
+
+        // If season has groups, cascade delete all associated data
+        if (groupCount > 0) {
+            const ManagedStudent = require('../models/ManagedStudent');
+            const Grade = require('../models/Grade');
+            const AttendanceSession = require('../models/AttendanceSession');
+            const AttendanceRecord = require('../models/AttendanceRecord');
+            const PaymentHistory = require('../models/PaymentHistory');
+            const PaymentReminder = require('../models/PaymentReminder');
+            const StudentMessage = require('../models/StudentMessage');
+
+            const groups = await Group.find({ season: season._id }).lean();
+            const groupIds = groups.map(g => g._id);
+
+            const students = await ManagedStudent.find({ group: { $in: groupIds } }).lean();
+            const studentIds = students.map(s => s._id);
+
+            if (studentIds.length > 0) {
+                const gr = await Grade.deleteMany({ student: { $in: studentIds } });
+                const ph = await PaymentHistory.deleteMany({ student: { $in: studentIds } });
+                const pr = await PaymentReminder.deleteMany({ student: { $in: studentIds } });
+                const sm = await StudentMessage.deleteMany({ student: { $in: studentIds } });
+                purged.grades = gr.deletedCount;
+                purged.paymentHistory = ph.deletedCount;
+                purged.paymentReminders = pr.deletedCount;
+                purged.messages = sm.deletedCount;
+            }
+
+            // Attendance (tied to groups)
+            const sessions = await AttendanceSession.find({ groupId: { $in: groupIds } }).lean();
+            const sessionIds = sessions.map(s => s._id);
+            if (sessionIds.length > 0) {
+                const ar = await AttendanceRecord.deleteMany({ session: { $in: sessionIds } });
+                purged.attendanceRecords = ar.deletedCount;
+            }
+            const as = await AttendanceSession.deleteMany({ groupId: { $in: groupIds } });
+            purged.attendanceSessions = as.deletedCount;
+
+            // Delete students
+            const sd = await ManagedStudent.deleteMany({ group: { $in: groupIds } });
+            purged.students = sd.deletedCount;
+
+            // Delete groups
+            const gd = await Group.deleteMany({ season: season._id });
+            purged.groups = gd.deletedCount;
+
+            console.log(`🗑️ Force-deleted season ${season.name} with cascade:`, purged);
+        }
+
         await season.deleteOne();
-        
-        res.json({ message: 'Season deleted successfully' });
+
+        res.json({ message: 'Season deleted successfully', purged });
     } catch (error) {
         console.error('Error deleting season:', error);
         res.status(500).json({ error: 'Failed to delete season' });

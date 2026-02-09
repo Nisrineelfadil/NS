@@ -46,8 +46,8 @@ const verifyTeacherToken = (req, res, next) => {
     }
 };
 
-// Middleware to verify student token
-const verifyStudentToken = (req, res, next) => {
+// Middleware to verify student token AND check account still exists
+const verifyStudentToken = async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
     
     if (!token) {
@@ -59,6 +59,16 @@ const verifyStudentToken = (req, res, next) => {
         if (decoded.role !== 'student') {
             return res.status(403).json({ message: 'Access denied. Students only.' });
         }
+
+        // Check if student still exists in DB (may have been deleted after season archive)
+        const studentExists = await ManagedStudent.exists({ _id: decoded.id });
+        if (!studentExists) {
+            return res.status(410).json({
+                message: 'Your account no longer exists. Your academic session has ended.',
+                accountDeleted: true
+            });
+        }
+
         req.student = decoded;
         next();
     } catch (error) {
@@ -625,7 +635,19 @@ router.post('/student/login', async (req, res) => {
         
         const student = await ManagedStudent.findOne({ schoolEmail: email, status: 'active' });
         if (!student) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            // Check if account ever existed (could be archived/deleted)
+            const anyAccount = await ManagedStudent.findOne({ schoolEmail: email });
+            if (anyAccount && anyAccount.status !== 'active') {
+                return res.status(410).json({
+                    error: 'Your account is no longer active. Your academic session has ended.',
+                    accountDeleted: true
+                });
+            }
+            // No account at all — either never existed or was purged after archiving
+            return res.status(401).json({
+                error: 'No account found with this email. If you were a student in a previous season, your account may have been archived.',
+                accountDeleted: true
+            });
         }
         
         const isMatch = await student.comparePassword(password);

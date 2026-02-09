@@ -55,7 +55,7 @@ const AdminAttendance = {
             
             const groupFilter = document.getElementById('attendanceGroupFilter');
             if (groupFilter) {
-                groupFilter.innerHTML = '<option value="">All Groups</option>';
+                groupFilter.innerHTML = `<option value="">${t('allGroups')}</option>`;
                 groupsData.groups.forEach(group => {
                     const option = document.createElement('option');
                     option.value = group._id;
@@ -74,7 +74,7 @@ const AdminAttendance = {
 
             const formationFilter = document.getElementById('attendanceFormationFilter');
             if (formationFilter) {
-                formationFilter.innerHTML = '<option value="">All Formations</option>';
+                formationFilter.innerHTML = `<option value="">${t('allFormations')}</option>`;
                 formations.forEach(formation => {
                     const option = document.createElement('option');
                     option.value = formation;
@@ -242,7 +242,7 @@ const AdminAttendance = {
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: var(--text-light);">
                     <i class="fas fa-calendar-times" style="font-size: 3rem; color: var(--primary-color); opacity: 0.3; margin-bottom: 15px;"></i>
-                    <p>No attendance records found</p>
+                    <p>${t('noAttendanceRecordsFound')}</p>
                 </div>
             `;
         } else {
@@ -849,7 +849,7 @@ function closeManualAttendanceModal() {
     // Reset form
     document.getElementById('manualTeacherSelect').value = '';
     document.getElementById('manualGroupSelect').value = '';
-    document.getElementById('manualFormationSelect').innerHTML = '<option value="">-- Select a Formation --</option>';
+    document.getElementById('manualFormationSelect').innerHTML = `<option value="">${t('selectAFormation')}</option>`;
     document.getElementById('manualDateSelect').value = '';
     document.getElementById('manualStartTime').value = '09:00';
     document.getElementById('manualEndTime').value = '11:00';
@@ -875,7 +875,7 @@ async function loadTeachersForManualAttendance() {
         manualAttendanceData.teachers = data.teachers || [];
         
         const select = document.getElementById('manualTeacherSelect');
-        select.innerHTML = '<option value="">-- Select a Teacher --</option>';
+        select.innerHTML = `<option value="">${t('selectATeacher')}</option>`;
         
         manualAttendanceData.teachers.forEach(teacher => {
             const option = document.createElement('option');
@@ -910,7 +910,7 @@ async function loadGroupsForManualAttendance() {
         manualAttendanceData.groups = groupsData.groups || [];
         
         const select = document.getElementById('manualGroupSelect');
-        select.innerHTML = '<option value="">-- Select a Group --</option>';
+        select.innerHTML = `<option value="">${t('selectAGroup')}</option>`;
         
         manualAttendanceData.groups.forEach(group => {
             const option = document.createElement('option');
@@ -931,15 +931,15 @@ function onManualTeacherChange() {
     const selectedOption = teacherSelect.options[teacherSelect.selectedIndex];
     
     if (!selectedOption.value) {
-        document.getElementById('manualFormationSelect').innerHTML = '<option value="">-- Select a Formation --</option>';
-        document.getElementById('manualGroupSelect').innerHTML = '<option value="">-- Select a Group --</option>';
+        document.getElementById('manualFormationSelect').innerHTML = `<option value="">${t('selectAFormation')}</option>`;
+        document.getElementById('manualGroupSelect').innerHTML = `<option value="">${t('selectAGroup')}</option>`;
         return;
     }
     
     // Update formations dropdown based on teacher's formations
     const formations = JSON.parse(selectedOption.dataset.formations || '[]');
     const formationSelect = document.getElementById('manualFormationSelect');
-    formationSelect.innerHTML = '<option value="">-- Select a Formation --</option>';
+    formationSelect.innerHTML = `<option value="">${t('selectAFormation')}</option>`;
     
     formations.forEach(formation => {
         const option = document.createElement('option');
@@ -951,7 +951,7 @@ function onManualTeacherChange() {
     // Update groups dropdown based on teacher's assigned groups
     const teacherGroupIds = JSON.parse(selectedOption.dataset.groups || '[]');
     const groupSelect = document.getElementById('manualGroupSelect');
-    groupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
+    groupSelect.innerHTML = `<option value="">${t('selectAGroup')}</option>`;
     
     // Filter groups to only show teacher's assigned groups
     const teacherGroups = manualAttendanceData.groups.filter(group => 
@@ -983,19 +983,19 @@ async function loadStudentsForManualAttendance() {
     
     // Validation
     if (!teacherId) {
-        showNotification('Please select a teacher', 'warning');
+        showNotification(t('selectTeacher'), 'warning');
         return;
     }
     if (!groupId) {
-        showNotification('Please select a group', 'warning');
+        showNotification(t('selectGroup'), 'warning');
         return;
     }
     if (!formation) {
-        showNotification('Please select a formation', 'warning');
+        showNotification(t('selectFormation'), 'warning');
         return;
     }
     if (!date) {
-        showNotification('Please select a date', 'warning');
+        showNotification(t('selectDate'), 'warning');
         return;
     }
     
@@ -1688,14 +1688,15 @@ async function loadEditPresencesGroups() {
         
         if (!seasonsResponse.ok) {
             console.error('Failed to fetch active season:', seasonsResponse.status);
-            groupSelect.innerHTML = '<option value="">Error loading season</option>';
+            groupSelect.innerHTML = `<option value="">${t('errorLoadingSeason')}</option>`;
             return;
         }
         
         const activeSeason = await seasonsResponse.json();
         
         if (!activeSeason || !activeSeason._id) {
-            groupSelect.innerHTML = '<option value="">No active season found</option>';
+            console.error('No active season found');
+            groupSelect.innerHTML = `<option value="">${t('noActiveSeason')}</option>`;
             return;
         }
         
@@ -1706,29 +1707,31 @@ async function loadEditPresencesGroups() {
         
         if (!groupsResponse.ok) {
             console.error('Failed to fetch groups:', groupsResponse.status);
-            groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+            groupSelect.innerHTML = `<option value="">${t('errorLoadingGroups')}</option>`;
             return;
         }
         
         const groupsData = await groupsResponse.json();
         
         if (groupsData.groups && groupsData.groups.length > 0) {
-            let optionsHTML = '<option value="">-- Select a group --</option>';
+            let optionsHTML = `<option value="">${t('selectAGroup')}</option>`;
             groupsData.groups.forEach(group => {
                 optionsHTML += `<option value="${group._id}">${group.name}</option>`;
             });
             groupSelect.innerHTML = optionsHTML;
         } else {
-            groupSelect.innerHTML = '<option value="">No groups in active season</option>';
+            groupSelect.innerHTML = `<option value="">${t('noGroupsInSeason')}</option>`;
         }
     } catch (error) {
         console.error('Error loading groups for edit presences:', error);
-        groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+        groupSelect.innerHTML = `<option value="">${t('errorLoadingGroups')}</option>`;
     }
 }
 
-// Load students with presences for the selected group
-async function loadStudentsWithPresences() {
+// Load groups from active season for the dropdown
+async function loadClearAbsencesGroups() {
+    const groupSelect = document.getElementById('clearAbsencesGroupSelect');
+    groupSelect.innerHTML = `<option value="">${t('selectAGroup')}</option>`;
     const groupId = document.getElementById('editPresencesGroupSelect').value;
     
     if (!groupId) {
@@ -1978,7 +1981,7 @@ async function showExportModal() {
         const data = await response.json();
         
         const seasonSelect = document.getElementById('exportSeasonSelect');
-        seasonSelect.innerHTML = '<option value="">-- Select a Season --</option>';
+        seasonSelect.innerHTML = `<option value="">${t('selectASeason')}</option>`;
         
         let activeSeasonId = null;
         if (data.seasons && data.seasons.length > 0) {
@@ -2020,7 +2023,7 @@ async function loadExportGroups(seasonId) {
         if (!seasonId) {
             // No season selected, clear groups
             const groupSelect = document.getElementById('exportGroupSelect');
-            groupSelect.innerHTML = '<option value="">-- Select a Season First --</option>';
+            groupSelect.innerHTML = `<option value="">${t('selectSeasonFirst')}</option>`;
             return;
         }
         
@@ -2031,7 +2034,7 @@ async function loadExportGroups(seasonId) {
         const data = await response.json();
         
         const groupSelect = document.getElementById('exportGroupSelect');
-        groupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
+        groupSelect.innerHTML = `<option value="">${t('selectAGroup')}</option>`;
         
         if (data.groups && data.groups.length > 0) {
             data.groups.forEach(group => {
@@ -2041,12 +2044,12 @@ async function loadExportGroups(seasonId) {
                 groupSelect.appendChild(option);
             });
         } else {
-            groupSelect.innerHTML = '<option value="">No groups in this season</option>';
+            groupSelect.innerHTML = `<option value="">${t('noGroupsInSeason')}</option>`;
         }
     } catch (error) {
         console.error('Error loading export groups:', error);
         const groupSelect = document.getElementById('exportGroupSelect');
-        groupSelect.innerHTML = '<option value="">Error loading groups</option>';
+        groupSelect.innerHTML = `<option value="">${t('errorLoadingGroups')}</option>`;
     }
 }
 
@@ -2071,25 +2074,25 @@ async function executeExport(format = 'excel') {
     
     // Validation
     if (!groupId) {
-        warningText.textContent = 'Please select a group before exporting.';
+        warningText.textContent = t('selectGroup');
         warningDiv.style.display = 'block';
         return;
     }
     
     if (!season) {
-        warningText.textContent = 'Please select a season before exporting.';
+        warningText.textContent = t('selectSeason');
         warningDiv.style.display = 'block';
         return;
     }
     
     if (!monthNum) {
-        warningText.textContent = 'Please select a month before exporting.';
+        warningText.textContent = t('selectMonth');
         warningDiv.style.display = 'block';
         return;
     }
     
     if (!year) {
-        warningText.textContent = 'Please select a year before exporting.';
+        warningText.textContent = t('year');
         warningDiv.style.display = 'block';
         return;
     }

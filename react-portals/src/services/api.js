@@ -28,9 +28,22 @@ const createAPIInstance = (tokenKey, userKey) => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // Unauthorized - clear token and redirect to login
+        // Skip redirect for login endpoints — let the login form show the error
+        const url = error.config?.url || '';
+        const isLoginRequest = url.includes('/login');
+        if (!isLoginRequest) {
+          // Expired/invalid token on authenticated route — clear and redirect
+          localStorage.removeItem(tokenKey);
+          localStorage.removeItem(userKey);
+          window.location.href = '/';
+        }
+      }
+      // 410 Gone = student account deleted (season archived, not carry-over)
+      if (error.response?.status === 410 && error.response?.data?.accountDeleted) {
         localStorage.removeItem(tokenKey);
         localStorage.removeItem(userKey);
+        localStorage.setItem('accountDeletedMessage',
+          error.response.data.message || error.response.data.error || 'Your account no longer exists.');
         window.location.href = '/';
       }
       return Promise.reject(error);

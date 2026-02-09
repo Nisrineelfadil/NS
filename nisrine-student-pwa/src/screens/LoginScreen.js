@@ -15,6 +15,16 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState('checking'); // checking, online, offline
+  const [accountMessage, setAccountMessage] = useState('');
+
+  // Check for account-deleted redirect message
+  useEffect(() => {
+    const msg = localStorage.getItem('accountDeletedMessage');
+    if (msg) {
+      setAccountMessage(msg);
+      localStorage.removeItem('accountDeletedMessage');
+    }
+  }, []);
   
   // PWA install hook
   const { handleInstall, platform, isInstalled, canInstall } = useInstallPWA();
@@ -117,7 +127,12 @@ const LoginScreen = () => {
       if (error.code === 'ECONNABORTED') {
         errorMessage = 'Connection timeout. The server is taking too long to respond. Please try again.';
       } else if (error.response) {
-        errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+        // Handle account deleted/archived (410 Gone)
+        if (error.response.status === 410 || error.response.data?.accountDeleted) {
+          setAccountMessage(error.response.data?.error || error.response.data?.message || 'Your account no longer exists.');
+          return;
+        }
+        errorMessage = error.response.data?.error || error.response.data?.message || `Server error: ${error.response.status}`;
       } else if (error.request) {
         errorMessage = 'No response from server. Please check your internet connection.';
       }
@@ -148,6 +163,36 @@ const LoginScreen = () => {
           <img src={logo} alt="Nisrine School Logo" className="logo-image" />
           <h1 className="title">Herzlich willkommen</h1>
         </motion.div>
+
+        {accountMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: '#fef2f2',
+              border: '1px solid #fca5a5',
+              borderRadius: '12px',
+              padding: '14px 16px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px'
+            }}
+          >
+            <span style={{ fontSize: '1.2em', flexShrink: 0 }}>⚠️</span>
+            <div>
+              <p style={{ margin: 0, color: '#991b1b', fontSize: '0.88rem', fontWeight: 600, lineHeight: 1.5 }}>
+                {accountMessage}
+              </p>
+              <button 
+                onClick={() => setAccountMessage('')}
+                style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.78rem', padding: '4px 0', marginTop: '4px', textDecoration: 'underline' }}
+              >
+                ✕ Dismiss
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         <motion.form 
           className="login-form" 

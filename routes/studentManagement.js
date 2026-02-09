@@ -397,27 +397,40 @@ router.get('/students', authenticateAdmin, async (req, res) => {
         }
         
         // Apply group filter
+        const andConditions = [];
+        
         if (group) {
             // Specific group requested - use it directly
-            filter.group = group;
+            andConditions.push({ group: group });
         } else if (seasonGroupIds.length > 0) {
-            // No specific group - filter by season groups
-            filter.group = { $in: seasonGroupIds };
+            // No specific group - show season students AND unassigned carry-over students
+            andConditions.push({
+                $or: [
+                    { group: { $in: seasonGroupIds } },
+                    { group: null, status: 'active' }
+                ]
+            });
         }
         
-        // Apply other filters (these will be combined with group/season filter)
-        if (formation) filter.formation = { $in: [formation] };
-        if (filiere) filter.filiere = { $in: [filiere] };
-        if (status) filter.status = status;
-        if (paymentStatus) filter.paymentStatus = paymentStatus;
-        if (branchSubgroup) filter.branchSubgroup = branchSubgroup;
+        // Apply other filters
+        if (formation) andConditions.push({ formation: { $in: [formation] } });
+        if (filiere) andConditions.push({ filiere: { $in: [filiere] } });
+        if (status) andConditions.push({ status: status });
+        if (paymentStatus) andConditions.push({ paymentStatus: paymentStatus });
+        if (branchSubgroup) andConditions.push({ branchSubgroup: branchSubgroup });
         
         if (search) {
-            filter.$or = [
-                { fullName: { $regex: search, $options: 'i' } },
-                { schoolEmail: { $regex: search, $options: 'i' } },
-                { phoneNumber: { $regex: search, $options: 'i' } }
-            ];
+            andConditions.push({
+                $or: [
+                    { fullName: { $regex: search, $options: 'i' } },
+                    { schoolEmail: { $regex: search, $options: 'i' } },
+                    { phoneNumber: { $regex: search, $options: 'i' } }
+                ]
+            });
+        }
+        
+        if (andConditions.length > 0) {
+            filter.$and = andConditions;
         }
         
         const skip = (parseInt(page) - 1) * parseInt(limit);

@@ -32,6 +32,7 @@ const jobApplicationsRoutes = require('./routes/jobApplications');
 const telcRoutes = require('./routes/telc');
 const fcmRoutes = require('./routes/fcm');
 const mediaRoutes = require('./routes/media');
+const seasonArchiveRoutes = require('./routes/seasonArchive');
 // const pushNotificationsRoutes = require('./routes/pushNotifications'); // DISABLED - Push notifications temporarily disabled
 
 // Import services
@@ -322,6 +323,7 @@ app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
   req.io = io; // Pass Socket.IO instance to routes
   next();
 }, seasonBackupRoutes);
+app.use('/api/season-archive', dbMiddleware, seasonArchiveRoutes);
 // app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes); // DISABLED
 
 // 404 handler

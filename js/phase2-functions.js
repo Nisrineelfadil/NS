@@ -75,7 +75,7 @@ function displaySeasons(seasons) {
     if (!grid) return;
 
     if (seasons.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px;">No seasons found. Create your first season!</p>';
+        grid.innerHTML = `<p style="text-align: center; color: #64748b; padding: 40px;">${t('noRecentSessions')}</p>`;
         return;
     }
 
@@ -88,7 +88,7 @@ function displaySeasons(seasons) {
                         ${season.name}
                     </h3>
                     <span class="badge ${season.status === 'active' ? 'badge-success' : 'badge-secondary'}" style="font-size: 0.75rem;">
-                        ${season.status.toUpperCase()}
+                        ${t(season.status)}
                     </span>
                 </div>
                 <div class="dropdown" style="position: relative;">
@@ -107,19 +107,14 @@ function displaySeasons(seasons) {
                             <i class="fas fa-check-circle"></i> ${t('activate')}
                         </a>
                         ` : ''}
-                        ${season.status === 'active' ? `
+                        ${season.status !== 'archived' ? `
                         <a href="#" onclick="archiveSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #f59e0b; text-decoration: none;">
-                            <i class="fas fa-archive"></i> ${t('archive')}
+                            <i class="fas fa-archive"></i> ${t('archiveToCloud')}
                         </a>
                         ` : ''}
-                        <a href="#" onclick="archiveToMegaCloud('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #dc2626; text-decoration: none;">
-                            <i class="fas fa-cloud" style="color: #dc2626;"></i> ${t('archiveToCloud')}
-                        </a>
-                        ${season.groupCount === 0 ? `
-                        <a href="#" onclick="deleteSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #dc2626; text-decoration: none;">
+                        <a href="#" onclick="deleteSeason('${season._id}', '${season.name}', ${season.groupCount || 0}, '${season.status}'); return false;" style="display: block; padding: 10px 15px; color: #dc2626; text-decoration: none; border-top: 1px solid #fee2e2;">
                             <i class="fas fa-trash"></i> ${t('delete')}
                         </a>
-                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -174,39 +169,39 @@ window.openAddSeasonModal = function() {
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
-                <h2><i class="fas fa-calendar-plus"></i> Create New Season</h2>
+                <h2><i class="fas fa-calendar-plus"></i> ${t('createSeason')}</h2>
                 <button class="close-modal" onclick="closeSeasonModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="seasonForm" onsubmit="createSeason(event)">
                     <div class="form-group">
-                        <label for="seasonName">Season Name *</label>
+                        <label for="seasonName">${t('name')} *</label>
                         <input type="text" id="seasonName" placeholder="e.g., 2025-2026" pattern="\\d{4}-\\d{4}" required>
                         <small style="color: #64748b;">Format: YYYY-YYYY</small>
                     </div>
                     <div class="form-group">
-                        <label for="seasonStartDate">Start Date *</label>
+                        <label for="seasonStartDate">${t('startDate')} *</label>
                         <input type="date" id="seasonStartDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="seasonEndDate">End Date *</label>
+                        <label for="seasonEndDate">${t('endDate')} *</label>
                         <input type="date" id="seasonEndDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="seasonDescription">Description (Optional)</label>
+                        <label for="seasonDescription">${t('description')} (${t('optional')})</label>
                         <textarea id="seasonDescription" rows="3" placeholder="Add notes about this academic year..."></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="seasonStatus">Status</label>
+                        <label for="seasonStatus">${t('status')}</label>
                         <select id="seasonStatus">
-                            <option value="upcoming">Upcoming</option>
-                            <option value="active">Active</option>
+                            <option value="upcoming">${t('upcoming')}</option>
+                            <option value="active">${t('active')}</option>
                         </select>
                     </div>
                     <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeSeasonModal()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeSeasonModal()">${t('cancel')}</button>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Create Season
+                            <i class="fas fa-plus"></i> ${t('createSeason')}
                         </button>
                     </div>
                 </form>
@@ -288,39 +283,39 @@ async function editSeason(seasonId) {
         modal.innerHTML = `
             <div class="modal-content" style="max-width: 500px;">
                 <div class="modal-header">
-                    <h2><i class="fas fa-edit"></i> Edit Season</h2>
+                    <h2><i class="fas fa-edit"></i> ${t('editSeason')}</h2>
                     <button class="close-modal" onclick="closeEditSeasonModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="editSeasonForm" onsubmit="updateSeason(event, '${seasonId}')">
                         <div class="form-group">
-                            <label for="editSeasonName">Season Name *</label>
+                            <label for="editSeasonName">${t('name')} *</label>
                             <input type="text" id="editSeasonName" value="${season.name}" pattern="\\d{4}-\\d{4}" required>
                         </div>
                         <div class="form-group">
-                            <label for="editSeasonStartDate">Start Date *</label>
+                            <label for="editSeasonStartDate">${t('startDate')} *</label>
                             <input type="date" id="editSeasonStartDate" value="${season.startDate.split('T')[0]}" required>
                         </div>
                         <div class="form-group">
-                            <label for="editSeasonEndDate">End Date *</label>
+                            <label for="editSeasonEndDate">${t('endDate')} *</label>
                             <input type="date" id="editSeasonEndDate" value="${season.endDate.split('T')[0]}" required>
                         </div>
                         <div class="form-group">
-                            <label for="editSeasonDescription">Description</label>
+                            <label for="editSeasonDescription">${t('description')}</label>
                             <textarea id="editSeasonDescription" rows="3">${season.description || ''}</textarea>
                         </div>
                         <div class="form-group">
-                            <label for="editSeasonStatus">Status</label>
+                            <label for="editSeasonStatus">${t('status')}</label>
                             <select id="editSeasonStatus">
-                                <option value="upcoming" ${season.status === 'upcoming' ? 'selected' : ''}>Upcoming</option>
-                                <option value="active" ${season.status === 'active' ? 'selected' : ''}>Active</option>
-                                <option value="archived" ${season.status === 'archived' ? 'selected' : ''}>Archived</option>
+                                <option value="upcoming" ${season.status === 'upcoming' ? 'selected' : ''}>${t('upcoming')}</option>
+                                <option value="active" ${season.status === 'active' ? 'selected' : ''}>${t('active')}</option>
+                                <option value="archived" ${season.status === 'archived' ? 'selected' : ''}>${t('archived')}</option>
                             </select>
                         </div>
                         <div class="modal-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeEditSeasonModal()">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeEditSeasonModal()">${t('cancel')}</button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Changes
+                                <i class="fas fa-save"></i> ${t('save')}
                             </button>
                         </div>
                     </form>
@@ -406,64 +401,412 @@ async function activateSeason(seasonId) {
     }
 }
 
-// Archive Season with Cloud Storage
+// Archive Season - Open carry-over student selection modal
 async function archiveSeason(seasonId) {
-    if (!confirm('Archive this season? This will:\n\n• Export all student data to Excel\n• Generate PDF registration forms\n• Upload to Cloud storage\n• Mark season as archived\n\nThis may take a few minutes. Continue?')) return;
-    
     try {
-        showNotification('Archiving season... This may take a few minutes.', 'info');
+        showNotification('Chargement des données de la saison...', 'info');
         
-        const response = await fetch(`/api/seasons/${seasonId}/archive`, {
+        const response = await fetch(`/api/season-archive/${seasonId}/prepare`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Échec du chargement');
+        }
+
+        const data = await response.json();
+        showArchiveModal(data);
+    } catch (error) {
+        console.error('Erreur préparation archive:', error);
+        showNotification(error.message, 'error');
+    }
+}
+
+// Show Archive Modal with carry-over student selection
+function showArchiveModal(data) {
+    const existingModal = document.getElementById('archiveSeasonModal');
+    if (existingModal) existingModal.remove();
+
+    const { season, students, stats } = data;
+    const totalGroups = (stats.totalLanguageGroups || 0) + (stats.totalBranchSubgroups || 0);
+
+    const modal = document.createElement('div');
+    modal.id = 'archiveSeasonModal';
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 860px; max-height: 92vh; border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 25px 60px rgba(0,0,0,0.2);">
+            <!-- Header -->
+            <div style="background: white; padding: 24px 28px 20px; border-bottom: 1px solid #f1f5f9; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 46px; height: 46px; background: linear-gradient(135deg, #7c3aed, #a78bfa); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-box-archive" style="color: white; font-size: 1.2em;"></i>
+                        </div>
+                        <div>
+                            <h2 style="margin: 0; font-size: 1.2rem; color: #1e293b; font-weight: 700;">Archiver la saison ${season.name}</h2>
+                            <p style="margin: 2px 0 0; font-size: 0.82rem; color: #94a3b8;">Sauvegarder et nettoyer les données</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('archiveSeasonModal').remove()" style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div style="overflow-y: auto; max-height: calc(92vh - 170px); padding: 24px 28px;">
+                <!-- Stats Grid -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                    <div style="background: #f5f3ff; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #7c3aed;">${stats.totalStudents}</div>
+                        <div style="font-size: 0.78rem; color: #6d28d9; font-weight: 500;">Étudiants</div>
+                    </div>
+                    <div style="background: #f0fdf4; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #059669;">${stats.totalGrades}</div>
+                        <div style="font-size: 0.78rem; color: #047857; font-weight: 500;">Notes</div>
+                    </div>
+                    <div style="background: #fffbeb; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #d97706;">${totalGroups}</div>
+                        <div style="font-size: 0.78rem; color: #b45309; font-weight: 500;">Groupes</div>
+                    </div>
+                </div>
+
+                <!-- Info Banner -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                        <div style="width: 32px; height: 32px; background: #dbeafe; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                            <i class="fas fa-info-circle" style="color: #2563eb; font-size: 0.9em;"></i>
+                        </div>
+                        <div style="font-size: 0.84rem; color: #475569; line-height: 1.6;">
+                            <strong style="color: #1e293b;">Ce qui va se passer :</strong>
+                            <div style="margin-top: 6px;">
+                                <span style="display: inline-flex; align-items: center; gap: 4px; margin-right: 12px;"><i class="fas fa-cloud-upload-alt" style="color: #7c3aed;"></i> Sauvegarde sur Mega.nz</span>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; margin-right: 12px;"><i class="fas fa-broom" style="color: #d97706;"></i> Nettoyage de la base</span>
+                                <span style="display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-user-shield" style="color: #059669;"></i> Conservation des étudiants sélectionnés</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Selection -->
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden;">
+                    <div style="padding: 16px 20px; background: #fafbfc; border-bottom: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700;">
+                                    <i class="fas fa-user-check" style="color: #059669;"></i> Sélectionner les étudiants à conserver
+                                </h3>
+                                <p style="margin: 4px 0 0; font-size: 0.78rem; color: #94a3b8;" id="archiveSelectedCount">0 sélectionné(s) sur ${students.length}</p>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="archiveSelectAll(true)" style="padding: 6px 12px; background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: 600;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                                    <i class="fas fa-check-double"></i> Tous
+                                </button>
+                                <button onclick="archiveSelectAll(false)" style="padding: 6px 12px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: 600;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                                    <i class="fas fa-times"></i> Aucun
+                                </button>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <input type="text" id="archiveStudentSearch" placeholder="Rechercher un étudiant..." 
+                                oninput="filterArchiveStudents(this.value)"
+                                style="width: 100%; padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.85rem; outline: none; transition: border 0.2s;"
+                                onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#d1d5db'">
+                        </div>
+                    </div>
+
+                    <div id="archiveStudentList" style="max-height: 280px; overflow-y: auto;">
+                        ${students.map((s, i) => `
+                            <label class="archive-student-item" style="display: flex; align-items: center; gap: 12px; padding: 11px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s; ${i % 2 === 0 ? 'background:#fafbfc;' : 'background:white;'}"
+                                onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='${i % 2 === 0 ? '#fafbfc' : 'white'}'">
+                                <input type="checkbox" class="archive-student-checkbox" value="${s._id}" onchange="updateArchiveSelectedCount()" style="width: 16px; height: 16px; accent-color: #7c3aed;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">${s.fullName}</div>
+                                    <div style="font-size: 0.76rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        ${(s.formation || []).join(', ')}${s.filiere && s.filiere.length > 0 ? ' · ' + s.filiere.join(', ') : ''}
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.72rem; color: #c4b5fd; background: #f5f3ff; padding: 2px 8px; border-radius: 5px; white-space: nowrap;">
+                                    ${s.groupName || '-'}
+                                </div>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 16px 28px; border-top: 1px solid #f1f5f9; background: white; display: flex; justify-content: space-between; align-items: center;">
+                <button onclick="document.getElementById('archiveSeasonModal').remove()" style="padding: 10px 20px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.88rem;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button onclick="executeArchive('${season._id}')" class="archive-execute-btn" style="padding: 10px 24px; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.88rem; box-shadow: 0 2px 8px rgba(124,58,237,0.3); transition: all 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(124,58,237,0.4)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(124,58,237,0.3)'">
+                    <i class="fas fa-box-archive"></i> Archiver et Nettoyer
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// Select/Deselect all students in archive modal
+window.archiveSelectAll = function(selectAll) {
+    document.querySelectorAll('.archive-student-checkbox').forEach(cb => {
+        const item = cb.closest('.archive-student-item');
+        if (item && item.style.display !== 'none') {
+            cb.checked = selectAll;
+        }
+    });
+    updateArchiveSelectedCount();
+};
+
+// Filter students in archive modal
+window.filterArchiveStudents = function(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.archive-student-item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? '' : 'none';
+    });
+};
+
+// Update selected count
+window.updateArchiveSelectedCount = function() {
+    const checked = document.querySelectorAll('.archive-student-checkbox:checked').length;
+    const total = document.querySelectorAll('.archive-student-checkbox').length;
+    const el = document.getElementById('archiveSelectedCount');
+    if (el) el.textContent = `${checked} sélectionné(s) sur ${total}`;
+};
+
+// Execute the actual archive
+window.executeArchive = async function(seasonId) {
+    const checkboxes = document.querySelectorAll('.archive-student-checkbox:checked');
+    const carryOverStudentIds = Array.from(checkboxes).map(cb => cb.value);
+    const totalStudents = document.querySelectorAll('.archive-student-checkbox').length;
+    const toDelete = totalStudents - carryOverStudentIds.length;
+
+    const confirmed = confirm(
+        `Confirmer l'archivage :\n\n` +
+        `• ${carryOverStudentIds.length} étudiant(s) conservé(s) pour la prochaine saison\n` +
+        `• ${toDelete} étudiant(s) seront archivés et supprimés de la base\n` +
+        `• Toutes les données seront sauvegardées sur Mega.nz\n\n` +
+        `Cette action est IRRÉVERSIBLE. Continuer ?`
+    );
+
+    if (!confirmed) return;
+
+    // Show progress
+    const btn = document.querySelector('#archiveSeasonModal .modal-footer .btn:last-child');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Archivage en cours...';
+    }
+
+    try {
+        const response = await fetch(`/api/season-archive/${seasonId}/archive`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({
-                generateExports: true,
-                uploadToCloud: true
-            })
+            body: JSON.stringify({ carryOverStudentIds })
         });
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Failed to archive season');
+            throw new Error(error.message || 'Échec de l\'archivage');
         }
-        
+
         const result = await response.json();
-        
-        showNotification(`Season archived successfully! ${result.exportPath ? 'Files saved to: ' + result.exportPath : ''}`, 'success');
+
+        // Close modal
+        document.getElementById('archiveSeasonModal')?.remove();
+
+        // Show success
+        showNotification(
+            `Saison archivée avec succès ! Taille: ${result.archiveSize}. ` +
+            `${result.purged.students} étudiants supprimés, ${result.carryOver.students} conservés.`,
+            'success'
+        );
+
+        // Reload seasons
         loadSeasons();
     } catch (error) {
-        console.error('Error archiving season:', error);
+        console.error('Erreur archivage:', error);
         showNotification(error.message, 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-archive"></i> Archiver et Nettoyer';
+        }
     }
+};
+
+// Delete Season - show centered modal with multilingual warning
+async function deleteSeason(seasonId, seasonName, groupCount, status) {
+    // Close dropdown
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+
+    const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'fr';
+    const isArchived = status === 'archived';
+    const hasData = groupCount > 0;
+
+    // Multilingual warning texts
+    const msgs = {
+        de: {
+            title: 'Saison löschen',
+            safeTitle: 'Archivierte Saison löschen',
+            safeMsg: 'Diese Saison wurde bereits archiviert. Alle Daten sind sicher auf Mega.nz gespeichert. Es wird nur die Saisonkarte entfernt.',
+            dangerTitle: '⚠️ ACHTUNG — Nicht archivierte Saison',
+            dangerMsg: 'Diese Saison wurde <strong>NICHT archiviert</strong>. Wenn Sie sie löschen, werden <strong>ALLE Daten unwiderruflich gelöscht</strong>:',
+            items: ['Alle Schüler und ihre Daten', 'Alle Noten', 'Alle Anwesenheitsdaten', 'Alle Zahlungshistorien', 'Alle Gruppen', 'Alle Nachrichten'],
+            recommend: 'Wir empfehlen dringend, zuerst zu archivieren!',
+            emptyMsg: 'Diese Saison hat keine Gruppen oder Schülerdaten. Es wird nur die Saisonkarte entfernt.',
+            confirmLabel: 'Endgültig löschen',
+            cancelLabel: 'Abbrechen',
+            typePlaceholder: 'Saisonname eingeben zum Bestätigen'
+        },
+        en: {
+            title: 'Delete Season',
+            safeTitle: 'Delete Archived Season',
+            safeMsg: 'This season has already been archived. All data is safely stored on Mega.nz. Only the season card will be removed.',
+            dangerTitle: '⚠️ WARNING — Non-Archived Season',
+            dangerMsg: 'This season has <strong>NOT been archived</strong>. Deleting it will <strong>permanently erase ALL data</strong>:',
+            items: ['All students and their data', 'All grades', 'All attendance records', 'All payment history', 'All groups', 'All messages'],
+            recommend: 'We strongly recommend archiving first!',
+            emptyMsg: 'This season has no groups or student data. Only the season card will be removed.',
+            confirmLabel: 'Delete permanently',
+            cancelLabel: 'Cancel',
+            typePlaceholder: 'Type season name to confirm'
+        },
+        fr: {
+            title: 'Supprimer la saison',
+            safeTitle: 'Supprimer la saison archivée',
+            safeMsg: 'Cette saison a déjà été archivée. Toutes les données sont sauvegardées sur Mega.nz. Seule la carte de la saison sera supprimée.',
+            dangerTitle: '⚠️ ATTENTION — Saison non archivée',
+            dangerMsg: 'Cette saison n\'a <strong>PAS été archivée</strong>. La supprimer effacera <strong>TOUTES les données de manière irréversible</strong> :',
+            items: ['Tous les étudiants et leurs données', 'Toutes les notes', 'Toutes les données de présence', 'Tout l\'historique des paiements', 'Tous les groupes', 'Tous les messages'],
+            recommend: 'Nous recommandons fortement d\'archiver d\'abord !',
+            emptyMsg: 'Cette saison n\'a pas de groupes ou de données étudiants. Seule la carte de la saison sera supprimée.',
+            confirmLabel: 'Supprimer définitivement',
+            cancelLabel: 'Annuler',
+            typePlaceholder: 'Tapez le nom de la saison pour confirmer'
+        },
+        ar: {
+            title: 'حذف الموسم',
+            safeTitle: 'حذف الموسم المؤرشف',
+            safeMsg: 'تم أرشفة هذا الموسم بالفعل. جميع البيانات محفوظة بأمان على Mega.nz. سيتم حذف بطاقة الموسم فقط.',
+            dangerTitle: '⚠️ تحذير — موسم غير مؤرشف',
+            dangerMsg: 'هذا الموسم <strong>لم يتم أرشفته</strong>. حذفه سيؤدي إلى <strong>محو جميع البيانات نهائياً</strong>:',
+            items: ['جميع الطلاب وبياناتهم', 'جميع الدرجات', 'جميع سجلات الحضور', 'جميع سجلات الدفع', 'جميع المجموعات', 'جميع الرسائل'],
+            recommend: 'ننصح بشدة بالأرشفة أولاً!',
+            emptyMsg: 'هذا الموسم ليس به مجموعات أو بيانات طلاب. سيتم حذف بطاقة الموسم فقط.',
+            confirmLabel: 'حذف نهائياً',
+            cancelLabel: 'إلغاء',
+            typePlaceholder: 'اكتب اسم الموسم للتأكيد'
+        }
+    };
+    const m = msgs[lang] || msgs.fr;
+    const isRtl = lang === 'ar';
+
+    // Determine scenario
+    let headerBg, headerIcon, bodyContent;
+    if (isArchived || !hasData) {
+        // Safe delete — just removing the card
+        headerBg = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        headerIcon = 'fa-box-archive';
+        bodyContent = `
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:36px;height:36px;background:#fef3c7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-info-circle" style="color:#d97706;"></i>
+                    </div>
+                    <p style="margin:0;font-size:0.88rem;color:#92400e;line-height:1.5;">${isArchived ? m.safeMsg : m.emptyMsg}</p>
+                </div>
+            </div>`;
+    } else {
+        // DANGER — non-archived with data
+        headerBg = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+        headerIcon = 'fa-exclamation-triangle';
+        bodyContent = `
+            <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                    <div style="width:36px;height:36px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                        <i class="fas fa-skull-crossbones" style="color:#dc2626;"></i>
+                    </div>
+                    <div>
+                        <p style="margin:0 0 8px;font-size:0.88rem;color:#991b1b;line-height:1.5;">${m.dangerMsg}</p>
+                        <ul style="margin:0;padding-left:18px;color:#991b1b;font-size:0.82rem;line-height:1.8;">
+                            ${m.items.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:16px;text-align:center;">
+                <strong style="color:#92400e;font-size:0.88rem;"><i class="fas fa-lightbulb"></i> ${m.recommend}</strong>
+            </div>
+            <div style="margin-bottom:8px;">
+                <label style="font-size:0.82rem;color:#64748b;display:block;margin-bottom:6px;">${m.typePlaceholder}: <strong>${seasonName}</strong></label>
+                <input type="text" id="deleteSeasonConfirmInput" placeholder="${seasonName}" style="width:100%;padding:10px 14px;border:2px solid #fca5a5;border-radius:10px;font-size:0.9rem;outline:none;transition:border 0.2s;" onfocus="this.style.borderColor='#dc2626'" onblur="this.style.borderColor='#fca5a5'" oninput="document.getElementById('deleteSeasonConfirmBtn').disabled = this.value !== '${seasonName}'">
+            </div>`;
+    }
+
+    const needsTyping = !isArchived && hasData;
+    const modal = document.createElement('div');
+    modal.id = 'deleteSeasonModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;animation:fadeIn 0.2s;';
+    modal.innerHTML = `
+        <div style="background:white;border-radius:20px;max-width:520px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.25);overflow:hidden;${isRtl ? 'direction:rtl;' : ''}" onclick="event.stopPropagation()">
+            <div style="background:${headerBg};padding:20px 24px;display:flex;align-items:center;gap:14px;">
+                <div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas ${headerIcon}" style="color:white;font-size:1.2em;"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0;color:white;font-size:1.1rem;font-weight:700;">${!isArchived && hasData ? m.dangerTitle : (isArchived ? m.safeTitle : m.title)}</h3>
+                    <p style="margin:3px 0 0;color:rgba(255,255,255,0.85);font-size:0.82rem;">${seasonName}</p>
+                </div>
+            </div>
+            <div style="padding:20px 24px;">
+                ${bodyContent}
+            </div>
+            <div style="padding:14px 24px;border-top:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <button onclick="document.getElementById('deleteSeasonModal').remove()" style="padding:10px 20px;background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;font-weight:600;font-size:0.88rem;">${m.cancelLabel}</button>
+                <button id="deleteSeasonConfirmBtn" onclick="executeDeleteSeason('${seasonId}', ${hasData})" ${needsTyping ? 'disabled' : ''} style="padding:10px 20px;background:${needsTyping ? '#fca5a5' : '#dc2626'};color:white;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:0.88rem;opacity:${needsTyping ? '0.5' : '1'};transition:all 0.2s;">
+                    <i class="fas fa-trash"></i> ${m.confirmLabel}
+                </button>
+            </div>
+        </div>`;
+
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
 }
 
-// Delete Season
-async function deleteSeason(seasonId) {
-    if (!confirm('Delete this season? This action cannot be undone.')) return;
-    
+// Execute the actual season deletion
+window.executeDeleteSeason = async function(seasonId, forceNeeded) {
+    const btn = document.getElementById('deleteSeasonConfirmBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+
     try {
-        const response = await fetch(`/api/seasons/${seasonId}`, {
+        const url = forceNeeded ? `/api/seasons/${seasonId}?force=true` : `/api/seasons/${seasonId}`;
+        const response = await fetch(url, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Failed to delete season');
         }
-        
-        showNotification('Season deleted successfully!', 'success');
+
+        document.getElementById('deleteSeasonModal')?.remove();
+        showNotification(t('successDeleted') || 'Saison supprimée avec succès !', 'success');
         loadSeasons();
     } catch (error) {
         console.error('Error deleting season:', error);
         showNotification(error.message, 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> ' + (t('delete') || 'Delete'); }
     }
-}
+};
 
 // Archive to Mega Cloud - Season Backup System
 window.archiveToMegaCloud = async function(seasonId) {
@@ -947,7 +1290,7 @@ function displayLanguageGroups(groups) {
     );
 
     if (languageGroups.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px;">No language groups found. Create your first group!</p>';
+        grid.innerHTML = `<p style="text-align: center; color: #64748b; padding: 40px;">${t('noStudentsFound')}</p>`;
         return;
     }
 
@@ -965,13 +1308,13 @@ function displayLanguageGroups(groups) {
                     ${group.seasonName ? `<span class="badge badge-secondary" style="font-size: 0.75rem; margin-left: 5px;">${group.seasonName}</span>` : ''}
                 </div>
                 <span class="badge ${group.status === 'active' ? 'badge-success' : 'badge-secondary'}">
-                    ${group.status.toUpperCase()}
+                    ${t(group.status)}
                 </span>
             </div>
             <div style="color: #64748b; font-size: 0.9rem;">
                 <p style="margin: 5px 0;">
                     <i class="fas fa-users"></i>
-                    <strong>Students:</strong> ${group.currentStudentCount || 0}/${group.maxStudents}
+                    <strong>${t('students')}:</strong> ${group.currentStudentCount || 0}/${group.maxStudents}
                 </p>
                 ${group.description ? `<p style="margin: 10px 0 0 0; font-style: italic;">${group.description}</p>` : ''}
             </div>
@@ -1025,6 +1368,9 @@ window.manageSeasonGroups = async function(seasonId) {
         
         // Reset to language tab
         switchSeasonTab('language');
+        
+        // Re-translate data-i18n attributes in the newly visible view
+        if (typeof translatePage === 'function') translatePage();
         
     } catch (error) {
         console.error('Error managing season groups:', error);
@@ -1115,8 +1461,8 @@ function displaySeasonLanguageGroups(groups) {
         grid.innerHTML = `
             <div style="text-align: center; padding: 60px 20px; color: #64748b;">
                 <i class="fas fa-users" style="font-size: 3em; margin-bottom: 20px; opacity: 0.3;"></i>
-                <h3 style="margin: 0 0 10px 0;">No Language Groups Yet</h3>
-                <p style="margin: 0;">Create your first language group (Group A, Group B, etc.) for this season.</p>
+                <h3 style="margin: 0 0 10px 0;">${t('noGroupsInSeason')}</h3>
+                <p style="margin: 0;"></p>
             </div>
         `;
         return;
@@ -1137,28 +1483,27 @@ function displaySeasonLanguageGroups(groups) {
                     </span>
                 </div>
                 <span class="badge ${group.status === 'active' ? 'badge-success' : 'badge-secondary'}">
-                    ${group.status.toUpperCase()}
+                    ${t(group.status).toUpperCase()}
                 </span>
             </div>
             <div style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">
                 <p style="margin: 5px 0;">
                     <i class="fas fa-users"></i>
-                    <strong>Students:</strong> ${group.currentStudentCount || 0}/${group.maxStudents || 30}
+                    <strong>${t('students')}:</strong> ${group.currentStudentCount || 0}/${group.maxStudents || 30}
                 </p>
                 ${group.description ? `<p style="margin: 10px 0 0 0; font-style: italic;">${group.description}</p>` : ''}
             </div>
             
             <!-- Action Buttons -->
             <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 15px; border-top: 1px solid #e2e8f0;">
-                <button onclick="viewLanguageGroupDetails('${group._id}', '${group.name}')" class="btn btn-small" style="background: #f59e0b; color: white;" title="View Students">
-                    <i class="fas fa-eye"></i> View
+                <button onclick="viewLanguageGroupDetails('${group._id}', '${group.name}')" class="btn btn-small" style="background: #f59e0b; color: white;" title="${t('view')}">
+                    <i class="fas fa-eye"></i> ${t('view')}
                 </button>
-                <button onclick="messageLanguageGroup('${group._id}', '${group.name}')" class="btn btn-small" style="background: #3b82f6; color: white;" title="Send Message">
-                    <i class="fas fa-paper-plane"></i> Message
+                <button onclick="messageLanguageGroup('${group._id}', '${group.name}')" class="btn btn-small" style="background: #3b82f6; color: white;" title="${t('message')}">
+                    <i class="fas fa-paper-plane"></i> ${t('message')}
                 </button>
-                <button onclick='editLanguageGroup(${JSON.stringify(group)})' class="btn btn-small btn-secondary" title="Edit Group">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
+                <button onclick='editLanguageGroup(${JSON.stringify(group)})' class="btn btn-small btn-secondary" title="${t('edit')}">
+                    <i class="fas fa-edit"></i> ${t('edit')}
             </div>
         </div>
     `).join('');
@@ -1234,10 +1579,10 @@ window.viewLanguageGroupDetails = async function(groupId, groupName) {
                     <!-- Tabs -->
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
                         <button onclick="switchLanguageGroupTab('students')" id="lang-tab-students" class="language-group-tab active" style="padding: 12px 24px; border: none; background: none; cursor: pointer; border-bottom: 3px solid #667eea; color: #667eea; font-weight: 600;">
-                            <i class="fas fa-list"></i> All Students (${students.length})
+                            <i class="fas fa-list"></i> ${t('students')} (${students.length})
                         </button>
                         <button onclick="switchLanguageGroupTab('top3')" id="lang-tab-top3" class="language-group-tab" style="padding: 12px 24px; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748b; font-weight: 600;">
-                            <i class="fas fa-trophy"></i> Top 3 Performers
+                            <i class="fas fa-trophy"></i> Top 3
                         </button>
                     </div>
                     
@@ -1246,7 +1591,7 @@ window.viewLanguageGroupDetails = async function(groupId, groupName) {
                         ${students.length === 0 ? `
                             <div style="text-align: center; padding: 40px; color: #94a3b8;">
                                 <i class="fas fa-users" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px;"></i>
-                                <p>No students in this group yet</p>
+                                <p>${t('noGroupsInSeason')}</p>
                             </div>
                         ` : `
                             <div style="display: grid; gap: 15px;">
@@ -1258,11 +1603,11 @@ window.viewLanguageGroupDetails = async function(groupId, groupName) {
                                                 <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #64748b; flex-wrap: wrap;">
                                                     <span><i class="fas fa-envelope"></i> ${student.schoolEmail}</span>
                                                     ${student.phones && student.phones.length > 0 ? `<span><i class="fas fa-phone"></i> ${student.phones[0]}</span>` : ''}
-                                                    ${student.averageScore > 0 ? `<span><i class="fas fa-chart-line"></i> Avg: ${student.averageScore.toFixed(1)}%</span>` : ''}
+                                                    ${student.averageScore > 0 ? `<span><i class="fas fa-chart-line"></i> ${student.averageScore.toFixed(1)}%</span>` : ''}
                                                 </div>
                                             </div>
                                             <button onclick="viewStudentProfile('${student._id}')" class="btn btn-small btn-primary">
-                                                <i class="fas fa-user"></i> Profile
+                                                <i class="fas fa-user"></i> ${t('view')}
                                             </button>
                                         </div>
                                     </div>
@@ -1276,7 +1621,7 @@ window.viewLanguageGroupDetails = async function(groupId, groupName) {
                         ${topPerformers.length === 0 ? `
                             <div style="text-align: center; padding: 40px; color: #94a3b8;">
                                 <i class="fas fa-trophy" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px;"></i>
-                                <p>No grades available yet</p>
+                                <p>-</p>
                             </div>
                         ` : `
                             <div style="display: grid; gap: 20px;">
@@ -1295,21 +1640,21 @@ window.viewLanguageGroupDetails = async function(groupId, groupName) {
                                                 </div>
                                                 <div style="text-align: center;">
                                                     <div style="font-size: 2rem; font-weight: bold; color: ${colors[index]};">${student.averageScore.toFixed(1)}%</div>
-                                                    <div style="font-size: 0.8rem; color: #64748b;">Average Score</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b;">${t('academicSummary')}</div>
                                                 </div>
                                             </div>
                                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
                                                 <div style="background: white; padding: 10px; border-radius: 6px;">
-                                                    <div style="font-size: 0.8rem; color: #64748b;">Total Grades</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b;">${t('studentGrades')}</div>
                                                     <div style="font-size: 1.2rem; font-weight: 600; color: #1e293b;">${student.grades.length}</div>
                                                 </div>
                                                 <div style="background: white; padding: 10px; border-radius: 6px;">
-                                                    <div style="font-size: 0.8rem; color: #64748b;">Rank</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b;">#</div>
                                                     <div style="font-size: 1.2rem; font-weight: 600; color: #1e293b;">#${index + 1}</div>
                                                 </div>
                                             </div>
                                             <button onclick="viewStudentProfile('${student._id}')" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
-                                                <i class="fas fa-user"></i> View Full Profile
+                                                <i class="fas fa-user"></i> ${t('view')}
                                             </button>
                                         </div>
                                     `;
@@ -1379,7 +1724,7 @@ window.messageLanguageGroup = async function(groupId, groupName) {
             <div class="modal-content" style="max-width: 600px;">
                 <div class="modal-header">
                     <h2 style="margin: 0; color: #1e293b;">
-                        <i class="fas fa-paper-plane"></i> Send Message to ${groupName}
+                        <i class="fas fa-paper-plane"></i> ${t('sendMessage')} - ${groupName}
                     </h2>
                     <button onclick="this.closest('.modal').remove()" class="modal-close">
                         <i class="fas fa-times"></i>
@@ -1389,29 +1734,29 @@ window.messageLanguageGroup = async function(groupId, groupName) {
                     <form onsubmit="sendLanguageGroupMessage(event, '${groupId}', '${groupName}')">
                         <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
                             <div style="color: #0369a1; font-weight: 600; margin-bottom: 5px;">
-                                <i class="fas fa-info-circle"></i> Recipients
+                                <i class="fas fa-info-circle"></i> ${t('recipient')}
                             </div>
                             <div style="color: #0c4a6e;">
-                                This message will be sent to <strong>${students.length} student${students.length > 1 ? 's' : ''}</strong> in ${groupName}
+                                <strong>${students.length} ${t('students')}</strong> - ${groupName}
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label>Message Subject *</label>
-                            <input type="text" name="subject" required placeholder="e.g., Important Announcement" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <label>${t('messageTitle')} *</label>
+                            <input type="text" name="subject" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
                         </div>
                         
                         <div class="form-group">
-                            <label>Message Content *</label>
-                            <textarea name="message" required rows="6" placeholder="Type your message here..." style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical;"></textarea>
+                            <label>${t('messageContent')} *</label>
+                            <textarea name="message" required rows="6" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary" style="flex: 1;">
-                                <i class="fas fa-paper-plane"></i> Send Message
+                                <i class="fas fa-paper-plane"></i> ${t('sendMessage')}
                             </button>
                             <button type="button" onclick="this.closest('.modal').remove()" class="btn btn-secondary" style="flex: 1;">
-                                <i class="fas fa-times"></i> Cancel
+                                <i class="fas fa-times"></i> ${t('cancel')}
                             </button>
                         </div>
                     </form>
@@ -1536,18 +1881,32 @@ function displayBranchGroupsOverview(branchGroups) {
     const container = document.getElementById('branchGroupsOverview');
     if (!container) return;
 
+    // Map formation names to translation keys
+    const formationKeyMap = {
+        'Cuisine': 'cuisine',
+        'Aide soignant': 'aideSoignant',
+        'Restauration': 'restauration',
+        'Gestion hôtelière': 'gestionHoteliere',
+        'Informatique': 'informatique',
+        'Gériatrie': 'geriatrie',
+        'Agent socio éducatif': 'agentSocioEducatif',
+        'Assistante sociale': 'assistanteSociale'
+    };
+
     if (branchGroups.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px;">No branch groups found.</p>';
+        container.innerHTML = `<p style="text-align: center; color: #64748b; padding: 40px;">${t('noGroupsInSeason')}</p>`;
         return;
     }
 
-    container.innerHTML = branchGroups.map(bg => `
+    container.innerHTML = branchGroups.map(bg => {
+        const translatedName = formationKeyMap[bg.formation] ? t(formationKeyMap[bg.formation]) : bg.displayName;
+        return `
         <div class="card" style="padding: 15px; cursor: pointer; transition: all 0.3s ease;" onclick="viewBranchSubgroups('${bg._id}')">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
                 <span style="font-size: 2em;">${bg.icon || '🎓'}</span>
                 <div style="flex: 1;">
                     <h4 style="margin: 0 0 4px 0; color: #1e293b; font-size: 1rem;">
-                        ${bg.displayName}
+                        ${translatedName}
                     </h4>
                     <span class="badge badge-secondary" style="font-size: 0.7rem;">
                         ${bg.formation}
@@ -1557,11 +1916,11 @@ function displayBranchGroupsOverview(branchGroups) {
             <div style="color: #64748b; font-size: 0.85rem;">
                 <p style="margin: 0;">
                     <i class="fas fa-layer-group"></i>
-                    <strong>${bg.subgroupCount || 0}</strong> subgroups
+                    <strong>${bg.subgroupCount || 0}</strong> ${t('subgroupsLabel')}
                 </p>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Display pending branch students
@@ -1573,7 +1932,7 @@ function displayPendingBranchStudents(students) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: #64748b;">
                 <i class="fas fa-check-circle" style="font-size: 2.5em; margin-bottom: 15px; color: #10b981;"></i>
-                <p style="margin: 0;">All students with subjects have been assigned to subgroups!</p>
+                <p style="margin: 0;">${t('pendingBranchAssignmentsDesc')}</p>
             </div>
         `;
         return;
@@ -1593,20 +1952,20 @@ function displayPendingBranchStudents(students) {
                                 ${student.fullName}
                             </h4>
                             <span class="badge badge-warning" style="font-size: 0.7rem;">
-                                <i class="fas fa-clock"></i> Pending
+                                <i class="fas fa-clock"></i> ${t('pending')}
                             </span>
                         </div>
                     </div>
                     <div style="color: #64748b; font-size: 0.85rem;">
                         <p style="margin: 5px 0;">
-                            <strong>Language Group:</strong> ${student.group?.name || 'Not assigned'}
+                            <strong>${t('languageGroupLabel')}:</strong> ${student.group?.name || '-'}
                         </p>
                         <p style="margin: 5px 0;">
-                            <strong>Selected Subject:</strong> ${student.filiere.join(', ')}
+                            <strong>${t('filiere')}:</strong> ${student.filiere.join(', ')}
                         </p>
                     </div>
                     <button class="btn btn-sm btn-primary" onclick="assignToBranchSubgroup('${student._id}')" style="width: 100%; margin-top: 10px;">
-                        <i class="fas fa-check"></i> Assign to Subgroup
+                        <i class="fas fa-check"></i> ${t('save')}
                     </button>
                 </div>
             `).join('')}
@@ -1658,7 +2017,7 @@ function displayUnifiedGroups(groups) {
     if (!grid) return;
 
     if (groups.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px;">No groups in this season yet. Create your first group!</p>';
+        grid.innerHTML = `<p style="text-align: center; color: #64748b; padding: 40px;">${t('noGroupsInSeason')}</p>`;
         return;
     }
 
@@ -1666,7 +2025,7 @@ function displayUnifiedGroups(groups) {
         const isLanguage = group.groupCategory === 'language';
         const icon = isLanguage ? '🗣️' : (group.icon || '🎓');
         const borderColor = isLanguage ? '#f59e0b' : '#667eea';
-        const categoryBadge = isLanguage ? 'Language' : 'Branch';
+        const categoryBadge = isLanguage ? t('language') : t('branch');
         const categoryColor = isLanguage ? '#f59e0b' : '#667eea';
 
         return `
@@ -1689,19 +2048,19 @@ function displayUnifiedGroups(groups) {
                         </span>
                     </div>
                     <span class="badge ${group.status === 'active' ? 'badge-success' : 'badge-secondary'}">
-                        ${group.status.toUpperCase()}
+                        ${t(group.status)}
                     </span>
                 </div>
                 <div style="color: #64748b; font-size: 0.9rem;">
                     ${isLanguage ? `
                         <p style="margin: 5px 0;">
                             <i class="fas fa-users"></i>
-                            <strong>Students:</strong> ${group.currentStudentCount || 0}/${group.maxStudents || 30}
+                            <strong>${t('students')}:</strong> ${group.currentStudentCount || 0}/${group.maxStudents || 30}
                         </p>
                     ` : `
                         <p style="margin: 5px 0;">
                             <i class="fas fa-layer-group"></i>
-                            <strong>Subgroups:</strong> ${group.subgroupCount || 0}
+                            <strong>${t('subgroupsLabel')}:</strong> ${group.subgroupCount || 0}
                         </p>
                     `}
                     ${group.description ? `<p style="margin: 10px 0 0 0; font-style: italic;">${group.description}</p>` : ''}
@@ -1739,16 +2098,16 @@ window.openCreateLanguageGroupModal = function() {
         return;
     }
     
-    const modal = createModal('Create Language Group', `
+    const modal = createModal(t('createLanguageGroup'), `
         <form onsubmit="createLanguageGroup(event)">
             <div class="form-group">
-                <label>Group Name *</label>
+                <label>${t('groupName')} *</label>
                 <input type="text" name="name" required placeholder="e.g., Group A, Group B">
             </div>
             <div class="form-group">
-                <label>Language Formation *</label>
+                <label>${t('formation')} *</label>
                 <select name="formation" required>
-                    <option value="">Select Language</option>
+                    <option value="">${t('selectFormation')}</option>
                     <option value="Allemand">Allemand (German)</option>
                     <option value="Anglais">Anglais (English)</option>
                     <option value="Français">Français (French)</option>
@@ -1757,16 +2116,16 @@ window.openCreateLanguageGroupModal = function() {
                 </select>
             </div>
             <div class="form-group">
-                <label>Max Students *</label>
+                <label>${t('maxStudents')} *</label>
                 <input type="number" name="maxStudents" required min="1" value="30">
             </div>
             <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" rows="3" placeholder="Optional description"></textarea>
+                <label>${t('description')}</label>
+                <textarea name="description" rows="3" placeholder="${t('optional')}"></textarea>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" class="btn"><i class="fas fa-save"></i> Create Group</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn"><i class="fas fa-save"></i> ${t('create')}</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
             </div>
         </form>
     `);
@@ -1851,7 +2210,7 @@ window.viewBranchSubgroups = async function(branchGroupId) {
             <div class="modal-content" style="max-width: 800px; max-height: 90vh;">
                 <div class="modal-header">
                     <h2 style="margin: 0; color: #1e293b;">
-                        <i class="fas fa-layer-group"></i> Manage ${branchData.displayName} Subgroups
+                        <i class="fas fa-layer-group"></i> ${branchData.displayName} - ${t('subgroupsLabel')}
                     </h2>
                     <button onclick="this.closest('.modal').remove()" class="modal-close">
                         <i class="fas fa-times"></i>
@@ -1861,7 +2220,7 @@ window.viewBranchSubgroups = async function(branchGroupId) {
                     <!-- Create Button -->
                     <div style="margin-bottom: 20px;">
                         <button onclick="createBranchSubgroup('${branchGroupId}', '${branchData.displayName}')" class="btn btn-success" style="width: 100%;">
-                            <i class="fas fa-plus"></i> Create New Subgroup
+                            <i class="fas fa-plus"></i> ${t('create')}
                         </button>
                     </div>
                     
@@ -1870,7 +2229,7 @@ window.viewBranchSubgroups = async function(branchGroupId) {
                         ${subgroups.length === 0 ? `
                             <div style="text-align: center; padding: 40px; color: #94a3b8;">
                                 <i class="fas fa-layer-group" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px;"></i>
-                                <p>No subgroups yet. Create the first one!</p>
+                                <p>${t('noGroupsInSeason')}</p>
                             </div>
                         ` : subgroups.map(sg => {
                             const percentage = (sg.studentCount / sg.maxStudents) * 100;
@@ -1882,21 +2241,21 @@ window.viewBranchSubgroups = async function(branchGroupId) {
                                         <div style="flex: 1;">
                                             <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 1rem;">${sg.name}</h4>
                                             <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #64748b;">
-                                                <span><i class="fas fa-users"></i> ${sg.studentCount || 0} / ${sg.maxStudents} students</span>
+                                                <span><i class="fas fa-users"></i> ${sg.studentCount || 0} / ${sg.maxStudents} ${t('students')}</span>
                                                 <span><i class="fas fa-calendar"></i> ${new Date(sg.createdAt).toLocaleDateString()}</span>
                                             </div>
                                         </div>
                                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                            <button onclick="viewSubgroupDetails('${sg._id}', '${sg.name}')" class="btn btn-small" style="background: #f59e0b; color: white;" title="View Students">
-                                                <i class="fas fa-eye"></i> View
+                                            <button onclick="viewSubgroupDetails('${sg._id}', '${sg.name}')" class="btn btn-small" style="background: #f59e0b; color: white;" title="${t('view')}">
+                                                <i class="fas fa-eye"></i> ${t('view')}
                                             </button>
-                                            <button onclick="messageSubgroup('${sg._id}', '${sg.name}')" class="btn btn-small" style="background: #3b82f6; color: white;" title="Send Message">
-                                                <i class="fas fa-paper-plane"></i> Message
+                                            <button onclick="messageSubgroup('${sg._id}', '${sg.name}')" class="btn btn-small" style="background: #3b82f6; color: white;" title="${t('message')}">
+                                                <i class="fas fa-paper-plane"></i> ${t('message')}
                                             </button>
-                                            <button onclick="editBranchSubgroup('${branchGroupId}', '${sg._id}')" class="btn btn-small btn-secondary" title="Edit">
-                                                <i class="fas fa-edit"></i> Edit
+                                            <button onclick="editBranchSubgroup('${branchGroupId}', '${sg._id}')" class="btn btn-small btn-secondary" title="${t('edit')}">
+                                                <i class="fas fa-edit"></i> ${t('edit')}
                                             </button>
-                                            <button onclick="deleteBranchSubgroup('${branchGroupId}', '${sg._id}', ${sg.studentCount})" class="btn btn-small btn-danger" title="Delete">
+                                            <button onclick="deleteBranchSubgroup('${branchGroupId}', '${sg._id}', ${sg.studentCount})" class="btn btn-small btn-danger" title="${t('delete')}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -1925,7 +2284,7 @@ window.createBranchSubgroup = function(branchGroupId, branchDisplayName) {
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h2 style="margin: 0; color: #1e293b;">
-                    <i class="fas fa-plus"></i> Create New Subgroup
+                    <i class="fas fa-plus"></i> ${t('create')}
                 </h2>
                 <button onclick="this.closest('.modal').remove()" class="modal-close">
                     <i class="fas fa-times"></i>
@@ -1934,7 +2293,7 @@ window.createBranchSubgroup = function(branchGroupId, branchDisplayName) {
             <div class="modal-body">
                 <form onsubmit="submitCreateBranchSubgroup(event, '${branchGroupId}')">
                     <div class="form-group">
-                        <label>Subgroup Name</label>
+                        <label>${t('groupName')}</label>
                         <input type="text" name="name" placeholder="Leave empty for auto-naming (e.g., ${branchDisplayName} GROUP 1)" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
                         <small style="color: #64748b; margin-top: 5px; display: block;">
                             If left empty, system will auto-generate: "${branchDisplayName} GROUP X"
@@ -1942,16 +2301,16 @@ window.createBranchSubgroup = function(branchGroupId, branchDisplayName) {
                     </div>
                     
                     <div class="form-group">
-                        <label>Max Students *</label>
+                        <label>${t('maxStudents')} *</label>
                         <input type="number" name="maxStudents" value="30" min="1" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
                     </div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="btn btn-primary" style="flex: 1;">
-                            <i class="fas fa-check"></i> Create Subgroup
+                            <i class="fas fa-check"></i> ${t('create')}
                         </button>
                         <button type="button" onclick="this.closest('.modal').remove()" class="btn btn-secondary" style="flex: 1;">
-                            <i class="fas fa-times"></i> Cancel
+                            <i class="fas fa-times"></i> ${t('cancel')}
                         </button>
                     </div>
                 </form>
@@ -2037,7 +2396,7 @@ window.editBranchSubgroup = async function(branchGroupId, subgroupId) {
             <div class="modal-content" style="max-width: 500px;">
                 <div class="modal-header">
                     <h2 style="margin: 0; color: #1e293b;">
-                        <i class="fas fa-edit"></i> Edit Subgroup
+                        <i class="fas fa-edit"></i> ${t('editGroup')}
                     </h2>
                     <button onclick="this.closest('.modal').remove()" class="modal-close">
                         <i class="fas fa-times"></i>
@@ -2046,30 +2405,30 @@ window.editBranchSubgroup = async function(branchGroupId, subgroupId) {
                 <div class="modal-body">
                     <form onsubmit="submitEditBranchSubgroup(event, '${branchGroupId}', '${subgroupId}')">
                         <div class="form-group">
-                            <label>Subgroup Name *</label>
+                            <label>${t('groupName')} *</label>
                             <input type="text" name="name" value="${subgroup.name}" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
                         </div>
                         
                         <div class="form-group">
-                            <label>Max Students *</label>
+                            <label>${t('maxStudents')} *</label>
                             <input type="number" name="maxStudents" value="${subgroup.maxStudents}" min="1" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
                         </div>
                         
                         <div class="form-group">
-                            <label>Status *</label>
+                            <label>${t('status')} *</label>
                             <select name="status" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
-                                <option value="active" ${subgroup.status === 'active' ? 'selected' : ''}>Active</option>
-                                <option value="inactive" ${subgroup.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-                                <option value="archived" ${subgroup.status === 'archived' ? 'selected' : ''}>Archived</option>
+                                <option value="active" ${subgroup.status === 'active' ? 'selected' : ''}>${t('active')}</option>
+                                <option value="inactive" ${subgroup.status === 'inactive' ? 'selected' : ''}>${t('inactive')}</option>
+                                <option value="archived" ${subgroup.status === 'archived' ? 'selected' : ''}>${t('archived')}</option>
                             </select>
                         </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary" style="flex: 1;">
-                                <i class="fas fa-save"></i> Save Changes
+                                <i class="fas fa-save"></i> ${t('save')}
                             </button>
                             <button type="button" onclick="this.closest('.modal').remove()" class="btn btn-secondary" style="flex: 1;">
-                                <i class="fas fa-times"></i> Cancel
+                                <i class="fas fa-times"></i> ${t('cancel')}
                             </button>
                         </div>
                     </form>
@@ -2265,10 +2624,10 @@ window.viewSubgroupDetails = async function(subgroupId, subgroupName) {
                     <!-- Tabs -->
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
                         <button onclick="switchSubgroupTab('students')" id="tab-students" class="subgroup-tab active" style="padding: 12px 24px; border: none; background: none; cursor: pointer; border-bottom: 3px solid #667eea; color: #667eea; font-weight: 600;">
-                            <i class="fas fa-list"></i> All Students (${students.length})
+                            <i class="fas fa-list"></i> ${t('students')} (${students.length})
                         </button>
                         <button onclick="switchSubgroupTab('top3')" id="tab-top3" class="subgroup-tab" style="padding: 12px 24px; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; color: #64748b; font-weight: 600;">
-                            <i class="fas fa-trophy"></i> Top 3 Performers
+                            <i class="fas fa-trophy"></i> Top 3
                         </button>
                     </div>
                     
@@ -2277,7 +2636,7 @@ window.viewSubgroupDetails = async function(subgroupId, subgroupName) {
                         ${students.length === 0 ? `
                             <div style="text-align: center; padding: 40px; color: #94a3b8;">
                                 <i class="fas fa-users" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px;"></i>
-                                <p>No students in this subgroup yet</p>
+                                <p>${t('noGroupsInSeason')}</p>
                             </div>
                         ` : `
                             <div style="display: grid; gap: 15px;">
@@ -2289,15 +2648,15 @@ window.viewSubgroupDetails = async function(subgroupId, subgroupName) {
                                                 <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #64748b; flex-wrap: wrap;">
                                                     <span><i class="fas fa-envelope"></i> ${student.schoolEmail}</span>
                                                     ${student.phones && student.phones.length > 0 ? `<span><i class="fas fa-phone"></i> ${student.phones[0]}</span>` : ''}
-                                                    ${student.averageScore > 0 ? `<span><i class="fas fa-chart-line"></i> Avg: ${student.averageScore.toFixed(1)}%</span>` : ''}
+                                                    ${student.averageScore > 0 ? `<span><i class="fas fa-chart-line"></i> ${student.averageScore.toFixed(1)}%</span>` : ''}
                                                 </div>
                                             </div>
                                             <div style="display: flex; gap: 8px;">
                                                 <button onclick="viewStudentProfile('${student._id}')" class="btn btn-small btn-primary">
-                                                    <i class="fas fa-user"></i> Profile
+                                                    <i class="fas fa-user"></i> ${t('view')}
                                                 </button>
-                                                <button onclick="unassignStudentFromSubgroup('${student._id}', '${subgroupId}', '${subgroupName}')" class="btn btn-small btn-danger" title="Remove from subgroup">
-                                                    <i class="fas fa-user-minus"></i> Unassign
+                                                <button onclick="unassignStudentFromSubgroup('${student._id}', '${subgroupId}', '${subgroupName}')" class="btn btn-small btn-danger" title="${t('delete')}">
+                                                    <i class="fas fa-user-minus"></i> ${t('delete')}
                                                 </button>
                                             </div>
                                         </div>
@@ -2312,7 +2671,7 @@ window.viewSubgroupDetails = async function(subgroupId, subgroupName) {
                         ${topPerformers.length === 0 ? `
                             <div style="text-align: center; padding: 40px; color: #94a3b8;">
                                 <i class="fas fa-trophy" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px;"></i>
-                                <p>No grades available yet</p>
+                                <p>-</p>
                             </div>
                         ` : `
                             <div style="display: grid; gap: 20px;">
@@ -2331,21 +2690,21 @@ window.viewSubgroupDetails = async function(subgroupId, subgroupName) {
                                                 </div>
                                                 <div style="text-align: center;">
                                                     <div style="font-size: 2rem; font-weight: bold; color: ${colors[index]};">${student.averageScore.toFixed(1)}%</div>
-                                                    <div style="font-size: 0.8rem; color: #64748b;">Average Score</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b;">${t('academicSummary')}</div>
                                                 </div>
                                             </div>
                                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
                                                 <div style="background: white; padding: 10px; border-radius: 6px;">
-                                                    <div style="font-size: 0.8rem; color: #64748b;">Total Grades</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b;">${t('studentGrades')}</div>
                                                     <div style="font-size: 1.2rem; font-weight: 600; color: #1e293b;">${student.grades.length}</div>
                                                 </div>
                                                 <div style="background: white; padding: 10px; border-radius: 6px;">
-                                                    <div style="font-size: 0.8rem; color: #64748b;">Rank</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b;">#</div>
                                                     <div style="font-size: 1.2rem; font-weight: 600; color: #1e293b;">#${index + 1}</div>
                                                 </div>
                                             </div>
                                             <button onclick="viewStudentProfile('${student._id}')" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
-                                                <i class="fas fa-user"></i> View Full Profile
+                                                <i class="fas fa-user"></i> ${t('view')}
                                             </button>
                                         </div>
                                     `;
@@ -2415,7 +2774,7 @@ window.messageSubgroup = async function(subgroupId, subgroupName) {
             <div class="modal-content" style="max-width: 600px;">
                 <div class="modal-header">
                     <h2 style="margin: 0; color: #1e293b;">
-                        <i class="fas fa-paper-plane"></i> Send Message to ${subgroupName}
+                        <i class="fas fa-paper-plane"></i> ${t('sendMessage')} - ${subgroupName}
                     </h2>
                     <button onclick="this.closest('.modal').remove()" class="modal-close">
                         <i class="fas fa-times"></i>
@@ -2425,29 +2784,29 @@ window.messageSubgroup = async function(subgroupId, subgroupName) {
                     <form onsubmit="sendSubgroupMessage(event, '${subgroupId}', '${subgroupName}')">
                         <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
                             <div style="color: #0369a1; font-weight: 600; margin-bottom: 5px;">
-                                <i class="fas fa-info-circle"></i> Recipients
+                                <i class="fas fa-info-circle"></i> ${t('recipient')}
                             </div>
                             <div style="color: #0c4a6e;">
-                                This message will be sent to <strong>${students.length} student${students.length > 1 ? 's' : ''}</strong> in ${subgroupName}
+                                <strong>${students.length} ${t('students')}</strong> - ${subgroupName}
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label>Message Subject *</label>
-                            <input type="text" name="subject" required placeholder="e.g., Important Announcement" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <label>${t('messageTitle')} *</label>
+                            <input type="text" name="subject" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
                         </div>
                         
                         <div class="form-group">
-                            <label>Message Content *</label>
-                            <textarea name="message" required rows="6" placeholder="Type your message here..." style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical;"></textarea>
+                            <label>${t('messageContent')} *</label>
+                            <textarea name="message" required rows="6" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary" style="flex: 1;">
-                                <i class="fas fa-paper-plane"></i> Send Message
+                                <i class="fas fa-paper-plane"></i> ${t('sendMessage')}
                             </button>
                             <button type="button" onclick="this.closest('.modal').remove()" class="btn btn-secondary" style="flex: 1;">
-                                <i class="fas fa-times"></i> Cancel
+                                <i class="fas fa-times"></i> ${t('cancel')}
                             </button>
                         </div>
                     </form>

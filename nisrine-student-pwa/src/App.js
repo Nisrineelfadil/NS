@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { checkVersion } from './version';
+import { setupApiInterceptor } from './services/apiInterceptor';
 
 // Screens
 import LoginScreen from './screens/LoginScreen';
@@ -20,6 +21,7 @@ function App() {
   // Check version on app load and clear cache if version changed
   useEffect(() => {
     checkVersion();
+    setupApiInterceptor();
   }, []);
 
   return (
