@@ -347,13 +347,52 @@ window.openNewStudentForm = function() {
                             </div>
                         </div>
                         
-                        <!-- Payment Information -->
+                        <!-- Pack Selection -->
                         <div class="form-section">
+                            <div class="form-section-header">
+                                <div class="form-section-icon">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <h3 class="form-section-title">Pack</h3>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="pm">
+                                    <input type="radio" name="paymentPlan" value="pm" checked style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
+                                    <span style="font-weight: 600;">P.M</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="trimestrial">
+                                    <input type="radio" name="paymentPlan" value="trimestrial" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
+                                    <span style="font-weight: 600;">Trimestre</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="normal">
+                                    <input type="radio" name="paymentPlan" value="normal" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
+                                    <span style="font-weight: 600;">P.Normal</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="vip">
+                                    <input type="radio" name="paymentPlan" value="vip" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
+                                    <span style="font-weight: 600;">P.VIP</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Information -->
+                        <div class="form-section" id="paymentInfoSection">
                             <div class="form-section-header">
                                 <div class="form-section-icon">
                                     <i class="fas fa-credit-card"></i>
                                 </div>
                                 <h3 class="form-section-title">Payment Information</h3>
+                            </div>
+                            
+                            <div id="annualPaymentNotice" style="display: none; padding: 16px; background: rgba(16, 185, 129, 0.1); border: 2px solid #059669; border-radius: 8px; margin-bottom: 16px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-star" style="color: #059669; font-size: 1.2rem;"></i>
+                                    <div>
+                                        <strong style="color: #059669;">Annual Payment (P.Normal)</strong>
+                                        <p style="margin: 4px 0 0; color: #047857; font-size: 0.85rem;">This student pays for the entire season. No payment reminders will be sent.</p>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="form-row">
@@ -370,7 +409,7 @@ window.openNewStudentForm = function() {
                                 </div>
                             </div>
                             
-                            <div class="form-group">
+                            <div class="form-group" id="reminderDaysGroup">
                                 <label>Reminder Days Before</label>
                                 <input type="number" name="reminderDaysBefore" id="studentReminderDays" 
                                        min="1" max="30" value="7" placeholder="7">
@@ -553,6 +592,22 @@ window.handlePhotoUpload = function(event) {
         updatePreview();
     };
     reader.readAsDataURL(file);
+};
+
+// Handle pack change - disable reminder fields for annual (P.Normal)
+window.handlePackChange = function(value) {
+    const reminderGroup = document.getElementById('reminderDaysGroup');
+    const annualNotice = document.getElementById('annualPaymentNotice');
+    
+    if (value === 'normal') {
+        // Annual payment - hide reminder, show notice
+        if (reminderGroup) reminderGroup.style.display = 'none';
+        if (annualNotice) annualNotice.style.display = 'block';
+    } else {
+        // Monthly/Trimestrial/VIP - show reminder, hide notice
+        if (reminderGroup) reminderGroup.style.display = 'block';
+        if (annualNotice) annualNotice.style.display = 'none';
+    }
 };
 
 // Generate password
@@ -741,6 +796,7 @@ window.submitNewStudent = async function(event) {
         group: formData.get('group'),
         paymentDate: formData.get('paymentDate'),
         paymentAmount: formData.get('paymentAmount'),
+        paymentPlan: formData.get('paymentPlan') || 'pm',
         reminderDaysBefore: formData.get('reminderDaysBefore') || '7',
         status: 'active'
     };

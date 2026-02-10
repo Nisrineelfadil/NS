@@ -47,9 +47,11 @@ class PaymentReminderService {
             await this.resetPaidStudents(now);
             
             // STEP 2: Find active students with pending payments
+            // Exclude 'normal' (annual) students — they have no recurring payment cycle
             const students = await ManagedStudent.find({
                 status: 'active',
-                paymentStatus: { $ne: 'paid' }
+                paymentStatus: { $ne: 'paid' },
+                paymentPlan: { $ne: 'normal' }
             });
 
             let upcomingCount = 0;
@@ -122,15 +124,18 @@ class PaymentReminderService {
     }
 
     // Reset paid students one day after their payment date
+    // Handles different payment plans: pm/vip = +1 month, trimestrial = +3 months, normal (annual) = no reset
     async resetPaidStudents(now) {
         try {
             // Find students who paid but their payment date was more than 1 day ago
+            // Exclude 'normal' (annual) students — they stay paid until season ends
             const oneDayAgo = new Date(now);
             oneDayAgo.setDate(oneDayAgo.getDate() - 1);
             
             const paidStudents = await ManagedStudent.find({
                 status: 'active',
                 paymentStatus: 'paid',
+                paymentPlan: { $ne: 'normal' },
                 paymentDate: { $lt: oneDayAgo } // Payment date is more than 1 day ago
             });
 
@@ -140,9 +145,17 @@ class PaymentReminderService {
                 // Reset payment status to pending
                 student.paymentStatus = 'pending';
                 
-                // Move payment date to next month (use setMonth for accurate month addition)
+                // Move payment date based on payment plan
                 const nextPaymentDate = new Date(student.paymentDate);
-                nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+                const plan = student.paymentPlan || 'pm';
+                
+                if (plan === 'trimestrial') {
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
+                } else {
+                    // pm and vip both use monthly cycle
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+                }
+                
                 student.paymentDate = nextPaymentDate;
                 
                 // Reset reminder flags
@@ -152,7 +165,7 @@ class PaymentReminderService {
                 await student.save();
                 resetCount++;
                 
-                console.log(`✅ Reset payment for ${student.fullName} - Next payment: ${nextPaymentDate.toLocaleDateString()}`);
+                console.log(`✅ Reset payment for ${student.fullName} (${plan}) - Next payment: ${nextPaymentDate.toLocaleDateString()}`);
             }
 
             if (resetCount > 0) {
@@ -201,9 +214,10 @@ class PaymentReminderService {
             const students = await ManagedStudent.find({
                 status: 'active',
                 paymentStatus: { $ne: 'paid' },
+                paymentPlan: { $ne: 'normal' },
                 paymentDate: { $lte: fifteenDaysFromNow } // Payment due within 15 days or already passed
             })
-            .select('fullName phoneNumber parentPhone schoolEmail groupName formation paymentAmount paymentDate paymentStatus reminderDaysBefore paymentReminderSent lastReminderDate')
+            .select('fullName phoneNumber parentPhone schoolEmail groupName formation paymentAmount paymentDate paymentStatus paymentPlan reminderDaysBefore paymentReminderSent lastReminderDate')
             .populate('group', 'name')
             .sort({ paymentDate: 1 })
             .lean(); // Use lean() for faster queries (returns plain JS objects)

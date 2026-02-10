@@ -153,8 +153,16 @@ async function generateRegistrationPDF(studentData, outputPath = null) {
             yPos = 430;
             drawFormationSection(doc, studentData, yPos);
 
+            // Pack Section (admin-managed students only, not public registrations)
+            if (studentData.paymentPlan) {
+                yPos = 510;
+                drawPackSection(doc, studentData, yPos);
+                yPos = 590;
+            } else {
+                yPos = 510;
+            }
+
             // Filière Section (if applicable)
-            yPos = 540;
             drawFiliereSection(doc, studentData, yPos);
 
             // Finalize PDF
@@ -295,30 +303,45 @@ function drawFormationSection(doc, studentData, startY) {
 }
 
 function drawPackSection(doc, studentData, startY) {
-    // Red box for "Pack"
-    doc.rect(50, startY, 150, 30)
+    // Full-width section header with background (matching Formation/Filière style)
+    doc.rect(50, startY, 500, 30)
        .fillColor('#8B0000')
        .fill();
     
     doc.fillColor('#FFFFFF')
-       .fontSize(11)
+       .fontSize(13)
        .font('Helvetica-Bold')
-       .text('Pack', 110, startY + 10);
+       .text('PACK', 60, startY + 10);
 
     // Reset color
     doc.fillColor('#000000').font('Helvetica');
 
-    // Pack options
-    const packs = ['P.M', 'Trimestre', 'P.Normal', 'PVIP'];
-    let xPos = 220;
+    // Pack options with their internal values
+    const packs = [
+        { label: 'P.M', value: 'pm' },
+        { label: 'Trimestre', value: 'trimestrial' },
+        { label: 'P.Normal', value: 'normal' },
+        { label: 'P.VIP', value: 'vip' }
+    ];
+    let xPos = 70;
+    const yPos = startY + 50;
+    const selectedPlan = studentData.paymentPlan || 'pm';
     
     packs.forEach(pack => {
         // Checkbox
-        doc.rect(xPos, startY + 8, 12, 12).stroke();
+        doc.rect(xPos, yPos, 15, 15).stroke();
+        
+        // Mark X if selected
+        if (selectedPlan === pack.value) {
+            doc.fontSize(14)
+               .font('Helvetica-Bold')
+               .text('X', xPos + 3, yPos + 1);
+            doc.font('Helvetica');
+        }
         
         // Label
-        doc.fontSize(10).text(pack, xPos + 20, startY + 10);
-        xPos += 80;
+        doc.fontSize(11).text(pack.label, xPos + 25, yPos + 3);
+        xPos += 120;
     });
 }
 

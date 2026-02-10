@@ -983,17 +983,28 @@ function displayStudents(students, pendingStudents = []) {
         let showNextPayment = false;
         
         if (isPaid) {
-            nextPaymentDate = new Date(paymentDate);
-            nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
-            daysUntilNextPayment = Math.ceil((nextPaymentDate - now) / (1000 * 60 * 60 * 24));
-            
-            // Calculate days since payment was marked as paid
-            const daysSincePaid = Math.ceil((now - paymentDate) / (1000 * 60 * 60 * 24));
-            
-            // Show next payment notification only if:
-            // 1. More than 2 days have passed since payment, OR
-            // 2. Less than 7 days until next payment
-            showNextPayment = daysSincePaid > 2 || daysUntilNextPayment <= 7;
+            const plan = student.paymentPlan || 'pm';
+            if (plan === 'normal') {
+                // Annual students: no next payment cycle — paid for the season
+                showNextPayment = false;
+            } else {
+                nextPaymentDate = new Date(paymentDate);
+                if (plan === 'trimestrial') {
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
+                } else {
+                    // pm and vip use monthly cycle
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+                }
+                daysUntilNextPayment = Math.ceil((nextPaymentDate - now) / (1000 * 60 * 60 * 24));
+                
+                // Calculate days since payment was marked as paid
+                const daysSincePaid = Math.ceil((now - paymentDate) / (1000 * 60 * 60 * 24));
+                
+                // Show next payment notification only if:
+                // 1. More than 2 days have passed since payment, OR
+                // 2. Less than 7 days until next payment
+                showNextPayment = daysSincePaid > 2 || daysUntilNextPayment <= 7;
+            }
         }
         
         // Helper function to format group code
@@ -1112,6 +1123,16 @@ function displayStudents(students, pendingStudents = []) {
                 <div class="student-info"><i class="fas fa-envelope"></i> ${student.schoolEmail}</div>
                 <div class="student-info"><i class="fas fa-id-badge"></i> ${formatGroupCode(student)}</div>
                 <div class="student-info"><i class="fas fa-book"></i> ${student.formation.join(', ')}</div>
+                <div class="student-info"><i class="fas fa-box"></i> <span class="badge" style="background: ${
+                    student.paymentPlan === 'normal' ? 'rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid #059669' :
+                    student.paymentPlan === 'trimestrial' ? 'rgba(139, 92, 246, 0.15); color: #7c3aed; border: 1px solid #7c3aed' :
+                    student.paymentPlan === 'vip' ? 'rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid #d97706' :
+                    'rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid #2563eb'
+                }; font-size: 0.75rem; padding: 2px 8px;">${
+                    student.paymentPlan === 'normal' ? 'P.Normal' :
+                    student.paymentPlan === 'trimestrial' ? t('trimpirimestre') :
+                    student.paymentPlan === 'vip' ? 'P.VIP' : 'P.M'
+                }</span></div>
                 <div class="student-info">
                     <i class="fas fa-calendar"></i> 
                     ${isPaid ? `<span style="color: var(--text-light); text-decoration: line-through;">${new Date(student.paymentDate).toLocaleDateString()}</span>` : new Date(student.paymentDate).toLocaleDateString()}
@@ -1744,6 +1765,27 @@ function openAddStudentModal() {
                     </label>
                 </div>
             </div>
+            <div class="form-group">
+                <label>${t('pack')} *</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px;">
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="pm" checked style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.M</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="trimestrial" style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">${t('trimpirimestre')}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="normal" style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.Normal</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="vip" style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.VIP</span>
+                    </label>
+                </div>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>${t('paymentDate')} *</label>
@@ -1838,18 +1880,32 @@ async function markAsPaid(studentId, studentName) {
         });
         
         if (result && result.success) {
-            // Calculate next payment date
-            const currentPaymentDate = new Date(result.student.paymentDate);
-            const nextPaymentDate = new Date(currentPaymentDate);
-            nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+            const plan = result.student.paymentPlan || 'pm';
             
-            const now = new Date();
-            const daysUntilNext = Math.ceil((nextPaymentDate - now) / (1000 * 60 * 60 * 24));
-            
-            showNotification(
-                `✅ Payment marked as paid!\n\n📅 Next Payment: ${nextPaymentDate.toLocaleDateString()}\n⏰ ${daysUntilNext} day${daysUntilNext !== 1 ? 's' : ''} remaining`, 
-                'success'
-            );
+            if (plan === 'normal') {
+                // Annual student — no next payment cycle
+                showNotification(
+                    `✅ Payment marked as paid!\n\n⭐ Annual plan (P.Normal) — paid for the season`, 
+                    'success'
+                );
+            } else {
+                // Calculate next payment date based on plan
+                const currentPaymentDate = new Date(result.student.paymentDate);
+                const nextPaymentDate = new Date(currentPaymentDate);
+                if (plan === 'trimestrial') {
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
+                } else {
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+                }
+                
+                const now = new Date();
+                const daysUntilNext = Math.ceil((nextPaymentDate - now) / (1000 * 60 * 60 * 24));
+                
+                showNotification(
+                    `✅ Payment marked as paid!\n\n📅 Next Payment: ${nextPaymentDate.toLocaleDateString()}\n⏰ ${daysUntilNext} day${daysUntilNext !== 1 ? 's' : ''} remaining`, 
+                    'success'
+                );
+            }
             await loadStudents();
             await loadDashboardStats();
             await loadPaymentReminders();
@@ -2445,6 +2501,27 @@ async function openEditStudentModal(student) {
                     </button>
                 </div>
                 <small style="color: var(--text-light);">Leave empty to keep the current password. Enter a new password to change it.</small>
+            </div>
+            <div class="form-group">
+                <label>${t('pack')} *</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px;">
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="pm" ${(!student.paymentPlan || student.paymentPlan === 'pm') ? 'checked' : ''} style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.M</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="trimestrial" ${student.paymentPlan === 'trimestrial' ? 'checked' : ''} style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">${t('trimpirimestre')}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="normal" ${student.paymentPlan === 'normal' ? 'checked' : ''} style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.Normal</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="paymentPlan" value="vip" ${student.paymentPlan === 'vip' ? 'checked' : ''} style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.VIP</span>
+                    </label>
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">

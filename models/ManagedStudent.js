@@ -110,6 +110,11 @@ const managedStudentSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    paymentPlan: {
+        type: String,
+        enum: ['pm', 'trimestrial', 'normal', 'vip'],
+        default: 'pm'
+    },
     paymentDate: {
         type: Date,
         required: true

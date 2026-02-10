@@ -558,6 +558,7 @@ router.post('/students',
             group,
             paymentDate,
             paymentAmount,
+            paymentPlan,
             reminderDaysBefore,
             notes
         } = req.body;
@@ -640,6 +641,7 @@ router.post('/students',
             filiere: filiereArray,
             group,
             groupName: groupDoc.name,
+            paymentPlan: paymentPlan || 'pm',
             paymentDate: new Date(paymentDate),
             paymentAmount: parseFloat(paymentAmount),
             reminderDaysBefore: reminderDaysBefore || 7,
@@ -793,6 +795,7 @@ router.put('/students/:id',
             branchSubgroup,
             paymentDate,
             paymentAmount,
+            paymentPlan,
             paymentStatus,
             reminderDaysBefore,
             notes,
@@ -888,6 +891,21 @@ router.put('/students/:id',
         }
         if (paymentDate) student.paymentDate = new Date(paymentDate);
         if (paymentAmount) student.paymentAmount = parseFloat(paymentAmount);
+        if (paymentPlan && ['pm', 'trimestrial', 'normal', 'vip'].includes(paymentPlan)) {
+            const oldPlan = student.paymentPlan;
+            student.paymentPlan = paymentPlan;
+            // If switching to annual (normal) and already paid, keep paid status
+            // If switching from annual to recurring plan, reset to pending with new cycle
+            if (paymentPlan === 'normal' && oldPlan !== 'normal') {
+                // Switching TO annual — admin sets the amount, student stays in current status
+                console.log(`📦 ${student.fullName}: Plan changed to annual (P.Normal)`);
+            } else if (paymentPlan !== 'normal' && oldPlan === 'normal') {
+                // Switching FROM annual to recurring — reset reminder flags for new cycle
+                student.paymentReminderSent = false;
+                student.lastReminderDate = null;
+                console.log(`📦 ${student.fullName}: Plan changed from annual to ${paymentPlan}`);
+            }
+        }
         if (paymentStatus) student.paymentStatus = paymentStatus;
         if (reminderDaysBefore) student.reminderDaysBefore = reminderDaysBefore;
         if (notes !== undefined) student.notes = notes;
@@ -1762,7 +1780,8 @@ router.post('/students/:id/generate-pdf', authenticateAdmin, async (req, res) =>
             email: student.email || student.schoolEmail,
             formation: Array.isArray(student.formation) ? student.formation : [student.formation],
             filiere: Array.isArray(student.filiere) ? student.filiere : (student.filiere ? [student.filiere] : []),
-            photoPath: student.photoPath
+            photoPath: student.photoPath,
+            paymentPlan: student.paymentPlan || 'pm'
         };
         
         // Generate PDF (returns buffer for Vercel compatibility)
@@ -1814,7 +1833,8 @@ router.post('/students/:id/backup-dropbox', authenticateAdmin, async (req, res) 
             email: student.email || student.schoolEmail,
             formation: Array.isArray(student.formation) ? student.formation : [student.formation],
             filiere: Array.isArray(student.filiere) ? student.filiere : (student.filiere ? [student.filiere] : []),
-            photoPath: student.photoPath
+            photoPath: student.photoPath,
+            paymentPlan: student.paymentPlan || 'pm'
         };
         
         // Generate PDF

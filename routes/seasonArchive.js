@@ -364,6 +364,7 @@ router.post('/:seasonId/archive', verifyToken, async (req, res) => {
 
         // Clear group/branchSubgroup for carry-over students (old groups no longer exist)
         if (carryOverStudentObjIds.length > 0) {
+            // Reset groups for all carry-over students
             await ManagedStudent.updateMany(
                 { _id: { $in: carryOverStudentObjIds } },
                 {
@@ -375,6 +376,22 @@ router.post('/:seasonId/archive', verifyToken, async (req, res) => {
                     }
                 }
             );
+            
+            // Reset annual (P.Normal) carry-over students to pending for the new season
+            const annualResetResult = await ManagedStudent.updateMany(
+                { _id: { $in: carryOverStudentObjIds }, paymentPlan: 'normal' },
+                {
+                    $set: {
+                        paymentStatus: 'pending',
+                        paymentReminderSent: false,
+                        lastReminderDate: null
+                    }
+                }
+            );
+            if (annualResetResult.modifiedCount > 0) {
+                console.log(`   Étudiants annuels réinitialisés (paiement → pending): ${annualResetResult.modifiedCount}`);
+            }
+            
             console.log(`   Étudiants conservés (groupes réinitialisés): ${carryOverStudentObjIds.length}`);
         }
 

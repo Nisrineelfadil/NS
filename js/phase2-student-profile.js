@@ -279,6 +279,38 @@ function renderStudentForm(student) {
             </div>
             ` : ''}
             
+            <!-- Pack Section -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; margin: 24px 0 16px 0; border-radius: 6px;">
+                <h3 style="margin: 0; color: white; font-size: 1rem; font-weight: 600;">PACK</h3>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${(!student.paymentPlan || student.paymentPlan === 'pm') ? '#3b82f6' : '#e2e8f0'}; border-radius: 8px; background: ${(!student.paymentPlan || student.paymentPlan === 'pm') ? 'rgba(59, 130, 246, 0.1)' : 'white'};">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${(!student.paymentPlan || student.paymentPlan === 'pm') ? '#3b82f6' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
+                        ${(!student.paymentPlan || student.paymentPlan === 'pm') ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6;"></div>' : ''}
+                    </div>
+                    <span style="font-weight: 600; color: ${(!student.paymentPlan || student.paymentPlan === 'pm') ? '#2563eb' : '#94a3b8'};">P.M</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'trimestrial' ? '#7c3aed' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'trimestrial' ? 'rgba(124, 58, 237, 0.1)' : 'white'};">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'trimestrial' ? '#7c3aed' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
+                        ${student.paymentPlan === 'trimestrial' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #7c3aed;"></div>' : ''}
+                    </div>
+                    <span style="font-weight: 600; color: ${student.paymentPlan === 'trimestrial' ? '#6d28d9' : '#94a3b8'};">Trimestre</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'normal' ? '#059669' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'normal' ? 'rgba(5, 150, 105, 0.1)' : 'white'};">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'normal' ? '#059669' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
+                        ${student.paymentPlan === 'normal' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></div>' : ''}
+                    </div>
+                    <span style="font-weight: 600; color: ${student.paymentPlan === 'normal' ? '#047857' : '#94a3b8'};">P.Normal</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'vip' ? '#d97706' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'vip' ? 'rgba(217, 119, 6, 0.1)' : 'white'};">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'vip' ? '#d97706' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
+                        ${student.paymentPlan === 'vip' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #d97706;"></div>' : ''}
+                    </div>
+                    <span style="font-weight: 600; color: ${student.paymentPlan === 'vip' ? '#b45309' : '#94a3b8'};">P.VIP</span>
+                </div>
+            </div>
+            
             <!-- Payment Information Section -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; margin: 24px 0 16px 0; border-radius: 6px;">
                 <h3 style="margin: 0; color: white; font-size: 1rem; font-weight: 600;">INFORMATIONS DE PAIEMENT</h3>
