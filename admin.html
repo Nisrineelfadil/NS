@@ -69,17 +69,14 @@
                         <div class="menu-item" id="myRegistrationsMenuItem" onclick="window.location.href='/my-registrations'">
                             <i class="fas fa-user-plus"></i>
                             <span data-i18n="admin.menu.myRegistrations">My Registrations</span>
-                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item" data-tab="appointments">
                             <i class="fas fa-calendar-check"></i>
                             <span data-i18n="admin.menu.appointments">Rendez-vous</span>
-                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item" data-tab="ratings">
                             <i class="fas fa-star"></i>
                             <span data-i18n="admin.menu.ratings">Ratings</span>
-                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item" data-tab="messages">
                             <i class="fas fa-envelope"></i>
@@ -103,7 +100,6 @@
                         <div class="menu-item" onclick="window.location.href='/student-management'">
                             <i class="fas fa-users-cog"></i>
                             <span data-i18n="admin.menu.students">Students</span>
-                            <span class="badge-new" style="background: #FFD700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 5px;">NEW</span>
                         </div>
                         <div class="menu-item hidden" id="employeesMenuItem" data-tab="employees">
                             <i class="fas fa-users"></i>
@@ -1420,197 +1416,6 @@
 
                     <!-- Settings Tab -->
                     <div class="tab-content" id="settingsTab">
-                        <!-- System Monitoring Section (Apple Glass iOS Style) -->
-                        <div class="glass-card system-monitoring">
-                            <div class="glass-header">
-                                <div class="glass-title">
-                                    <i class="fas fa-chart-pie glass-icon"></i>
-                                    <h2 data-i18n="admin.settings.system_capacity">System Capacity</h2>
-                                </div>
-                                <button class="glass-btn refresh-btn" onclick="refreshSystemStats()">
-                                    <i class="fas fa-sync-alt"></i>
-                                    <span data-i18n="admin.settings.refresh">Refresh</span>
-                                </button>
-                            </div>
-                            
-                            <div class="glass-body">
-                                <!-- Overall Database Usage -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fas fa-database capacity-icon"></i>
-                                            <span data-i18n="admin.settings.db_usage">Database Usage (MongoDB)</span>
-                                        </div>
-                                        <div class="capacity-value" id="dbUsageValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="dbUsageFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="dbUsageInfo">0 MB of 10 GB used</span>
-                                    </div>
-                                </div>
-
-                                <!-- Dropbox Storage -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fab fa-dropbox capacity-icon"></i>
-                                            <span data-i18n="admin.settings.dropbox_storage">Dropbox Backup Storage</span>
-                                        </div>
-                                        <div class="capacity-value" id="dropboxUsageValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="dropboxUsageFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="dropboxUsageInfo">0 MB of 2 GB used</span>
-                                    </div>
-                                </div>
-
-                                <!-- Student Data Storage -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fas fa-user-graduate capacity-icon"></i>
-                                            <span data-i18n="admin.settings.student_data">Student Data</span>
-                                        </div>
-                                        <div class="capacity-value" id="studentDataValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="studentDataFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="studentDataInfo">0 students</span>
-                                    </div>
-                                </div>
-
-                                <!-- Photos & Documents -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fas fa-images capacity-icon"></i>
-                                            <span data-i18n="admin.settings.photos_documents">Photos & Documents</span>
-                                        </div>
-                                        <div class="capacity-value" id="photosDataValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="photosDataFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="photosDataInfo">0 files</span>
-                                    </div>
-                                </div>
-
-                                <!-- Grades & Records -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fas fa-chart-bar capacity-icon"></i>
-                                            <span data-i18n="admin.settings.grades_records">Grades & Records</span>
-                                        </div>
-                                        <div class="capacity-value" id="gradesDataValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="gradesDataFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="gradesDataInfo">0 records</span>
-                                    </div>
-                                </div>
-
-                                <!-- Attendance Records -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fas fa-calendar-check capacity-icon"></i>
-                                            <span data-i18n="admin.settings.attendance_records">Attendance Records</span>
-                                        </div>
-                                        <div class="capacity-value" id="attendanceDataValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="attendanceDataFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="attendanceDataInfo">0 records</span>
-                                    </div>
-                                </div>
-
-                                <!-- Archived Seasons -->
-                                <div class="capacity-item">
-                                    <div class="capacity-header">
-                                        <div class="capacity-label">
-                                            <i class="fas fa-archive capacity-icon"></i>
-                                            <span data-i18n="admin.settings.archived_seasons">Archived Seasons</span>
-                                        </div>
-                                        <div class="capacity-value" id="seasonsDataValue">
-                                            <span class="value-number">0</span>
-                                            <span class="value-unit">MB</span>
-                                            <span class="value-percentage">0%</span>
-                                        </div>
-                                    </div>
-                                    <div class="glass-progress-bar">
-                                        <div class="progress-fill" id="seasonsDataFill" data-percentage="0"></div>
-                                        <div class="progress-glow"></div>
-                                    </div>
-                                    <div class="capacity-info">
-                                        <span id="seasonsDataInfo">0 seasons</span>
-                                    </div>
-                                </div>
-
-                                <!-- Last Cleanup Info -->
-                                <div class="cleanup-info">
-                                    <div class="cleanup-label">
-                                        <i class="fas fa-broom"></i>
-                                        <span data-i18n="admin.settings.last_cleanup">Last Cleanup:</span>
-                                    </div>
-                                    <div class="cleanup-value" id="lastCleanupDate" data-i18n="admin.settings.never">Never</div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="glass-actions">
-                                    <button class="glass-btn primary-btn" onclick="manageStorage()">
-                                        <i class="fas fa-cog"></i>
-                                        <span data-i18n="admin.settings.manage_storage">Manage Storage</span>
-                                    </button>
-                                    <button class="glass-btn secondary-btn" onclick="viewStorageHistory()">
-                                        <i class="fas fa-chart-line"></i>
-                                        <span data-i18n="admin.settings.view_history">View History</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="section-card">
                             <div class="section-header">
                                 <h2>
@@ -1679,6 +1484,15 @@
                                     <p style="color: #9ca3af; margin-top: 12px; font-size: 0.8rem;">
                                         <i class="fas fa-info-circle"></i> v1.0.2 — Windows 10/11 (64-bit)
                                     </p>
+                                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(102, 126, 234, 0.2);">
+                                        <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 8px;" data-i18n="admin.settings.share_link">Share this link with employees to install the app:</p>
+                                        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                                            <input type="text" id="desktopShareLink" value="https://github.com/Zayddahhaoui0609/ns/releases/latest/download/Nisrine.School.Admin.1.0.2.exe" readonly style="flex: 1; max-width: 500px; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #f8fafc; color: #475569;">
+                                            <button onclick="navigator.clipboard.writeText(document.getElementById('desktopShareLink').value); this.innerHTML='<i class=\'fas fa-check\'></i>'; setTimeout(() => this.innerHTML='<i class=\'fas fa-copy\'></i>', 2000);" style="padding: 10px 14px; border: 2px solid #667eea; border-radius: 8px; background: white; color: #667eea; cursor: pointer; font-size: 1rem;">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -621,7 +621,8 @@
                     "desktop_app": "Desktop-Anwendung",
                     "desktop_app_title": "Nisrine School Admin - Desktop-Version",
                     "desktop_app_desc": "Laden Sie die Desktop-Anwendung für ein besseres Erlebnis herunter. Kein Browser nötig, funktioniert mit automatischen Updates.",
-                    "download_windows": "Für Windows herunterladen"
+                    "download_windows": "Für Windows herunterladen",
+                    "share_link": "Teilen Sie diesen Link mit Mitarbeitern, um die App zu installieren:"
                 }
             }
         }
@@ -1273,7 +1274,8 @@
                     "desktop_app": "Desktop Application",
                     "desktop_app_title": "Nisrine School Admin - Desktop Version",
                     "desktop_app_desc": "Download the desktop application for a better experience. No browser needed, works with auto-updates.",
-                    "download_windows": "Download for Windows"
+                    "download_windows": "Download for Windows",
+                    "share_link": "Share this link with employees to install the app:"
                 }
             }
         }
@@ -1925,7 +1927,8 @@
                     "desktop_app": "Application Bureau",
                     "desktop_app_title": "Nisrine School Admin - Version Bureau",
                     "desktop_app_desc": "Téléchargez l'application bureau pour une meilleure expérience. Pas de navigateur nécessaire, mises à jour automatiques.",
-                    "download_windows": "Télécharger pour Windows"
+                    "download_windows": "Télécharger pour Windows",
+                    "share_link": "Partagez ce lien avec les employés pour installer l'application :"
                 }
             }
         }
@@ -2577,7 +2580,8 @@
                     "desktop_app": "تطبيق سطح المكتب",
                     "desktop_app_title": "إدارة مدرسة نسرين - نسخة سطح المكتب",
                     "desktop_app_desc": "قم بتنزيل تطبيق سطح المكتب لتجربة أفضل. لا حاجة للمتصفح، يعمل مع التحديثات التلقائية.",
-                    "download_windows": "تنزيل لنظام ويندوز"
+                    "download_windows": "تنزيل لنظام ويندوز",
+                    "share_link": "شارك هذا الرابط مع الموظفين لتثبيت التطبيق:"
                 }
             }
         }
