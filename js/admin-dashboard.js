@@ -142,6 +142,11 @@ async function showDashboard() {
         document.getElementById('examSection')?.classList.remove('hidden');
         document.getElementById('factoryResetSection')?.style.setProperty('display', 'block');
     }
+
+    // Desktop App Download - show for super_admin/dev, but HIDE if already in desktop app
+    if ((adminRole === 'dev' || adminRole === 'super_admin') && !window.IS_DESKTOP_APP) {
+        document.getElementById('desktopDownloadSection')?.style.setProperty('display', 'block');
+    }
 }
 
 // Show Error Message

@@ -1658,6 +1658,31 @@
                                 </form>
                             </div>
                         </div>
+                        <!-- Desktop App Download (SUPER_ADMIN / DEV only, hidden in desktop app) -->
+                        <div class="section-card" id="desktopDownloadSection" style="display: none;">
+                            <div class="section-header" style="border-bottom: 3px solid #667eea;">
+                                <h2 style="color: #667eea;">
+                                    <i class="fas fa-desktop"></i>
+                                    <span data-i18n="admin.settings.desktop_app">Desktop Application</span>
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)); border: 2px solid #667eea; border-radius: 12px; padding: 24px; text-align: center;">
+                                    <div style="font-size: 3rem; margin-bottom: 12px;">🖥️</div>
+                                    <h3 style="color: #4c1d95; margin-bottom: 8px;" data-i18n="admin.settings.desktop_app_title">Nisrine School Admin - Desktop Version</h3>
+                                    <p style="color: #6b7280; margin-bottom: 20px; font-size: 0.9rem;" data-i18n="admin.settings.desktop_app_desc">Download the desktop application for a better experience. No browser needed, works offline with auto-updates.</p>
+                                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                        <a id="desktopDownloadBtn" href="https://github.com/Zayddahhaoui0609/ns/releases/latest/download/Nisrine.School.Admin.1.0.2.exe" class="action-btn btn-primary" style="padding: 14px 28px; font-size: 1rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none;">
+                                            <i class="fas fa-download"></i> <span data-i18n="admin.settings.download_windows">Download for Windows</span>
+                                        </a>
+                                    </div>
+                                    <p style="color: #9ca3af; margin-top: 12px; font-size: 0.8rem;">
+                                        <i class="fas fa-info-circle"></i> v1.0.2 — Windows 10/11 (64-bit)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Factory Reset (DEV ONLY) -->
                         <div class="section-card" id="factoryResetSection" style="display: none;">
                             <div class="section-header" style="border-bottom: 3px solid #ef4444;">

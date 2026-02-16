@@ -617,7 +617,11 @@
                     "factory_reset_warning": "Dies löscht dauerhaft ALLE Daten: Schüler, Registrierungen, Nachrichten, Termine, Bewertungen, Dienste, Kassenbuch, Anwesenheit, Noten, TELC-Daten und alle Dateien auf Mega.nz. Nur Ihr Dev-Konto und App-Einstellungen bleiben erhalten.",
                     "factory_reset_type": "Geben Sie FACTORY-RESET-CONFIRM ein, um fortzufahren:",
                     "factory_reset_btn": "WERKSRESET AUSFÜHREN",
-                    "factory_reset_progress": "Alle Daten werden gelöscht... Bitte warten, dies kann eine Minute dauern."
+                    "factory_reset_progress": "Alle Daten werden gelöscht... Bitte warten, dies kann eine Minute dauern.",
+                    "desktop_app": "Desktop-Anwendung",
+                    "desktop_app_title": "Nisrine School Admin - Desktop-Version",
+                    "desktop_app_desc": "Laden Sie die Desktop-Anwendung für ein besseres Erlebnis herunter. Kein Browser nötig, funktioniert mit automatischen Updates.",
+                    "download_windows": "Für Windows herunterladen"
                 }
             }
         }
@@ -1265,7 +1269,11 @@
                     "factory_reset_warning": "This will permanently delete ALL data: students, registrations, messages, appointments, ratings, services, cash register, attendance, grades, TELC data, and all files on Mega.nz cloud storage. Only your dev account and app settings will be kept.",
                     "factory_reset_type": "Type FACTORY-RESET-CONFIRM to proceed:",
                     "factory_reset_btn": "EXECUTE FACTORY RESET",
-                    "factory_reset_progress": "Wiping all data... Please wait, this may take a minute."
+                    "factory_reset_progress": "Wiping all data... Please wait, this may take a minute.",
+                    "desktop_app": "Desktop Application",
+                    "desktop_app_title": "Nisrine School Admin - Desktop Version",
+                    "desktop_app_desc": "Download the desktop application for a better experience. No browser needed, works with auto-updates.",
+                    "download_windows": "Download for Windows"
                 }
             }
         }
@@ -1913,7 +1921,11 @@
                     "factory_reset_warning": "Cela supprimera définitivement TOUTES les données : étudiants, inscriptions, messages, rendez-vous, évaluations, services, caisse, présences, notes, données TELC et tous les fichiers sur Mega.nz. Seul votre compte dev et les paramètres seront conservés.",
                     "factory_reset_type": "Tapez FACTORY-RESET-CONFIRM pour continuer :",
                     "factory_reset_btn": "EXÉCUTER LA RÉINITIALISATION",
-                    "factory_reset_progress": "Suppression de toutes les données... Veuillez patienter, cela peut prendre une minute."
+                    "factory_reset_progress": "Suppression de toutes les données... Veuillez patienter, cela peut prendre une minute.",
+                    "desktop_app": "Application Bureau",
+                    "desktop_app_title": "Nisrine School Admin - Version Bureau",
+                    "desktop_app_desc": "Téléchargez l'application bureau pour une meilleure expérience. Pas de navigateur nécessaire, mises à jour automatiques.",
+                    "download_windows": "Télécharger pour Windows"
                 }
             }
         }
@@ -2561,7 +2573,11 @@
                     "factory_reset_warning": "سيؤدي هذا إلى حذف جميع البيانات نهائيًا: الطلاب، التسجيلات، الرسائل، المواعيد، التقييمات، الخدمات، الصندوق، الحضور، الدرجات، بيانات TELC وجميع الملفات على Mega.nz. سيتم الاحتفاظ بحساب المطور وإعدادات التطبيق فقط.",
                     "factory_reset_type": "اكتب FACTORY-RESET-CONFIRM للمتابعة:",
                     "factory_reset_btn": "تنفيذ إعادة ضبط المصنع",
-                    "factory_reset_progress": "جاري حذف جميع البيانات... يرجى الانتظار، قد يستغرق هذا دقيقة."
+                    "factory_reset_progress": "جاري حذف جميع البيانات... يرجى الانتظار، قد يستغرق هذا دقيقة.",
+                    "desktop_app": "تطبيق سطح المكتب",
+                    "desktop_app_title": "إدارة مدرسة نسرين - نسخة سطح المكتب",
+                    "desktop_app_desc": "قم بتنزيل تطبيق سطح المكتب لتجربة أفضل. لا حاجة للمتصفح، يعمل مع التحديثات التلقائية.",
+                    "download_windows": "تنزيل لنظام ويندوز"
                 }
             }
         }
