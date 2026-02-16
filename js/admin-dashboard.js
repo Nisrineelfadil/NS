@@ -551,25 +551,25 @@ function displayStudentsCards(students) {
             <div class="student-card-actions">
                 ${student.status === 'pending' ? `
                     <button class="action-btn btn-success" onclick="updateStatus('${student._id}', 'approved')">
-                        <i class="fas fa-check"></i> Approve
+                        <i class="fas fa-check"></i> ${adminT('registrations.approve', 'Approve')}
                     </button>
                     <button class="action-btn btn-danger" onclick="updateStatus('${student._id}', 'rejected')">
-                        <i class="fas fa-times"></i> Reject
+                        <i class="fas fa-times"></i> ${adminT('registrations.reject', 'Reject')}
                     </button>
                 ` : ''}
                 ${student.status === 'approved' ? `
                     <button class="action-btn btn-info" onclick="backupToMega('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')">
-                        <i class="fas fa-cloud"></i> Backup
+                        <i class="fas fa-cloud"></i> ${adminT('registrations.backup', 'Backup')}
                     </button>
                 ` : ''}
                 <button class="action-btn btn-info" onclick="viewStudent('${student._id}')">
-                    <i class="fas fa-eye"></i> View
+                    <i class="fas fa-eye"></i> ${adminT('registrations.view', 'View')}
                 </button>
                 <button class="action-btn btn-warning" onclick="downloadPDF('${student._id}', '${student.cin}')">
-                    <i class="fas fa-download"></i> PDF
+                    <i class="fas fa-download"></i> ${adminT('registrations.pdf', 'PDF')}
                 </button>
                 <button class="action-btn btn-danger" onclick="deleteStudent('${student._id}')">
-                    <i class="fas fa-trash"></i> Delete
+                    <i class="fas fa-trash"></i> ${adminT('registrations.delete', 'Delete')}
                 </button>
             </div>
         `;
@@ -843,11 +843,26 @@ function applyTranslations(lang) {
     if (typeof currentCategory !== 'undefined') {
         updateCategoryTitle(currentCategory);
     }
+    
+    // Re-render dynamic JS content so adminT() picks up the new language
+    const activeTab = document.querySelector('.menu-item.active')?.getAttribute('data-tab');
+    if (activeTab === 'messages') { loadMessages(); }
+    if (activeTab === 'employees') { loadEmployees(); }
+    if (activeTab === 'registrations' && typeof renderStudents === 'function') { renderStudents(allStudents); }
 }
 
 // Get nested translation
 function getNestedTranslation(obj, path) {
     return path.split('.').reduce((current, key) => current?.[key], obj);
+}
+
+// Get admin translation by key path (e.g. 'messages.read')
+function adminT(keyPath, fallback) {
+    if (!translations[currentLanguage]) return fallback || keyPath;
+    const t = translations[currentLanguage].translations?.admin;
+    if (!t) return fallback || keyPath;
+    const result = keyPath.split('.').reduce((current, key) => current?.[key], t);
+    return result || fallback || keyPath;
 }
 
 // Update page title
@@ -1099,10 +1114,10 @@ async function loadMessages() {
                     <td>${msg.phoneNumber}</td>
                     <td style="max-width: 400px; white-space: normal; word-wrap: break-word; line-height: 1.5;">${msg.message}</td>
                     <td>${new Date(msg.createdAt).toLocaleDateString()}</td>
-                    <td><span class="badge ${msg.isRead ? 'badge-approved' : 'badge-pending'}">${msg.isRead ? 'Read' : 'Unread'}</span></td>
+                    <td><span class="badge ${msg.isRead ? 'badge-approved' : 'badge-pending'}">${msg.isRead ? adminT('messages.read', 'Read') : adminT('messages.unread', 'Unread')}</span></td>
                     <td>
-                        ${!msg.isRead ? `<button class="action-btn btn-info" onclick="event.stopPropagation(); markAsRead('${msg._id}')"><i class="fas fa-check"></i> Mark Read</button>` : ''}
-                        <button class="action-btn btn-danger" onclick="event.stopPropagation(); deleteMessage('${msg._id}')"><i class="fas fa-trash"></i> Delete</button>
+                        ${!msg.isRead ? `<button class="action-btn btn-info" onclick="event.stopPropagation(); markAsRead('${msg._id}')"><i class="fas fa-check"></i> ${adminT('messages.read', 'Mark Read')}</button>` : ''}
+                        <button class="action-btn btn-danger" onclick="event.stopPropagation(); deleteMessage('${msg._id}')"><i class="fas fa-trash"></i> ${adminT('messages.delete', 'Delete')}</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1171,17 +1186,17 @@ async function loadEmployees() {
                 row.innerHTML = `
                     <td>${emp.username}</td>
                     <td>${emp.email || 'N/A'}</td>
-                    <td><span class="badge ${emp.isActive ? 'badge-approved' : 'badge-rejected'}">${emp.isActive ? 'Active' : 'Inactive'}</span></td>
+                    <td><span class="badge ${emp.isActive ? 'badge-approved' : 'badge-rejected'}">${emp.isActive ? adminT('employees.active', 'Active') : adminT('employees.deactivate', 'Inactive')}</span></td>
                     <td>${new Date(emp.createdAt).toLocaleDateString()}</td>
                     <td>
                         <button class="action-btn btn-info" onclick="changeEmployeePassword('${emp._id}', '${emp.username}')">
-                            <i class="fas fa-key"></i> Change Password
+                            <i class="fas fa-key"></i> ${adminT('employees.change_password', 'Change Password')}
                         </button>
                         <button class="action-btn ${emp.isActive ? 'btn-warning' : 'btn-success'}" onclick="toggleEmployee('${emp._id}')">
-                            <i class="fas fa-toggle-${emp.isActive ? 'off' : 'on'}"></i> ${emp.isActive ? 'Deactivate' : 'Activate'}
+                            <i class="fas fa-toggle-${emp.isActive ? 'off' : 'on'}"></i> ${emp.isActive ? adminT('employees.deactivate', 'Deactivate') : adminT('employees.active', 'Activate')}
                         </button>
                         <button class="action-btn btn-danger" onclick="deleteEmployee('${emp._id}')">
-                            <i class="fas fa-trash"></i> Delete
+                            <i class="fas fa-trash"></i> ${adminT('employees.delete', 'Delete')}
                         </button>
                     </td>
                 `;

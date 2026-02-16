@@ -1260,23 +1260,23 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-users"></i>
-                                    Employee Management
+                                    <span data-i18n="admin.employees.title">Employee Management</span>
                                 </h2>
                                 <button class="action-btn btn-success" onclick="showCreateEmployeeForm()">
-                                    <i class="fas fa-plus"></i> Add Employee
+                                    <i class="fas fa-plus"></i> <span data-i18n="admin.employees.add_employee">Add Employee</span>
                                 </button>
                             </div>
                             <div class="section-body">
-                                <div class="loading" id="employeesLoading">Loading employees...</div>
+                                <div class="loading" id="employeesLoading" data-i18n="admin.employees.loading">Loading employees...</div>
                                 <div id="employeesTableContainer" style="display: none; overflow-x: auto;">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>Username</th>
-                                                <th>Email</th>
-                                                <th>Status</th>
-                                                <th>Created</th>
-                                                <th>Actions</th>
+                                                <th data-i18n="admin.employees.username">Username</th>
+                                                <th data-i18n="admin.employees.email">Email</th>
+                                                <th data-i18n="admin.employees.status">Status</th>
+                                                <th data-i18n="admin.employees.created">Created</th>
+                                                <th data-i18n="admin.employees.actions">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="employeesTableBody">
@@ -1292,17 +1292,17 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-chart-bar"></i>
-                                    Employee Performance
+                                    <span data-i18n="admin.employees.performance_title">Employee Performance</span>
                                 </h2>
                                 <button class="action-btn btn-info" onclick="loadEmployeePerformance()">
-                                    <i class="fas fa-sync"></i> Refresh
+                                    <i class="fas fa-sync"></i> <span data-i18n="admin.employees.refresh">Refresh</span>
                                 </button>
                             </div>
                             <div class="section-body">
                                 <p style="color: var(--text-light); margin-bottom: 20px;">
-                                    Track employee login activity and performance metrics
+                                    <span data-i18n="admin.employees.track_performance">Track employee login activity and performance metrics</span>
                                 </p>
-                                <div class="loading" id="performanceLoading">Loading performance data...</div>
+                                <div class="loading" id="performanceLoading" data-i18n="admin.employees.loading_performance">Loading performance data...</div>
                                 <div id="performanceContainer" style="display: none;">
                                     <div class="stats-grid" id="performanceGrid">
                                         <!-- Performance cards will be inserted here -->
@@ -1316,30 +1316,30 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-tasks"></i>
-                                    Employee Activity Dashboard
+                                    <span data-i18n="admin.employees.activity_dashboard">Employee Activity Dashboard</span>
                                 </h2>
                                 <div style="display: flex; gap: 10px;">
                                     <button class="action-btn btn-info" onclick="loadEmployeeActivity()">
-                                        <i class="fas fa-sync"></i> Refresh
+                                        <i class="fas fa-sync"></i> <span data-i18n="admin.employees.refresh">Refresh</span>
                                     </button>
                                     <button class="action-btn btn-danger" onclick="clearEmployeeActivity()">
-                                        <i class="fas fa-trash"></i> Clear Activity
+                                        <i class="fas fa-trash"></i> <span data-i18n="admin.employees.clear_activity">Clear Activity</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="section-body">
                                 <p style="color: var(--text-light); margin-bottom: 20px;">
-                                    View detailed employee actions and activity logs
+                                    <span data-i18n="admin.employees.view_activity">View detailed employee actions and activity logs</span>
                                 </p>
-                                <div class="loading" id="activityDashboardLoading">Loading activity dashboard...</div>
+                                <div class="loading" id="activityDashboardLoading" data-i18n="admin.employees.loading_activity">Loading activity dashboard...</div>
                                 <div id="activityDashboardContainer" style="display: none; overflow-x: auto;">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>Employee</th>
-                                                <th>Action</th>
-                                                <th>Details</th>
-                                                <th>Date</th>
+                                                <th data-i18n="admin.employees.employee">Employee</th>
+                                                <th data-i18n="admin.employees.action">Action</th>
+                                                <th data-i18n="admin.employees.details">Details</th>
+                                                <th data-i18n="admin.employees.date">Date</th>
                                             </tr>
                                         </thead>
                                         <tbody id="activityDashboardBody">
@@ -1357,22 +1357,22 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-chart-line"></i>
-                                    Activity Log
+                                    <span data-i18n="admin.activity.title">Activity Log</span>
                                 </h2>
                                 <button class="action-btn btn-danger" onclick="clearActivityLogs()">
-                                    <i class="fas fa-trash"></i> Clear Logs
+                                    <i class="fas fa-trash"></i> <span data-i18n="admin.activity.clear_logs">Clear Logs</span>
                                 </button>
                             </div>
                             <div class="section-body">
-                                <div class="loading" id="activityLoading">Loading activity logs...</div>
+                                <div class="loading" id="activityLoading" data-i18n="admin.activity.loading">Loading activity logs...</div>
                                 <div id="activityTableContainer" style="display: none; overflow-x: auto;">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>User</th>
-                                                <th>Action</th>
-                                                <th>Details</th>
-                                                <th>Date</th>
+                                                <th data-i18n="admin.activity.user">User</th>
+                                                <th data-i18n="admin.activity.action">Action</th>
+                                                <th data-i18n="admin.activity.details">Details</th>
+                                                <th data-i18n="admin.activity.date">Date</th>
                                             </tr>
                                         </thead>
                                         <tbody id="activityTableBody">
@@ -1390,23 +1390,23 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-clock"></i>
-                                    Login Sessions
+                                    <span data-i18n="admin.sessions.title">Login Sessions</span>
                                 </h2>
                                 <button class="action-btn btn-danger" onclick="clearLoginSessions()">
-                                    <i class="fas fa-trash"></i> Clear Sessions
+                                    <i class="fas fa-trash"></i> <span data-i18n="admin.sessions.clear_sessions">Clear Sessions</span>
                                 </button>
                             </div>
                             <div class="section-body">
-                                <div class="loading" id="sessionsLoading">Loading login sessions...</div>
+                                <div class="loading" id="sessionsLoading" data-i18n="admin.sessions.loading">Loading login sessions...</div>
                                 <div id="sessionsTableContainer" style="display: none; overflow-x: auto;">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>User</th>
-                                                <th>IP Address</th>
-                                                <th>User Agent</th>
-                                                <th>Platform</th>
-                                                <th>Login Time</th>
+                                                <th data-i18n="admin.sessions.user">User</th>
+                                                <th data-i18n="admin.sessions.ip_address">IP Address</th>
+                                                <th data-i18n="admin.sessions.user_agent">User Agent</th>
+                                                <th data-i18n="admin.sessions.platform">Platform</th>
+                                                <th data-i18n="admin.sessions.login_time">Login Time</th>
                                             </tr>
                                         </thead>
                                         <tbody id="sessionsTableBody">
@@ -1425,11 +1425,11 @@
                             <div class="glass-header">
                                 <div class="glass-title">
                                     <i class="fas fa-chart-pie glass-icon"></i>
-                                    <h2>System Capacity</h2>
+                                    <h2 data-i18n="admin.settings.system_capacity">System Capacity</h2>
                                 </div>
                                 <button class="glass-btn refresh-btn" onclick="refreshSystemStats()">
                                     <i class="fas fa-sync-alt"></i>
-                                    <span>Refresh</span>
+                                    <span data-i18n="admin.settings.refresh">Refresh</span>
                                 </button>
                             </div>
                             
@@ -1439,7 +1439,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fas fa-database capacity-icon"></i>
-                                            <span>Database Usage (MongoDB)</span>
+                                            <span data-i18n="admin.settings.db_usage">Database Usage (MongoDB)</span>
                                         </div>
                                         <div class="capacity-value" id="dbUsageValue">
                                             <span class="value-number">0</span>
@@ -1461,7 +1461,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fab fa-dropbox capacity-icon"></i>
-                                            <span>Dropbox Backup Storage</span>
+                                            <span data-i18n="admin.settings.dropbox_storage">Dropbox Backup Storage</span>
                                         </div>
                                         <div class="capacity-value" id="dropboxUsageValue">
                                             <span class="value-number">0</span>
@@ -1483,7 +1483,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fas fa-user-graduate capacity-icon"></i>
-                                            <span>Student Data</span>
+                                            <span data-i18n="admin.settings.student_data">Student Data</span>
                                         </div>
                                         <div class="capacity-value" id="studentDataValue">
                                             <span class="value-number">0</span>
@@ -1505,7 +1505,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fas fa-images capacity-icon"></i>
-                                            <span>Photos & Documents</span>
+                                            <span data-i18n="admin.settings.photos_documents">Photos & Documents</span>
                                         </div>
                                         <div class="capacity-value" id="photosDataValue">
                                             <span class="value-number">0</span>
@@ -1527,7 +1527,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fas fa-chart-bar capacity-icon"></i>
-                                            <span>Grades & Records</span>
+                                            <span data-i18n="admin.settings.grades_records">Grades & Records</span>
                                         </div>
                                         <div class="capacity-value" id="gradesDataValue">
                                             <span class="value-number">0</span>
@@ -1549,7 +1549,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fas fa-calendar-check capacity-icon"></i>
-                                            <span>Attendance Records</span>
+                                            <span data-i18n="admin.settings.attendance_records">Attendance Records</span>
                                         </div>
                                         <div class="capacity-value" id="attendanceDataValue">
                                             <span class="value-number">0</span>
@@ -1571,7 +1571,7 @@
                                     <div class="capacity-header">
                                         <div class="capacity-label">
                                             <i class="fas fa-archive capacity-icon"></i>
-                                            <span>Archived Seasons</span>
+                                            <span data-i18n="admin.settings.archived_seasons">Archived Seasons</span>
                                         </div>
                                         <div class="capacity-value" id="seasonsDataValue">
                                             <span class="value-number">0</span>
@@ -1592,20 +1592,20 @@
                                 <div class="cleanup-info">
                                     <div class="cleanup-label">
                                         <i class="fas fa-broom"></i>
-                                        <span>Last Cleanup:</span>
+                                        <span data-i18n="admin.settings.last_cleanup">Last Cleanup:</span>
                                     </div>
-                                    <div class="cleanup-value" id="lastCleanupDate">Never</div>
+                                    <div class="cleanup-value" id="lastCleanupDate" data-i18n="admin.settings.never">Never</div>
                                 </div>
 
                                 <!-- Action Buttons -->
                                 <div class="glass-actions">
                                     <button class="glass-btn primary-btn" onclick="manageStorage()">
                                         <i class="fas fa-cog"></i>
-                                        <span>Manage Storage</span>
+                                        <span data-i18n="admin.settings.manage_storage">Manage Storage</span>
                                     </button>
                                     <button class="glass-btn secondary-btn" onclick="viewStorageHistory()">
                                         <i class="fas fa-chart-line"></i>
-                                        <span>View History</span>
+                                        <span data-i18n="admin.settings.view_history">View History</span>
                                     </button>
                                 </div>
                             </div>
@@ -1615,17 +1615,17 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-user"></i>
-                                    Change Username
+                                    <span data-i18n="admin.settings.change_username">Change Username</span>
                                 </h2>
                             </div>
                             <div class="section-body">
                                 <form id="changeUsernameForm" style="max-width: 500px;">
                                     <div class="form-group">
-                                        <label>New Username</label>
+                                        <label data-i18n="admin.settings.new_username">New Username</label>
                                         <input type="text" id="newUsername" required>
                                     </div>
                                     <button type="submit" class="action-btn btn-success">
-                                        <i class="fas fa-save"></i> Update Username
+                                        <i class="fas fa-save"></i> <span data-i18n="admin.settings.update_username">Update Username</span>
                                     </button>
                                 </form>
                             </div>
@@ -1635,25 +1635,25 @@
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-lock"></i>
-                                    Change Password
+                                    <span data-i18n="admin.settings.change_password">Change Password</span>
                                 </h2>
                             </div>
                             <div class="section-body">
                                 <form id="changePasswordForm" style="max-width: 500px;">
                                     <div class="form-group">
-                                        <label>Current Password</label>
+                                        <label data-i18n="admin.settings.current_password">Current Password</label>
                                         <input type="password" id="currentPassword" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>New Password</label>
+                                        <label data-i18n="admin.settings.new_password">New Password</label>
                                         <input type="password" id="newPassword" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>Confirm New Password</label>
+                                        <label data-i18n="admin.settings.confirm_password">Confirm New Password</label>
                                         <input type="password" id="confirmPassword" required>
                                     </div>
                                     <button type="submit" class="action-btn btn-success">
-                                        <i class="fas fa-save"></i> Update Password
+                                        <i class="fas fa-save"></i> <span data-i18n="admin.settings.update_password">Update Password</span>
                                     </button>
                                 </form>
                             </div>
@@ -2034,7 +2034,7 @@
     <div class="modal-overlay" id="addEmployeeModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2><i class="fas fa-user-plus"></i> Add New Employee</h2>
+                <h2><i class="fas fa-user-plus"></i> <span data-i18n="admin.employees.add_new_employee">Add New Employee</span></h2>
                 <button class="modal-close" onclick="closeEmployeeModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -2042,27 +2042,27 @@
             <div class="modal-body">
                 <form id="addEmployeeForm">
                     <div class="form-group">
-                        <label for="empUsername"><i class="fas fa-user"></i> Username</label>
+                        <label for="empUsername"><i class="fas fa-user"></i> <span data-i18n="admin.employees.username">Username</span></label>
                         <input type="text" id="empUsername" required placeholder="Enter username">
                     </div>
                     <div class="form-group">
-                        <label for="empEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <label for="empEmail"><i class="fas fa-envelope"></i> <span data-i18n="admin.employees.email">Email</span></label>
                         <input type="email" id="empEmail" required placeholder="employee@example.com">
                     </div>
                     <div class="form-group">
-                        <label for="empPassword"><i class="fas fa-lock"></i> Password</label>
+                        <label for="empPassword"><i class="fas fa-lock"></i> <span data-i18n="admin.employees.password">Password</span></label>
                         <input type="password" id="empPassword" required placeholder="Enter password">
                     </div>
                     <div class="form-group">
-                        <label for="empConfirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                        <label for="empConfirmPassword"><i class="fas fa-lock"></i> <span data-i18n="admin.employees.confirm_password">Confirm Password</span></label>
                         <input type="password" id="empConfirmPassword" required placeholder="Confirm password">
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="action-btn btn-success" style="flex: 1;">
-                            <i class="fas fa-save"></i> Create Employee
+                            <i class="fas fa-save"></i> <span data-i18n="admin.employees.create_employee">Create Employee</span>
                         </button>
                         <button type="button" class="action-btn btn-danger" onclick="closeEmployeeModal()" style="flex: 1;">
-                            <i class="fas fa-times"></i> Cancel
+                            <i class="fas fa-times"></i> <span data-i18n="admin.employees.cancel">Cancel</span>
                         </button>
                     </div>
                 </form>
@@ -2083,23 +2083,23 @@
                 <form id="appointmentForm">
                     <input type="hidden" id="appointmentId">
                     <div class="form-group">
-                        <label for="appointmentFullName"><i class="fas fa-user"></i> Full Name</label>
+                        <label for="appointmentFullName"><i class="fas fa-user"></i> <span data-i18n="admin.appointments.full_name">Full Name</span></label>
                         <input type="text" id="appointmentFullName" required placeholder="Enter client's full name">
                     </div>
                     <div class="form-group">
-                        <label for="appointmentPhone"><i class="fas fa-phone"></i> Phone Number</label>
+                        <label for="appointmentPhone"><i class="fas fa-phone"></i> <span data-i18n="admin.appointments.phone_number">Phone Number</span></label>
                         <input type="tel" id="appointmentPhone" required placeholder="+212 6XX XXX XXX">
                     </div>
                     <div class="form-group">
-                        <label for="appointmentPurpose"><i class="fas fa-clipboard"></i> Purpose / Notes</label>
+                        <label for="appointmentPurpose"><i class="fas fa-clipboard"></i> <span data-i18n="admin.appointments.purpose">Purpose / Notes</span></label>
                         <textarea id="appointmentPurpose" required placeholder="Reason for the meeting..." rows="3"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="appointmentDate"><i class="fas fa-calendar"></i> Appointment Date</label>
+                        <label for="appointmentDate"><i class="fas fa-calendar"></i> <span data-i18n="admin.appointments.appointment_date">Appointment Date</span></label>
                         <input type="date" id="appointmentDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="appointmentPriority"><i class="fas fa-flag"></i> Priority</label>
+                        <label for="appointmentPriority"><i class="fas fa-flag"></i> <span data-i18n="admin.appointments.priority">Priority</span></label>
                         <select id="appointmentPriority">
                             <option value="low">Low Priority</option>
                             <option value="medium" selected>Medium Priority</option>
@@ -2111,7 +2111,7 @@
                             <i class="fas fa-save"></i> <span id="appointmentSubmitBtn">Save Appointment</span>
                         </button>
                         <button type="button" class="action-btn btn-danger" onclick="closeAppointmentModal()" style="flex: 1;">
-                            <i class="fas fa-times"></i> Cancel
+                            <i class="fas fa-times"></i> <span data-i18n="admin.appointments.cancel">Cancel</span>
                         </button>
                     </div>
                 </form>
@@ -2123,27 +2123,27 @@
     <div class="modal-overlay" id="pdfDatePickerModal">
         <div class="modal-container" style="max-width: 400px;">
             <div class="modal-header">
-                <h2><i class="fas fa-calendar-alt"></i> Select Date for PDF</h2>
+                <h2><i class="fas fa-calendar-alt"></i> <span data-i18n="admin.appointments.select_date_for_pdf">Select Date for PDF</span></h2>
                 <button class="modal-close" onclick="closePdfDatePicker()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <p style="color: #64748b; margin-bottom: 20px; font-size: 0.9rem;">
-                    Choose the date for which you want to download the appointments PDF.
+                    <span data-i18n="admin.appointments.choose_date_desc">Choose the date for which you want to download the appointments PDF.</span>
                 </p>
                 <div class="form-group">
                     <label for="pdfExportDate">
-                        <i class="fas fa-calendar"></i> Appointment Date
+                        <i class="fas fa-calendar"></i> <span data-i18n="admin.appointments.appointment_date_label">Appointment Date</span>
                     </label>
                     <input type="date" id="pdfExportDate" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 1rem;">
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 24px;">
                     <button class="action-btn btn-success" onclick="confirmPdfDownload()" style="flex: 1;">
-                        <i class="fas fa-download"></i> Download PDF
+                        <i class="fas fa-download"></i> <span data-i18n="admin.appointments.download_pdf">Download PDF</span>
                     </button>
                     <button class="action-btn btn-danger" onclick="closePdfDatePicker()" style="flex: 1;">
-                        <i class="fas fa-times"></i> Cancel
+                        <i class="fas fa-times"></i> <span data-i18n="admin.appointments.cancel">Cancel</span>
                     </button>
                 </div>
             </div>

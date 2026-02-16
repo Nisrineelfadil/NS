@@ -274,7 +274,10 @@
                     "pdf": "PDF",
                     "delete": "Löschen",
                     "approved": "Genehmigt",
-                    "invalid_date": "Ungültiges Datum"
+                    "invalid_date": "Ungültiges Datum",
+                    "approve": "Genehmigen",
+                    "reject": "Ablehnen",
+                    "pending": "Ausstehend"
                 },
                 "messages": {
                     "title": "Kontaktnachrichten",
@@ -284,7 +287,10 @@
                     "date": "Datum",
                     "status": "Status",
                     "actions": "Aktionen",
-                    "loading": "Nachrichten werden geladen..."
+                    "loading": "Nachrichten werden geladen...",
+                    "read": "Gelesen",
+                    "unread": "Ungelesen",
+                    "delete": "Löschen"
                 },
                 "services": {
                     "title": "Serviceanfragen",
@@ -436,7 +442,11 @@
                     "edit": "Bearbeiten",
                     "delete": "Löschen",
                     "mark_completed": "Als abgeschlossen markieren",
-                    "name_phone_purpose": "Name, Telefon oder Zweck"
+                    "name_phone_purpose": "Name, Telefon oder Zweck",
+                    "select_date_for_pdf": "Datum für PDF auswählen",
+                    "choose_date_desc": "Wählen Sie das Datum, für das Sie das Termin-PDF herunterladen möchten.",
+                    "appointment_date_label": "Termindatum",
+                    "download_pdf": "PDF herunterladen"
                 },
                 "notifications": {
                     "title": "Benachrichtigungen",
@@ -525,6 +535,81 @@
                     "noActiveSeason": "Keine aktive Saison gefunden",
                     "noGroupsInSeason": "Keine Gruppen in aktiver Saison",
                     "errorLoadingGroups": "Fehler beim Laden der Gruppen"
+                },
+                "employees": {
+                    "title": "Mitarbeiterverwaltung",
+                    "add_employee": "Mitarbeiter hinzufügen",
+                    "loading": "Mitarbeiter werden geladen...",
+                    "username": "Benutzername",
+                    "email": "E-Mail",
+                    "status": "Status",
+                    "created": "Erstellt",
+                    "actions": "Aktionen",
+                    "active": "Aktiv",
+                    "change_password": "Passwort ändern",
+                    "deactivate": "Deaktivieren",
+                    "delete": "Löschen",
+                    "performance_title": "Mitarbeiterleistung",
+                    "refresh": "Aktualisieren",
+                    "track_performance": "Mitarbeiter-Anmeldeaktivität und Leistungskennzahlen verfolgen",
+                    "loading_performance": "Leistungsdaten werden geladen...",
+                    "logins_today": "Anmeldungen heute",
+                    "activity_dashboard": "Mitarbeiter-Aktivitäts-Dashboard",
+                    "clear_activity": "Aktivität löschen",
+                    "view_activity": "Detaillierte Mitarbeiteraktionen und Aktivitätsprotokolle anzeigen",
+                    "loading_activity": "Aktivitäts-Dashboard wird geladen...",
+                    "employee": "Mitarbeiter",
+                    "action": "Aktion",
+                    "details": "Details",
+                    "date": "Datum",
+                    "add_new_employee": "Neuen Mitarbeiter hinzufügen",
+                    "password": "Passwort",
+                    "confirm_password": "Passwort bestätigen",
+                    "create_employee": "Mitarbeiter erstellen",
+                    "cancel": "Abbrechen"
+                },
+                "activity": {
+                    "title": "Aktivitätsprotokoll",
+                    "clear_logs": "Protokolle löschen",
+                    "loading": "Aktivitätsprotokolle werden geladen...",
+                    "user": "Benutzer",
+                    "action": "Aktion",
+                    "details": "Details",
+                    "date": "Datum"
+                },
+                "sessions": {
+                    "title": "Anmeldesitzungen",
+                    "clear_sessions": "Sitzungen löschen",
+                    "loading": "Anmeldesitzungen werden geladen...",
+                    "user": "Benutzer",
+                    "ip_address": "IP-Adresse",
+                    "user_agent": "User-Agent",
+                    "platform": "Plattform",
+                    "login_time": "Anmeldezeit"
+                },
+                "settings": {
+                    "title": "Einstellungen",
+                    "system_capacity": "Systemkapazität",
+                    "refresh": "Aktualisieren",
+                    "db_usage": "Datenbanknutzung (MongoDB)",
+                    "dropbox_storage": "Dropbox-Sicherungsspeicher",
+                    "student_data": "Schülerdaten",
+                    "photos_documents": "Fotos & Dokumente",
+                    "grades_records": "Noten & Aufzeichnungen",
+                    "attendance_records": "Anwesenheitsaufzeichnungen",
+                    "archived_seasons": "Archivierte Saisons",
+                    "last_cleanup": "Letzte Bereinigung:",
+                    "never": "Nie",
+                    "manage_storage": "Speicher verwalten",
+                    "view_history": "Verlauf anzeigen",
+                    "change_username": "Benutzernamen ändern",
+                    "new_username": "Neuer Benutzername",
+                    "update_username": "Benutzernamen aktualisieren",
+                    "change_password": "Passwort ändern",
+                    "current_password": "Aktuelles Passwort",
+                    "new_password": "Neues Passwort",
+                    "confirm_password": "Neues Passwort bestätigen",
+                    "update_password": "Passwort aktualisieren"
                 }
             }
         }
@@ -798,7 +883,16 @@
                     "all_students": "All Students",
                     "refresh": "Refresh",
                     "download_all": "Download All",
-                    "clear_category": "Clear Category"
+                    "clear_category": "Clear Category",
+                    "backup": "Backup",
+                    "view": "View",
+                    "pdf": "PDF",
+                    "delete": "Delete",
+                    "approved": "Approved",
+                    "invalid_date": "Invalid Date",
+                    "approve": "Approve",
+                    "reject": "Reject",
+                    "pending": "Pending"
                 },
                 "messages": {
                     "title": "Contact Messages",
@@ -808,7 +902,10 @@
                     "date": "Date",
                     "status": "Status",
                     "actions": "Actions",
-                    "loading": "Loading messages..."
+                    "loading": "Loading messages...",
+                    "read": "Read",
+                    "unread": "Unread",
+                    "delete": "Delete"
                 },
                 "services": {
                     "title": "Service Requests",
@@ -960,7 +1057,11 @@
                     "edit": "Edit",
                     "delete": "Delete",
                     "mark_completed": "Mark as Completed",
-                    "name_phone_purpose": "Name, phone, or purpose"
+                    "name_phone_purpose": "Name, phone, or purpose",
+                    "select_date_for_pdf": "Select Date for PDF",
+                    "choose_date_desc": "Choose the date for which you want to download the appointments PDF.",
+                    "appointment_date_label": "Appointment Date",
+                    "download_pdf": "Download PDF"
                 },
                 "notifications": {
                     "title": "Notifications",
@@ -1074,6 +1175,81 @@
                     "noActiveSeason": "No active season found",
                     "noGroupsInSeason": "No groups in active season",
                     "errorLoadingGroups": "Error loading groups"
+                },
+                "employees": {
+                    "title": "Employee Management",
+                    "add_employee": "Add Employee",
+                    "loading": "Loading employees...",
+                    "username": "Username",
+                    "email": "Email",
+                    "status": "Status",
+                    "created": "Created",
+                    "actions": "Actions",
+                    "active": "Active",
+                    "change_password": "Change Password",
+                    "deactivate": "Deactivate",
+                    "delete": "Delete",
+                    "performance_title": "Employee Performance",
+                    "refresh": "Refresh",
+                    "track_performance": "Track employee login activity and performance metrics",
+                    "loading_performance": "Loading performance data...",
+                    "logins_today": "Logins Today",
+                    "activity_dashboard": "Employee Activity Dashboard",
+                    "clear_activity": "Clear Activity",
+                    "view_activity": "View detailed employee actions and activity logs",
+                    "loading_activity": "Loading activity dashboard...",
+                    "employee": "Employee",
+                    "action": "Action",
+                    "details": "Details",
+                    "date": "Date",
+                    "add_new_employee": "Add New Employee",
+                    "password": "Password",
+                    "confirm_password": "Confirm Password",
+                    "create_employee": "Create Employee",
+                    "cancel": "Cancel"
+                },
+                "activity": {
+                    "title": "Activity Log",
+                    "clear_logs": "Clear Logs",
+                    "loading": "Loading activity logs...",
+                    "user": "User",
+                    "action": "Action",
+                    "details": "Details",
+                    "date": "Date"
+                },
+                "sessions": {
+                    "title": "Login Sessions",
+                    "clear_sessions": "Clear Sessions",
+                    "loading": "Loading login sessions...",
+                    "user": "User",
+                    "ip_address": "IP Address",
+                    "user_agent": "User Agent",
+                    "platform": "Platform",
+                    "login_time": "Login Time"
+                },
+                "settings": {
+                    "title": "Settings",
+                    "system_capacity": "System Capacity",
+                    "refresh": "Refresh",
+                    "db_usage": "Database Usage (MongoDB)",
+                    "dropbox_storage": "Dropbox Backup Storage",
+                    "student_data": "Student Data",
+                    "photos_documents": "Photos & Documents",
+                    "grades_records": "Grades & Records",
+                    "attendance_records": "Attendance Records",
+                    "archived_seasons": "Archived Seasons",
+                    "last_cleanup": "Last Cleanup:",
+                    "never": "Never",
+                    "manage_storage": "Manage Storage",
+                    "view_history": "View History",
+                    "change_username": "Change Username",
+                    "new_username": "New Username",
+                    "update_username": "Update Username",
+                    "change_password": "Change Password",
+                    "current_password": "Current Password",
+                    "new_password": "New Password",
+                    "confirm_password": "Confirm New Password",
+                    "update_password": "Update Password"
                 }
             }
         }
@@ -1347,7 +1523,16 @@
                     "all_students": "Tous les Étudiants",
                     "refresh": "Actualiser",
                     "download_all": "Tout Télécharger",
-                    "clear_category": "Effacer la Catégorie"
+                    "clear_category": "Effacer la Catégorie",
+                    "backup": "Sauvegarde",
+                    "view": "Voir",
+                    "pdf": "PDF",
+                    "delete": "Supprimer",
+                    "approved": "Approuvé",
+                    "invalid_date": "Date invalide",
+                    "approve": "Approuver",
+                    "reject": "Rejeter",
+                    "pending": "En attente"
                 },
                 "messages": {
                     "title": "Messages de Contact",
@@ -1357,7 +1542,10 @@
                     "date": "Date",
                     "status": "Statut",
                     "actions": "Actions",
-                    "loading": "Chargement des messages..."
+                    "loading": "Chargement des messages...",
+                    "read": "Lu",
+                    "unread": "Non lu",
+                    "delete": "Supprimer"
                 },
                 "services": {
                     "title": "Demandes de Service",
@@ -1509,7 +1697,11 @@
                     "edit": "Modifier",
                     "delete": "Supprimer",
                     "mark_completed": "Marquer comme Terminé",
-                    "name_phone_purpose": "Nom, téléphone ou objet"
+                    "name_phone_purpose": "Nom, téléphone ou objet",
+                    "select_date_for_pdf": "Sélectionner la date pour le PDF",
+                    "choose_date_desc": "Choisissez la date pour laquelle vous souhaitez télécharger le PDF des rendez-vous.",
+                    "appointment_date_label": "Date du rendez-vous",
+                    "download_pdf": "Télécharger le PDF"
                 },
                 "notifications": {
                     "title": "Notifications",
@@ -1623,6 +1815,81 @@
                     "noActiveSeason": "Aucune saison active trouvée",
                     "noGroupsInSeason": "Aucun groupe dans la saison active",
                     "errorLoadingGroups": "Erreur lors du chargement des groupes"
+                },
+                "employees": {
+                    "title": "Gestion des Employés",
+                    "add_employee": "Ajouter un Employé",
+                    "loading": "Chargement des employés...",
+                    "username": "Nom d'utilisateur",
+                    "email": "Email",
+                    "status": "Statut",
+                    "created": "Créé",
+                    "actions": "Actions",
+                    "active": "Actif",
+                    "change_password": "Changer le mot de passe",
+                    "deactivate": "Désactiver",
+                    "delete": "Supprimer",
+                    "performance_title": "Performance des Employés",
+                    "refresh": "Actualiser",
+                    "track_performance": "Suivre l'activité de connexion et les indicateurs de performance des employés",
+                    "loading_performance": "Chargement des données de performance...",
+                    "logins_today": "Connexions aujourd'hui",
+                    "activity_dashboard": "Tableau de bord d'activité des employés",
+                    "clear_activity": "Effacer l'activité",
+                    "view_activity": "Voir les actions détaillées des employés et les journaux d'activité",
+                    "loading_activity": "Chargement du tableau de bord d'activité...",
+                    "employee": "Employé",
+                    "action": "Action",
+                    "details": "Détails",
+                    "date": "Date",
+                    "add_new_employee": "Ajouter un nouvel employé",
+                    "password": "Mot de passe",
+                    "confirm_password": "Confirmer le mot de passe",
+                    "create_employee": "Créer l'employé",
+                    "cancel": "Annuler"
+                },
+                "activity": {
+                    "title": "Journal d'activité",
+                    "clear_logs": "Effacer les journaux",
+                    "loading": "Chargement des journaux d'activité...",
+                    "user": "Utilisateur",
+                    "action": "Action",
+                    "details": "Détails",
+                    "date": "Date"
+                },
+                "sessions": {
+                    "title": "Sessions de connexion",
+                    "clear_sessions": "Effacer les sessions",
+                    "loading": "Chargement des sessions de connexion...",
+                    "user": "Utilisateur",
+                    "ip_address": "Adresse IP",
+                    "user_agent": "Agent utilisateur",
+                    "platform": "Plateforme",
+                    "login_time": "Heure de connexion"
+                },
+                "settings": {
+                    "title": "Paramètres",
+                    "system_capacity": "Capacité du système",
+                    "refresh": "Actualiser",
+                    "db_usage": "Utilisation de la base de données (MongoDB)",
+                    "dropbox_storage": "Stockage de sauvegarde Dropbox",
+                    "student_data": "Données des étudiants",
+                    "photos_documents": "Photos et documents",
+                    "grades_records": "Notes et dossiers",
+                    "attendance_records": "Registres de présence",
+                    "archived_seasons": "Saisons archivées",
+                    "last_cleanup": "Dernier nettoyage :",
+                    "never": "Jamais",
+                    "manage_storage": "Gérer le stockage",
+                    "view_history": "Voir l'historique",
+                    "change_username": "Changer le nom d'utilisateur",
+                    "new_username": "Nouveau nom d'utilisateur",
+                    "update_username": "Mettre à jour le nom d'utilisateur",
+                    "change_password": "Changer le mot de passe",
+                    "current_password": "Mot de passe actuel",
+                    "new_password": "Nouveau mot de passe",
+                    "confirm_password": "Confirmer le nouveau mot de passe",
+                    "update_password": "Mettre à jour le mot de passe"
                 }
             }
         }
@@ -1896,7 +2163,16 @@
                     "all_students": "جميع الطلاب",
                     "refresh": "تحديث",
                     "download_all": "تنزيل الكل",
-                    "clear_category": "مسح الفئة"
+                    "clear_category": "مسح الفئة",
+                    "backup": "نسخ احتياطي",
+                    "view": "عرض",
+                    "pdf": "PDF",
+                    "delete": "حذف",
+                    "approved": "موافق عليه",
+                    "invalid_date": "تاريخ غير صالح",
+                    "approve": "موافقة",
+                    "reject": "رفض",
+                    "pending": "قيد الانتظار"
                 },
                 "messages": {
                     "title": "رسائل الاتصال",
@@ -1906,7 +2182,10 @@
                     "date": "التاريخ",
                     "status": "الحالة",
                     "actions": "الإجراءات",
-                    "loading": "جاري تحميل الرسائل..."
+                    "loading": "جاري تحميل الرسائل...",
+                    "read": "مقروء",
+                    "unread": "غير مقروء",
+                    "delete": "حذف"
                 },
                 "services": {
                     "title": "طلبات الخدمة",
@@ -2058,7 +2337,11 @@
                     "edit": "تعديل",
                     "delete": "حذف",
                     "mark_completed": "وضع علامة مكتمل",
-                    "name_phone_purpose": "الاسم أو الهاتف أو الغرض"
+                    "name_phone_purpose": "الاسم أو الهاتف أو الغرض",
+                    "select_date_for_pdf": "اختيار التاريخ للـ PDF",
+                    "choose_date_desc": "اختر التاريخ الذي تريد تنزيل ملف PDF المواعيد له.",
+                    "appointment_date_label": "تاريخ الموعد",
+                    "download_pdf": "تنزيل PDF"
                 },
                 "notifications": {
                     "title": "الإشعارات",
@@ -2172,6 +2455,81 @@
                     "noActiveSeason": "لم يتم العثور على موسم نشط",
                     "noGroupsInSeason": "لا توجد مجموعات في الموسم النشط",
                     "errorLoadingGroups": "خطأ في تحميل المجموعات"
+                },
+                "employees": {
+                    "title": "إدارة الموظفين",
+                    "add_employee": "إضافة موظف",
+                    "loading": "جاري تحميل الموظفين...",
+                    "username": "اسم المستخدم",
+                    "email": "البريد الإلكتروني",
+                    "status": "الحالة",
+                    "created": "تاريخ الإنشاء",
+                    "actions": "الإجراءات",
+                    "active": "نشط",
+                    "change_password": "تغيير كلمة المرور",
+                    "deactivate": "تعطيل",
+                    "delete": "حذف",
+                    "performance_title": "أداء الموظفين",
+                    "refresh": "تحديث",
+                    "track_performance": "تتبع نشاط تسجيل الدخول ومؤشرات أداء الموظفين",
+                    "loading_performance": "جاري تحميل بيانات الأداء...",
+                    "logins_today": "تسجيلات الدخول اليوم",
+                    "activity_dashboard": "لوحة نشاط الموظفين",
+                    "clear_activity": "مسح النشاط",
+                    "view_activity": "عرض إجراءات الموظفين المفصلة وسجلات النشاط",
+                    "loading_activity": "جاري تحميل لوحة النشاط...",
+                    "employee": "الموظف",
+                    "action": "الإجراء",
+                    "details": "التفاصيل",
+                    "date": "التاريخ",
+                    "add_new_employee": "إضافة موظف جديد",
+                    "password": "كلمة المرور",
+                    "confirm_password": "تأكيد كلمة المرور",
+                    "create_employee": "إنشاء الموظف",
+                    "cancel": "إلغاء"
+                },
+                "activity": {
+                    "title": "سجل النشاط",
+                    "clear_logs": "مسح السجلات",
+                    "loading": "جاري تحميل سجلات النشاط...",
+                    "user": "المستخدم",
+                    "action": "الإجراء",
+                    "details": "التفاصيل",
+                    "date": "التاريخ"
+                },
+                "sessions": {
+                    "title": "جلسات تسجيل الدخول",
+                    "clear_sessions": "مسح الجلسات",
+                    "loading": "جاري تحميل جلسات تسجيل الدخول...",
+                    "user": "المستخدم",
+                    "ip_address": "عنوان IP",
+                    "user_agent": "وكيل المستخدم",
+                    "platform": "المنصة",
+                    "login_time": "وقت تسجيل الدخول"
+                },
+                "settings": {
+                    "title": "الإعدادات",
+                    "system_capacity": "سعة النظام",
+                    "refresh": "تحديث",
+                    "db_usage": "استخدام قاعدة البيانات (MongoDB)",
+                    "dropbox_storage": "تخزين النسخ الاحتياطي Dropbox",
+                    "student_data": "بيانات الطلاب",
+                    "photos_documents": "الصور والمستندات",
+                    "grades_records": "الدرجات والسجلات",
+                    "attendance_records": "سجلات الحضور",
+                    "archived_seasons": "المواسم المؤرشفة",
+                    "last_cleanup": "آخر تنظيف:",
+                    "never": "أبداً",
+                    "manage_storage": "إدارة التخزين",
+                    "view_history": "عرض السجل",
+                    "change_username": "تغيير اسم المستخدم",
+                    "new_username": "اسم المستخدم الجديد",
+                    "update_username": "تحديث اسم المستخدم",
+                    "change_password": "تغيير كلمة المرور",
+                    "current_password": "كلمة المرور الحالية",
+                    "new_password": "كلمة المرور الجديدة",
+                    "confirm_password": "تأكيد كلمة المرور الجديدة",
+                    "update_password": "تحديث كلمة المرور"
                 }
             }
         }
