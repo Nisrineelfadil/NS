@@ -293,7 +293,6 @@ class StudentLife {
         // All images data
         const images = [
             { src: 'Img/1.png', label: 'Certificate Achievement', i18n: 'students.card1' },
-            { src: 'Img/2.png', label: 'German Graduate', i18n: 'students.card2' },
             { src: 'Img/3.png', label: 'Nursing Training', i18n: 'students.card3' },
             { src: 'Img/4.png', label: 'Hotel Training', i18n: 'students.card4' },
             { src: 'Img/5.png', label: 'Student Success', i18n: 'students.card5' },
