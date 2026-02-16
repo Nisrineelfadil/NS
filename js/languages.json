@@ -446,7 +446,10 @@
                     "select_date_for_pdf": "Datum für PDF auswählen",
                     "choose_date_desc": "Wählen Sie das Datum, für das Sie das Termin-PDF herunterladen möchten.",
                     "appointment_date_label": "Termindatum",
-                    "download_pdf": "PDF herunterladen"
+                    "download_pdf": "PDF herunterladen",
+                    "low_priority": "Niedrige Priorität",
+                    "medium_priority": "Mittlere Priorität",
+                    "high_priority": "Hohe Priorität"
                 },
                 "notifications": {
                     "title": "Benachrichtigungen",
@@ -1061,7 +1064,10 @@
                     "select_date_for_pdf": "Select Date for PDF",
                     "choose_date_desc": "Choose the date for which you want to download the appointments PDF.",
                     "appointment_date_label": "Appointment Date",
-                    "download_pdf": "Download PDF"
+                    "download_pdf": "Download PDF",
+                    "low_priority": "Low Priority",
+                    "medium_priority": "Medium Priority",
+                    "high_priority": "High Priority"
                 },
                 "notifications": {
                     "title": "Notifications",
@@ -1701,7 +1707,10 @@
                     "select_date_for_pdf": "Sélectionner la date pour le PDF",
                     "choose_date_desc": "Choisissez la date pour laquelle vous souhaitez télécharger le PDF des rendez-vous.",
                     "appointment_date_label": "Date du rendez-vous",
-                    "download_pdf": "Télécharger le PDF"
+                    "download_pdf": "Télécharger le PDF",
+                    "low_priority": "Priorité basse",
+                    "medium_priority": "Priorité moyenne",
+                    "high_priority": "Priorité haute"
                 },
                 "notifications": {
                     "title": "Notifications",
@@ -2341,7 +2350,10 @@
                     "select_date_for_pdf": "اختيار التاريخ للـ PDF",
                     "choose_date_desc": "اختر التاريخ الذي تريد تنزيل ملف PDF المواعيد له.",
                     "appointment_date_label": "تاريخ الموعد",
-                    "download_pdf": "تنزيل PDF"
+                    "download_pdf": "تنزيل PDF",
+                    "low_priority": "أولوية منخفضة",
+                    "medium_priority": "أولوية متوسطة",
+                    "high_priority": "أولوية عالية"
                 },
                 "notifications": {
                     "title": "الإشعارات",

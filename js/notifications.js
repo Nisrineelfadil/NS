@@ -263,6 +263,42 @@ function addNotificationToList(notification) {
     notificationList.insertAdjacentHTML('afterbegin', notificationHTML);
 }
 
+// Translate notification title based on type
+function getTranslatedTitle(notification) {
+    const titleMap = {
+        'registration': 'admin.notifications.new_registration',
+        'service_request': 'admin.notifications.new_service_request',
+        'rating': 'admin.notifications.new_rating',
+        'appointment': 'admin.notifications.new_appointment',
+        'message': 'admin.notifications.new_message'
+    };
+    const key = titleMap[notification.type];
+    return key ? (t(key) || notification.title) : notification.title;
+}
+
+// Translate notification message based on type and metadata
+function getTranslatedMessage(notification) {
+    const name = notification.metadata?.studentName || '';
+    const n = notification;
+    
+    switch (n.type) {
+        case 'registration':
+            return `${name} ${t('admin.notifications.registered_for')} ${n.metadata?.serviceType || ''}`;
+        case 'rating': {
+            const stars = '⭐'.repeat(n.metadata?.rating || 0);
+            return `${name} ${t('admin.notifications.gave_rating')} ${stars} (${n.metadata?.rating || 0}/5)`;
+        }
+        case 'appointment':
+            return `${name} ${t('admin.notifications.scheduled_appointment')} ${n.metadata?.appointmentDate ? new Date(n.metadata.appointmentDate).toLocaleDateString() : ''}`;
+        case 'service_request':
+            return `${name} ${t('admin.notifications.requested')} ${n.metadata?.serviceType || ''}`;
+        case 'message':
+            return `${name} ${t('admin.notifications.sent_message')}`;
+        default:
+            return n.message;
+    }
+}
+
 // Create notification HTML
 function createNotificationHTML(notification) {
     const timeAgo = getTimeAgo(new Date(notification.createdAt));
@@ -275,14 +311,17 @@ function createNotificationHTML(notification) {
         iconType = `service_${notification.metadata.serviceType}`;
     }
     
+    const translatedTitle = getTranslatedTitle(notification);
+    const translatedMessage = getTranslatedMessage(notification);
+    
     return `
         <div class="notification-item ${isUnread ? 'unread' : ''}" data-id="${notification._id}">
             <div class="notification-icon ${iconType}">
                 <i class="${iconClass}"></i>
             </div>
             <div class="notification-content" onclick="handleNotificationClick('${notification._id}', '${notification.type}', '${notification.relatedId}')">
-                <div class="notification-title">${notification.title}</div>
-                <div class="notification-message">${notification.message}</div>
+                <div class="notification-title">${translatedTitle}</div>
+                <div class="notification-message">${translatedMessage}</div>
                 <div class="notification-time">${timeAgo}</div>
             </div>
             <button class="notification-delete-btn" onclick="event.stopPropagation(); deleteNotification('${notification._id}')" title="Delete notification">
