@@ -1658,6 +1658,32 @@
                                 </form>
                             </div>
                         </div>
+                        <!-- Factory Reset (DEV ONLY) -->
+                        <div class="section-card" id="factoryResetSection" style="display: none;">
+                            <div class="section-header" style="border-bottom: 3px solid #ef4444;">
+                                <h2 style="color: #ef4444;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span data-i18n="admin.settings.factory_reset">Factory Reset</span>
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <p style="color: #ef4444; margin-bottom: 15px; font-weight: 600;">
+                                    <i class="fas fa-skull-crossbones"></i>
+                                    <span data-i18n="admin.settings.factory_reset_warning">This will permanently delete ALL data: students, registrations, messages, appointments, ratings, services, cash register, attendance, grades, TELC data, and all files on Mega.nz cloud storage. Only your dev account and app settings will be kept.</span>
+                                </p>
+                                <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                                    <p style="margin-bottom: 10px; color: #991b1b;" data-i18n="admin.settings.factory_reset_type">Type <strong>FACTORY-RESET-CONFIRM</strong> to proceed:</p>
+                                    <input type="text" id="factoryResetInput" placeholder="FACTORY-RESET-CONFIRM" style="width: 100%; padding: 12px; border: 2px solid #ef4444; border-radius: 8px; font-size: 1rem; font-family: monospace; margin-bottom: 15px;">
+                                    <button class="action-btn btn-danger" onclick="executeFactoryReset()" style="width: 100%; padding: 15px; font-size: 1.1rem; font-weight: 700;">
+                                        <i class="fas fa-nuclear"></i> <span data-i18n="admin.settings.factory_reset_btn">EXECUTE FACTORY RESET</span>
+                                    </button>
+                                </div>
+                                <div id="factoryResetProgress" style="display: none;">
+                                    <div class="loading" data-i18n="admin.settings.factory_reset_progress">Wiping all data... Please wait, this may take a minute.</div>
+                                </div>
+                                <div id="factoryResetResult" style="display: none; margin-top: 15px;"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Telc Tab -->

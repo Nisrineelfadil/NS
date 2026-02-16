@@ -320,8 +320,8 @@ function drawPackSection(doc, studentData, startY) {
     const packs = [
         { label: 'P.M', value: 'pm' },
         { label: 'Trimestre', value: 'trimestrial' },
-        { label: 'P.Normal', value: 'normal' },
-        { label: 'P.VIP', value: 'vip' }
+        { label: 'P.Semestriel', value: 'semestriel' },
+        { label: 'P.Annuel', value: 'annuel' }
     ];
     let xPos = 70;
     const yPos = startY + 50;

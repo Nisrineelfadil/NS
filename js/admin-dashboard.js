@@ -136,10 +136,11 @@ async function showDashboard() {
         document.getElementById('settingsMenuItem')?.classList.remove('hidden');
     }
     
-    // Check if Dev account - show EXAM section with Telc
+    // Check if Dev account - show EXAM section with Telc + Factory Reset
     const adminRole = localStorage.getItem('adminRole');
     if (adminRole === 'dev') {
         document.getElementById('examSection')?.classList.remove('hidden');
+        document.getElementById('factoryResetSection')?.style.setProperty('display', 'block');
     }
 }
 
@@ -2202,6 +2203,63 @@ window.downloadServiceFile = downloadServiceFile;
 window.backupServiceToCloud = backupServiceToCloud;
 window.refreshServices = refreshServices;
 window.exportServicesData = exportServicesData;
+window.executeFactoryReset = executeFactoryReset;
+
+// Factory Reset (DEV ONLY)
+async function executeFactoryReset() {
+    const input = document.getElementById('factoryResetInput').value.trim();
+    if (input !== 'FACTORY-RESET-CONFIRM') {
+        alert('❌ Invalid confirmation code. Type exactly: FACTORY-RESET-CONFIRM');
+        return;
+    }
+
+    if (!confirm('⚠️ FINAL WARNING: This will DELETE ALL DATA permanently.\n\nStudents, registrations, messages, appointments, ratings, services, cash register, attendance, grades, TELC, and ALL Mega.nz files.\n\nOnly your dev account will survive.\n\nAre you absolutely sure?')) {
+        return;
+    }
+
+    const progress = document.getElementById('factoryResetProgress');
+    const result = document.getElementById('factoryResetResult');
+    progress.style.display = 'block';
+    result.style.display = 'none';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/factory-reset`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ confirmCode: 'FACTORY-RESET-CONFIRM' })
+        });
+
+        const data = await response.json();
+        progress.style.display = 'none';
+
+        if (data.success) {
+            let html = '<div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 20px;">';
+            html += '<h3 style="color: #16a34a; margin-bottom: 10px;">✅ Factory Reset Complete</h3>';
+            html += '<strong>Database Collections:</strong><ul style="margin: 5px 0 15px 20px;">';
+            for (const [name, count] of Object.entries(data.results.collections)) {
+                html += `<li>${name}: ${count} deleted</li>`;
+            }
+            html += '</ul><strong>Mega.nz Storage:</strong><ul style="margin: 5px 0 10px 20px;">';
+            for (const [folder, status] of Object.entries(data.results.mega)) {
+                html += `<li>${folder}: ${status}</li>`;
+            }
+            html += '</ul></div>';
+            result.innerHTML = html;
+            result.style.display = 'block';
+            document.getElementById('factoryResetInput').value = '';
+        } else {
+            result.innerHTML = `<div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; color: #991b1b;">❌ ${data.message}</div>`;
+            result.style.display = 'block';
+        }
+    } catch (error) {
+        progress.style.display = 'none';
+        result.innerHTML = `<div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; color: #991b1b;">❌ Error: ${error.message}</div>`;
+        result.style.display = 'block';
+    }
+}
 
 // Close mobile menu when clicking menu items
 document.addEventListener('DOMContentLoaded', () => {

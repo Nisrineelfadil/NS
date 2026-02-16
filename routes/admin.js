@@ -2095,4 +2095,137 @@ router.get('/test-mega', authenticateAdmin, async (req, res) => {
     }
 });
 
+// POST /api/admin/factory-reset - Wipe all data (DEV ROLE ONLY)
+router.post('/factory-reset', authenticateAdmin, async (req, res) => {
+    try {
+        // STRICT: Only dev role can factory reset
+        const admin = await Admin.findById(req.adminId);
+        if (!admin || admin.role !== 'dev') {
+            return res.status(403).json({ success: false, message: 'Access denied. Dev team only.' });
+        }
+
+        const { confirmCode } = req.body;
+        if (confirmCode !== 'FACTORY-RESET-CONFIRM') {
+            return res.status(400).json({ success: false, message: 'Invalid confirmation code.' });
+        }
+
+        console.log('🔴 FACTORY RESET initiated by:', admin.username);
+        const results = { collections: {}, mega: {} };
+
+        // 1. Wipe all data collections (keep Admin and Settings)
+        const collectionsToWipe = [
+            { name: 'Student', model: require('../models/Student') },
+            { name: 'Message', model: require('../models/Message') },
+            { name: 'Notification', model: require('../models/Notification') },
+            { name: 'LoginSession', model: require('../models/LoginSession') },
+            { name: 'AdminActivity', model: require('../models/AdminActivity') },
+            { name: 'ActivityLog', model: require('../models/ActivityLog') },
+            { name: 'Rating', model: require('../models/Rating') },
+            { name: 'ServiceRequest', model: require('../models/ServiceRequest') },
+            { name: 'Appointment', model: require('../models/Appointment') },
+            { name: 'AttendanceRecord', model: require('../models/AttendanceRecord') },
+            { name: 'AttendanceSession', model: require('../models/AttendanceSession') },
+            { name: 'CashTransaction', model: require('../models/CashTransaction') },
+            { name: 'CreditTransaction', model: require('../models/CreditTransaction') },
+            { name: 'Grade', model: require('../models/Grade') },
+            { name: 'JobApplication', model: require('../models/JobApplication') },
+            { name: 'ManagedStudent', model: require('../models/ManagedStudent') },
+            { name: 'MonthlyNote', model: require('../models/MonthlyNote') },
+            { name: 'PaymentHistory', model: require('../models/PaymentHistory') },
+            { name: 'PaymentReminder', model: require('../models/PaymentReminder') },
+            { name: 'PushSubscription', model: require('../models/PushSubscription') },
+            { name: 'StudentMessage', model: require('../models/StudentMessage') },
+            { name: 'TelcCandidate', model: require('../models/TelcCandidate') },
+            { name: 'TelcEmailTemplate', model: require('../models/TelcEmailTemplate') },
+            { name: 'TelcExamMonth', model: require('../models/TelcExamMonth') },
+            { name: 'UnpaidService', model: require('../models/UnpaidService') },
+            { name: 'Season', model: require('../models/Season') },
+            { name: 'SeasonBackup', model: require('../models/SeasonBackup') },
+            { name: 'Group', model: require('../models/Group') },
+            { name: 'BranchGroup', model: require('../models/BranchGroup') },
+            { name: 'Teacher', model: require('../models/Teacher') }
+        ];
+
+        for (const col of collectionsToWipe) {
+            try {
+                const result = await col.model.deleteMany({});
+                results.collections[col.name] = result.deletedCount;
+                console.log(`  ✅ ${col.name}: ${result.deletedCount} deleted`);
+            } catch (err) {
+                results.collections[col.name] = `Error: ${err.message}`;
+                console.error(`  ❌ ${col.name}: ${err.message}`);
+            }
+        }
+
+        // 2. Delete employee accounts only (keep dev + super_admin)
+        try {
+            const empResult = await Admin.deleteMany({ role: 'employee' });
+            results.collections['Admin (employees)'] = empResult.deletedCount;
+            console.log(`  ✅ Admin (employees only): ${empResult.deletedCount} deleted`);
+        } catch (err) {
+            results.collections['Admin (employees)'] = `Error: ${err.message}`;
+        }
+
+        // 3. Wipe Mega.nz folders
+        const megaFolders = [
+            '/Nisrine Images/student-photos',
+            '/Nisrine Images/student-cin',
+            '/Nisrine Images/receipts',
+            '/Nisrine Images/certificates',
+            '/Nisrine Images/registration-photos'
+        ];
+
+        for (const folder of megaFolders) {
+            try {
+                const listResult = await megaService.listFiles(folder);
+                if (listResult.success && listResult.files.length > 0) {
+                    let deleted = 0;
+                    for (const file of listResult.files) {
+                        if (!file.isFolder) {
+                            await megaService.deleteFile(file.path);
+                            deleted++;
+                        }
+                    }
+                    results.mega[folder] = `${deleted} files deleted`;
+                    console.log(`  ✅ Mega ${folder}: ${deleted} files deleted`);
+                } else {
+                    results.mega[folder] = '0 files (empty)';
+                }
+            } catch (err) {
+                results.mega[folder] = `Error: ${err.message}`;
+                console.error(`  ❌ Mega ${folder}: ${err.message}`);
+            }
+        }
+
+        // Also try to wipe the old registration PDFs folder
+        try {
+            const regList = await megaService.listFiles('/Nisrine School Registrations');
+            if (regList.success && regList.files.length > 0) {
+                let deleted = 0;
+                for (const file of regList.files) {
+                    if (!file.isFolder) {
+                        await megaService.deleteFile(file.path);
+                        deleted++;
+                    }
+                }
+                results.mega['/Nisrine School Registrations'] = `${deleted} files deleted`;
+            }
+        } catch (err) {
+            // Folder may not exist
+        }
+
+        console.log('🔴 FACTORY RESET COMPLETE');
+
+        res.json({
+            success: true,
+            message: 'Factory reset completed. All data has been wiped.',
+            results
+        });
+
+    } catch (error) {
+        console.error('❌ Factory reset error:', error);
+        res.status(500).json({ success: false, message: 'Factory reset failed', error: error.message });
+    }
+});
+
 module.exports = router;

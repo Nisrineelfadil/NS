@@ -891,19 +891,14 @@ router.put('/students/:id',
         }
         if (paymentDate) student.paymentDate = new Date(paymentDate);
         if (paymentAmount) student.paymentAmount = parseFloat(paymentAmount);
-        if (paymentPlan && ['pm', 'trimestrial', 'normal', 'vip'].includes(paymentPlan)) {
+        if (paymentPlan && ['pm', 'trimestrial', 'semestriel', 'annuel'].includes(paymentPlan)) {
             const oldPlan = student.paymentPlan;
             student.paymentPlan = paymentPlan;
-            // If switching to annual (normal) and already paid, keep paid status
-            // If switching from annual to recurring plan, reset to pending with new cycle
-            if (paymentPlan === 'normal' && oldPlan !== 'normal') {
-                // Switching TO annual — admin sets the amount, student stays in current status
-                console.log(`📦 ${student.fullName}: Plan changed to annual (P.Normal)`);
-            } else if (paymentPlan !== 'normal' && oldPlan === 'normal') {
-                // Switching FROM annual to recurring — reset reminder flags for new cycle
+            // If switching plans, reset reminder flags for new cycle
+            if (paymentPlan !== oldPlan) {
                 student.paymentReminderSent = false;
                 student.lastReminderDate = null;
-                console.log(`📦 ${student.fullName}: Plan changed from annual to ${paymentPlan}`);
+                console.log(`📦 ${student.fullName}: Plan changed from ${oldPlan} to ${paymentPlan}`);
             }
         }
         if (paymentStatus) student.paymentStatus = paymentStatus;

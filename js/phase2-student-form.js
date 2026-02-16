@@ -365,13 +365,13 @@ window.openNewStudentForm = function() {
                                     <input type="radio" name="paymentPlan" value="trimestrial" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
                                     <span style="font-weight: 600;">Trimestre</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="normal">
-                                    <input type="radio" name="paymentPlan" value="normal" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
-                                    <span style="font-weight: 600;">P.Normal</span>
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="semestriel">
+                                    <input type="radio" name="paymentPlan" value="semestriel" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
+                                    <span style="font-weight: 600;">P.Semestriel</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="vip">
-                                    <input type="radio" name="paymentPlan" value="vip" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
-                                    <span style="font-weight: 600;">P.VIP</span>
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid var(--border-color, #e2e8f0); border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="pack-option" data-pack="annuel">
+                                    <input type="radio" name="paymentPlan" value="annuel" style="width: 16px; height: 16px;" onchange="handlePackChange(this.value)">
+                                    <span style="font-weight: 600;">P.Annuel</span>
                                 </label>
                             </div>
                         </div>
@@ -389,8 +389,8 @@ window.openNewStudentForm = function() {
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <i class="fas fa-star" style="color: #059669; font-size: 1.2rem;"></i>
                                     <div>
-                                        <strong style="color: #059669;">Annual Payment (P.Normal)</strong>
-                                        <p style="margin: 4px 0 0; color: #047857; font-size: 0.85rem;">This student pays for the entire season. No payment reminders will be sent.</p>
+                                        <strong style="color: #059669;">Annual Payment (P.Annuel)</strong>
+                                        <p style="margin: 4px 0 0; color: #047857; font-size: 0.85rem;">This student pays once for the full 10-month season. No payment reminders will be sent.</p>
                                     </div>
                                 </div>
                             </div>
@@ -594,17 +594,16 @@ window.handlePhotoUpload = function(event) {
     reader.readAsDataURL(file);
 };
 
-// Handle pack change - disable reminder fields for annual (P.Normal)
+// Handle pack change - show annual notice for P.Annuel, hide reminder for annual
 window.handlePackChange = function(value) {
     const reminderGroup = document.getElementById('reminderDaysGroup');
     const annualNotice = document.getElementById('annualPaymentNotice');
     
-    if (value === 'normal') {
+    if (value === 'annuel') {
         // Annual payment - hide reminder, show notice
         if (reminderGroup) reminderGroup.style.display = 'none';
         if (annualNotice) annualNotice.style.display = 'block';
     } else {
-        // Monthly/Trimestrial/VIP - show reminder, hide notice
         if (reminderGroup) reminderGroup.style.display = 'block';
         if (annualNotice) annualNotice.style.display = 'none';
     }

@@ -377,9 +377,9 @@ router.post('/:seasonId/archive', verifyToken, async (req, res) => {
                 }
             );
             
-            // Reset annual (P.Normal) carry-over students to pending for the new season
-            const annualResetResult = await ManagedStudent.updateMany(
-                { _id: { $in: carryOverStudentObjIds }, paymentPlan: 'normal' },
+            // Reset annuel (P.Annuel) carry-over students to pending for the new season
+            const annuelResetResult = await ManagedStudent.updateMany(
+                { _id: { $in: carryOverStudentObjIds }, paymentPlan: 'annuel' },
                 {
                     $set: {
                         paymentStatus: 'pending',
@@ -388,8 +388,8 @@ router.post('/:seasonId/archive', verifyToken, async (req, res) => {
                     }
                 }
             );
-            if (annualResetResult.modifiedCount > 0) {
-                console.log(`   Étudiants annuels réinitialisés (paiement → pending): ${annualResetResult.modifiedCount}`);
+            if (annuelResetResult.modifiedCount > 0) {
+                console.log(`   Étudiants annuels réinitialisés (paiement → pending): ${annuelResetResult.modifiedCount}`);
             }
             
             console.log(`   Étudiants conservés (groupes réinitialisés): ${carryOverStudentObjIds.length}`);

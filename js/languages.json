@@ -612,7 +612,12 @@
                     "current_password": "Aktuelles Passwort",
                     "new_password": "Neues Passwort",
                     "confirm_password": "Neues Passwort bestätigen",
-                    "update_password": "Passwort aktualisieren"
+                    "update_password": "Passwort aktualisieren",
+                    "factory_reset": "Werksreset",
+                    "factory_reset_warning": "Dies löscht dauerhaft ALLE Daten: Schüler, Registrierungen, Nachrichten, Termine, Bewertungen, Dienste, Kassenbuch, Anwesenheit, Noten, TELC-Daten und alle Dateien auf Mega.nz. Nur Ihr Dev-Konto und App-Einstellungen bleiben erhalten.",
+                    "factory_reset_type": "Geben Sie FACTORY-RESET-CONFIRM ein, um fortzufahren:",
+                    "factory_reset_btn": "WERKSRESET AUSFÜHREN",
+                    "factory_reset_progress": "Alle Daten werden gelöscht... Bitte warten, dies kann eine Minute dauern."
                 }
             }
         }
@@ -1255,7 +1260,12 @@
                     "current_password": "Current Password",
                     "new_password": "New Password",
                     "confirm_password": "Confirm New Password",
-                    "update_password": "Update Password"
+                    "update_password": "Update Password",
+                    "factory_reset": "Factory Reset",
+                    "factory_reset_warning": "This will permanently delete ALL data: students, registrations, messages, appointments, ratings, services, cash register, attendance, grades, TELC data, and all files on Mega.nz cloud storage. Only your dev account and app settings will be kept.",
+                    "factory_reset_type": "Type FACTORY-RESET-CONFIRM to proceed:",
+                    "factory_reset_btn": "EXECUTE FACTORY RESET",
+                    "factory_reset_progress": "Wiping all data... Please wait, this may take a minute."
                 }
             }
         }
@@ -1898,7 +1908,12 @@
                     "current_password": "Mot de passe actuel",
                     "new_password": "Nouveau mot de passe",
                     "confirm_password": "Confirmer le nouveau mot de passe",
-                    "update_password": "Mettre à jour le mot de passe"
+                    "update_password": "Mettre à jour le mot de passe",
+                    "factory_reset": "Réinitialisation d'usine",
+                    "factory_reset_warning": "Cela supprimera définitivement TOUTES les données : étudiants, inscriptions, messages, rendez-vous, évaluations, services, caisse, présences, notes, données TELC et tous les fichiers sur Mega.nz. Seul votre compte dev et les paramètres seront conservés.",
+                    "factory_reset_type": "Tapez FACTORY-RESET-CONFIRM pour continuer :",
+                    "factory_reset_btn": "EXÉCUTER LA RÉINITIALISATION",
+                    "factory_reset_progress": "Suppression de toutes les données... Veuillez patienter, cela peut prendre une minute."
                 }
             }
         }
@@ -2541,7 +2556,12 @@
                     "current_password": "كلمة المرور الحالية",
                     "new_password": "كلمة المرور الجديدة",
                     "confirm_password": "تأكيد كلمة المرور الجديدة",
-                    "update_password": "تحديث كلمة المرور"
+                    "update_password": "تحديث كلمة المرور",
+                    "factory_reset": "إعادة ضبط المصنع",
+                    "factory_reset_warning": "سيؤدي هذا إلى حذف جميع البيانات نهائيًا: الطلاب، التسجيلات، الرسائل، المواعيد، التقييمات، الخدمات، الصندوق، الحضور، الدرجات، بيانات TELC وجميع الملفات على Mega.nz. سيتم الاحتفاظ بحساب المطور وإعدادات التطبيق فقط.",
+                    "factory_reset_type": "اكتب FACTORY-RESET-CONFIRM للمتابعة:",
+                    "factory_reset_btn": "تنفيذ إعادة ضبط المصنع",
+                    "factory_reset_progress": "جاري حذف جميع البيانات... يرجى الانتظار، قد يستغرق هذا دقيقة."
                 }
             }
         }

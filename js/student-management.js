@@ -984,15 +984,18 @@ function displayStudents(students, pendingStudents = []) {
         
         if (isPaid) {
             const plan = student.paymentPlan || 'pm';
-            if (plan === 'normal') {
-                // Annual students: no next payment cycle — paid for the season
+            nextPaymentDate = new Date(paymentDate);
+            if (plan === 'annuel') {
+                // Annual students: paid for the full 10-month season, no next cycle
                 showNextPayment = false;
             } else {
                 nextPaymentDate = new Date(paymentDate);
-                if (plan === 'trimestrial') {
+                if (plan === 'semestriel') {
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 6);
+                } else if (plan === 'trimestrial') {
                     nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
                 } else {
-                    // pm and vip use monthly cycle
+                    // pm uses monthly cycle
                     nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
                 }
                 daysUntilNextPayment = Math.ceil((nextPaymentDate - now) / (1000 * 60 * 60 * 24));
@@ -1124,14 +1127,14 @@ function displayStudents(students, pendingStudents = []) {
                 <div class="student-info"><i class="fas fa-id-badge"></i> ${formatGroupCode(student)}</div>
                 <div class="student-info"><i class="fas fa-book"></i> ${student.formation.join(', ')}</div>
                 <div class="student-info"><i class="fas fa-box"></i> <span class="badge" style="background: ${
-                    student.paymentPlan === 'normal' ? 'rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid #059669' :
+                    student.paymentPlan === 'semestriel' ? 'rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid #059669' :
                     student.paymentPlan === 'trimestrial' ? 'rgba(139, 92, 246, 0.15); color: #7c3aed; border: 1px solid #7c3aed' :
-                    student.paymentPlan === 'vip' ? 'rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid #d97706' :
+                    student.paymentPlan === 'annuel' ? 'rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid #d97706' :
                     'rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid #2563eb'
                 }; font-size: 0.75rem; padding: 2px 8px;">${
-                    student.paymentPlan === 'normal' ? 'P.Normal' :
+                    student.paymentPlan === 'semestriel' ? 'P.Semestriel' :
                     student.paymentPlan === 'trimestrial' ? t('trimpirimestre') :
-                    student.paymentPlan === 'vip' ? 'P.VIP' : 'P.M'
+                    student.paymentPlan === 'annuel' ? 'P.Annuel' : 'P.M'
                 }</span></div>
                 <div class="student-info">
                     <i class="fas fa-calendar"></i> 
@@ -1777,12 +1780,12 @@ function openAddStudentModal() {
                         <span style="font-weight: 500;">${t('trimpirimestre')}</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="paymentPlan" value="normal" style="width: 16px; height: 16px;">
-                        <span style="font-weight: 500;">P.Normal</span>
+                        <input type="radio" name="paymentPlan" value="semestriel" style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.Semestriel</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="paymentPlan" value="vip" style="width: 16px; height: 16px;">
-                        <span style="font-weight: 500;">P.VIP</span>
+                        <input type="radio" name="paymentPlan" value="annuel" style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.Annuel</span>
                     </label>
                 </div>
             </div>
@@ -1882,17 +1885,19 @@ async function markAsPaid(studentId, studentName) {
         if (result && result.success) {
             const plan = result.student.paymentPlan || 'pm';
             
-            if (plan === 'normal') {
+            if (plan === 'annuel') {
                 // Annual student — no next payment cycle
                 showNotification(
-                    `✅ Payment marked as paid!\n\n⭐ Annual plan (P.Normal) — paid for the season`, 
+                    `✅ Payment marked as paid!\n\n⭐ Annual plan (P.Annuel) — paid for the season`, 
                     'success'
                 );
             } else {
                 // Calculate next payment date based on plan
                 const currentPaymentDate = new Date(result.student.paymentDate);
                 const nextPaymentDate = new Date(currentPaymentDate);
-                if (plan === 'trimestrial') {
+                if (plan === 'semestriel') {
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 6);
+                } else if (plan === 'trimestrial') {
                     nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
                 } else {
                     nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
@@ -2514,12 +2519,12 @@ async function openEditStudentModal(student) {
                         <span style="font-weight: 500;">${t('trimpirimestre')}</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="paymentPlan" value="normal" ${student.paymentPlan === 'normal' ? 'checked' : ''} style="width: 16px; height: 16px;">
-                        <span style="font-weight: 500;">P.Normal</span>
+                        <input type="radio" name="paymentPlan" value="semestriel" ${student.paymentPlan === 'semestriel' ? 'checked' : ''} style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.Semestriel</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 6px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="paymentPlan" value="vip" ${student.paymentPlan === 'vip' ? 'checked' : ''} style="width: 16px; height: 16px;">
-                        <span style="font-weight: 500;">P.VIP</span>
+                        <input type="radio" name="paymentPlan" value="annuel" ${student.paymentPlan === 'annuel' ? 'checked' : ''} style="width: 16px; height: 16px;">
+                        <span style="font-weight: 500;">P.Annuel</span>
                     </label>
                 </div>
             </div>

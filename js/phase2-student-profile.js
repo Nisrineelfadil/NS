@@ -297,17 +297,17 @@ function renderStudentForm(student) {
                     </div>
                     <span style="font-weight: 600; color: ${student.paymentPlan === 'trimestrial' ? '#6d28d9' : '#94a3b8'};">Trimestre</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'normal' ? '#059669' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'normal' ? 'rgba(5, 150, 105, 0.1)' : 'white'};">
-                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'normal' ? '#059669' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
-                        ${student.paymentPlan === 'normal' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></div>' : ''}
+                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'semestriel' ? '#059669' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'semestriel' ? 'rgba(5, 150, 105, 0.1)' : 'white'};">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'semestriel' ? '#059669' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
+                        ${student.paymentPlan === 'semestriel' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></div>' : ''}
                     </div>
-                    <span style="font-weight: 600; color: ${student.paymentPlan === 'normal' ? '#047857' : '#94a3b8'};">P.Normal</span>
+                    <span style="font-weight: 600; color: ${student.paymentPlan === 'semestriel' ? '#047857' : '#94a3b8'};">P.Semestriel</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'vip' ? '#d97706' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'vip' ? 'rgba(217, 119, 6, 0.1)' : 'white'};">
-                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'vip' ? '#d97706' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
-                        ${student.paymentPlan === 'vip' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #d97706;"></div>' : ''}
+                <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 2px solid ${student.paymentPlan === 'annuel' ? '#d97706' : '#e2e8f0'}; border-radius: 8px; background: ${student.paymentPlan === 'annuel' ? 'rgba(217, 119, 6, 0.1)' : 'white'};">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${student.paymentPlan === 'annuel' ? '#d97706' : '#cbd5e1'}; display: flex; align-items: center; justify-content: center;">
+                        ${student.paymentPlan === 'annuel' ? '<div style="width: 10px; height: 10px; border-radius: 50%; background: #d97706;"></div>' : ''}
                     </div>
-                    <span style="font-weight: 600; color: ${student.paymentPlan === 'vip' ? '#b45309' : '#94a3b8'};">P.VIP</span>
+                    <span style="font-weight: 600; color: ${student.paymentPlan === 'annuel' ? '#b45309' : '#94a3b8'};">P.Annuel</span>
                 </div>
             </div>
             
