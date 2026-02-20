@@ -14,7 +14,7 @@ let tray = null;
 const isDev = process.argv.includes('--dev');
 
 // Production server URL (your deployed Vercel app)
-const PRODUCTION_SERVER = 'https://nisrine-school.vercel.app';
+const PRODUCTION_SERVER = 'https://nisrineschool.com';
 const DEV_SERVER = 'http://localhost:3000';
 
 // ============================================

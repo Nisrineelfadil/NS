@@ -5,4 +5,4 @@ Disallow: /student-management
 Disallow: /my-registrations
 Disallow: /api/
 
-Sitemap: https://nisrine-school.vercel.app/sitemap.xml
+Sitemap: https://nisrineschool.com/sitemap.xml
