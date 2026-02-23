@@ -328,6 +328,19 @@ const translations = {
         reject: "Ablehnen",
         approvedReviews: "Genehmigte Bewertungen",
         
+        // Ratings Section
+        ratings: {
+            title: "Bewerten Sie uns",
+            subtitle: "Teilen Sie Ihre Erfahrung mit der Nisrine Schule",
+            form_title: "Hinterlassen Sie Ihr Feedback",
+            name_label: "Ihr Name",
+            name_placeholder: "Geben Sie Ihren Namen ein",
+            rating_label: "Ihre Bewertung",
+            feedback_label: "Ihr Feedback",
+            feedback_placeholder: "Erzählen Sie uns von Ihrer Erfahrung...",
+            submit_button: "Bewertung absenden"
+        },
+        
         // Messages
         telefon: "Telefon",
         nachricht: "Nachricht",
@@ -717,6 +730,20 @@ const translations = {
         archived: "Archived",
         teachers: "Teachers",
         cashRegister: "Cash Register",
+        approvedReviews: "Approved Reviews",
+        
+        // Ratings Section
+        ratings: {
+            title: "Rate Us",
+            subtitle: "Share your experience with Nisrine School",
+            form_title: "Leave Your Feedback",
+            name_label: "Your Name",
+            name_placeholder: "Enter your name",
+            rating_label: "Your Rating",
+            feedback_label: "Your Feedback",
+            feedback_placeholder: "Tell us about your experience...",
+            submit_button: "Submit Rating"
+        },
         
         // Archived Seasons
         archivedSeasons: "Archived Seasons",
@@ -1130,6 +1157,19 @@ const translations = {
         teachers: "Enseignants",
         cashRegister: "Caisse",
         
+        // Ratings Section
+        ratings: {
+            title: "Évaluez-nous",
+            subtitle: "Partagez votre expérience avec Nisrine School",
+            form_title: "Laissez votre avis",
+            name_label: "Votre nom",
+            name_placeholder: "Entrez votre nom",
+            rating_label: "Votre évaluation",
+            feedback_label: "Votre avis",
+            feedback_placeholder: "Parlez-nous de votre expérience...",
+            submit_button: "Soumettre l'évaluation"
+        },
+        
         // Saisons Archivées
         archivedSeasons: "Saisons Archivées",
         archivedSeasonsDesc: "Consultez les données des saisons précédentes (lecture seule)",
@@ -1540,6 +1580,19 @@ const translations = {
         archived: "مؤرشف",
         teachers: "المعلمون",
         cashRegister: "الصندوق",
+        
+        // قسم التقييمات
+        ratings: {
+            title: "قيمنا",
+            subtitle: "شارك تجربتك مع مدرسة نسرين",
+            form_title: "اترك تقييمك",
+            name_label: "اسمك",
+            name_placeholder: "أدخل اسمك",
+            rating_label: "تقييمك",
+            feedback_label: "رأيك",
+            feedback_placeholder: "أخبرنا عن تجربتك...",
+            submit_button: "إرسال التقييم"
+        },
         
         // المواسم المؤرشفة
         archivedSeasons: "المواسم المؤرشفة",

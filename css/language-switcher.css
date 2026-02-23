@@ -9,7 +9,7 @@
 }
 
 .language-button {
-    background: linear-gradient(135deg, #FFCC00, #FF9500);
+    background: linear-gradient(135deg, #DC143C, #8B0000);
     border: none;
     padding: 10px 16px;
     border-radius: 25px;
@@ -20,7 +20,7 @@
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     color: white;
     font-weight: 500;
-    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -41,9 +41,9 @@
 }
 
 .language-button:hover {
-    background: linear-gradient(135deg, #FF9500, #FFCC00);
+    background: linear-gradient(135deg, #8B0000, #DC143C);
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+    box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
 }
 
 .language-button i:first-child {
@@ -132,7 +132,7 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: linear-gradient(135deg, #FFCC00, #FF9500);
+    background: linear-gradient(135deg, #DC143C, #8B0000);
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
@@ -142,14 +142,14 @@
 }
 
 .language-option:hover {
-    background: linear-gradient(135deg, rgba(255, 204, 0, 0.1), rgba(255, 149, 0, 0.1));
+    background: linear-gradient(135deg, rgba(220, 20, 60, 0.1), rgba(139, 0, 0, 0.1));
     color: #333 !important;
     text-decoration: none;
     transform: translateX(8px);
 }
 
 .language-option.active {
-    background: linear-gradient(135deg, #FFCC00, #FF9500);
+    background: linear-gradient(135deg, #DC143C, #8B0000);
     color: white !important;
 }
 

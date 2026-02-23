@@ -79,6 +79,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+        
+        // Handle placeholder translations separately
+        const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+        placeholderElements.forEach(element => {
+            const key = element.getAttribute('data-i18n-placeholder');
+            const translation = getNestedTranslation(translations, key);
+            if (translation) {
+                element.placeholder = translation;
+            }
+        });
     };
 
     // Helper function to get nested translation values
@@ -163,6 +173,12 @@ document.addEventListener('DOMContentLoaded', function() {
         languageButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            // Close portal dropdown if open
+            const portalDropdown = document.querySelector('.portal-dropdown');
+            const portalButton = document.querySelector('.portal-button');
+            if (portalDropdown) portalDropdown.classList.remove('show');
+            if (portalButton) portalButton.classList.remove('active');
+            
             languageDropdown.classList.toggle('show');
             languageButton.classList.toggle('active');
         });
@@ -254,6 +270,12 @@ document.addEventListener('DOMContentLoaded', function() {
         portalButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            // Close language dropdown if open
+            const langDropdown = document.querySelector('.language-dropdown');
+            const langButton = document.querySelector('.language-button');
+            if (langDropdown) langDropdown.classList.remove('show');
+            if (langButton) langButton.classList.remove('active');
+            
             portalDropdown.classList.toggle('show');
             portalButton.classList.toggle('active');
         });
@@ -349,63 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Hamburger or navLinks not found:', { hamburger, navLinks });
     }
     
-    // Language Selector Toggle
-    if (languageSelector && languageButton) {
-        // Toggle language dropdown
-        languageButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Language button clicked!'); // Debug log
-            
-            const dropdown = document.querySelector('.language-dropdown');
-            if (dropdown) {
-                dropdown.classList.toggle('show');
-                languageButton.classList.toggle('active');
-                console.log('Dropdown classes:', dropdown.classList.toString());
-            } else {
-                console.error('Language dropdown not found');
-            }
-            
-            // Don't close mobile menu when clicking language button - keep it open
-        });
-        
-        
-        // Handle language selection
-        const languageOptions = languageSelector.querySelectorAll('.language-option');
-        languageOptions.forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.preventDefault();
-                const lang = option.getAttribute('data-lang');
-                if (lang) {
-                    // Update active state
-                    languageOptions.forEach(opt => opt.classList.remove('active'));
-                    option.classList.add('active');
-                    
-                    // Here you would typically change the language
-                    console.log('Language changed to:', lang);
-                    
-                    // Close dropdown after selection
-                    languageSelector.classList.remove('active');
-                }
-            });
-        });
-        
-        // Close dropdown when clicking on the document
-        document.addEventListener('click', (e) => {
-            if (!languageSelector.contains(e.target)) {
-                languageSelector.classList.remove('active');
-            }
-        });
-        
-        // Prevent dropdown from closing when clicking inside it
-        const dropdown = document.querySelector('.language-dropdown');
-        if (dropdown) {
-            dropdown.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log('Dropdown clicked, preventing close');
-            });
-        }
-    }
+    // Language selector is now handled by setupLanguageSwitcher() in initLanguageSwitcher()
     
     // Initialize everything
     animateCounter();

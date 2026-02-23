@@ -880,7 +880,7 @@
         <!-- Service Form -->
         <div id="serviceForm">
             <a href="/" class="back-button">
-                <i class="fas fa-arrow-left"></i> Back to Home
+                <i class="fas fa-arrow-left"></i> <span data-i18n="registration.back_to_home">Back to Home</span>
             </a>
 
             <div class="service-header">
@@ -890,38 +890,38 @@
                 <div class="icon">
                     <i class="fas fa-language"></i>
                 </div>
-                <h1>Translation Service Request</h1>
-                <p>Professional document translation services</p>
+                <h1 data-i18n="registration.translation_service">Translation Service</h1>
+                <p data-i18n="registration.translation_desc">Document translation services</p>
             </div>
 
             <form id="translateForm">
                 <div class="form-group">
                     <label for="fullName">
-                        <i class="fas fa-user"></i> Full Name *
+                        <i class="fas fa-user"></i> <span data-i18n="registration.full_name">Full Name</span> *
                     </label>
                     <input type="text" id="fullName" name="fullName" required>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">
-                        <i class="fas fa-phone"></i> Phone Number *
+                        <i class="fas fa-phone"></i> <span data-i18n="registration.phone_number">Phone Number</span> *
                     </label>
                     <input type="tel" id="phone" name="phone" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">
-                        <i class="fas fa-envelope"></i> Email *
+                        <i class="fas fa-envelope"></i> <span data-i18n="registration.email">Email</span> *
                     </label>
                     <input type="email" id="email" name="email" required>
                 </div>
 
                 <div class="form-group">
                     <label for="languages">
-                        <i class="fas fa-language"></i> Language Pair *
+                        <i class="fas fa-language"></i> <span data-i18n="registration.translation_direction">Translation Direction</span> *
                     </label>
                     <select id="languages" name="languages" required>
-                        <option value="">Select language pair...</option>
+                        <option value="" data-i18n="registration.select_direction">Select translation direction...</option>
                         <option value="german-arabic">German → Arabic</option>
                         <option value="arabic-german">Arabic → German</option>
                         <option value="german-english">German → English</option>
@@ -934,14 +934,14 @@
 
                 <div class="form-group">
                     <label for="notes">
-                        <i class="fas fa-comment"></i> Additional Notes
+                        <i class="fas fa-comment"></i> <span data-i18n="registration.additional_notes">Additional Notes</span>
                     </label>
                     <textarea id="notes" name="notes" placeholder="Any specific requirements or information..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>
-                        <i class="fas fa-upload"></i> Upload Documents to Translate *
+                        <i class="fas fa-upload"></i> <span data-i18n="registration.upload_document">Upload Documents to Translate</span> *
                     </label>
                     <p class="upload-hint">You can upload up to 25 documents. Click "Add More" to add additional documents.</p>
                     
@@ -962,20 +962,20 @@
 
                 <!-- Instagram Follow Section -->
                 <div class="instagram-follow-section" id="instagramSection">
-                    <h3>Please follow us on Instagram before submitting your request ❤️</h3>
-                    <p>Stay connected with us and get the latest updates about our services!</p>
+                    <h3 data-i18n="registration.follow_instagram">Please follow us on Instagram before submitting your request ❤️</h3>
+                    <p data-i18n="registration.stay_connected">Stay connected with us and get the latest updates about our services!</p>
                     <div class="instagram-buttons">
                         <a href="https://www.instagram.com/nisrinegermanschool/" target="_blank" class="instagram-btn follow-btn" id="followBtn">
-                            <i class="fab fa-instagram"></i> Follow on Instagram
+                            <i class="fab fa-instagram"></i> <span data-i18n="registration.follow_btn">Follow on Instagram</span>
                         </a>
                         <button type="button" class="instagram-btn confirm-btn" id="confirmBtn" disabled>
-                            <i class="fas fa-check-circle"></i> I followed ✅
+                            <i class="fas fa-check-circle"></i> <span data-i18n="registration.i_followed">I followed</span> ✅
                         </button>
                     </div>
                 </div>
 
                 <button type="submit" class="submit-btn locked" id="submitBtn" disabled>
-                    <i class="fas fa-lock"></i> Submit Translation Request (Follow us first)
+                    <i class="fas fa-lock"></i> <span data-i18n="registration.submit_translation">Submit Translation Request</span>
                 </button>
 
                 <div class="form-message" id="formMessage"></div>
@@ -1005,5 +1005,16 @@
     </div>
 
     <script src="js/translate.js"></script>
+    <script src="js/page-i18n.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const i18n = window.pageI18n;
+            await i18n.load();
+            i18n.setLang(i18n.currentLang);
+            const form = document.getElementById('serviceForm');
+            if (form) i18n.createMiniSwitcher(form);
+            i18n.translatePage();
+        });
+    </script>
 </body>
 </html>

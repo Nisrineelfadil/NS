@@ -740,7 +740,7 @@
         <!-- Service Form -->
         <div id="serviceForm">
             <a href="/" class="back-button">
-                <i class="fas fa-arrow-left"></i> Back to Home
+                <i class="fas fa-arrow-left"></i> <span data-i18n="registration.back_to_home">Back to Home</span>
             </a>
 
             <div class="service-header">
@@ -750,76 +750,74 @@
                 <div class="icon">
                     <i class="fas fa-briefcase"></i>
                 </div>
-                <h1>Bewerbung Service Request</h1>
-                <p>Job application assistance (Bewerbung)</p>
+                <h1 data-i18n="registration.applying_service">Applying Service</h1>
+                <p data-i18n="registration.applying_desc">Job application assistance (Bewerbung)</p>
             </div>
 
             <form id="applyForm">
                 <div class="form-group">
                     <label for="fullName">
-                        <i class="fas fa-user"></i> Full Name *
+                        <i class="fas fa-user"></i> <span data-i18n="registration.full_name">Full Name</span> *
                     </label>
                     <input type="text" id="fullName" name="fullName" required>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">
-                        <i class="fas fa-phone"></i> Phone Number *
+                        <i class="fas fa-phone"></i> <span data-i18n="registration.phone_number">Phone Number</span> *
                     </label>
                     <input type="tel" id="phone" name="phone" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">
-                        <i class="fas fa-envelope"></i> Email *
+                        <i class="fas fa-envelope"></i> <span data-i18n="registration.email">Email</span> *
                     </label>
                     <input type="email" id="email" name="email" required>
                 </div>
 
                 <div class="form-group">
                     <label for="jobType">
-                        <i class="fas fa-briefcase"></i> Choose Job Type *
+                        <i class="fas fa-briefcase"></i> <span data-i18n="registration.choose_job_type">Choose Job Type</span> *
                     </label>
                     <select id="jobType" name="jobType" required>
-                        <option value="">Select job type...</option>
+                        <option value="" data-i18n="registration.select_job">Select job type...</option>
                         <option value="ausbildung">Ausbildung</option>
-                        <option value="full-time">Full-time Position</option>
-                        <option value="part-time">Part-time Position</option>
-                        <option value="internship">Internship</option>
-                        <option value="other">Other</option>
+                        <option value="arbeit">Arbeit</option>
+                        <option value="studium">Studium</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="notes">
-                        <i class="fas fa-comment"></i> Additional Notes
+                        <i class="fas fa-comment"></i> <span data-i18n="registration.additional_notes">Additional Notes</span>
                     </label>
                     <textarea id="notes" name="notes" placeholder="Any specific requirements or information..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="file">
-                        <i class="fas fa-upload"></i> Upload Documents (Optional)
+                        <i class="fas fa-upload"></i> <span data-i18n="registration.upload_documents_optional">Upload Documents (Optional)</span>
                     </label>
                     <input type="file" id="file" name="file" accept=".pdf,.doc,.docx">
                 </div>
 
                 <!-- Instagram Follow Section -->
                 <div class="instagram-follow-section" id="instagramSection">
-                    <h3>Please follow us on Instagram before submitting your request ❤️</h3>
-                    <p>Stay connected with us and get the latest updates about our services!</p>
+                    <h3 data-i18n="registration.follow_instagram">Please follow us on Instagram before submitting your request ❤️</h3>
+                    <p data-i18n="registration.stay_connected">Stay connected with us and get the latest updates about our services!</p>
                     <div class="instagram-buttons">
                         <a href="https://www.instagram.com/nisrinegermanschool/" target="_blank" class="instagram-btn follow-btn" id="followBtn">
-                            <i class="fab fa-instagram"></i> Follow on Instagram
+                            <i class="fab fa-instagram"></i> <span data-i18n="registration.follow_btn">Follow on Instagram</span>
                         </a>
                         <button type="button" class="instagram-btn confirm-btn" id="confirmBtn" disabled>
-                            <i class="fas fa-check-circle"></i> I followed ✅
+                            <i class="fas fa-check-circle"></i> <span data-i18n="registration.i_followed">I followed</span> ✅
                         </button>
                     </div>
                 </div>
 
                 <button type="submit" class="submit-btn locked" id="submitBtn" disabled>
-                    <i class="fas fa-lock"></i> Submit Application Request (Follow us first)
+                    <i class="fas fa-lock"></i> <span data-i18n="registration.submit_application">Submit Application Request</span>
                 </button>
 
                 <div class="form-message" id="formMessage"></div>
@@ -849,5 +847,16 @@
     </div>
 
     <script src="js/apply.js"></script>
+    <script src="js/page-i18n.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const i18n = window.pageI18n;
+            await i18n.load();
+            i18n.setLang(i18n.currentLang);
+            const form = document.getElementById('serviceForm');
+            if (form) i18n.createMiniSwitcher(form);
+            i18n.translatePage();
+        });
+    </script>
 </body>
 </html>

@@ -11,6 +11,76 @@ class RegistrationModal {
         this.createModal();
         this.attachEventListeners();
         await this.checkServiceAvailability();
+        // Load translations for modal
+        if (window.pageI18n) {
+            await window.pageI18n.load();
+            this.translateModal();
+        }
+    }
+
+    translateModal() {
+        if (!window.pageI18n) return;
+        const t = (key) => window.pageI18n.get('registration.' + key);
+        
+        const modalTitle = document.getElementById('modalTitle');
+        if (modalTitle && this.currentView === 'main') {
+            modalTitle.textContent = t('choose_type') || 'Choose Registration Type';
+        }
+        
+        // Main view
+        const coursesOption = document.querySelector('.service-option[data-service="courses"]');
+        if (coursesOption) {
+            const h3 = coursesOption.querySelector('h3');
+            const p = coursesOption.querySelector('p');
+            if (h3) h3.textContent = t('register_courses') || 'Register for Courses';
+            if (p) p.textContent = t('courses_desc') || 'German Language, French, English & more';
+        }
+        const otherOption = document.querySelector('.service-option[data-service="other"]');
+        if (otherOption) {
+            const h3 = otherOption.querySelector('h3');
+            const p = otherOption.querySelector('p');
+            if (h3) h3.textContent = t('other_services') || 'Other Services';
+            if (p) p.textContent = t('other_services_desc') || 'CV, Bewerbung, Translation & more';
+        }
+        
+        // Other services view
+        const cvCard = document.querySelector('.other-service-card[data-service="cv"]');
+        if (cvCard) {
+            const h4 = cvCard.querySelector('h4');
+            const p = cvCard.querySelector('p');
+            if (h4) h4.textContent = t('cv_service') || 'CV Service';
+            if (p) p.textContent = t('cv_desc') || 'Professional CV creation and optimization';
+        }
+        const bewCard = document.querySelector('.other-service-card[data-service="bewerbung"]');
+        if (bewCard) {
+            const h4 = bewCard.querySelector('h4');
+            const p = bewCard.querySelector('p');
+            if (h4) h4.textContent = t('applying_service') || 'Applying Service';
+            if (p) p.textContent = t('applying_desc') || 'Job application assistance (Bewerbung)';
+        }
+        const transCard = document.querySelector('.other-service-card[data-service="translation"]');
+        if (transCard) {
+            const h4 = transCard.querySelector('h4');
+            const p = transCard.querySelector('p');
+            if (h4) h4.textContent = t('translation_service') || 'Translation Service';
+            if (p) p.textContent = t('translation_desc') || 'Document translation services';
+        }
+        
+        // Back buttons
+        document.querySelectorAll('.back-button').forEach(btn => {
+            const backTo = btn.dataset.back;
+            const icon = btn.querySelector('i');
+            if (backTo === 'main') {
+                btn.innerHTML = '';
+                if (icon) btn.appendChild(icon.cloneNode(true));
+                else btn.insertAdjacentHTML('afterbegin', '<i class="fas fa-arrow-left"></i> ');
+                btn.append(' ' + (t('back') || 'Back'));
+            } else if (backTo === 'other') {
+                btn.innerHTML = '';
+                btn.insertAdjacentHTML('afterbegin', '<i class="fas fa-arrow-left"></i> ');
+                btn.append(t('back_to_services') || 'Back to Services');
+            }
+        });
     }
 
     async checkServiceAvailability() {
@@ -345,7 +415,8 @@ class RegistrationModal {
                     // Redirect to existing registration page with modal flag
                     window.location.href = '/register?from=modal';
                 } else if (service === 'other') {
-                    this.showView('otherServicesView', 'Choose a Service');
+                    const title = window.pageI18n?.get('registration.choose_service') || 'Choose a Service';
+                    this.showView('otherServicesView', title);
                 }
             });
         });
@@ -369,9 +440,11 @@ class RegistrationModal {
             btn.addEventListener('click', (e) => {
                 const backTo = e.currentTarget.dataset.back;
                 if (backTo === 'main') {
-                    this.showView('mainView', 'Choose Registration Type');
+                    const title = window.pageI18n?.get('registration.choose_type') || 'Choose Registration Type';
+                    this.showView('mainView', title);
                 } else if (backTo === 'other') {
-                    this.showView('otherServicesView', 'Choose a Service');
+                    const title = window.pageI18n?.get('registration.choose_service') || 'Choose a Service';
+                    this.showView('otherServicesView', title);
                 }
             });
         });
@@ -588,6 +661,7 @@ class RegistrationModal {
     async open() {
         // Check service availability every time modal opens
         await this.checkServiceAvailability();
+        this.translateModal();
         this.overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
@@ -598,7 +672,8 @@ class RegistrationModal {
         
         // Reset to main view after animation
         setTimeout(() => {
-            this.showView('mainView', 'Choose Registration Type');
+            const title = window.pageI18n?.get('registration.choose_type') || 'Choose Registration Type';
+            this.showView('mainView', title);
         }, 300);
     }
 }

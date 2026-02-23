@@ -949,39 +949,39 @@
                 <a href="/">NISRINE <span class="red-text">SCHOOL</span></a>
             </div>
             
-            <h1>Student Registration</h1>
-            <p>Fill out the form below to register for our courses</p>
+            <h1 data-i18n="registration.student_registration">Student Registration</h1>
+            <p data-i18n="registration.fill_form">Fill out the form below to register for our courses</p>
             
             <!-- Registration Form -->
             <form id="registrationForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="fullName"><i class="fas fa-user"></i> Nom et Prénom (Full Name) *</label>
+                    <label for="fullName"><i class="fas fa-user"></i> <span data-i18n="registration.full_name">Full Name</span> *</label>
                     <input type="text" id="fullName" name="fullName" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="dateOfBirth"><i class="fas fa-calendar"></i> Date de naissance (Date of Birth) *</label>
+                    <label for="dateOfBirth"><i class="fas fa-calendar"></i> <span data-i18n="registration.date_of_birth">Date of Birth</span> *</label>
                     <input type="date" id="dateOfBirth" name="dateOfBirth" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="cin"><i class="fas fa-id-card"></i> CIN (ID Number) *</label>
+                    <label for="cin"><i class="fas fa-id-card"></i> <span data-i18n="registration.cin">CIN (ID Number)</span> *</label>
                     <input type="text" id="cin" name="cin" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="city"><i class="fas fa-city"></i> Ville / Cartier (City) *</label>
+                    <label for="city"><i class="fas fa-city"></i> <span data-i18n="registration.city">City / Quarter</span> *</label>
                     <input type="text" id="city" name="city" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="phoneNumber"><i class="fas fa-phone"></i> GSM (Phone Number) *</label>
+                    <label for="phoneNumber"><i class="fas fa-phone"></i> <span data-i18n="registration.gsm">GSM (Phone Number)</span> *</label>
                     <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
                     <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
                 </div>
                 
                 <div class="form-group">
-                    <label for="parentPhone"><i class="fas fa-phone-square"></i> GSM des Parents (Parent's Phone) *</label>
+                    <label for="parentPhone"><i class="fas fa-phone-square"></i> <span data-i18n="registration.parent_phone">Parent Phone</span> *</label>
                     <input type="tel" id="parentPhone" name="parentPhone" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
                     <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
                 </div>
@@ -1003,7 +1003,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label><i class="fas fa-language"></i> Formation choisie (Languages) - Select all that apply *</label>
+                    <label><i class="fas fa-language"></i> <span data-i18n="registration.formation">Formation (Languages)</span> *</label>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" name="formationChoisie" value="Allemand" class="formation-checkbox">
@@ -1025,7 +1025,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label><i class="fas fa-briefcase"></i> Filière (Branches) - Select all that apply (Optional)</label>
+                    <label><i class="fas fa-briefcase"></i> <span data-i18n="registration.filiere">Filière (Branch)</span></label>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" name="filiere" value="Gériatrie" class="filiere-checkbox">
@@ -1063,27 +1063,27 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="photo"><i class="fas fa-camera"></i> Upload Your Photo *</label>
+                    <label for="photo"><i class="fas fa-camera"></i> <span data-i18n="registration.upload_photo">Upload Your Photo</span> *</label>
                     <input type="file" id="photo" name="photo" accept="image/*" required>
                     <div id="photoPreview" class="photo-preview"></div>
                 </div>
                 
                 <!-- Instagram Follow Section -->
                 <div class="instagram-follow-section" id="instagramSection">
-                    <h3>Please follow us on Instagram before submitting your registration ❤️</h3>
-                    <p>Stay connected with us and get the latest updates about our courses and events!</p>
+                    <h3 data-i18n="registration.follow_instagram">Please follow us on Instagram before submitting your registration ❤️</h3>
+                    <p data-i18n="registration.stay_connected">Stay connected with us and get the latest updates about our courses and events!</p>
                     <div class="instagram-buttons">
                         <a href="https://www.instagram.com/nisrinegermanschool/" target="_blank" class="instagram-btn follow-btn" id="followBtn">
-                            <i class="fab fa-instagram"></i> Follow on Instagram
+                            <i class="fab fa-instagram"></i> <span data-i18n="registration.follow_btn">Follow on Instagram</span>
                         </a>
                         <button type="button" class="instagram-btn confirm-btn" id="confirmBtn" disabled>
-                            <i class="fas fa-check-circle"></i> I followed ✅
+                            <i class="fas fa-check-circle"></i> <span data-i18n="registration.i_followed">I followed</span> ✅
                         </button>
                     </div>
                 </div>
                 
                 <button type="submit" class="submit-btn locked" id="submitBtn" disabled>
-                    <i class="fas fa-lock"></i> Submit Registration (Follow us first)
+                    <i class="fas fa-lock"></i> <span data-i18n="registration.submit_registration">Submit Registration (Follow us first)</span>
                 </button>
                 
                 <div id="message" class="message"></div>
@@ -1091,7 +1091,7 @@
             
             <div id="backButtonContainer">
                 <a href="/" class="back-home-btn" id="backButton">
-                    <i class="fas fa-arrow-left"></i> Back to Home
+                    <i class="fas fa-arrow-left"></i> <span data-i18n="registration.back_to_home">Back to Home</span>
                 </a>
             </div>
         </div>
@@ -1392,5 +1392,18 @@
         });
     </script>
     
+    <!-- Page Translation -->
+    <script src="js/page-i18n.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const i18n = window.pageI18n;
+            await i18n.load();
+            i18n.setLang(i18n.currentLang);
+            // Add mini language switcher
+            const content = document.getElementById('registrationContent');
+            if (content) i18n.createMiniSwitcher(content);
+            i18n.translatePage();
+        });
+    </script>
 </body>
 </html>
