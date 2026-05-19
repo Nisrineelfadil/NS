@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 – Seite nicht gefunden | Nisrine School</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -15,40 +16,42 @@
             position: relative;
         }
 
-        /* ── Moroccan Pattern Corners ── */
-        .pattern-corner {
+        /* ── Real Leaf Images (blurred decorations) ── */
+        .leaf-deco {
             position: fixed;
+            pointer-events: none;
+            opacity: 0.55;
+            filter: blur(1px);
+            z-index: 0;
+        }
+        .leaf-deco.left {
+            left: -40px;
+            top: 30%;
             width: 220px;
-            height: 220px;
-            opacity: 0.12;
-            pointer-events: none;
+            transform: rotate(-20deg);
+            animation: sway 6s ease-in-out infinite;
         }
-        .pattern-corner.top-right {
-            top: 0; right: 0;
-            background-image: repeating-conic-gradient(#c97b00 0% 25%, transparent 0% 50%);
-            background-size: 20px 20px;
-            clip-path: polygon(100% 0, 0 0, 100% 100%);
+        .leaf-deco.right {
+            right: -40px;
+            bottom: 20%;
+            width: 200px;
+            transform: scaleX(-1) rotate(-15deg);
+            animation: sway 6s ease-in-out infinite reverse;
         }
-        .pattern-corner.bottom-left {
-            bottom: 0; left: 0;
-            background-image: repeating-conic-gradient(#c97b00 0% 25%, transparent 0% 50%);
-            background-size: 20px 20px;
-            clip-path: polygon(0 0, 0 100%, 100% 100%);
+        @keyframes sway {
+            0%, 100% { transform: rotate(-20deg); }
+            50%       { transform: rotate(-10deg); }
         }
-        /* Zellige Star Patterns */
-        .zellige {
-            position: fixed;
-            opacity: 0.08;
-            pointer-events: none;
-            font-size: 140px;
-            color: #c97b00;
-            line-height: 1;
+        .leaf-deco.right { animation-name: swayR; }
+        @keyframes swayR {
+            0%, 100% { transform: scaleX(-1) rotate(-15deg); }
+            50%       { transform: scaleX(-1) rotate(-5deg); }
         }
-        .zellige.tr { top: -10px; right: -10px; }
-        .zellige.bl { bottom: -10px; left: -10px; transform: rotate(180deg); }
 
         /* ── Layout ── */
         .container {
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -66,33 +69,32 @@
 
         @keyframes slideInLeft {
             from { opacity: 0; transform: translateX(-40px); }
-            to { opacity: 1; transform: translateX(0); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
         .error-code {
             font-size: clamp(100px, 16vw, 160px);
             font-weight: 900;
             line-height: 0.9;
-            background: linear-gradient(135deg, #FF8C00 0%, #FFC200 50%, #FF6B00 100%);
+            background: linear-gradient(135deg, #e03000 0%, #FF8C00 55%, #FFC200 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -4px;
             margin-bottom: 8px;
-            position: relative;
         }
 
         .error-title {
-            font-size: clamp(22px, 4vw, 36px);
+            font-size: clamp(22px, 4vw, 34px);
             font-weight: 800;
             color: #1a1a2e;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .error-subtitle {
             font-size: 15px;
             color: #6b6b7b;
-            line-height: 1.7;
+            line-height: 1.75;
             margin-bottom: 8px;
             max-width: 380px;
         }
@@ -112,34 +114,36 @@
         /* ── Buttons ── */
         .btn-group {
             display: flex;
-            gap: 14px;
+            gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 28px;
+            align-items: center;
         }
 
         .btn-primary {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 13px 24px;
-            background: linear-gradient(135deg, #FF8C00, #FFC200);
+            gap: 9px;
+            padding: 13px 26px;
+            background: linear-gradient(135deg, #e03000 0%, #FF8C00 100%);
             color: white;
             font-weight: 700;
             font-size: 14px;
             border-radius: 50px;
             text-decoration: none;
-            box-shadow: 0 4px 20px rgba(255,140,0,0.4);
+            box-shadow: 0 4px 18px rgba(224,48,0,0.35);
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(255,140,0,0.5);
+            box-shadow: 0 8px 28px rgba(224,48,0,0.45);
         }
+        .btn-primary i { font-size: 13px; }
 
         .btn-secondary {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
             padding: 12px 24px;
             background: white;
             color: #1a1a2e;
@@ -147,30 +151,65 @@
             font-size: 14px;
             border-radius: 50px;
             text-decoration: none;
-            border: 2px solid #e8e0d5;
+            border: 1.5px solid #e8e0d5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
         .btn-secondary:hover {
             transform: translateY(-2px);
             border-color: #FFC200;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .btn-secondary .btn-icon-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8C00, #FFC200);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .btn-secondary .btn-icon-circle i {
+            font-size: 10px;
+            color: white;
+        }
+
+        /* ── Help / WhatsApp link ── */
+        .help-label {
+            font-size: 13px;
+            color: #9999aa;
+            margin-bottom: 8px;
         }
 
         .contact-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #FF8C00;
+            color: #1a1a2e;
             font-size: 14px;
             font-weight: 600;
-            text-decoration: none;
-            transition: gap 0.2s;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: gap 0.2s, color 0.2s;
         }
-        .contact-link:hover { gap: 12px; }
-        .help-label {
-            font-size: 13px;
-            color: #9999aa;
-            margin-bottom: 8px;
+        .contact-link:hover {
+            gap: 12px;
+            color: #25D366;
+        }
+        .contact-link .wa-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #25D366;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .contact-link .wa-icon i {
+            font-size: 15px;
+            color: white;
         }
 
         /* ── Quote Box ── */
@@ -183,23 +222,26 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             max-width: 380px;
             animation: fadeUp 1s ease 0.4s both;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
         }
-        .quote-box .icon {
-            font-size: 28px;
+        .quote-box i {
+            font-size: 22px;
             color: #FFC200;
-            margin-bottom: 6px;
-            display: block;
+            margin-top: 2px;
+            flex-shrink: 0;
         }
         .quote-text {
             font-size: 13px;
             color: #4a4a5a;
-            line-height: 1.6;
+            line-height: 1.65;
             font-style: italic;
         }
 
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         /* ── Right Visual ── */
@@ -208,110 +250,68 @@
             max-width: 480px;
             position: relative;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
+            min-height: 400px;
             animation: slideInRight 0.8s ease forwards;
         }
 
         @keyframes slideInRight {
             from { opacity: 0; transform: translateX(40px); }
-            to { opacity: 1; transform: translateX(0); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
-        /* Moroccan Arch */
-        .arch-wrapper {
-            position: relative;
-            width: 300px;
-            height: 380px;
+        /* Real Door image */
+        .door-img {
+            width: 260px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.18));
+            animation: floatDoor 5s ease-in-out infinite;
         }
-
-        .arch {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 240px;
-            height: 320px;
-            background: white;
-            border-radius: 120px 120px 12px 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
-
-        .arch-inner {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 280px;
-            background: linear-gradient(180deg, #FFD700 0%, #FFA500 40%, #FF8C00 70%, #c97b00 100%);
-            border-radius: 100px 100px 8px 8px;
-            overflow: hidden;
-        }
-
-        /* Moroccan city silhouette inside arch */
-        .city-silhouette {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-        }
-        .city-silhouette svg { width: 100%; height: 100%; }
-
-        /* Sun glow */
-        .arch-sun {
-            position: absolute;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70px;
-            height: 70px;
-            background: radial-gradient(circle, rgba(255,255,255,0.95) 30%, rgba(255,220,0,0.5) 60%, transparent 80%);
-            border-radius: 50%;
-            animation: pulseSun 3s ease-in-out infinite;
-        }
-        @keyframes pulseSun {
-            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
-            50% { transform: translateX(-50%) scale(1.15); opacity: 1; }
-        }
-
-        /* Birds */
-        .bird {
-            position: absolute;
-            color: rgba(255,255,255,0.7);
-            font-size: 10px;
-            animation: flyBird 6s ease-in-out infinite;
-        }
-        .bird:nth-child(2) { animation-delay: 1.5s; top: 80px; left: 40px; }
-        .bird:nth-child(3) { animation-delay: 3s; top: 95px; left: 60px; }
-        @keyframes flyBird {
+        @keyframes floatDoor {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50%       { transform: translateY(-12px); }
+        }
+
+        /* Paper airplane */
+        .airplane {
+            position: absolute;
+            top: 30px;
+            left: 10px;
+            animation: flyAround 8s ease-in-out infinite;
+            z-index: 2;
+        }
+        @keyframes flyAround {
+            0%   { transform: translate(0, 0) rotate(15deg); }
+            25%  { transform: translate(90px, -35px) rotate(-5deg); }
+            50%  { transform: translate(180px, 5px) rotate(10deg); }
+            75%  { transform: translate(90px, 40px) rotate(22deg); }
+            100% { transform: translate(0, 0) rotate(15deg); }
+        }
+        .airplane svg {
+            filter: drop-shadow(2px 2px 4px rgba(255,140,0,0.4));
         }
 
         /* Sign posts */
         .signpost-wrapper {
             position: absolute;
-            right: -10px;
-            bottom: 0;
+            right: -20px;
+            bottom: 20px;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 6px;
+            gap: 5px;
         }
-
         .sign-pole {
             position: absolute;
-            right: 28px;
-            bottom: 0;
+            right: 30px;
+            bottom: -20px;
             width: 6px;
-            height: 180px;
-            background: linear-gradient(180deg, #5c3d1e, #3d2710);
+            height: 200px;
+            background: linear-gradient(180deg, #6b4423, #3d2710);
             border-radius: 3px;
         }
-
         .sign {
             position: relative;
             display: flex;
@@ -323,15 +323,13 @@
             font-weight: 700;
             padding: 7px 14px 7px 10px;
             border-radius: 4px 12px 12px 4px;
-            cursor: pointer;
             text-decoration: none;
-            box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 2px 3px 10px rgba(0,0,0,0.35);
             transition: transform 0.2s, background 0.2s;
             white-space: nowrap;
         }
         .sign:hover {
-            background: linear-gradient(135deg, #FF8C00, #FFC200);
-            color: white;
+            background: linear-gradient(135deg, #e03000, #FF8C00);
             transform: translateX(-6px);
         }
         .sign::before {
@@ -340,121 +338,64 @@
             left: -8px;
             top: 50%;
             transform: translateY(-50%);
-            width: 0;
-            height: 0;
             border-top: 10px solid transparent;
             border-bottom: 10px solid transparent;
             border-right: 8px solid #2d2d2d;
         }
-        .sign:hover::before {
-            border-right-color: #FF8C00;
-        }
-        .sign .sign-icon {
-            font-size: 13px;
-        }
-
-        /* Paper airplane */
-        .airplane {
-            position: absolute;
-            top: 20px;
-            left: 30px;
-            animation: flyAround 8s ease-in-out infinite;
-        }
-        @keyframes flyAround {
-            0%   { transform: translate(0, 0) rotate(15deg); }
-            25%  { transform: translate(80px, -30px) rotate(-5deg); }
-            50%  { transform: translate(160px, 10px) rotate(10deg); }
-            75%  { transform: translate(80px, 40px) rotate(20deg); }
-            100% { transform: translate(0, 0) rotate(15deg); }
-        }
-
-        .airplane svg {
-            filter: drop-shadow(2px 2px 4px rgba(255,140,0,0.4));
-        }
-
-        /* Airplane trail */
-        .trail {
-            position: absolute;
-            top: 35px;
-            left: 50px;
-            width: 140px;
-            height: 40px;
-            pointer-events: none;
-            opacity: 0.4;
-        }
-
-        /* Floating leaves */
-        .leaf {
-            position: fixed;
-            pointer-events: none;
-            opacity: 0.15;
-            font-size: 70px;
-        }
-        .leaf.left { left: -10px; top: 40%; color: #2d8a4e; animation: sway 4s ease-in-out infinite; }
-        .leaf.right { right: -10px; bottom: 30%; color: #2d8a4e; animation: sway 4s ease-in-out infinite reverse; transform: scaleX(-1); }
-        @keyframes sway {
-            0%, 100% { transform: rotate(-10deg); }
-            50% { transform: rotate(10deg); }
-        }
-        .leaf.right { transform: scaleX(-1) rotate(-10deg); }
+        .sign:hover::before { border-right-color: #e03000; }
+        .sign i { font-size: 11px; width: 14px; text-align: center; }
 
         /* ── Responsive ── */
         @media (max-width: 820px) {
-            .container {
-                flex-direction: column;
-                padding: 60px 20px;
-                gap: 40px;
-            }
+            .container { flex-direction: column; padding: 60px 20px; gap: 40px; }
             .left { text-align: center; }
             .error-subtitle, .error-cta-text { margin-left: auto; margin-right: auto; }
             .btn-group { justify-content: center; }
             .quote-box { margin-left: auto; margin-right: auto; }
             .right { display: none; }
-            .leaf { display: none; }
+            .leaf-deco { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Decorative elements -->
-    <div class="zellige tr">✦</div>
-    <div class="zellige bl">✦</div>
-    <div class="leaf left">🌿</div>
-    <div class="leaf right">🌿</div>
+    <!-- Real Leaf images (blurred decorations) -->
+    <img src="/Img/Leaf.png" class="leaf-deco left" alt="">
+    <img src="/Img/Leaf.png" class="leaf-deco right" alt="">
 
     <div class="container">
 
         <!-- ── LEFT: Text Content ── -->
         <div class="left">
             <div class="error-code">404</div>
-            <h1 class="error-title">Seite nicht gefunden</h1>
-            <p class="error-subtitle">
-                Ups! Die Seite, die Sie suchen, scheint auf Urlaub<br>
-                nach Marokko gegangen zu sein.
+            <h1 class="error-title" id="t-heading">Seite nicht gefunden</h1>
+            <p class="error-subtitle" id="t-subtitle">
+                Ups! Die Seite, die Sie suchen, scheint auf Urlaub nach Marokko gegangen zu sein.
             </p>
-            <p class="error-cta-text">
+            <p class="error-cta-text" id="t-cta">
                 Lassen Sie uns Ihnen den <span>Weg zurück</span> zeigen.
             </p>
 
             <div class="btn-group">
-                <a href="/" class="btn-primary">
-                    🏠 Zur Startseite
+                <a href="/" class="btn-primary" id="t-btn1">
+                    <i class="fas fa-house"></i> Zur Startseite
                 </a>
-                <a href="/#services" class="btn-secondary">
-                    ✨ Alle Kurse entdecken
+                <a href="/#services" class="btn-secondary" id="t-btn2">
+                    <span class="btn-icon-circle"><i class="fas fa-compass"></i></span>
+                    Alle Kurse entdecken
                 </a>
             </div>
 
-            <p class="help-label">Oder brauchen Sie Hilfe?</p>
-            <a href="/#contact" class="contact-link">
-                💬 Kontaktieren Sie uns &nbsp;›
+            <p class="help-label" id="t-help">Oder brauchen Sie Hilfe?</p>
+            <a href="https://wa.me/212664648455" target="_blank" rel="noopener noreferrer" class="contact-link" id="t-contact">
+                <span class="wa-icon"><i class="fab fa-whatsapp"></i></span>
+                Kontaktieren Sie uns &nbsp;›
             </a>
 
             <div class="quote-box">
-                <span class="icon">❝</span>
-                <p class="quote-text">
-                    Bildung ist der Schlüssel, der die Türen zur Zukunft öffnet.<br>
-                    <em style="color:#FF8C00;font-size:12px">— Nisrine School</em>
+                <i class="fas fa-quote-left"></i>
+                <p class="quote-text"><span id="t-quote">Bildung ist der Schlüssel, der die Türen zur Zukunft öffnet.</span>
+                    <br><em style="color:#FF8C00;font-size:12px;font-style:normal;font-weight:600">— Nisrine School</em>
                 </p>
             </div>
         </div>
@@ -464,79 +405,125 @@
 
             <!-- Paper Airplane -->
             <div class="airplane">
-                <svg width="40" height="32" viewBox="0 0 40 32" fill="none">
+                <svg width="38" height="30" viewBox="0 0 40 32" fill="none">
                     <path d="M1 16 L39 1 L25 31 L18 20 L1 16Z" fill="#FF8C00" stroke="#FFC200" stroke-width="1.5" stroke-linejoin="round"/>
-                    <path d="M18 20 L25 31 L29 22 L18 20Z" fill="#e07000" stroke="#FFC200" stroke-width="1" stroke-linejoin="round"/>
+                    <path d="M18 20 L25 31 L29 22 L18 20Z" fill="#c96000" stroke="#FFC200" stroke-width="1" stroke-linejoin="round"/>
                     <path d="M1 16 L18 20 L39 1" stroke="#FFC200" stroke-width="1" fill="none" opacity="0.5"/>
                 </svg>
             </div>
 
-            <!-- Moroccan Arch Wrapper -->
-            <div class="arch-wrapper">
+            <!-- Real Door image -->
+            <img src="/Img/Door.png" class="door-img" alt="Moroccan door">
 
-                <!-- Main arch -->
-                <div class="arch">
-                    <div class="arch-inner">
-                        <div class="arch-sun"></div>
-                        <div class="bird" style="top:70px;left:30px">🕊</div>
-                        <div class="bird" style="top:85px;left:55px">🕊</div>
-
-                        <!-- City silhouette SVG -->
-                        <div class="city-silhouette">
-                            <svg viewBox="0 0 200 80" fill="rgba(100,50,0,0.35)" preserveAspectRatio="xMidYMax slice">
-                                <!-- Minaret tall -->
-                                <rect x="20" y="0" width="14" height="70"/>
-                                <polygon points="20,0 27,‑15 34,0"/>
-                                <rect x="22" y="8" width="10" height="3" fill="rgba(0,0,0,0.2)"/>
-                                <rect x="22" y="16" width="10" height="3" fill="rgba(0,0,0,0.2)"/>
-                                <rect x="22" y="24" width="10" height="3" fill="rgba(0,0,0,0.2)"/>
-                                <!-- Small dome -->
-                                <ellipse cx="27" cy="0" rx="8" ry="6"/>
-                                <!-- Palm tree -->
-                                <rect x="55" y="30" width="5" height="50"/>
-                                <ellipse cx="57" cy="30" rx="18" ry="10" transform="rotate(-20 57 30)"/>
-                                <ellipse cx="57" cy="30" rx="18" ry="10" transform="rotate(20 57 30)"/>
-                                <ellipse cx="57" cy="28" rx="12" ry="8"/>
-                                <!-- Building row -->
-                                <rect x="80" y="25" width="20" height="55"/>
-                                <rect x="104" y="35" width="16" height="45"/>
-                                <rect x="124" y="20" width="22" height="60"/>
-                                <rect x="150" y="38" width="14" height="42"/>
-                                <rect x="168" y="28" width="18" height="52"/>
-                                <!-- Arch windows -->
-                                <ellipse cx="90" cy="38" rx="5" ry="8" fill="rgba(255,160,0,0.4)"/>
-                                <ellipse cx="135" cy="35" rx="5" ry="8" fill="rgba(255,160,0,0.4)"/>
-                                <!-- Ground -->
-                                <rect x="0" y="70" width="200" height="15"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sign posts -->
-                <div class="signpost-wrapper" style="right:-80px;bottom:30px;">
-                    <div class="sign-pole"></div>
-                    <a href="/" class="sign" style="animation:fadeUp 0.6s 0.1s both">
-                        <span class="sign-icon">🏠</span> Startseite
-                    </a>
-                    <a href="/#services" class="sign" style="animation:fadeUp 0.6s 0.2s both">
-                        <span class="sign-icon">📚</span> Dienstleistungen
-                    </a>
-                    <a href="/#about" class="sign" style="animation:fadeUp 0.6s 0.3s both">
-                        <span class="sign-icon">👥</span> Über uns
-                    </a>
-                    <a href="/student-portal" class="sign" style="animation:fadeUp 0.6s 0.4s both">
-                        <span class="sign-icon">🎓</span> Für Studenten
-                    </a>
-                    <a href="/#contact" class="sign" style="animation:fadeUp 0.6s 0.5s both">
-                        <span class="sign-icon">📞</span> Kontakt
-                    </a>
-                </div>
-
+            <!-- Sign posts -->
+            <div class="signpost-wrapper">
+                <div class="sign-pole"></div>
+                <a href="/" class="sign" style="animation:fadeUp 0.6s 0.1s both">
+                    <i class="fas fa-house"></i> <span class="sign-label">Startseite</span>
+                </a>
+                <a href="/#services" class="sign" style="animation:fadeUp 0.6s 0.2s both">
+                    <i class="fas fa-book-open"></i> <span class="sign-label">Dienstleistungen</span>
+                </a>
+                <a href="/#about" class="sign" style="animation:fadeUp 0.6s 0.3s both">
+                    <i class="fas fa-users"></i> <span class="sign-label">Über uns</span>
+                </a>
+                <a href="/student-portal" class="sign" style="animation:fadeUp 0.6s 0.4s both">
+                    <i class="fas fa-graduation-cap"></i> <span class="sign-label">Für Studenten</span>
+                </a>
+                <a href="https://wa.me/212664648455" target="_blank" class="sign" style="animation:fadeUp 0.6s 0.5s both">
+                    <i class="fab fa-whatsapp"></i> <span class="sign-label">Kontakt</span>
+                </a>
             </div>
+
         </div>
 
     </div>
 
+    <script>
+        // Auto-detect language from site localStorage and apply translations
+        const translations = {
+            de: {
+                title: "404 – Seite nicht gefunden | Nisrine School",
+                code_label: "",
+                heading: "Seite nicht gefunden",
+                subtitle: "Ups! Die Seite, die Sie suchen, scheint auf Urlaub nach Marokko gegangen zu sein.",
+                cta: 'Lassen Sie uns Ihnen den <span>Weg zurück</span> zeigen.',
+                btn1: "Zur Startseite",
+                btn2: "Alle Kurse entdecken",
+                help: "Oder brauchen Sie Hilfe?",
+                contact: "Kontaktieren Sie uns",
+                quote: "Bildung ist der Schlüssel, der die Türen zur Zukunft öffnet.",
+                signs: ["Startseite","Dienstleistungen","Über uns","Für Studenten","Kontakt"]
+            },
+            fr: {
+                title: "404 – Page non trouvée | Nisrine School",
+                heading: "Page non trouvée",
+                subtitle: "Oups ! La page que vous cherchez semble être partie en vacances au Maroc.",
+                cta: 'Laissez-nous vous montrer le <span>chemin du retour</span>.',
+                btn1: "Accueil",
+                btn2: "Découvrir les cours",
+                help: "Besoin d'aide ?",
+                contact: "Contactez-nous",
+                quote: "L'éducation est la clé qui ouvre les portes de l'avenir.",
+                signs: ["Accueil","Services","À propos","Étudiants","Contact"]
+            },
+            en: {
+                title: "404 – Page Not Found | Nisrine School",
+                heading: "Page Not Found",
+                subtitle: "Oops! The page you're looking for seems to have gone on vacation to Morocco.",
+                cta: 'Let us show you the <span>way back</span>.',
+                btn1: "Go Home",
+                btn2: "Explore Courses",
+                help: "Need help?",
+                contact: "Contact us",
+                quote: "Education is the key that opens the doors to the future.",
+                signs: ["Home","Services","About us","For Students","Contact"]
+            },
+            ar: {
+                title: "404 – الصفحة غير موجودة | مدرسة نسرين",
+                heading: "الصفحة غير موجودة",
+                subtitle: "عذراً! يبدو أن الصفحة التي تبحث عنها ذهبت في إجازة إلى المغرب.",
+                cta: 'دعنا نريك <span>طريق العودة</span>.',
+                btn1: "الرئيسية",
+                btn2: "استكشاف الدورات",
+                help: "هل تحتاج مساعدة؟",
+                contact: "تواصل معنا",
+                quote: "التعليم هو المفتاح الذي يفتح أبواب المستقبل.",
+                signs: ["الرئيسية","الخدمات","من نحن","للطلاب","تواصل"]
+            }
+        };
+
+        function applyLang(lang) {
+            const t = translations[lang] || translations['de'];
+            document.title = t.title;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+            const el = (id) => document.getElementById('t-' + id);
+            if (el('heading'))  el('heading').textContent = t.heading;
+            if (el('subtitle')) el('subtitle').textContent = t.subtitle;
+            if (el('cta'))      el('cta').innerHTML = t.cta;
+            if (el('btn1'))     el('btn1').innerHTML = `<i class="fas fa-house"></i> ${t.btn1}`;
+            if (el('btn2'))     el('btn2').innerHTML = `<span class="btn-icon-circle"><i class="fas fa-compass"></i></span> ${t.btn2}`;
+            if (el('help'))     el('help').textContent = t.help;
+            if (el('contact'))  el('contact').innerHTML = `<span class="wa-icon"><i class="fab fa-whatsapp"></i></span> ${t.contact} &nbsp;›`;
+            if (el('quote'))    el('quote').textContent = t.quote;
+
+            const signs = document.querySelectorAll('.sign-label');
+            signs.forEach((s, i) => { if (t.signs[i]) s.textContent = t.signs[i]; });
+        }
+
+        // Detect language: any key used site-wide → browser language → fallback de
+        const stored = localStorage.getItem('selectedLanguage')
+                    || localStorage.getItem('adminLanguage')
+                    || localStorage.getItem('language')
+                    || localStorage.getItem('teacherLanguage')
+                    || localStorage.getItem('lang');
+        const browser = navigator.language?.slice(0, 2);
+        const lang = (stored && translations[stored]) ? stored
+                   : (browser && translations[browser]) ? browser
+                   : 'de';
+        applyLang(lang);
+    </script>
 </body>
 </html>
