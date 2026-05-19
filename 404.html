@@ -8,11 +8,14 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: #FAF7F2;
-            min-height: 100vh;
-            overflow-x: hidden;
             position: relative;
         }
 
@@ -252,7 +255,8 @@
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            min-height: 400px;
+            height: 420px;
+            overflow: visible;
             animation: slideInRight 0.8s ease forwards;
         }
 
@@ -296,7 +300,7 @@
         /* Sign posts */
         .signpost-wrapper {
             position: absolute;
-            right: -20px;
+            right: 0;
             bottom: 20px;
             display: flex;
             flex-direction: column;
@@ -305,7 +309,7 @@
         }
         .sign-pole {
             position: absolute;
-            right: 30px;
+            right: 20px;
             bottom: -20px;
             width: 6px;
             height: 200px;
@@ -347,7 +351,8 @@
 
         /* ── Responsive ── */
         @media (max-width: 820px) {
-            .container { flex-direction: column; padding: 60px 20px; gap: 40px; }
+            html, body { overflow: auto; height: auto; }
+            .container { flex-direction: column; padding: 60px 20px 40px; gap: 40px; min-height: 100vh; }
             .left { text-align: center; }
             .error-subtitle, .error-cta-text { margin-left: auto; margin-right: auto; }
             .btn-group { justify-content: center; }
