@@ -143,7 +143,28 @@
   - Set date to today
 - **Why**: Ensures the form is fully reset and editable for consecutive appointment entries
 
-### 15. Added Settings tab visibility for normal admins (employees)
+### 15. Fixed 2FA email delivery in production (Vercel serverless)
+- **Modified**: `routes/admin.js` — both the login endpoint and the resend endpoint
+- **Issue 1 — Fire-and-forget killed by Vercel**: The original code sent the email as a background task after `res.json()` was called. Vercel terminates the serverless function immediately after the response is sent, so the email never actually left the server in production. On localhost this worked because the server is persistent.
+- **Fix**: Changed both email send calls from fire-and-forget (`.catch()`) to `await emailService.send2FACode(...)` so the email is fully sent **before** the HTTP response is returned.
+- **Issue 2 — Codes expiring too fast**: The 2FA code expiry and the temporary JWT token were both set to 5 minutes. Given email delivery delays + Vercel cold-start latency, codes were frequently already expired by the time the admin opened the email.
+- **Fix**: Increased both `twoFactorExpiry` and JWT `expiresIn` to **10 minutes** across login and resend endpoints.
+- **Why**: 2FA was completely non-functional in production despite working perfectly on localhost. Root cause was a Vercel serverless limitation — not a logic bug.
+
+### 16. Added custom 404 page
+- **Created**: `404.html` — full-page Moroccan-themed 404 with CSS animations
+- **Design**: Inspired by reference image — large gradient "404" text, real `Img/Door.png` Moroccan arch (floating animation), blurred `Img/Leaf.png` decorations on both sides, animated paper airplane, dark sign-post navigation
+- **Images committed**: `Img/Door.png` and `Img/Leaf.png` were never tracked by git — added with `git add` and committed
+- **Navigation**: 5 sign-posts (Startseite, Dienstleistungen, Über uns, Für Studenten, Kontakt) with Font Awesome icons, hover turns orange
+- **WhatsApp link**: "Kontaktieren Sie uns" opens `wa.me/212664648455` with green WhatsApp icon badge
+- **Buttons**: Primary = red→orange gradient (`#e03000→#FF8C00`) with `fas fa-house`; Secondary = white with orange circle-badge + `fas fa-compass` — matching reference design
+- **No emojis**: All icons replaced with Font Awesome 6 icons loaded from CDN
+- **Auto-translation**: Detects site language from `localStorage` (`selectedLanguage`, `adminLanguage`, `language`, `teacherLanguage`) → browser language → fallback German. Supports 🇩🇪 DE / 🇫🇷 FR / 🇬🇧 EN / 🇸🇦 AR with full RTL for Arabic
+- **Modified**: `server.js` — 404 handler now serves `404.html` for browser routes; API routes still return JSON `{ error: "Page not found" }`
+- **Modified**: `vercel.json` — added `404.html` to `includeFiles` so Vercel bundles it with the serverless function
+- **Why**: Previously all 404s returned raw JSON `{"error":"Page not found","path":"/..."}` directly in the browser — very poor UX for end users who mistype a URL
+
+### 17. Added Settings tab visibility for normal admins (employees)
 - **Modified**: `js/admin-dashboard.js` — menu visibility logic
 - **Change**: Settings menu item now visible to **all admin roles** (employee, super_admin, dev), not just super_admin/dev
 - **Role-based UI restrictions**:
@@ -192,4 +213,8 @@ The client's diagnostic (OWASP ZAP + manual audit) flagged several items that ar
 - [x] ~~Replace Gmail with professional domain email~~ → Not needed; `nisrineschool2024@gmail.com` is the school's active email, stays until client buys a pro domain email
 - [x] ~~Add 2FA for admin accounts~~ → Done (fix #12, Email OTP with multi-language support)
 - [x] ~~Add CAPTCHA (reCAPTCHA v3) to registration, contact, and rating forms~~ → Done (fix #13, invisible bot protection)
+- [x] ~~Fix 2FA not working in Vercel production~~ → Done (fix #15, await email send + 10min expiry)
+- [x] ~~Add custom 404 page~~ → Done (fix #16, Moroccan-themed, auto-translated, real images)
+- [ ] **Add SMTP environment variables to both Vercel projects** — `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — without these, 2FA emails will not send in production
+- [ ] **Authorize production domain in Google reCAPTCHA console** — add `nisrineschool.com` and `*.vercel.app` to allowed domains so the CAPTCHA badge appears on the live site
 - [ ] Add DNS CAA record for domain (optional hardening — no CAA record found in Namecheap, Vercel handles SSL automatically)
