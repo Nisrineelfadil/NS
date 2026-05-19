@@ -260,7 +260,7 @@ router.post('/login', async (req, res) => {
         if (admin.twoFactorEnabled && admin.twoFactorEmail) {
             const code = generate2FACode();
             admin.twoFactorCode = code;
-            admin.twoFactorExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+            admin.twoFactorExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
             await admin.save();
 
             // Send OTP to admin's personal 2FA email (fire-and-forget for speed)
@@ -273,7 +273,7 @@ router.post('/login', async (req, res) => {
             const tempToken = jwt.sign(
                 { id: admin._id, purpose: '2fa_verify' },
                 JWT_SECRET,
-                { expiresIn: '5m' }
+                { expiresIn: '10m' }
             );
 
             // Mask personal email for display (z****i@gmail.com)
@@ -474,7 +474,7 @@ router.post('/2fa/resend', async (req, res) => {
         // Generate new code
         const code = generate2FACode();
         admin.twoFactorCode = code;
-        admin.twoFactorExpiry = new Date(Date.now() + 5 * 60 * 1000);
+        admin.twoFactorExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
         await admin.save();
 
         // Send to admin's personal 2FA email
