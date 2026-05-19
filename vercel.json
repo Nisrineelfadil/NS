@@ -4,7 +4,7 @@
     "api/index.js": {
       "maxDuration": 60,
       "memory": 1024,
-      "includeFiles": "{*.html,favicon.ico,css/**,js/**,Img/**,public/**,pwa/**,react-portals/dist/**,models/**,routes/**,services/**,middleware/**,config/**,utils/**,server.js}"
+      "includeFiles": "{*.html,404.html,favicon.ico,css/**,js/**,Img/**,public/**,pwa/**,react-portals/dist/**,models/**,routes/**,services/**,middleware/**,config/**,utils/**,server.js}"
     }
   },
   "routes": [

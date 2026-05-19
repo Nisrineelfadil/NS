@@ -370,10 +370,18 @@ app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
 app.use('/api/season-archive', dbMiddleware, seasonArchiveRoutes);
 // app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes); // DISABLED
 
-// 404 handler
+// 404 handler — API routes get JSON, browser routes get the custom 404 page
 app.use((req, res) => {
   console.log('404 - Not found:', req.method, req.path);
-  res.status(404).json({ error: 'Page not found', path: req.path });
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Page not found', path: req.path });
+  }
+  const filePath = path.join(process.cwd(), '404.html');
+  if (fs.existsSync(filePath)) {
+    res.status(404).sendFile(filePath);
+  } else {
+    res.status(404).send('<h1>404 - Page not found</h1>');
+  }
 });
 
 // Global error handler
