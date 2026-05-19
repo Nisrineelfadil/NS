@@ -310,6 +310,11 @@ function openAddAppointmentModal() {
     }
     
     if (modal) modal.classList.add('active');
+
+    // Restore keyboard focus after alert() dialogs steal it (fixes Electron/browser focus issue)
+    setTimeout(() => {
+        if (fullNameInput) fullNameInput.focus();
+    }, 100);
 }
 
 // Close appointment modal
