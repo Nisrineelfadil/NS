@@ -263,11 +263,13 @@ router.post('/login', async (req, res) => {
             admin.twoFactorExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
             await admin.save();
 
-            // Send OTP to admin's personal 2FA email (fire-and-forget for speed)
+            // Send OTP — must await on serverless (Vercel kills background tasks after response)
             emailService.initialize();
-            emailService.send2FACode(admin.twoFactorEmail, code, admin.username).catch(err => {
+            try {
+                await emailService.send2FACode(admin.twoFactorEmail, code, admin.username);
+            } catch (err) {
                 console.error('2FA email send error:', err.message);
-            });
+            }
 
             // Issue a short-lived temp token (valid only for 2FA verification)
             const tempToken = jwt.sign(
@@ -477,11 +479,13 @@ router.post('/2fa/resend', async (req, res) => {
         admin.twoFactorExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
         await admin.save();
 
-        // Send to admin's personal 2FA email
+        // Send to admin's personal 2FA email — must await on serverless
         emailService.initialize();
-        emailService.send2FACode(admin.twoFactorEmail, code, admin.username).catch(err => {
+        try {
+            await emailService.send2FACode(admin.twoFactorEmail, code, admin.username);
+        } catch (err) {
             console.error('2FA resend email error:', err.message);
-        });
+        }
 
         res.json({ success: true, message: 'Nouveau code envoyé' });
 
