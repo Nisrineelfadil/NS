@@ -48,6 +48,9 @@ if (authToken) {
     showDashboard();
 }
 
+// 2FA state
+let pending2FAToken = null;
+
 // Login Form Handler
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -63,15 +66,23 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success && data.requires2FA) {
+            // 2FA required — show OTP input
+            pending2FAToken = data.tempToken;
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('twoFactorForm').style.display = 'block';
+            document.getElementById('twoFactorEmail').textContent = data.maskedEmail;
+            document.getElementById('otpCode').value = '';
+            document.getElementById('otpCode').focus();
+        } else if (data.success) {
             authToken = data.token;
             localStorage.setItem('adminToken', authToken);
-            // Check if user is super admin or dev
             const isSuperAdmin = data.admin && (data.admin.role === 'super_admin' || data.admin.role === 'dev');
             localStorage.setItem('isSuperAdmin', isSuperAdmin);
-            // Store username and role
             localStorage.setItem('adminUsername', data.admin.username);
             localStorage.setItem('adminRole', data.admin.role);
+            localStorage.setItem('adminEmail', data.admin.email || '');
             showDashboard();
         } else {
             showError(data.message || 'Login failed');
@@ -79,6 +90,91 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     } catch (error) {
         showError('Connection error. Please try again.');
     }
+});
+
+// 2FA: Verify OTP code
+async function verify2FA() {
+    const code = document.getElementById('otpCode').value.trim();
+    if (!code || code.length !== 6) {
+        showError('Entrez le code à 6 chiffres');
+        return;
+    }
+
+    const btn = document.getElementById('verifyOtpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/2fa/verify-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tempToken: pending2FAToken, code })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            authToken = data.token;
+            localStorage.setItem('adminToken', authToken);
+            const isSuperAdmin = data.admin && (data.admin.role === 'super_admin' || data.admin.role === 'dev');
+            localStorage.setItem('isSuperAdmin', isSuperAdmin);
+            localStorage.setItem('adminUsername', data.admin.username);
+            localStorage.setItem('adminRole', data.admin.role);
+            localStorage.setItem('adminEmail', data.admin.email || '');
+            showDashboard();
+        } else {
+            showError(data.message || 'Code incorrect');
+            document.getElementById('otpCode').value = '';
+            document.getElementById('otpCode').focus();
+        }
+    } catch (error) {
+        showError('Connection error. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Vérifier';
+    }
+}
+
+// 2FA: Resend OTP code
+async function resend2FA() {
+    const btn = document.getElementById('resendOtpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/2fa/resend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tempToken: pending2FAToken })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Envoyé !';
+            setTimeout(() => { btn.innerHTML = '<i class="fas fa-redo"></i> Renvoyer le code'; btn.disabled = false; }, 3000);
+        } else {
+            showError(data.message);
+            btn.innerHTML = '<i class="fas fa-redo"></i> Renvoyer le code';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        showError('Connection error');
+        btn.innerHTML = '<i class="fas fa-redo"></i> Renvoyer le code';
+        btn.disabled = false;
+    }
+}
+
+// 2FA: Back to login form
+function back2FA() {
+    pending2FAToken = null;
+    document.getElementById('twoFactorForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('password').value = '';
+}
+
+// Allow Enter key on OTP input
+document.getElementById('otpCode')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') verify2FA();
 });
 
 // Logout Handler
@@ -127,17 +223,27 @@ async function showDashboard() {
         document.getElementById('adminUsername').textContent = username;
     }
     
-    // Check if super admin
+    // Show Settings for ALL roles (2FA, username, password change)
+    document.getElementById('settingsMenuItem')?.classList.remove('hidden');
+
+    // Check role
+    const adminRole = localStorage.getItem('adminRole');
     const isSuperAdmin = localStorage.getItem('isSuperAdmin') === 'true';
+    
+    // Hide username/password change sections for employees (only show 2FA)
+    if (adminRole === 'employee') {
+        document.getElementById('usernameChangeSection')?.style.setProperty('display', 'none');
+        document.getElementById('passwordChangeSection')?.style.setProperty('display', 'none');
+    }
+    
+    // Check if super admin
     if (isSuperAdmin) {
         document.getElementById('employeesMenuItem')?.classList.remove('hidden');
         document.getElementById('activityMenuItem')?.classList.remove('hidden');
         document.getElementById('sessionsMenuItem')?.classList.remove('hidden');
-        document.getElementById('settingsMenuItem')?.classList.remove('hidden');
     }
     
     // Check if Dev account - show EXAM section with Telc + Factory Reset
-    const adminRole = localStorage.getItem('adminRole');
     if (adminRole === 'dev') {
         document.getElementById('examSection')?.classList.remove('hidden');
         document.getElementById('factoryResetSection')?.style.setProperty('display', 'block');
@@ -790,6 +896,8 @@ document.querySelectorAll('.menu-item').forEach(item => {
         if (tab === 'activity') loadActivityLogs();
         if (tab === 'sessions') loadLoginSessions();
         if (tab === 'settings') {
+            // Load 2FA status
+            load2FAStatus();
             // Initialize system stats when Settings tab is opened
             if (typeof initializeSystemStats === 'function') {
                 initializeSystemStats();
@@ -1491,6 +1599,141 @@ document.getElementById('changePasswordForm')?.addEventListener('submit', async 
         alert('Error updating password');
     }
 });
+
+// ==================== 2FA Settings ====================
+
+// Load 2FA status for the settings tab
+async function load2FAStatus() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/2fa/status`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+            const setupForm = document.getElementById('twoFactorSetupForm');
+            const activeView = document.getElementById('twoFactorActiveView');
+            const statusDiv = document.getElementById('twoFactorStatus');
+
+            if (data.twoFactorEnabled && data.twoFactorEmail) {
+                // 2FA is active — show active view
+                if (setupForm) setupForm.style.display = 'none';
+                if (activeView) activeView.style.display = 'block';
+                if (statusDiv) {
+                    statusDiv.style.background = 'rgba(34, 197, 94, 0.1)';
+                    statusDiv.style.color = '#166534';
+                    statusDiv.innerHTML = `<i class="fas fa-shield-alt"></i> <strong>${adminT('admin.settings.two_factor_enabled')}</strong> — ${adminT('admin.settings.two_factor_protected')}`;
+                }
+                const emailEl = document.getElementById('twoFactorActiveEmail');
+                if (emailEl) emailEl.textContent = data.twoFactorEmail;
+            } else {
+                // 2FA is not active — show setup form
+                if (setupForm) setupForm.style.display = 'block';
+                if (activeView) activeView.style.display = 'none';
+                if (statusDiv) {
+                    statusDiv.style.background = 'rgba(220, 38, 38, 0.08)';
+                    statusDiv.style.color = '#dc2626';
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>${adminT('admin.settings.two_factor_disabled')}</strong> — ${adminT('admin.settings.two_factor_less_protected')}`;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading 2FA status:', error);
+    }
+}
+
+// Enable 2FA with email + password
+async function enable2FA() {
+    const email = document.getElementById('twoFactorSetupEmail').value.trim();
+    const password = document.getElementById('twoFactorSetupPassword').value;
+
+    if (!email) { alert('Veuillez entrer votre email personnel'); return; }
+    if (!password) { alert('Veuillez entrer votre mot de passe'); return; }
+
+    const btn = document.getElementById('enable2FABtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activation...';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/2fa/enable`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('twoFactorSetupEmail').value = '';
+            document.getElementById('twoFactorSetupPassword').value = '';
+            load2FAStatus(); // Refresh the UI
+        } else {
+            alert(data.message || 'Erreur');
+        }
+    } catch (error) {
+        alert('Erreur de connexion');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-shield-alt"></i> Activer la 2FA';
+    }
+}
+
+// Change 2FA email
+async function change2FAEmail() {
+    const email = document.getElementById('twoFactorChangeEmail').value.trim();
+    const password = document.getElementById('twoFactorChangePassword').value;
+
+    if (!email) { alert('Veuillez entrer le nouvel email'); return; }
+    if (!password) { alert('Veuillez entrer votre mot de passe'); return; }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/2fa/update-email`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('twoFactorChangeEmail').value = '';
+            document.getElementById('twoFactorChangePassword').value = '';
+            load2FAStatus(); // Refresh
+            alert('Email 2FA mis à jour avec succès !');
+        } else {
+            alert(data.message || 'Erreur');
+        }
+    } catch (error) {
+        alert('Erreur de connexion');
+    }
+}
+
+// Disable 2FA
+async function disable2FA() {
+    const password = document.getElementById('disable2FAPassword').value;
+    if (!password) { alert('Veuillez entrer votre mot de passe'); return; }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/2fa/disable`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password })
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('disable2FAPassword').value = '';
+            load2FAStatus(); // Refresh
+        } else {
+            alert(data.message || 'Mot de passe incorrect');
+        }
+    } catch (error) {
+        alert('Erreur de connexion');
+    }
+}
 
 // Show Create Employee Modal
 function showCreateEmployeeForm() {

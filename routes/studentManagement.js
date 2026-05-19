@@ -600,8 +600,8 @@ router.post('/students',
         }
         console.log('Admin found:', admin.username);
         
-        // Parse formation and filiere
-        const formationArray = Array.isArray(formation) ? formation : [formation];
+        // Parse formation and filiere (both are optional — student can have language only, branch only, or both)
+        const formationArray = formation ? (Array.isArray(formation) ? formation : [formation]) : [];
         const filiereArray = filiere ? (Array.isArray(filiere) ? filiere : [filiere]) : [];
         
         console.log('Formation array:', formationArray);
@@ -853,12 +853,12 @@ router.put('/students/:id',
         if (studyLevel !== undefined) student.studyLevel = studyLevel;
         if (phoneNumber) student.phoneNumber = phoneNumber;
         if (parentPhone) student.parentPhone = parentPhone;
-        if (formation) student.formation = Array.isArray(formation) ? formation : [formation];
+        if (formation !== undefined) student.formation = formation ? (Array.isArray(formation) ? formation : [formation]) : [];
         
         // Handle filiere (branch) change - clear branchSubgroup if it no longer matches
         let branchClearedByFiliereChange = false;
-        if (filiere) {
-            const newFiliereArray = Array.isArray(filiere) ? filiere : [filiere];
+        if (filiere !== undefined) {
+            const newFiliereArray = filiere ? (Array.isArray(filiere) ? filiere : [filiere]) : [];
             const oldFiliereArray = student.filiere || [];
             const filiereChanged = JSON.stringify([...newFiliereArray].sort()) !== JSON.stringify([...oldFiliereArray].sort());
             

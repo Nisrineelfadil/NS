@@ -3,9 +3,10 @@ const router = express.Router();
 const Rating = require('../models/Rating');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
 const notificationService = require('../services/notificationService');
+const { verifyCaptcha } = require('../middleware/captchaMiddleware');
 
 // Public route - Submit a rating
-router.post('/submit', async (req, res) => {
+router.post('/submit', verifyCaptcha, async (req, res) => {
   try {
     const { name, stars, comment } = req.body;
 

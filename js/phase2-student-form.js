@@ -265,7 +265,7 @@ window.openNewStudentForm = function() {
                             </div>
                             
                             <div class="form-group">
-                                <label>Language Formation (Select all that apply) <span class="required">*</span></label>
+                                <label>Language Formation (Select all that apply)</label>
                                 <div class="checkbox-grid">
                                     <div class="checkbox-item">
                                         <input type="checkbox" id="lang_allemand" name="formation" value="Allemand" onchange="updatePreview()">
@@ -759,9 +759,9 @@ window.submitNewStudent = async function(event) {
     const filieres = Array.from(document.querySelectorAll('input[name="filiere"]:checked'))
         .map(cb => cb.value);
     
-    // Validate at least one language selected
-    if (formations.length === 0) {
-        alert('Please select at least one language formation');
+    // Validate at least one language OR one branch selected
+    if (formations.length === 0 && filieres.length === 0) {
+        alert('Please select at least one language formation OR one branch/subject');
         return;
     }
     

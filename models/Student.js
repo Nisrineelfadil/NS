@@ -23,9 +23,10 @@ const studentSchema = new mongoose.Schema({
     },
     cin: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
-        unique: true
+        sparse: true,
+        default: null
     },
     city: {
         type: String,
@@ -45,10 +46,12 @@ const studentSchema = new mongoose.Schema({
     },
     parentPhone: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
+        default: null,
         validate: {
             validator: function(v) {
+                if (!v) return true;
                 return /^0[5-7][0-9]{8}$/.test(v);
             },
             message: 'Parent phone number must be a valid Moroccan number (format: 06XXXXXXXX)'
@@ -61,13 +64,8 @@ const studentSchema = new mongoose.Schema({
     },
     formationChoisie: {
         type: [String],
-        required: true,
-        validate: {
-            validator: function(v) {
-                return v && v.length > 0;
-            },
-            message: 'At least one formation must be selected'
-        },
+        required: false,
+        default: [],
         enum: ['Allemand', 'Anglais', 'Français', 'Ausbildung']
     },
     filiere: {

@@ -87,6 +87,7 @@ async function loadAppointments() {
     try {
         const token = localStorage.getItem('adminToken');
         if (!token) {
+            console.error('No authentication token found');
             throw new Error('Not authenticated');
         }
 
@@ -267,17 +268,46 @@ function openAddAppointmentModal() {
     const title = document.getElementById('appointmentModalTitle');
     const submitBtn = document.getElementById('appointmentSubmitBtn');
 
+    // Reset form
     if (form) form.reset();
     if (title) title.textContent = 'New Appointment';
     if (submitBtn) submitBtn.textContent = 'Save Appointment';
     
-    // Set default date to today
+    // Explicitly clear all fields and remove any disabled/readonly states
+    const fullNameInput = document.getElementById('appointmentFullName');
+    const phoneInput = document.getElementById('appointmentPhone');
+    const purposeInput = document.getElementById('appointmentPurpose');
     const dateInput = document.getElementById('appointmentDate');
+    const priorityInput = document.getElementById('appointmentPriority');
+    const idInput = document.getElementById('appointmentId');
+
+    if (fullNameInput) {
+        fullNameInput.value = '';
+        fullNameInput.disabled = false;
+        fullNameInput.readOnly = false;
+    }
+    if (phoneInput) {
+        phoneInput.value = '';
+        phoneInput.disabled = false;
+        phoneInput.readOnly = false;
+    }
+    if (purposeInput) {
+        purposeInput.value = '';
+        purposeInput.disabled = false;
+        purposeInput.readOnly = false;
+    }
     if (dateInput) {
         dateInput.value = new Date().toISOString().split('T')[0];
+        dateInput.disabled = false;
+        dateInput.readOnly = false;
     }
-
-    document.getElementById('appointmentId').value = '';
+    if (priorityInput) {
+        priorityInput.value = 'medium';
+        priorityInput.disabled = false;
+    }
+    if (idInput) {
+        idInput.value = '';
+    }
     
     if (modal) modal.classList.add('active');
 }

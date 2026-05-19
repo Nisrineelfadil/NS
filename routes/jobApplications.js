@@ -5,6 +5,7 @@ const JobApplication = require('../models/JobApplication');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
 const megaService = require('../services/megaService');
 const notificationService = require('../services/notificationService');
+const { verifyCaptcha } = require('../middleware/captchaMiddleware');
 
 // Configure multer for file uploads
 const upload = multer({
@@ -50,7 +51,7 @@ const handleMulterError = (err, req, res, next) => {
 // ==================== PUBLIC ROUTES ====================
 
 // POST /api/job-applications/public - Submit application from public form (pending review)
-router.post('/public', (req, res, next) => {
+router.post('/public', verifyCaptcha, (req, res, next) => {
     upload.single('document')(req, res, (err) => {
         if (err) {
             return handleMulterError(err, req, res, next);

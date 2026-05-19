@@ -97,6 +97,13 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
             try {
+                // Get reCAPTCHA v3 token
+                if (typeof grecaptcha !== 'undefined' && window.RECAPTCHA_SITE_KEY) {
+                    try {
+                        formData.captchaToken = await grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'rating' });
+                    } catch (_) {}
+                }
+
                 const response = await fetch(`${API_BASE_URL}/api/ratings/submit`, {
                     method: 'POST',
                     headers: {
@@ -130,7 +137,10 @@
         if (!grid) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/ratings/approved`);
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
+            const response = await fetch(`${API_BASE_URL}/api/ratings/approved`, { signal: controller.signal });
+            clearTimeout(timeout);
             const data = await response.json();
 
             if (response.ok && data.success && data.ratings.length > 0) {

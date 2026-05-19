@@ -8,6 +8,7 @@ const Settings = require('../models/Settings');
 const { generateRegistrationPDF } = require('../services/pdfGenerator');
 const notificationService = require('../services/notificationService');
 const imageStorageService = require('../services/imageStorageService');
+const { verifyCaptcha } = require('../middleware/captchaMiddleware');
 
 // Configure multer for photo uploads (using memory storage for Vercel compatibility)
 const storage = multer.memoryStorage();
@@ -28,7 +29,7 @@ const upload = multer({
 });
 
 // POST /api/register - Submit registration
-router.post('/register', upload.single('photo'), async (req, res) => {
+router.post('/register', upload.single('photo'), verifyCaptcha, async (req, res) => {
     try {
         console.log('📝 Registration request received');
         console.log('Body:', req.body);
@@ -54,9 +55,10 @@ router.post('/register', upload.single('photo'), async (req, res) => {
                 formationChoisie = JSON.parse(formationChoisie);
             } catch (e) {
                 // If it's not JSON, treat as single value and convert to array
-                formationChoisie = [formationChoisie];
+                formationChoisie = formationChoisie ? [formationChoisie] : [];
             }
         }
+        if (!formationChoisie) formationChoisie = [];
         
         if (typeof filiere === 'string') {
             try {
@@ -66,21 +68,24 @@ router.post('/register', upload.single('photo'), async (req, res) => {
                 filiere = filiere ? [filiere] : [];
             }
         }
+        if (!filiere) filiere = [];
 
         // Validate required fields (email and parentName removed)
-        if (!fullName || !dateOfBirth || !phoneNumber || !cin || !city || 
-            !parentPhone || !studyLevel || !formationChoisie || formationChoisie.length === 0) {
+        // Student must select at least one language OR one branch
+        const hasFormation = formationChoisie && formationChoisie.length > 0;
+        const hasFiliere = filiere && filiere.length > 0;
+        
+        if (!fullName || !dateOfBirth || !phoneNumber || !city || 
+            !studyLevel || (!hasFormation && !hasFiliere)) {
             
             // Log which fields are missing
             const missingFields = [];
             if (!fullName) missingFields.push('fullName');
             if (!dateOfBirth) missingFields.push('dateOfBirth');
             if (!phoneNumber) missingFields.push('phoneNumber');
-            if (!cin) missingFields.push('cin');
             if (!city) missingFields.push('city');
-            if (!parentPhone) missingFields.push('parentPhone');
             if (!studyLevel) missingFields.push('studyLevel');
-            if (!formationChoisie || formationChoisie.length === 0) missingFields.push('formationChoisie');
+            if (!hasFormation && !hasFiliere) missingFields.push('formationChoisie or filiere');
             
             console.log('❌ Missing fields:', missingFields);
             
@@ -99,7 +104,8 @@ router.post('/register', upload.single('photo'), async (req, res) => {
             });
         }
 
-        if (!phoneRegex.test(parentPhone)) {
+        // Validate parentPhone only if provided
+        if (parentPhone && !phoneRegex.test(parentPhone)) {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Parent phone number must be a valid Moroccan number (format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX)' 
@@ -114,13 +120,15 @@ router.post('/register', upload.single('photo'), async (req, res) => {
             });
         }
 
-        // Check if CIN already exists
-        const existingStudent = await Student.findOne({ cin });
-        if (existingStudent) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'A student with this ID number already exists' 
-            });
+        // Check if CIN already exists (only if CIN was provided)
+        if (cin) {
+            const existingStudent = await Student.findOne({ cin });
+            if (existingStudent) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'A student with this ID number already exists' 
+                });
+            }
         }
 
         // Prepare photo path before saving (photoPath is required)
@@ -141,11 +149,11 @@ router.post('/register', upload.single('photo'), async (req, res) => {
             fullName,
             dateOfBirth,
             phoneNumber,
-            cin,
+            cin: cin || null,
             city,
             email: email || '',
             parentName: parentName || '',
-            parentPhone,
+            parentPhone: parentPhone || null,
             studyLevel,
             formationChoisie: Array.isArray(formationChoisie) ? formationChoisie : [formationChoisie],
             filiere: Array.isArray(filiere) && filiere.length > 0 ? filiere : [],

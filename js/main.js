@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.5 });
+        }, { threshold: 0.1 });
 
         observer.observe(counterElement);
     };
@@ -445,6 +445,13 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.querySelector('span').textContent = 'Sending...';
             
             try {
+                // Get reCAPTCHA v3 token
+                if (typeof grecaptcha !== 'undefined' && window.RECAPTCHA_SITE_KEY) {
+                    try {
+                        formData.captchaToken = await grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'contact' });
+                    } catch (_) {}
+                }
+
                 // Send to backend API
                 const API_BASE_URL = window.location.hostname === 'localhost' 
                     ? 'http://localhost:3000' 

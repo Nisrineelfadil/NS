@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -110,6 +112,31 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Pragma']
 }));
 
+// Rate limiting — prevent brute-force and abuse
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' }
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10, // stricter limit for login attempts
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts, please try again later.' }
+});
+app.use('/api/', apiLimiter);
+app.use('/api/login', authLimiter);
+
+// Sanitize user input against NoSQL injection (body + params only; req.query is read-only in Express 5)
+app.use((req, res, next) => {
+  if (req.body) req.body = mongoSanitize.sanitize(req.body);
+  if (req.params) req.params = mongoSanitize.sanitize(req.params);
+  next();
+});
+
 // Additional headers for Electron app compatibility
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -148,7 +175,20 @@ const staticOptions = {
 // Use process.cwd() for Vercel serverless compatibility
 const rootPath = process.cwd();
 app.use(express.static(path.join(rootPath, 'public'), staticOptions));
-app.use('/uploads', express.static(path.join(rootPath, 'uploads'), staticOptions));
+// Protect /uploads/ with JWT auth — student photos/documents require authentication
+app.use('/uploads', (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1] || req.query.token;
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication required to access uploads' });
+  }
+  try {
+    const jwt = require('jsonwebtoken');
+    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-this');
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+}, express.static(path.join(rootPath, 'uploads'), staticOptions));
 app.use('/css', express.static(path.join(rootPath, 'css'), staticOptions));
 app.use('/js', express.static(path.join(rootPath, 'js'), staticOptions));
 app.use('/Img', express.static(path.join(rootPath, 'Img'), staticOptions));
@@ -203,6 +243,10 @@ app.get('/translate.html', serveHTML('translate.html'));
 app.get('/phase2-test', serveHTML('phase2-test.html'));
 app.get('/login-app', serveHTML('app-redirect.html'));
 app.get('/cash-register', serveHTML('cash-register.html'));
+app.get('/privacy-policy', serveHTML('privacy-policy.html'));
+app.get('/privacy-policy.html', serveHTML('privacy-policy.html'));
+app.get('/terms', serveHTML('terms.html'));
+app.get('/terms.html', serveHTML('terms.html'));
 
 // Serve React portals (student and teacher) - no-cache headers to prevent stale HTML on Vercel CDN
 app.get('/student-portal', (req, res) => {

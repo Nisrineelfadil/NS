@@ -38,6 +38,29 @@
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
+            <!-- 2FA Verification Step -->
+            <div id="twoFactorForm" style="display:none;">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <i class="fas fa-shield-alt" style="font-size:40px;color:#c0392b;margin-bottom:10px;"></i>
+                    <p style="font-size:14px;color:#666;">Code envoyé à <strong id="twoFactorEmail"></strong></p>
+                    <p style="font-size:12px;color:#999;margin:4px 0 0;">Vous ne le trouvez pas ? Vérifiez vos <strong>spams</strong>.</p>
+                </div>
+                <div class="form-group">
+                    <label for="otpCode"><i class="fas fa-key"></i> Code de vérification</label>
+                    <input type="text" id="otpCode" maxlength="6" pattern="[0-9]{6}" placeholder="000000" autocomplete="one-time-code" style="text-align:center;font-size:24px;letter-spacing:8px;font-weight:bold;" required>
+                </div>
+                <button type="button" id="verifyOtpBtn" class="login-btn" onclick="verify2FA()">
+                    <i class="fas fa-check-circle"></i> Vérifier
+                </button>
+                <div style="display:flex;justify-content:space-between;margin-top:15px;">
+                    <button type="button" id="resendOtpBtn" onclick="resend2FA()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:13px;font-weight:600;">
+                        <i class="fas fa-redo"></i> Renvoyer le code
+                    </button>
+                    <button type="button" onclick="back2FA()" style="background:none;border:none;color:#666;cursor:pointer;font-size:13px;">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1416,7 +1439,7 @@
 
                     <!-- Settings Tab -->
                     <div class="tab-content" id="settingsTab">
-                        <div class="section-card">
+                        <div class="section-card" id="usernameChangeSection">
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-user"></i>
@@ -1436,7 +1459,7 @@
                             </div>
                         </div>
 
-                        <div class="section-card">
+                        <div class="section-card" id="passwordChangeSection">
                             <div class="section-header">
                                 <h2>
                                     <i class="fas fa-lock"></i>
@@ -1463,6 +1486,93 @@
                                 </form>
                             </div>
                         </div>
+                        <!-- 2FA Security Section -->
+                        <div class="section-card">
+                            <div class="section-header" style="border-bottom: 3px solid #c0392b;">
+                                <h2 style="color: #c0392b;">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span data-i18n="admin.settings.two_factor_auth">Authentification à deux facteurs (2FA)</span>
+                                </h2>
+                            </div>
+                            <div class="section-body">
+                                <!-- 2FA Status Banner -->
+                                <div id="twoFactorStatus" style="padding: 14px 18px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;"></div>
+
+                                <!-- SETUP FORM (shown when 2FA is disabled) -->
+                                <div id="twoFactorSetupForm" style="max-width: 500px;">
+                                    <p style="color: #555; font-size: 14px; margin: 0 0 16px;">
+                                        <i class="fas fa-info-circle" style="color: #c0392b;"></i>
+                                        <span data-i18n="admin.settings.two_factor_info">Entrez votre email personnel pour recevoir un code de vérification à chaque connexion.</span>
+                                    </p>
+                                    <div class="form-group">
+                                        <label><i class="fas fa-envelope"></i> <span data-i18n="admin.settings.two_factor_personal_email">Votre email personnel (Gmail, Outlook, etc.)</span></label>
+                                        <input type="email" id="twoFactorSetupEmail" placeholder="exemple@gmail.com" style="width:100%;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><i class="fas fa-lock"></i> <span data-i18n="admin.settings.two_factor_account_password">Mot de passe du compte (pour confirmer)</span></label>
+                                        <input type="password" id="twoFactorSetupPassword" placeholder="Votre mot de passe actuel" style="width:100%;">
+                                    </div>
+                                    <button type="button" id="enable2FABtn" onclick="enable2FA()" class="action-btn btn-success" style="margin-top: 8px;">
+                                        <i class="fas fa-shield-alt"></i> <span data-i18n="admin.settings.two_factor_enable">Activer la 2FA</span>
+                                    </button>
+                                </div>
+
+                                <!-- ACTIVE VIEW (shown when 2FA is enabled) -->
+                                <div id="twoFactorActiveView" style="max-width: 500px; display: none;">
+                                    <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <i class="fas fa-check-circle" style="font-size: 28px; color: #22c55e;"></i>
+                                            <div>
+                                                <h4 style="margin: 0 0 4px; color: #166534;" data-i18n="admin.settings.two_factor_enabled">2FA est activé</h4>
+                                                <p style="margin: 0; font-size: 13px; color: #15803d;">
+                                                    <span data-i18n="admin.settings.two_factor_codes_sent_to">Les codes sont envoyés à :</span> <strong id="twoFactorActiveEmail">—</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Change email -->
+                                    <details style="margin-bottom: 12px;">
+                                        <summary style="cursor: pointer; font-size: 14px; color: #c0392b; font-weight: 600; padding: 8px 0;">
+                                            <i class="fas fa-pen"></i> <span data-i18n="admin.settings.two_factor_change_email">Changer l'email 2FA</span>
+                                        </summary>
+                                        <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; margin-top: 8px;">
+                                            <div class="form-group">
+                                                <label><i class="fas fa-envelope"></i> <span data-i18n="admin.settings.two_factor_new_email">Nouvel email</span></label>
+                                                <input type="email" id="twoFactorChangeEmail" placeholder="nouveau@gmail.com" style="width:100%;">
+                                            </div>
+                                            <div class="form-group">
+                                                <label><i class="fas fa-lock"></i> <span data-i18n="admin.settings.two_factor_password">Mot de passe</span></label>
+                                                <input type="password" id="twoFactorChangePassword" placeholder="Votre mot de passe" style="width:100%;">
+                                            </div>
+                                            <button type="button" onclick="change2FAEmail()" class="action-btn btn-primary" style="margin-top: 4px;">
+                                                <i class="fas fa-save"></i> <span data-i18n="admin.settings.two_factor_update">Mettre à jour</span>
+                                            </button>
+                                        </div>
+                                    </details>
+
+                                    <!-- Disable 2FA -->
+                                    <details>
+                                        <summary style="cursor: pointer; font-size: 14px; color: #dc2626; font-weight: 600; padding: 8px 0;">
+                                            <i class="fas fa-lock-open"></i> <span data-i18n="admin.settings.two_factor_disable">Désactiver la 2FA</span>
+                                        </summary>
+                                        <div style="padding: 16px; background: #fef2f2; border-radius: 8px; margin-top: 8px;">
+                                            <p style="font-size: 13px; color: #991b1b; margin: 0 0 12px;">
+                                                <i class="fas fa-exclamation-triangle"></i> <span data-i18n="admin.settings.two_factor_disable_warning">Votre compte sera moins protégé si vous désactivez la 2FA.</span>
+                                            </p>
+                                            <div class="form-group">
+                                                <label><i class="fas fa-lock"></i> <span data-i18n="admin.settings.two_factor_password_confirm">Mot de passe pour confirmer</span></label>
+                                                <input type="password" id="disable2FAPassword" placeholder="Votre mot de passe" style="width:100%;">
+                                            </div>
+                                            <button type="button" onclick="disable2FA()" class="action-btn btn-danger" style="margin-top: 4px;">
+                                                <i class="fas fa-lock-open"></i> <span data-i18n="admin.settings.two_factor_disable">Désactiver la 2FA</span>
+                                            </button>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Desktop App Download (SUPER_ADMIN / DEV only, hidden in desktop app) -->
                         <div class="section-card" id="desktopDownloadSection" style="display: none;">
                             <div class="section-header" style="border-bottom: 3px solid #667eea;">

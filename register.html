@@ -949,8 +949,8 @@
                 <a href="/">NISRINE <span class="red-text">SCHOOL</span></a>
             </div>
             
-            <h1 data-i18n="registration.student_registration">Student Registration</h1>
-            <p data-i18n="registration.fill_form">Fill out the form below to register for our courses</p>
+            <h1 data-i18n="registration.student_registration">Demande d'inscription</h1>
+            <p data-i18n="registration.fill_form">Remplissez le formulaire ci-dessous pour soumettre votre demande d'inscription</p>
             
             <!-- Registration Form -->
             <form id="registrationForm" enctype="multipart/form-data">
@@ -965,11 +965,6 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="cin"><i class="fas fa-id-card"></i> <span data-i18n="registration.cin">CIN (ID Number)</span> *</label>
-                    <input type="text" id="cin" name="cin" required>
-                </div>
-                
-                <div class="form-group">
                     <label for="city"><i class="fas fa-city"></i> <span data-i18n="registration.city">City / Quarter</span> *</label>
                     <input type="text" id="city" name="city" required>
                 </div>
@@ -977,12 +972,6 @@
                 <div class="form-group">
                     <label for="phoneNumber"><i class="fas fa-phone"></i> <span data-i18n="registration.gsm">GSM (Phone Number)</span> *</label>
                     <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
-                    <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="parentPhone"><i class="fas fa-phone-square"></i> <span data-i18n="registration.parent_phone">Parent Phone</span> *</label>
-                    <input type="tel" id="parentPhone" name="parentPhone" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
                     <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
                 </div>
                 
@@ -1003,7 +992,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label><i class="fas fa-language"></i> <span data-i18n="registration.formation">Formation (Languages)</span> *</label>
+                    <label><i class="fas fa-language"></i> <span data-i18n="registration.formation">Formation (Languages)</span></label>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" name="formationChoisie" value="Allemand" class="formation-checkbox">
@@ -1312,9 +1301,9 @@
                 const filiereCheckboxes = document.querySelectorAll('input[name="filiere"]:checked');
                 const selectedFilieres = Array.from(filiereCheckboxes).map(cb => cb.value);
                 
-                if (selectedFormations.length === 0) {
+                if (selectedFormations.length === 0 && selectedFilieres.length === 0) {
                     messageDiv.className = 'message error';
-                    messageDiv.textContent = '❌ Please select at least one Formation choisie (Language)';
+                    messageDiv.textContent = '❌ Please select at least one Language OR one Branch/Subject';
                     messageDiv.style.display = 'block';
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Registration';
@@ -1326,9 +1315,7 @@
                 formData.append('fullName', document.getElementById('fullName').value);
                 formData.append('dateOfBirth', document.getElementById('dateOfBirth').value);
                 formData.append('phoneNumber', document.getElementById('phoneNumber').value);
-                formData.append('cin', document.getElementById('cin').value);
                 formData.append('city', document.getElementById('city').value);
-                formData.append('parentPhone', document.getElementById('parentPhone').value);
                 // Handle study level - if "Autre" is selected, use the custom text
                 const studyLevelValue = document.getElementById('studyLevel').value;
                 if (studyLevelValue === 'Autre') {
@@ -1348,12 +1335,14 @@
                 
                 formData.append('photo', document.getElementById('photo').files[0]);
                 
-                // Debug: Log form data
-                console.log('Submitting form data:');
-                for (let pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1]);
+                // Get reCAPTCHA v3 token
+                if (typeof grecaptcha !== 'undefined' && window.RECAPTCHA_SITE_KEY) {
+                    try {
+                        const captchaToken = await grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'register' });
+                        formData.append('captchaToken', captchaToken);
+                    } catch (_) {}
                 }
-                
+
                 // Submit to API
                 const response = await fetch(`${API_BASE_URL}/api/register`, {
                     method: 'POST',
@@ -1392,6 +1381,10 @@
         });
     </script>
     
+    <!-- reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr" async defer></script>
+    <script>window.RECAPTCHA_SITE_KEY = '6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr';</script>
+
     <!-- Page Translation -->
     <script src="js/page-i18n.js"></script>
     <script>

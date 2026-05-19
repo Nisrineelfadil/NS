@@ -59,9 +59,10 @@ router.post('/register', authenticateAdmin, upload.single('photo'), async (req, 
             try {
                 formationChoisie = JSON.parse(formationChoisie);
             } catch (e) {
-                formationChoisie = [formationChoisie];
+                formationChoisie = formationChoisie ? [formationChoisie] : [];
             }
         }
+        if (!formationChoisie) formationChoisie = [];
         
         if (typeof filiere === 'string') {
             try {
@@ -70,10 +71,15 @@ router.post('/register', authenticateAdmin, upload.single('photo'), async (req, 
                 filiere = filiere ? [filiere] : [];
             }
         }
+        if (!filiere) filiere = [];
 
         // Validate required fields
+        // Student must select at least one language OR one branch
+        const hasFormation = formationChoisie && formationChoisie.length > 0;
+        const hasFiliere = filiere && filiere.length > 0;
+        
         if (!fullName || !dateOfBirth || !phoneNumber || !cin || !city || 
-            !parentPhone || !studyLevel || !formationChoisie || formationChoisie.length === 0) {
+            !parentPhone || !studyLevel || (!hasFormation && !hasFiliere)) {
             
             const missingFields = [];
             if (!fullName) missingFields.push('fullName');
@@ -83,7 +89,7 @@ router.post('/register', authenticateAdmin, upload.single('photo'), async (req, 
             if (!city) missingFields.push('city');
             if (!parentPhone) missingFields.push('parentPhone');
             if (!studyLevel) missingFields.push('studyLevel');
-            if (!formationChoisie || formationChoisie.length === 0) missingFields.push('formationChoisie');
+            if (!hasFormation && !hasFiliere) missingFields.push('formationChoisie or filiere');
             
             console.log('❌ Missing fields:', missingFields);
             

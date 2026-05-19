@@ -42,6 +42,25 @@ const adminSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    // 2FA Email OTP
+    twoFactorEnabled: {
+        type: Boolean,
+        default: false
+    },
+    twoFactorEmail: {
+        type: String,
+        default: null,
+        trim: true,
+        lowercase: true
+    },
+    twoFactorCode: {
+        type: String,
+        default: null
+    },
+    twoFactorExpiry: {
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

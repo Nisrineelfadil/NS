@@ -270,6 +270,30 @@ class EmailService {
         return { success: true };
     }
 
+    // Send 2FA verification code
+    async send2FACode(toEmail, code, adminName) {
+        const subject = `🔐 ${code} — Votre code de vérification Nisrine School`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: #c0392b; margin: 0;">Nisrine School</h2>
+                    <p style="color: #666; margin: 5px 0;">Code de vérification</p>
+                </div>
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 30px; text-align: center; border: 1px solid #e9ecef;">
+                    <p style="color: #333; margin: 0 0 15px; font-size: 14px;">Bonjour <strong>${adminName}</strong>,</p>
+                    <p style="color: #666; margin: 0 0 20px; font-size: 14px;">Voici votre code de connexion :</p>
+                    <div style="background: #fff; border: 2px dashed #c0392b; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <span style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #c0392b; font-family: monospace;">${code}</span>
+                    </div>
+                    <p style="color: #999; margin: 15px 0 0; font-size: 12px;">⏱ Ce code expire dans 5 minutes</p>
+                </div>
+                <p style="color: #999; font-size: 11px; text-align: center; margin-top: 20px;">Si vous n'avez pas demandé ce code, ignorez cet email.</p>
+            </div>
+        `;
+
+        return await this.sendEmail(toEmail, subject, html);
+    }
+
     // Test email configuration
     async sendTestEmail(toEmail) {
         const subject = 'Test Email - Nisrine School TELC System';

@@ -8,6 +8,7 @@ const megaService = require('../services/megaService');
 const notificationService = require('../services/notificationService');
 const { validatePDFUpload } = require('../middleware/pdfValidationMiddleware');
 const pdfValidator = require('../utils/pdfValidator');
+const { verifyCaptcha } = require('../middleware/captchaMiddleware');
 
 // Configure multer for file uploads (memory storage)
 const upload = multer({
@@ -30,7 +31,7 @@ const upload = multer({
 });
 
 // POST /api/services - Create new service request (public)
-router.post('/', async (req, res) => {
+router.post('/', verifyCaptcha, async (req, res) => {
     try {
         const { serviceType, fullName, phone, email, cvDetails, applyingDetails, translationDetails } = req.body;
 
@@ -89,7 +90,7 @@ const uploadMultiple = multer({
 
 // POST /api/services/upload - Create service request with file upload (public)
 // Supports both single file (file) and multiple files (files) for translation
-router.post('/upload', (req, res, next) => {
+router.post('/upload', verifyCaptcha, (req, res, next) => {
     // Use fields to accept both 'file' (single) and 'files' (multiple)
     uploadMultiple.fields([
         { name: 'file', maxCount: 1 },

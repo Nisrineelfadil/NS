@@ -124,6 +124,14 @@ document.getElementById('applyForm').addEventListener('submit', async (e) => {
             uploadFormData.append('document', fileInput.files[0]);
         }
 
+        // Get reCAPTCHA v3 token
+        if (typeof grecaptcha !== 'undefined' && window.RECAPTCHA_SITE_KEY) {
+            try {
+                const captchaToken = await grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'job_application' });
+                uploadFormData.append('captchaToken', captchaToken);
+            } catch (_) {}
+        }
+
         // Submit to new job applications public endpoint
         const response = await fetch(`${API_BASE_URL}/api/job-applications/public`, {
             method: 'POST',

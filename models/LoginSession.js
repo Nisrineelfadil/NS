@@ -58,7 +58,7 @@ const loginSessionSchema = new mongoose.Schema({
     },
     loginMethod: {
         type: String,
-        enum: ['password', 'secret_passcode'],
+        enum: ['password', 'secret_passcode', '2fa_email'],
         default: 'password'
     }
 });

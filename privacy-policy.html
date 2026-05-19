@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politique de Confidentialité — Nisrine School</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fdf6f0; color: #333; line-height: 1.8; }
+        .header { background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff; padding: 40px 20px; text-align: center; }
+        .header img { height: 60px; margin-bottom: 15px; }
+        .header h1 { font-size: 2rem; font-weight: 700; }
+        .container { max-width: 800px; margin: 40px auto; padding: 0 20px 60px; }
+        h2 { color: #c0392b; margin: 30px 0 12px; font-size: 1.3rem; }
+        p, li { margin-bottom: 10px; font-size: 0.95rem; }
+        ul { padding-left: 20px; }
+        .back-link { display: inline-block; margin-top: 30px; color: #c0392b; text-decoration: none; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .footer-mini { text-align: center; padding: 20px; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 40px; }
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
+        .lang-switcher { display: flex; gap: 6px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        .lang-btn { display: flex; align-items: center; gap: 4px; padding: 5px 12px; border: 2px solid #e0e0e0; border-radius: 20px; background: white; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s ease; color: #555; }
+        .lang-btn:hover { border-color: #DC143C; background: #fff5f5; }
+        .lang-btn.active { border-color: #DC143C; background: linear-gradient(135deg, #DC143C, #8B0000); color: white; }
+        body.rtl { direction: rtl; text-align: right; }
+        body.rtl ul { padding-left: 0; padding-right: 20px; }
+        body.rtl .back-link i { transform: rotate(180deg); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="/Img/logo.png" alt="Nisrine School Logo">
+        <h1 id="pageTitle">Politique de Confidentialité</h1>
+    </div>
+    <div class="container">
+        <div class="lang-switcher">
+            <button class="lang-btn" data-lang="de" onclick="switchLang('de')">🇩🇪 DE</button>
+            <button class="lang-btn" data-lang="en" onclick="switchLang('en')">🇬🇧 EN</button>
+            <button class="lang-btn active" data-lang="fr" onclick="switchLang('fr')">🇫🇷 FR</button>
+            <button class="lang-btn" data-lang="ar" onclick="switchLang('ar')">🇲🇦 عر</button>
+        </div>
+
+        <!-- FRENCH -->
+        <div class="lang-content active" id="lang-fr">
+            <p><strong>Dernière mise à jour :</strong> 18 mai 2026</p>
+            <h2>1. Introduction</h2>
+            <p>Nisrine School s'engage à protéger la vie privée de ses utilisateurs. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos données personnelles conformément à la loi marocaine n° 09-08 relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel et au Règlement Général sur la Protection des Données (RGPD).</p>
+            <h2>2. Données collectées</h2>
+            <p>Nous collectons les données suivantes lors de votre utilisation de nos services :</p>
+            <ul>
+                <li><strong>Données d'inscription :</strong> Nom complet, date de naissance, numéro de téléphone, ville, niveau d'études, formation choisie, photo d'identité.</li>
+                <li><strong>Données de contact :</strong> Nom, email, message (via le formulaire de contact).</li>
+                <li><strong>Données techniques :</strong> Adresse IP, type de navigateur, pages visitées (à des fins d'analyse).</li>
+            </ul>
+            <h2>3. Utilisation des données</h2>
+            <p>Vos données sont utilisées exclusivement pour :</p>
+            <ul>
+                <li>Traiter votre demande d'inscription aux cours.</li>
+                <li>Vous contacter concernant votre inscription ou nos services.</li>
+                <li>Améliorer la qualité de nos services et de notre site web.</li>
+                <li>Respecter nos obligations légales.</li>
+            </ul>
+            <h2>4. Protection des données</h2>
+            <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos données, notamment :</p>
+            <ul>
+                <li>Chiffrement des communications (SSL/TLS).</li>
+                <li>Authentification sécurisée par tokens JWT.</li>
+                <li>Hachage des mots de passe avec bcrypt.</li>
+                <li>Stockage sécurisé des photos dans un service cloud protégé.</li>
+            </ul>
+            <h2>5. Partage des données</h2>
+            <p>Nous ne vendons, ne louons ni ne partageons vos données personnelles avec des tiers, sauf dans les cas suivants :</p>
+            <ul>
+                <li>Obligation légale ou demande des autorités compétentes.</li>
+                <li>Prestataires techniques nécessaires au fonctionnement du service (hébergement, stockage).</li>
+            </ul>
+            <h2>6. Vos droits</h2>
+            <p>Conformément à la loi 09-08 et au RGPD, vous disposez des droits suivants :</p>
+            <ul>
+                <li><strong>Droit d'accès :</strong> obtenir une copie de vos données personnelles.</li>
+                <li><strong>Droit de rectification :</strong> corriger des données inexactes.</li>
+                <li><strong>Droit de suppression :</strong> demander l'effacement de vos données.</li>
+                <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données.</li>
+            </ul>
+            <p>Pour exercer ces droits, contactez-nous par email ou via notre formulaire de contact.</p>
+            <h2>7. Cookies</h2>
+            <p>Notre site utilise des cookies techniques nécessaires au bon fonctionnement du service. Aucun cookie publicitaire ou de suivi tiers n'est utilisé.</p>
+            <h2>8. Contact</h2>
+            <p>Pour toute question relative à cette politique :</p>
+            <ul>
+                <li><strong>Adresse :</strong> N° 429 Avenue Saint Louis Lot Zaza, Fès 30000, Maroc</li>
+                <li><strong>Téléphone :</strong> +212 664-648455</li>
+                <li><strong>Email :</strong> <span class="obf-email" data-user="nisrineschool2024" data-domain="gmail.com"></span></li>
+            </ul>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a>
+        </div>
+
+        <!-- ENGLISH -->
+        <div class="lang-content" id="lang-en">
+            <p><strong>Last updated:</strong> May 18, 2026</p>
+            <h2>1. Introduction</h2>
+            <p>Nisrine School is committed to protecting the privacy of its users. This privacy policy explains how we collect, use, and protect your personal data in accordance with Moroccan Law No. 09-08 on the protection of individuals with regard to the processing of personal data and the General Data Protection Regulation (GDPR).</p>
+            <h2>2. Data Collected</h2>
+            <p>We collect the following data when you use our services:</p>
+            <ul>
+                <li><strong>Registration data:</strong> Full name, date of birth, phone number, city, education level, chosen course, ID photo.</li>
+                <li><strong>Contact data:</strong> Name, email, message (via the contact form).</li>
+                <li><strong>Technical data:</strong> IP address, browser type, pages visited (for analytics purposes).</li>
+            </ul>
+            <h2>3. Use of Data</h2>
+            <p>Your data is used exclusively for:</p>
+            <ul>
+                <li>Processing your course registration request.</li>
+                <li>Contacting you regarding your registration or our services.</li>
+                <li>Improving the quality of our services and website.</li>
+                <li>Complying with our legal obligations.</li>
+            </ul>
+            <h2>4. Data Protection</h2>
+            <p>We implement appropriate technical and organizational security measures to protect your data, including:</p>
+            <ul>
+                <li>Encrypted communications (SSL/TLS).</li>
+                <li>Secure authentication via JWT tokens.</li>
+                <li>Password hashing with bcrypt.</li>
+                <li>Secure photo storage in a protected cloud service.</li>
+            </ul>
+            <h2>5. Data Sharing</h2>
+            <p>We do not sell, rent, or share your personal data with third parties, except in the following cases:</p>
+            <ul>
+                <li>Legal obligation or request from competent authorities.</li>
+                <li>Technical providers necessary for the operation of the service (hosting, storage).</li>
+            </ul>
+            <h2>6. Your Rights</h2>
+            <p>In accordance with Law 09-08 and the GDPR, you have the following rights:</p>
+            <ul>
+                <li><strong>Right of access:</strong> obtain a copy of your personal data.</li>
+                <li><strong>Right of rectification:</strong> correct inaccurate data.</li>
+                <li><strong>Right of erasure:</strong> request the deletion of your data.</li>
+                <li><strong>Right to object:</strong> object to the processing of your data.</li>
+            </ul>
+            <p>To exercise these rights, contact us by email or via our contact form.</p>
+            <h2>7. Cookies</h2>
+            <p>Our website uses technical cookies necessary for the proper functioning of the service. No advertising or third-party tracking cookies are used.</p>
+            <h2>8. Contact</h2>
+            <p>For any questions regarding this policy:</p>
+            <ul>
+                <li><strong>Address:</strong> N° 429 Avenue Saint Louis Lot Zaza, Fes 30000, Morocco</li>
+                <li><strong>Phone:</strong> +212 664-648455</li>
+                <li><strong>Email:</strong> <span class="obf-email" data-user="nisrineschool2024" data-domain="gmail.com"></span></li>
+            </ul>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        </div>
+
+        <!-- GERMAN -->
+        <div class="lang-content" id="lang-de">
+            <p><strong>Letzte Aktualisierung:</strong> 18. Mai 2026</p>
+            <h2>1. Einleitung</h2>
+            <p>Die Nisrine Schule verpflichtet sich, die Privatsphäre ihrer Nutzer zu schützen. Diese Datenschutzrichtlinie erklärt, wie wir Ihre personenbezogenen Daten erfassen, verwenden und schützen, in Übereinstimmung mit dem marokkanischen Gesetz Nr. 09-08 zum Schutz natürlicher Personen bei der Verarbeitung personenbezogener Daten und der Datenschutz-Grundverordnung (DSGVO).</p>
+            <h2>2. Erfasste Daten</h2>
+            <p>Wir erfassen die folgenden Daten bei der Nutzung unserer Dienste:</p>
+            <ul>
+                <li><strong>Anmeldedaten:</strong> Vollständiger Name, Geburtsdatum, Telefonnummer, Stadt, Bildungsniveau, gewählter Kurs, Passfoto.</li>
+                <li><strong>Kontaktdaten:</strong> Name, E-Mail, Nachricht (über das Kontaktformular).</li>
+                <li><strong>Technische Daten:</strong> IP-Adresse, Browsertyp, besuchte Seiten (zu Analysezwecken).</li>
+            </ul>
+            <h2>3. Verwendung der Daten</h2>
+            <p>Ihre Daten werden ausschließlich für folgende Zwecke verwendet:</p>
+            <ul>
+                <li>Bearbeitung Ihres Kursanmeldeantrags.</li>
+                <li>Kontaktaufnahme bezüglich Ihrer Anmeldung oder unserer Dienstleistungen.</li>
+                <li>Verbesserung der Qualität unserer Dienstleistungen und unserer Website.</li>
+                <li>Erfüllung unserer gesetzlichen Verpflichtungen.</li>
+            </ul>
+            <h2>4. Datenschutz</h2>
+            <p>Wir setzen angemessene technische und organisatorische Sicherheitsmaßnahmen zum Schutz Ihrer Daten um, darunter:</p>
+            <ul>
+                <li>Verschlüsselte Kommunikation (SSL/TLS).</li>
+                <li>Sichere Authentifizierung über JWT-Tokens.</li>
+                <li>Passwort-Hashing mit bcrypt.</li>
+                <li>Sichere Fotospeicherung in einem geschützten Cloud-Dienst.</li>
+            </ul>
+            <h2>5. Datenweitergabe</h2>
+            <p>Wir verkaufen, vermieten oder teilen Ihre personenbezogenen Daten nicht mit Dritten, außer in folgenden Fällen:</p>
+            <ul>
+                <li>Gesetzliche Verpflichtung oder Anfrage zuständiger Behörden.</li>
+                <li>Technische Dienstleister, die für den Betrieb des Dienstes erforderlich sind (Hosting, Speicherung).</li>
+            </ul>
+            <h2>6. Ihre Rechte</h2>
+            <p>Gemäß dem Gesetz 09-08 und der DSGVO haben Sie folgende Rechte:</p>
+            <ul>
+                <li><strong>Auskunftsrecht:</strong> Eine Kopie Ihrer personenbezogenen Daten erhalten.</li>
+                <li><strong>Berichtigungsrecht:</strong> Unrichtige Daten korrigieren.</li>
+                <li><strong>Recht auf Löschung:</strong> Die Löschung Ihrer Daten beantragen.</li>
+                <li><strong>Widerspruchsrecht:</strong> Der Verarbeitung Ihrer Daten widersprechen.</li>
+            </ul>
+            <p>Um diese Rechte auszuüben, kontaktieren Sie uns per E-Mail oder über unser Kontaktformular.</p>
+            <h2>7. Cookies</h2>
+            <p>Unsere Website verwendet technische Cookies, die für das ordnungsgemäße Funktionieren des Dienstes erforderlich sind. Es werden keine Werbe- oder Drittanbieter-Tracking-Cookies verwendet.</p>
+            <h2>8. Kontakt</h2>
+            <p>Bei Fragen zu dieser Richtlinie:</p>
+            <ul>
+                <li><strong>Adresse:</strong> N° 429 Avenue Saint Louis Lot Zaza, Fes 30000, Marokko</li>
+                <li><strong>Telefon:</strong> +212 664-648455</li>
+                <li><strong>E-Mail:</strong> <span class="obf-email" data-user="nisrineschool2024" data-domain="gmail.com"></span></li>
+            </ul>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Zurück zur Startseite</a>
+        </div>
+
+        <!-- ARABIC -->
+        <div class="lang-content" id="lang-ar">
+            <p><strong>آخر تحديث:</strong> 18 ماي 2026</p>
+            <h2>1. مقدمة</h2>
+            <p>تلتزم مدرسة نسرين بحماية خصوصية مستخدميها. توضح سياسة الخصوصية هذه كيفية جمع بياناتكم الشخصية واستخدامها وحمايتها وفقاً للقانون المغربي رقم 09-08 المتعلق بحماية الأشخاص الذاتيين تجاه معالجة المعطيات ذات الطابع الشخصي والنظام العام لحماية البيانات (RGPD).</p>
+            <h2>2. البيانات المجمعة</h2>
+            <p>نجمع البيانات التالية عند استخدامكم لخدماتنا:</p>
+            <ul>
+                <li><strong>بيانات التسجيل:</strong> الاسم الكامل، تاريخ الازدياد، رقم الهاتف، المدينة، المستوى الدراسي، التكوين المختار، صورة شخصية.</li>
+                <li><strong>بيانات الاتصال:</strong> الاسم، البريد الإلكتروني، الرسالة (عبر نموذج الاتصال).</li>
+                <li><strong>بيانات تقنية:</strong> عنوان IP، نوع المتصفح، الصفحات التي تمت زيارتها (لأغراض التحليل).</li>
+            </ul>
+            <h2>3. استخدام البيانات</h2>
+            <p>تُستخدم بياناتكم حصرياً من أجل:</p>
+            <ul>
+                <li>معالجة طلب تسجيلكم في الدورات.</li>
+                <li>الاتصال بكم بخصوص تسجيلكم أو خدماتنا.</li>
+                <li>تحسين جودة خدماتنا وموقعنا الإلكتروني.</li>
+                <li>الامتثال لالتزاماتنا القانونية.</li>
+            </ul>
+            <h2>4. حماية البيانات</h2>
+            <p>نطبق تدابير أمنية تقنية وتنظيمية مناسبة لحماية بياناتكم، بما في ذلك:</p>
+            <ul>
+                <li>تشفير الاتصالات (SSL/TLS).</li>
+                <li>مصادقة آمنة عبر رموز JWT.</li>
+                <li>تشفير كلمات المرور باستخدام bcrypt.</li>
+                <li>تخزين آمن للصور في خدمة سحابية محمية.</li>
+            </ul>
+            <h2>5. مشاركة البيانات</h2>
+            <p>لا نبيع أو نؤجر أو نشارك بياناتكم الشخصية مع أطراف ثالثة، إلا في الحالات التالية:</p>
+            <ul>
+                <li>التزام قانوني أو طلب من السلطات المختصة.</li>
+                <li>مقدمو خدمات تقنية ضروريون لتشغيل الخدمة (الاستضافة، التخزين).</li>
+            </ul>
+            <h2>6. حقوقكم</h2>
+            <p>وفقاً للقانون 09-08 والنظام العام لحماية البيانات، لديكم الحقوق التالية:</p>
+            <ul>
+                <li><strong>حق الوصول:</strong> الحصول على نسخة من بياناتكم الشخصية.</li>
+                <li><strong>حق التصحيح:</strong> تصحيح البيانات غير الدقيقة.</li>
+                <li><strong>حق الحذف:</strong> طلب محو بياناتكم.</li>
+                <li><strong>حق الاعتراض:</strong> الاعتراض على معالجة بياناتكم.</li>
+            </ul>
+            <p>لممارسة هذه الحقوق، اتصلوا بنا عبر البريد الإلكتروني أو عبر نموذج الاتصال.</p>
+            <h2>7. ملفات تعريف الارتباط</h2>
+            <p>يستخدم موقعنا ملفات تعريف الارتباط التقنية الضرورية لحسن سير الخدمة. لا يتم استخدام أي ملفات تعريف ارتباط إعلانية أو تتبع من طرف ثالث.</p>
+            <h2>8. الاتصال</h2>
+            <p>لأي سؤال يتعلق بهذه السياسة:</p>
+            <ul>
+                <li><strong>العنوان:</strong> رقم 429 شارع سان لوي لوت زازا، فاس 30000، المغرب</li>
+                <li><strong>الهاتف:</strong> 648455-664 212+</li>
+                <li><strong>البريد الإلكتروني:</strong> <span class="obf-email" data-user="nisrineschool2024" data-domain="gmail.com"></span></li>
+            </ul>
+            <a href="/" class="back-link"><i class="fas fa-arrow-right"></i> العودة إلى الصفحة الرئيسية</a>
+        </div>
+    </div>
+    <div class="footer-mini">&copy; 2025 Nisrine School.</div>
+
+    <script>
+    var titles = { fr: 'Politique de Confidentialité', en: 'Privacy Policy', de: 'Datenschutzrichtlinie', ar: 'سياسة الخصوصية' };
+    function switchLang(lang) {
+        document.querySelectorAll('.lang-content').forEach(function(el) { el.classList.remove('active'); });
+        var target = document.getElementById('lang-' + lang);
+        if (target) target.classList.add('active');
+        document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.lang === lang); });
+        document.getElementById('pageTitle').textContent = titles[lang] || titles.fr;
+        document.documentElement.setAttribute('lang', lang);
+        if (lang === 'ar') { document.body.classList.add('rtl'); document.documentElement.setAttribute('dir', 'rtl'); }
+        else { document.body.classList.remove('rtl'); document.documentElement.setAttribute('dir', 'ltr'); }
+        localStorage.setItem('preferredLanguage', lang);
+        // Re-run email obfuscation for newly visible content
+        document.querySelectorAll('.obf-email').forEach(function(el) {
+            var u = el.getAttribute('data-user'), d = el.getAttribute('data-domain');
+            el.innerHTML = '<a href="mai' + 'lto:' + u + '@' + d + '">' + u + '@' + d + '</a>';
+        });
+    }
+    // Init: use saved language preference
+    var savedLang = localStorage.getItem('preferredLanguage') || 'fr';
+    switchLang(savedLang);
+    </script>
+</body>
+</html>

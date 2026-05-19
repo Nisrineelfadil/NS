@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Message = require('../models/Message');
 const notificationService = require('../services/notificationService');
+const { verifyCaptcha } = require('../middleware/captchaMiddleware');
 
 // POST /api/contact - Submit a new contact message
-router.post('/', async (req, res) => {
+router.post('/', verifyCaptcha, async (req, res) => {
     try {
         const { fullName, phoneNumber, message } = req.body;
 

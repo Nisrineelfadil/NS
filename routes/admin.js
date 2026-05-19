@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const Admin = require('../models/Admin');
 const LoginSession = require('../models/LoginSession');
 const AdminActivity = require('../models/AdminActivity');
@@ -16,6 +17,12 @@ const Settings = require('../models/Settings');
 const { authenticateAdmin, requireSuperAdmin, checkActiveStatus } = require('../middleware/authMiddleware');
 const { createBulkDownloadZip, getDownloadStatistics } = require('../services/bulkDownload');
 const megaService = require('../services/megaService');
+const emailService = require('../services/emailService');
+
+// Generate a 6-digit OTP code
+function generate2FACode() {
+    return crypto.randomInt(100000, 999999).toString();
+}
 
 // Helper functions
 function getClientIp(req) {
@@ -249,7 +256,41 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Generate JWT token with role
+        // 2FA Check: if enabled and personal 2FA email is set, send OTP
+        if (admin.twoFactorEnabled && admin.twoFactorEmail) {
+            const code = generate2FACode();
+            admin.twoFactorCode = code;
+            admin.twoFactorExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+            await admin.save();
+
+            // Send OTP to admin's personal 2FA email (fire-and-forget for speed)
+            emailService.initialize();
+            emailService.send2FACode(admin.twoFactorEmail, code, admin.username).catch(err => {
+                console.error('2FA email send error:', err.message);
+            });
+
+            // Issue a short-lived temp token (valid only for 2FA verification)
+            const tempToken = jwt.sign(
+                { id: admin._id, purpose: '2fa_verify' },
+                JWT_SECRET,
+                { expiresIn: '5m' }
+            );
+
+            // Mask personal email for display (z****i@gmail.com)
+            const emailParts = admin.twoFactorEmail.split('@');
+            const maskedUser = emailParts[0][0] + '****' + emailParts[0].slice(-1);
+            const maskedEmail = maskedUser + '@' + emailParts[1];
+
+            return res.json({
+                success: true,
+                requires2FA: true,
+                tempToken,
+                maskedEmail,
+                message: 'Code de vérification envoyé par email'
+            });
+        }
+
+        // No 2FA — issue JWT directly
         const token = jwt.sign(
             { id: admin._id, username: admin.username, role: admin.role },
             JWT_SECRET,
@@ -305,6 +346,309 @@ router.post('/login', async (req, res) => {
             success: false, 
             message: 'Server error' 
         });
+    }
+});
+
+// POST /api/admin/2fa/verify-login - Verify 2FA code and complete login
+router.post('/2fa/verify-login', async (req, res) => {
+    try {
+        const { tempToken, code } = req.body;
+
+        if (!tempToken || !code) {
+            return res.status(400).json({ success: false, message: 'Token and code are required' });
+        }
+
+        // Verify temp token
+        let decoded;
+        try {
+            decoded = jwt.verify(tempToken, JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ success: false, message: 'Code expiré. Veuillez vous reconnecter.' });
+        }
+
+        if (decoded.purpose !== '2fa_verify') {
+            return res.status(401).json({ success: false, message: 'Invalid token' });
+        }
+
+        const admin = await Admin.findById(decoded.id);
+        if (!admin) {
+            return res.status(401).json({ success: false, message: 'Account not found' });
+        }
+
+        // Check code validity
+        if (!admin.twoFactorCode || !admin.twoFactorExpiry) {
+            return res.status(400).json({ success: false, message: 'No pending verification code' });
+        }
+
+        if (new Date() > admin.twoFactorExpiry) {
+            return res.status(401).json({ success: false, message: 'Code expiré. Cliquez sur Renvoyer.' });
+        }
+
+        if (admin.twoFactorCode !== code.trim()) {
+            return res.status(401).json({ success: false, message: 'Code incorrect' });
+        }
+
+        // Code is valid — clear it and issue real JWT
+        admin.twoFactorCode = null;
+        admin.twoFactorExpiry = null;
+        await admin.save();
+
+        const token = jwt.sign(
+            { id: admin._id, username: admin.username, role: admin.role },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        // Get client info & create session
+        const ipAddress = getClientIp(req);
+        const userAgent = req.headers['user-agent'] || 'Unknown';
+        const { browser, os, device } = parseUserAgent(userAgent);
+        const platform = detectPlatform(userAgent);
+
+        const session = new LoginSession({
+            adminId: admin._id,
+            adminName: admin.username,
+            adminRole: admin.role,
+            ipAddress,
+            userAgent,
+            browser,
+            os,
+            device,
+            platform,
+            loginMethod: '2fa_email'
+        });
+        await session.save();
+
+        await logActivity({
+            adminId: admin._id,
+            adminUsername: admin.username,
+            action: 'login',
+            targetType: 'system',
+            details: 'Login with 2FA email verification',
+            req
+        });
+
+        res.json({
+            success: true,
+            message: 'Login successful',
+            token,
+            admin: {
+                id: admin._id,
+                username: admin.username,
+                email: admin.email,
+                role: admin.role
+            }
+        });
+
+    } catch (error) {
+        console.error('2FA verify error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// POST /api/admin/2fa/resend - Resend 2FA code
+router.post('/2fa/resend', async (req, res) => {
+    try {
+        const { tempToken } = req.body;
+
+        if (!tempToken) {
+            return res.status(400).json({ success: false, message: 'Token required' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(tempToken, JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ success: false, message: 'Session expirée. Veuillez vous reconnecter.' });
+        }
+
+        if (decoded.purpose !== '2fa_verify') {
+            return res.status(401).json({ success: false, message: 'Invalid token' });
+        }
+
+        const admin = await Admin.findById(decoded.id);
+        if (!admin) {
+            return res.status(401).json({ success: false, message: 'Account not found' });
+        }
+
+        // Generate new code
+        const code = generate2FACode();
+        admin.twoFactorCode = code;
+        admin.twoFactorExpiry = new Date(Date.now() + 5 * 60 * 1000);
+        await admin.save();
+
+        // Send to admin's personal 2FA email
+        emailService.initialize();
+        emailService.send2FACode(admin.twoFactorEmail, code, admin.username).catch(err => {
+            console.error('2FA resend email error:', err.message);
+        });
+
+        res.json({ success: true, message: 'Nouveau code envoyé' });
+
+    } catch (error) {
+        console.error('2FA resend error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// POST /api/admin/2fa/enable - Enable 2FA (requires personal email + password)
+router.post('/2fa/enable', authenticateAdmin, checkActiveStatus, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const admin = await Admin.findById(req.adminId);
+
+        if (!admin) {
+            return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email et mot de passe requis' });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ success: false, message: 'Format d\'email invalide' });
+        }
+
+        // Verify password
+        const isMatch = await admin.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Mot de passe incorrect' });
+        }
+
+        admin.twoFactorEnabled = true;
+        admin.twoFactorEmail = email.trim().toLowerCase();
+        await admin.save();
+
+        await logActivity({
+            adminId: admin._id,
+            adminUsername: admin.username,
+            action: 'update',
+            targetType: 'system',
+            details: `2FA enabled with email ${email}`,
+            req
+        });
+
+        res.json({ success: true, message: '2FA activé avec succès', twoFactorEmail: admin.twoFactorEmail });
+
+    } catch (error) {
+        console.error('2FA enable error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// POST /api/admin/2fa/update-email - Change 2FA email (requires password)
+router.post('/2fa/update-email', authenticateAdmin, checkActiveStatus, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const admin = await Admin.findById(req.adminId);
+
+        if (!admin) {
+            return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email et mot de passe requis' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ success: false, message: 'Format d\'email invalide' });
+        }
+
+        const isMatch = await admin.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Mot de passe incorrect' });
+        }
+
+        admin.twoFactorEmail = email.trim().toLowerCase();
+        await admin.save();
+
+        await logActivity({
+            adminId: admin._id,
+            adminUsername: admin.username,
+            action: 'update',
+            targetType: 'system',
+            details: `2FA email changed to ${email}`,
+            req
+        });
+
+        res.json({ success: true, message: 'Email 2FA mis à jour', twoFactorEmail: admin.twoFactorEmail });
+
+    } catch (error) {
+        console.error('2FA update-email error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// POST /api/admin/2fa/disable - Disable 2FA (requires password confirmation)
+router.post('/2fa/disable', authenticateAdmin, checkActiveStatus, async (req, res) => {
+    try {
+        const { password } = req.body;
+        const admin = await Admin.findById(req.adminId);
+
+        if (!admin) {
+            return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+
+        if (!admin.twoFactorEnabled) {
+            return res.json({ success: true, message: '2FA is already disabled' });
+        }
+
+        if (!password) {
+            return res.status(400).json({ success: false, message: 'Mot de passe requis' });
+        }
+
+        const isMatch = await admin.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Mot de passe incorrect' });
+        }
+
+        admin.twoFactorEnabled = false;
+        admin.twoFactorEmail = null;
+        admin.twoFactorCode = null;
+        admin.twoFactorExpiry = null;
+        await admin.save();
+
+        await logActivity({
+            adminId: admin._id,
+            adminUsername: admin.username,
+            action: 'update',
+            targetType: 'system',
+            details: '2FA disabled',
+            req
+        });
+
+        res.json({ success: true, message: '2FA désactivé' });
+
+    } catch (error) {
+        console.error('2FA disable error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// GET /api/admin/2fa/status - Get 2FA status for current admin
+router.get('/2fa/status', authenticateAdmin, async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.adminId);
+        if (!admin) {
+            return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+        // Mask the 2FA email for display
+        let maskedEmail = null;
+        if (admin.twoFactorEmail) {
+            const parts = admin.twoFactorEmail.split('@');
+            maskedEmail = parts[0][0] + '****' + parts[0].slice(-1) + '@' + parts[1];
+        }
+        res.json({
+            success: true,
+            twoFactorEnabled: admin.twoFactorEnabled,
+            twoFactorEmail: admin.twoFactorEmail || null,
+            maskedEmail
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 

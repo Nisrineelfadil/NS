@@ -277,6 +277,14 @@ document.getElementById('cvForm').addEventListener('submit', async (e) => {
         });
         uploadFormData.append('documentCount', files.length);
 
+        // Get reCAPTCHA v3 token
+        if (typeof grecaptcha !== 'undefined' && window.RECAPTCHA_SITE_KEY) {
+            try {
+                const captchaToken = await grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'cv_service' });
+                uploadFormData.append('captchaToken', captchaToken);
+            } catch (_) {}
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/services/upload`, {
             method: 'POST',
             body: uploadFormData

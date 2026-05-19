@@ -685,7 +685,24 @@
                     "desktop_app_title": "Nisrine School Admin - Desktop-Version",
                     "desktop_app_desc": "Laden Sie die Desktop-Anwendung für ein besseres Erlebnis herunter. Kein Browser nötig, funktioniert mit automatischen Updates.",
                     "download_windows": "Für Windows herunterladen",
-                    "share_link": "Teilen Sie diesen Link mit Mitarbeitern, um die App zu installieren:"
+                    "share_link": "Teilen Sie diesen Link mit Mitarbeitern, um die App zu installieren:",
+                    "two_factor_auth": "Zwei-Faktor-Authentifizierung (2FA)",
+                    "two_factor_enabled": "2FA aktiviert",
+                    "two_factor_disabled": "2FA deaktiviert",
+                    "two_factor_protected": "Ihr Konto ist geschützt",
+                    "two_factor_less_protected": "Ihr Konto ist weniger geschützt",
+                    "two_factor_info": "Geben Sie Ihre persönliche E-Mail ein, um bei jeder Anmeldung einen Bestätigungscode zu erhalten.",
+                    "two_factor_personal_email": "Ihre persönliche E-Mail (Gmail, Outlook, etc.)",
+                    "two_factor_account_password": "Kontopasswort (zur Bestätigung)",
+                    "two_factor_enable": "2FA aktivieren",
+                    "two_factor_codes_sent_to": "Codes werden gesendet an:",
+                    "two_factor_change_email": "2FA-E-Mail ändern",
+                    "two_factor_new_email": "Neue E-Mail",
+                    "two_factor_password": "Passwort",
+                    "two_factor_update": "Aktualisieren",
+                    "two_factor_disable": "2FA deaktivieren",
+                    "two_factor_disable_warning": "Ihr Konto wird weniger geschützt, wenn Sie 2FA deaktivieren.",
+                    "two_factor_password_confirm": "Passwort zur Bestätigung"
                 }
             }
         }
@@ -1401,7 +1418,24 @@
                     "desktop_app_title": "Nisrine School Admin - Desktop Version",
                     "desktop_app_desc": "Download the desktop application for a better experience. No browser needed, works with auto-updates.",
                     "download_windows": "Download for Windows",
-                    "share_link": "Share this link with employees to install the app:"
+                    "share_link": "Share this link with employees to install the app:",
+                    "two_factor_auth": "Two-Factor Authentication (2FA)",
+                    "two_factor_enabled": "2FA enabled",
+                    "two_factor_disabled": "2FA disabled",
+                    "two_factor_protected": "Your account is protected",
+                    "two_factor_less_protected": "Your account is less protected",
+                    "two_factor_info": "Enter your personal email to receive a verification code each time you log in.",
+                    "two_factor_personal_email": "Your personal email (Gmail, Outlook, etc.)",
+                    "two_factor_account_password": "Account password (to confirm)",
+                    "two_factor_enable": "Enable 2FA",
+                    "two_factor_codes_sent_to": "Codes are sent to:",
+                    "two_factor_change_email": "Change 2FA email",
+                    "two_factor_new_email": "New email",
+                    "two_factor_password": "Password",
+                    "two_factor_update": "Update",
+                    "two_factor_disable": "Disable 2FA",
+                    "two_factor_disable_warning": "Your account will be less protected if you disable 2FA.",
+                    "two_factor_password_confirm": "Password to confirm"
                 }
             }
         }
@@ -2117,7 +2151,24 @@
                     "desktop_app_title": "Nisrine School Admin - Version Bureau",
                     "desktop_app_desc": "Téléchargez l'application bureau pour une meilleure expérience. Pas de navigateur nécessaire, mises à jour automatiques.",
                     "download_windows": "Télécharger pour Windows",
-                    "share_link": "Partagez ce lien avec les employés pour installer l'application :"
+                    "share_link": "Partagez ce lien avec les employés pour installer l'application :",
+                    "two_factor_auth": "Authentification à deux facteurs (2FA)",
+                    "two_factor_enabled": "2FA activé",
+                    "two_factor_disabled": "2FA désactivé",
+                    "two_factor_protected": "Votre compte est protégé",
+                    "two_factor_less_protected": "Votre compte est moins protégé",
+                    "two_factor_info": "Entrez votre email personnel pour recevoir un code de vérification à chaque connexion.",
+                    "two_factor_personal_email": "Votre email personnel (Gmail, Outlook, etc.)",
+                    "two_factor_account_password": "Mot de passe du compte (pour confirmer)",
+                    "two_factor_enable": "Activer la 2FA",
+                    "two_factor_codes_sent_to": "Les codes sont envoyés à :",
+                    "two_factor_change_email": "Changer l'email 2FA",
+                    "two_factor_new_email": "Nouvel email",
+                    "two_factor_password": "Mot de passe",
+                    "two_factor_update": "Mettre à jour",
+                    "two_factor_disable": "Désactiver la 2FA",
+                    "two_factor_disable_warning": "Votre compte sera moins protégé si vous désactivez la 2FA.",
+                    "two_factor_password_confirm": "Mot de passe pour confirmer"
                 }
             }
         }
@@ -2833,7 +2884,24 @@
                     "desktop_app_title": "إدارة مدرسة نسرين - نسخة سطح المكتب",
                     "desktop_app_desc": "قم بتنزيل تطبيق سطح المكتب لتجربة أفضل. لا حاجة للمتصفح، يعمل مع التحديثات التلقائية.",
                     "download_windows": "تنزيل لنظام ويندوز",
-                    "share_link": "شارك هذا الرابط مع الموظفين لتثبيت التطبيق:"
+                    "share_link": "شارك هذا الرابط مع الموظفين لتثبيت التطبيق:",
+                    "two_factor_auth": "المصادقة الثنائية (2FA)",
+                    "two_factor_enabled": "2FA مفعّل",
+                    "two_factor_disabled": "2FA معطّل",
+                    "two_factor_protected": "حسابك محمي",
+                    "two_factor_less_protected": "حسابك أقل حماية",
+                    "two_factor_info": "أدخل بريدك الإلكتروني الشخصي لتلقي رمز التحقق في كل مرة تسجل فيها الدخول.",
+                    "two_factor_personal_email": "بريدك الإلكتروني الشخصي (Gmail، Outlook، إلخ)",
+                    "two_factor_account_password": "كلمة مرور الحساب (للتأكيد)",
+                    "two_factor_enable": "تفعيل 2FA",
+                    "two_factor_codes_sent_to": "يتم إرسال الرموز إلى:",
+                    "two_factor_change_email": "تغيير بريد 2FA",
+                    "two_factor_new_email": "بريد إلكتروني جديد",
+                    "two_factor_password": "كلمة المرور",
+                    "two_factor_update": "تحديث",
+                    "two_factor_disable": "تعطيل 2FA",
+                    "two_factor_disable_warning": "سيكون حسابك أقل حماية إذا قمت بتعطيل 2FA.",
+                    "two_factor_password_confirm": "كلمة المرور للتأكيد"
                 }
             }
         }

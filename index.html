@@ -629,7 +629,7 @@
                         </div>
                         <div>
                             <h3>Email</h3>
-                            <p>nisrineschool2024@gmail.com</p>
+                            <p><span id="contactEmail" data-user="nisrineschool2024" data-domain="gmail.com"></span></p>
                         </div>
                     </div>
                     <div class="social-links">
@@ -756,9 +756,9 @@
                 <h3 data-i18n="ratings.reviews_title">What Our Students Say</h3>
                 <div id="approvedRatingsGrid" class="ratings-grid">
                     <!-- Ratings will be loaded here dynamically -->
-                    <div class="loading-ratings">
+                    <div class="loading-ratings" id="loadingRatings">
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading reviews...</p>
+                        <p data-i18n="ratings.loading">Loading reviews...</p>
                     </div>
                 </div>
             </div>
@@ -806,16 +806,16 @@
                         <li><i class="fas fa-map-marker-alt"></i> <span data-i18n="footer.address">N° 429 AVENUE SAINT LOUIS LOT ZAZA, Fes 30000, Morocco</span></li>
                         <li><i class="fas fa-phone-alt"></i> <span data-i18n="footer.phone">+212 664-648455 / +212 5 356-06737</span></li>
                         <li><i class="fab fa-whatsapp"></i> <span data-i18n="footer.whatsapp">+212 666-695793</span></li>
-                        <li><i class="fas fa-envelope"></i> <span data-i18n="footer.email">nisrineschool2024@gmail.com</span></li>
+                        <li><i class="fas fa-envelope"></i> <span data-i18n="footer.email" id="footerEmail" data-user="nisrineschool2024" data-domain="gmail.com"></span></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p data-i18n="footer.copyright">&copy; 2024 Nisrine School. All rights reserved.</p>
+                <p data-i18n="footer.copyright">&copy; 2025 Nisrine School. All rights reserved.</p>
                 <div class="footer-legal">
-                    <a href="#" data-i18n="footer.privacy">Privacy Policy</a>
+                    <a href="/privacy-policy.html" data-i18n="footer.privacy">Privacy Policy</a>
                     <span>|</span>
-                    <a href="#" data-i18n="footer.terms">Terms & Conditions</a>
+                    <a href="/terms.html" data-i18n="footer.terms">Terms & Conditions</a>
                 </div>
             </div>
         </div>
@@ -861,8 +861,45 @@
     <!-- Ratings JavaScript -->
     <script src="js/ratings.js"></script>
 
+    <!-- reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr" async defer></script>
+    <script>window.RECAPTCHA_SITE_KEY = '6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr';</script>
+
     <!-- JavaScript -->
     <script src="js/main.js"></script>
     <script src="js/animations.js"></script>
+
+    <!-- Email obfuscation: assemble email from data attributes at runtime -->
+    <script>
+    document.querySelectorAll('[data-user][data-domain]').forEach(function(el) {
+        var u = el.getAttribute('data-user');
+        var d = el.getAttribute('data-domain');
+        var addr = u + '@' + d;
+        el.innerHTML = '<a href="mai' + 'lto:' + addr + '">' + addr + '</a>';
+    });
+    </script>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsent" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(30,30,30,0.97);color:#fff;padding:16px 24px;z-index:99999;font-size:14px;box-shadow:0 -2px 10px rgba(0,0,0,0.3);backdrop-filter:blur(8px);">
+        <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <p id="cookieText" style="margin:0;flex:1;min-width:250px;line-height:1.5;">Ce site utilise des cookies techniques nécessaires à son bon fonctionnement. En continuant, vous acceptez notre <a href="/privacy-policy.html" style="color:#DC143C;text-decoration:underline;">Politique de Confidentialité</a>.</p>
+            <button id="cookieAccept" onclick="document.getElementById('cookieConsent').style.display='none';localStorage.setItem('cookieConsent','accepted');" style="background:linear-gradient(135deg,#DC143C,#8B0000);color:#fff;border:none;padding:10px 28px;border-radius:25px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap;transition:transform 0.2s;">OK</button>
+        </div>
+    </div>
+    <script>
+    (function() {
+        if (localStorage.getItem('cookieConsent') === 'accepted') return;
+        var msgs = {
+            fr: 'Ce site utilise des cookies techniques nécessaires à son bon fonctionnement. En continuant, vous acceptez notre <a href="/privacy-policy.html" style="color:#DC143C;text-decoration:underline;">Politique de Confidentialité</a>.',
+            en: 'This site uses technical cookies necessary for its proper functioning. By continuing, you accept our <a href="/privacy-policy.html" style="color:#DC143C;text-decoration:underline;">Privacy Policy</a>.',
+            de: 'Diese Website verwendet technische Cookies, die für den ordnungsgemäßen Betrieb erforderlich sind. Durch die weitere Nutzung akzeptieren Sie unsere <a href="/privacy-policy.html" style="color:#DC143C;text-decoration:underline;">Datenschutzrichtlinie</a>.',
+            ar: 'يستخدم هذا الموقع ملفات تعريف الارتباط التقنية الضرورية لحسن سيره. بالاستمرار، فإنكم توافقون على <a href="/privacy-policy.html" style="color:#DC143C;text-decoration:underline;">سياسة الخصوصية</a>.'
+        };
+        var lang = localStorage.getItem('preferredLanguage') || 'fr';
+        var el = document.getElementById('cookieText');
+        if (el && msgs[lang]) el.innerHTML = msgs[lang];
+        document.getElementById('cookieConsent').style.display = 'block';
+    })();
+    </script>
 </body>
 </html>

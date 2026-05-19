@@ -77,13 +77,8 @@ const managedStudentSchema = new mongoose.Schema({
     },
     formation: {
         type: [String],
-        required: true,
-        validate: {
-            validator: function(v) {
-                return v && v.length > 0;
-            },
-            message: 'At least one formation must be selected'
-        },
+        required: false,
+        default: [],
         enum: ['Allemand', 'Anglais', 'Français', 'Ausbildung']
     },
     filiere: {
