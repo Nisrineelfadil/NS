@@ -100,8 +100,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome (async to prevent render blocking) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
@@ -234,7 +235,7 @@
                 <!-- Service Box 1 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <img src="Img/service-language.jpg" alt="German Language Courses" class="service-image">
+                        <img src="Img/service-language.webp" alt="German Language Courses" class="service-image">
                     </div>
                     <h3 data-i18n="services.language_courses.title">German Language Courses</h3>
                     <p data-i18n="services.language_courses.description">Comprehensive German language training from beginner to advanced levels with certified instructors.</p>
@@ -250,7 +251,7 @@
                 <!-- Service Box 2 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <img src="Img/service-visa.jpg" alt="Visa Support" class="service-image">
+                        <img src="Img/service-visa.webp" alt="Visa Support" class="service-image">
                     </div>
                     <h3 data-i18n="services.visa_support.title">Visa Support</h3>
                     <p data-i18n="services.visa_support.description">Supporting our students for different types of visas: Arbeit, Ausbildung, or Studium.</p>
@@ -259,7 +260,7 @@
                 <!-- Service Box 3 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <img src="Img/service-culture.jpg" alt="Cultural Integration" class="service-image">
+                        <img src="Img/service-culture.webp" alt="Cultural Integration" class="service-image">
                     </div>
                     <h3 data-i18n="services.cultural_integration.title">Cultural Integration</h3>
                     <p data-i18n="services.cultural_integration.description">Support and resources to help you adapt to German culture and society.</p>
@@ -268,7 +269,7 @@
                 <!-- Service Box 4 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <img src="Img/service-nursing.jpg" alt="Nursing Preparation" class="service-image">
+                        <img src="Img/service-nursing.webp" alt="Nursing Preparation" class="service-image">
                     </div>
                     <h3 data-i18n="services.nursing_preparation.title">Nursing Preparation</h3>
                     <p data-i18n="services.nursing_preparation.description">Specialized training for nursing careers in both Morocco and Germany.</p>
@@ -277,7 +278,7 @@
                 <!-- Service Box 5 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <img src="Img/service-hotel.jpg" alt="Hotel Service Training" class="service-image">
+                        <img src="Img/service-hotel.webp" alt="Hotel Service Training" class="service-image">
                     </div>
                     <h3 data-i18n="services.hotel_training.title">Hotel Service Training</h3>
                     <p data-i18n="services.hotel_training.description">Professional hospitality and hotel service training programs.</p>
@@ -286,7 +287,7 @@
                 <!-- Service Box 6 -->
                 <div class="service-box">
                     <div class="service-icon">
-                        <img src="Img/service-education.jpg" alt="Educational Services" class="service-image">
+                        <img src="Img/service-education.webp" alt="Educational Services" class="service-image">
                     </div>
                     <h3 data-i18n="services.educational_services.title">Educational Services</h3>
                     <p data-i18n="services.educational_services.description">Additional educational programs and support services for students.</p>
@@ -335,7 +336,7 @@
                     </div>
                     <!-- Static Image (shows after video) -->
                     <div id="about-image-container" class="about-media-container" style="display: none;">
-                        <img src="Img/about.png" alt="Nisrine School - German Language Center">
+                        <img src="Img/about.webp" alt="Nisrine School - German Language Center">
                     </div>
                     <div class="experience-badge apple-glass">
                         <div class="counter-container">
@@ -386,28 +387,28 @@
                         
                         <div class="three-cards-container">
                             <div class="gallery-card" data-index="0">
-                                <img src="Img/1.png" alt="Certificate Achievement" loading="lazy">
+                                <img src="Img/1.webp" alt="Certificate Achievement" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="1">
-                                <img src="Img/3.png" alt="Nursing Training" loading="lazy">
+                                <img src="Img/3.webp" alt="Nursing Training" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="3">
-                                <img src="Img/4.png" alt="Hotel Service" loading="lazy">
+                                <img src="Img/4.webp" alt="Hotel Service" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="4">
-                                <img src="Img/5.png" alt="Achievement Award" loading="lazy">
+                                <img src="Img/5.webp" alt="Achievement Award" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="5">
-                                <img src="Img/6.png" alt="Cultural Integration" loading="lazy">
+                                <img src="Img/6.webp" alt="Cultural Integration" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="6">
-                                <img src="Img/7.png" alt="Graduation Day" loading="lazy">
+                                <img src="Img/7.webp" alt="Graduation Day" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="7">
-                                <img src="Img/8.png" alt="Study Group" loading="lazy">
+                                <img src="Img/8.webp" alt="Study Group" loading="lazy">
                             </div>
                             <div class="gallery-card" data-index="8">
-                                <img src="Img/9.png" alt="Language Practice" loading="lazy">
+                                <img src="Img/9.webp" alt="Language Practice" loading="lazy">
                             </div>
                         </div>
                         
@@ -433,20 +434,20 @@
                         </div>
                         
                         <div class="main-display-card">
-                            <img id="main-display-img" src="Img/1.png" alt="Certificate Achievement" loading="lazy">
+                            <img id="main-display-img" src="Img/1.webp" alt="Certificate Achievement" loading="lazy">
                         </div>
                     </div>
                     
                     <!-- Hidden photos data -->
                     <div class="photos-data" style="display: none;">
-                        <div data-src="Img/1.png" data-title="Certificate Achievement"></div>
-                        <div data-src="Img/3.png" data-title="Nursing Training"></div>
-                        <div data-src="Img/4.png" data-title="Hotel Service"></div>
-                        <div data-src="Img/5.png" data-title="Achievement Award"></div>
-                        <div data-src="Img/6.png" data-title="Cultural Integration"></div>
-                        <div data-src="Img/7.png" data-title="Graduation Day"></div>
-                        <div data-src="Img/8.png" data-title="Study Group"></div>
-                        <div data-src="Img/9.png" data-title="Language Practice"></div>
+                        <div data-src="Img/1.webp" data-title="Certificate Achievement"></div>
+                        <div data-src="Img/3.webp" data-title="Nursing Training"></div>
+                        <div data-src="Img/4.webp" data-title="Hotel Service"></div>
+                        <div data-src="Img/5.webp" data-title="Achievement Award"></div>
+                        <div data-src="Img/6.webp" data-title="Cultural Integration"></div>
+                        <div data-src="Img/7.webp" data-title="Graduation Day"></div>
+                        <div data-src="Img/8.webp" data-title="Study Group"></div>
+                        <div data-src="Img/9.webp" data-title="Language Practice"></div>
                     </div>
                 </div>
                     </div>
@@ -485,63 +486,63 @@
                             <div class="three-cards-container video-cards-container">
                                 <div class="video-card" data-index="0" data-video="Img/Video/Intro_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Intro_P.png" alt="Welcome to Nisrine School" class="video-poster">
+                                        <img src="Img/Video/Intro_P.webp" alt="Welcome to Nisrine School" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="1" data-video="Img/Video/Bestschool_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Bestschool_P.png" alt="Best German Language School" class="video-poster">
+                                        <img src="Img/Video/Bestschool_P.webp" alt="Best German Language School" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="2" data-video="Img/Video/Nusring_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Nusring_P.png" alt="Nursing Training" class="video-poster">
+                                        <img src="Img/Video/Nusring_P.webp" alt="Nursing Training" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="3" data-video="Img/Video/Hotel_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Hotel_P.png" alt="Hotel Service" class="video-poster">
+                                        <img src="Img/Video/Hotel_P.webp" alt="Hotel Service" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="4" data-video="Img/Video/Job_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Job_P.png" alt="Job Training" class="video-poster">
+                                        <img src="Img/Video/Job_P.webp" alt="Job Training" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="5" data-video="Img/Video/Altenheim_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Altenheim_P.png" alt="Altenheim Training" class="video-poster">
+                                        <img src="Img/Video/Altenheim_P.webp" alt="Altenheim Training" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="6" data-video="Img/Video/Trio_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Trio_P.png" alt="Student Trio" class="video-poster">
+                                        <img src="Img/Video/Trio_P.webp" alt="Student Trio" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="7" data-video="Img/Video/Anas_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Anas_P.png" alt="Anas Success Story" class="video-poster">
+                                        <img src="Img/Video/Anas_P.webp" alt="Anas Success Story" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
                                 </div>
                                 <div class="video-card" data-index="8" data-video="Img/Video/Omar_V.mp4">
                                     <div class="card-video video-thumbnail">
-                                        <img src="Img/Video/Omar_P.png" alt="Omar Success Story" class="video-poster">
+                                        <img src="Img/Video/Omar_P.webp" alt="Omar Success Story" class="video-poster">
                                         <div class="video-overlay">
                                             </div>
                                     </div>
@@ -778,7 +779,7 @@
             <div class="footer-content">
                 <div class="footer-about">
                     <div class="footer-logo">
-                        <img src="Img/logo.png" alt="Nisrine School Logo">
+                        <img src="Img/logo.webp" alt="Nisrine School Logo">
                     </div>
                     <p data-i18n="footer.about_text">Your trusted partner in German language education and cultural integration in Fez, Morocco.</p>
                     <div class="footer-social">
