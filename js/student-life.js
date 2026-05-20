@@ -292,14 +292,14 @@ class StudentLife {
 
         // All images data
         const images = [
-            { src: 'Img/1.png', label: 'Certificate Achievement', i18n: 'students.card1' },
-            { src: 'Img/3.png', label: 'Nursing Training', i18n: 'students.card3' },
-            { src: 'Img/4.png', label: 'Hotel Training', i18n: 'students.card4' },
-            { src: 'Img/5.png', label: 'Student Success', i18n: 'students.card5' },
-            { src: 'Img/6.png', label: 'Language Practice', i18n: 'students.card6' },
-            { src: 'Img/7.png', label: 'Cultural Exchange', i18n: 'students.card7' },
-            { src: 'Img/8.png', label: 'Graduation Day', i18n: 'students.card8' },
-            { src: 'Img/9.png', label: 'Career Start', i18n: 'students.card9' }
+            { src: 'Img/1.webp', label: 'Certificate Achievement', i18n: 'students.card1' },
+            { src: 'Img/3.webp', label: 'Nursing Training', i18n: 'students.card3' },
+            { src: 'Img/4.webp', label: 'Hotel Training', i18n: 'students.card4' },
+            { src: 'Img/5.webp', label: 'Student Success', i18n: 'students.card5' },
+            { src: 'Img/6.webp', label: 'Language Practice', i18n: 'students.card6' },
+            { src: 'Img/7.webp', label: 'Cultural Exchange', i18n: 'students.card7' },
+            { src: 'Img/8.webp', label: 'Graduation Day', i18n: 'students.card8' },
+            { src: 'Img/9.webp', label: 'Career Start', i18n: 'students.card9' }
         ];
 
         let currentStartIndex = 0;

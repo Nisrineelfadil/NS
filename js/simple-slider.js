@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Simple image array - just the image sources
     const images = [
-        'Img/1.png', 'Img/2.png', 'Img/3.png', 'Img/4.png', 'Img/5.png',
-        'Img/6.png', 'Img/7.png', 'Img/8.png', 'Img/9.png', 'Img/10.png',
-        'Img/11.png', 'Img/12.png', 'Img/13.png', 'Img/14.png', 'Img/15.png'
+        'Img/1.webp', 'Img/2.webp', 'Img/3.webp', 'Img/4.webp', 'Img/5.webp',
+        'Img/6.webp', 'Img/7.webp', 'Img/8.webp', 'Img/9.webp', 'Img/10.webp',
+        'Img/11.webp', 'Img/12.webp', 'Img/13.webp', 'Img/14.webp', 'Img/15.webp'
     ];
     
     let currentSlide = 0;
