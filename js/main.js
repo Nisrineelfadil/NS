@@ -79,6 +79,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        // Update all elements with data-i18n-html (preserves HTML like links)
+        document.querySelectorAll('[data-i18n-html]').forEach(element => {
+            const key = element.getAttribute('data-i18n-html');
+            const translation = getNestedTranslation(translations, key);
+            if (translation) {
+                element.innerHTML = translation;
+            }
+        });
         
         // Handle placeholder translations separately
         const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
