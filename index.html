@@ -877,9 +877,28 @@
     <!-- Ratings JavaScript -->
     <script src="js/ratings.js" defer></script>
 
-    <!-- reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr" async defer></script>
-    <script>window.RECAPTCHA_SITE_KEY = '6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr';</script>
+    <!-- reCAPTCHA v3 (lazy-loaded on first form interaction to save ~500KB on initial load) -->
+    <script>
+    window.RECAPTCHA_SITE_KEY = '6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr';
+    window._recaptchaLoaded = false;
+    function loadRecaptcha() {
+        if (window._recaptchaLoaded) return;
+        window._recaptchaLoaded = true;
+        var s = document.createElement('script');
+        s.src = 'https://www.google.com/recaptcha/api.js?render=' + window.RECAPTCHA_SITE_KEY;
+        s.async = true;
+        document.head.appendChild(s);
+    }
+    // Load on first interaction with any form field or scroll past hero
+    document.addEventListener('DOMContentLoaded', function() {
+        var triggers = document.querySelectorAll('#contactForm input, #contactForm textarea, #ratingForm input, #registerForm input');
+        triggers.forEach(function(el) { el.addEventListener('focus', loadRecaptcha, { once: true }); });
+        // Also load when user scrolls 50% down the page
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > document.body.scrollHeight * 0.3) { loadRecaptcha(); }
+        }, { once: true });
+    });
+    </script>
 
     <!-- JavaScript -->
     <script src="js/main.js" defer></script>
