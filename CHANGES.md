@@ -176,6 +176,43 @@
 
 ---
 
+## 2026-05-20
+
+### 18. Legal Compliance — RGPD/CNDP Data Protection (Chunk 1)
+- **Created**: `CNDP-DECLARATION-GUIDE.md` — Complete administrative guide for Morocco CNDP declaration (loi 09-08)
+  - Step-by-step process for declaring personal data processing to Morocco's CNDP
+  - Required documents, fees, timeline, post-declaration checklist
+  - Data retention periods, cross-border transfer documentation
+- **Modified**: `register.html` — Added photo consent checkbox with legal basis
+  - Yellow consent box below photo upload field (required checkbox)
+  - References loi 09-08 and links to Privacy Policy
+  - Legal basis established for collecting student ID photos
+- **Modified**: `privacy-policy.html` — Added data retention policy section (4 languages: FR/EN/DE/AR)
+  - Active students: training duration + 1 year
+  - Inactive students: 5 years after last registration
+  - Financial data: 10 years (Moroccan accounting law)
+  - Photos: deleted on request or after retention period expires
+  - Renumbered sections 5→9 to accommodate new retention section
+- **Modified**: `index.html` — Added RGPD data processing notice under contact form
+  - Shield icon + privacy notice linking to Privacy Policy
+  - Mentions loi 09-08 and user rights (access, rectification, deletion)
+- **Modified**: `cv.html`, `translate.html`, `apply.html` — Added data consent checkboxes to all 3 service forms
+  - Yellow consent boxes (same design as registration photo consent)
+  - Required checkboxes before form submission
+  - RGPD-compliant consent for CV service, translation service, job applications
+- **Modified**: `js/page-i18n.js` — Added `data-i18n-html` support
+  - New translation method that preserves HTML content (uses `innerHTML` instead of `textContent`)
+  - Allows consent text to include clickable Privacy Policy links while remaining translatable
+  - Handles `[data-i18n-html]` attribute separately from standard `[data-i18n]`
+- **Modified**: `js/languages.json` — Added consent/privacy notice translations (DE/EN/FR/AR)
+  - `registration.photo_consent` — Photo consent checkbox text (4 languages)
+  - `contact.privacy_notice` — Data consent for service forms (4 languages, checkbox format)
+  - `contact.privacy_notice_info` — Privacy notice for contact form (4 languages, informational)
+  - All translations preserve HTML `<a>` tags linking to `/privacy-policy.html`
+- **Why**: Morocco CNDP compliance (loi 09-08) + RGPD transparency requirements. Organizations collecting sensitive data (CIN, photos) must declare to CNDP and provide clear consent mechanisms. Fixes legal compliance gaps: no photo consent, no retention policy, no service form privacy notices.
+
+---
+
 ## False Positives from Diagnostic Report
 
 The client's diagnostic (OWASP ZAP + manual audit) flagged several items that are **not actual vulnerabilities** in this codebase:
@@ -198,6 +235,26 @@ The client's diagnostic (OWASP ZAP + manual audit) flagged several items that ar
 ### FP-4. "2e certificat non fiable détecté (no-sni.vercel-infra.com)" — NOT A BUG
 - **What the diagnostic said**: A second untrusted SSL certificate was detected
 - **Why it's not a bug**: This is Vercel's infrastructure behavior. When a client connects without SNI (Server Name Indication), Vercel returns its default `no-sni.vercel-infra.com` certificate. This is standard for all Vercel-hosted sites and is not a security vulnerability. Modern browsers all support SNI.
+
+### FP-6. "Lazy loading manquant sur les images" — FALSE POSITIVE
+- **What the diagnostic said**: Images lack lazy loading optimization
+- **Why it's false**: All gallery images already have `loading="lazy"` attribute (HTML5 native) — `index.html` lines 388-410 (gallery cards), line 435 (main display), line 681 (Google Maps iframe). The diagnostic tool failed to detect the native HTML5 lazy loading implementation.
+
+### FP-7. "Schema.org LocalBusiness manquant" — FALSE POSITIVE
+- **What the diagnostic said**: Missing schema.org LocalBusiness structured data
+- **Why it's false**: Full JSON-LD structured data exists with `@type: "EducationalOrganization"` in `index.html` lines 33-104 — includes geo coordinates, address, courses offered, multilingual contact, areaServed. EducationalOrganization is more appropriate than LocalBusiness for a school.
+
+### FP-8. "Google reCAPTCHA non configuré" — FALSE POSITIVE
+- **What the diagnostic said**: Google reCAPTCHA not configured on forms
+- **Why it's false**: reCAPTCHA v3 already integrated on **all** public forms (fix #13) — Contact, Rating, Registration, CV, Translation, Job Applications. Six endpoints protected with server-side middleware + frontend tokens. Invisible for legitimate users.
+
+### FP-9. "Cookie consent RGPD manquant" — FALSE POSITIVE
+- **What the diagnostic said**: Missing GDPR cookie consent banner
+- **Why it's false**: Cookie consent banner already implemented in `index.html` (fix #11) — GDPR compliant with Accept/Refuse buttons, localStorage storage, no third-party advertising cookies.
+
+### FP-10. "Application PWA manquante" — FALSE POSITIVE
+- **What the diagnostic said**: Progressive Web App not implemented
+- **Why it's false**: Full student PWA already built and deployed in `/nisrine-student-pwa` folder — React + Service Worker + manifest.json. Mobile student portal with offline capabilities. The diagnostic likely targeted the public website (which doesn't need to be a PWA).
 
 ---
 

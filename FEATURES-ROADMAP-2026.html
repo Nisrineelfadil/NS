@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feuille de Route — Nouvelles Fonctionnalités — Nisrine School</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --orange: #FF8C00;
+    --red-orange: #e03000;
+    --dark: #1a1a2e;
+    --mid: #4a4a5a;
+    --light: #6b6b7b;
+    --bg: #FAF7F2;
+    --white: #ffffff;
+    --border: #e8e0d5;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --amber: #d97706;
+    --purple: #9333ea;
+    --cyan: #06b6d4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0ece6;
+    color: var(--dark);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── Page simulation ── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: var(--white);
+    margin: 20px auto;
+    padding: 16mm 18mm;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.15);
+    position: relative;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10mm;
+    padding-bottom: 6mm;
+    border-bottom: 3px solid var(--orange);
+  }
+  .header-left h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dark);
+    line-height: 1.2;
+  }
+  .header-left h1 span { color: var(--orange); }
+  .header-left p {
+    font-size: 11px;
+    color: var(--light);
+    margin-top: 4px;
+  }
+  .header-right {
+    text-align: right;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-orange { background: #FFF3E0; color: var(--orange); border: 1px solid #FFD699; }
+  .badge-purple { background: #F3E8FF; color: var(--purple); border: 1px solid #D8B4FE; }
+  .badge-blue   { background: #DBEAFE; color: var(--blue);  border: 1px solid #93C5FD; }
+  .header-right .badge { margin-bottom: 6px; }
+  .header-right p { font-size: 10px; color: var(--light); margin-top: 4px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 8mm; }
+  .section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 5px 10px;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    color: white;
+    border-radius: 6px;
+    margin-bottom: 4mm;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Summary boxes ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 6mm;
+  }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .stat-box .label {
+    font-size: 10px;
+    color: var(--light);
+    margin-top: 3px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Feature entries ── */
+  .feature-list { display: flex; flex-direction: column; gap: 5px; }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .feature-item.critical { border-left: 4px solid var(--red); }
+  .feature-item.high     { border-left: 4px solid var(--orange); }
+  .feature-item.medium   { border-left: 4px solid var(--blue); }
+  .feature-item.low      { border-left: 4px solid var(--cyan); }
+  
+  .feature-num {
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .feature-content { flex: 1; }
+  .feature-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 2px;
+  }
+  .feature-title-fr {
+    font-size: 11px;
+    color: var(--mid);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .feature-desc {
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .feature-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+    margin-top: 3px;
+    background: #F3E8FF;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .feature-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .prio-critical { background: #FEE2E2; color: var(--red); }
+  .prio-high     { background: #FFF3E0; color: var(--orange); }
+  .prio-medium   { background: #DBEAFE; color: var(--blue); }
+  .prio-low      { background: #CFFAFE; color: var(--cyan); }
+
+  /* ── Timeline ── */
+  .timeline-box {
+    background: linear-gradient(135deg, #FFF3E0, #FFFBEB);
+    border: 1px solid #FFD699;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 6mm;
+  }
+  .timeline-box h3 {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .timeline-box p {
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.6;
+  }
+  .timeline-box .highlight {
+    display: inline-block;
+    background: white;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: var(--orange);
+    margin: 0 2px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 8mm;
+    padding-top: 4mm;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer p { font-size: 10px; color: var(--light); }
+  .footer .logo-text {
+    font-size: 12px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 100%; }
+    .no-print { display: none; }
+  }
+
+  /* ── Print button ── */
+  .print-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(224,48,0,0.35);
+    font-family: 'Inter', sans-serif;
+    z-index: 100;
+  }
+  .print-btn:hover { opacity: 0.9; }
+
+  .divider { height: 1px; background: var(--border); margin: 6mm 0; }
+  
+  .note-box {
+    background: #DBEAFE;
+    border-left: 4px solid var(--blue);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 4mm;
+  }
+  .note-box p {
+    font-size: 11px;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+  .note-box strong { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">⬇ Speichern als PDF</button>
+
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Feuille de Route<br><span>Nouvelles Fonctionnalités</span></h1>
+      <p>Extensions & Modules Additionnels — Post-Octobre 2025</p>
+      <p style="margin-top:6px;font-size:10px;color:#aaa">Rédigé par : <strong style="color:#555">Zayd Dahhaoui</strong></p>
+    </div>
+    <div class="header-right">
+      <div class="badge badge-purple">✨ Fonctionnalités futures</div><br>
+      <div class="badge badge-blue">Planification stratégique</div>
+      <p>Dépôt privé GitHub :<br>
+        <code style="font-size:9px;font-family:monospace">Zayddahhaoui0609/ns</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── CONTEXT ── -->
+  <div class="timeline-box">
+    <h3>📍 Contexte</h3>
+    <p>
+      Le système <strong>Nisrine School</strong> a été lancé en <span class="highlight">Octobre 2025</span> avec un ensemble de fonctionnalités de base : 
+      inscription d'étudiants, gestion admin, contact, ratings, emploi, services, et portail étudiant/prof.
+    </p>
+    <p style="margin-top:8px">
+      Ce document liste <strong>13 nouvelles fonctionnalités</strong> identifiées comme des <em>extensions</em> non présentes dans le système initial, 
+      classées par priorité stratégique : <span class="highlight">Critique</span>, <span class="highlight">Haute</span>, <span class="highlight">Moyenne</span>, <span class="highlight">Basse</span>.
+    </p>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="summary-grid">
+    <div class="stat-box">
+      <div class="num">13</div>
+      <div class="label">Nouvelles fonctionnalités</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">5</div>
+      <div class="label">Priorité critique/haute</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">8</div>
+      <div class="label">Priorité moyenne/basse</div>
+    </div>
+  </div>
+
+  <!-- ── CRITICAL FEATURES ── -->
+  <div class="section">
+    <div class="section-title">🔥 Fonctionnalités Critiques (Priorité Haute)</div>
+    <div class="feature-list">
+
+      <div class="feature-item critical">
+        <div class="feature-num">1</div>
+        <div class="feature-content">
+          <div class="feature-title">Paiement en ligne (CMI Maroc, Stripe)</div>
+          <div class="feature-title-fr">Online Payment System</div>
+          <div class="feature-desc">
+            Intégration de passerelles de paiement sécurisées pour permettre aux parents/étudiants de régler les frais d'inscription et de formation en ligne. 
+            <strong>CMI (Centre Monétique Interbancaire)</strong> pour les cartes bancaires marocaines + <strong>Stripe</strong> pour les paiements internationaux.
+          </div>
+          <span class="feature-tech">CMI API · Stripe SDK · Webhook handlers · Payment receipts</span>
+        </div>
+        <span class="feature-badge prio-critical">Critique</span>
+      </div>
+
+      <div class="feature-item critical">
+        <div class="feature-num">2</div>
+        <div class="feature-content">
+          <div class="feature-title">Newsletter / Mailing List</div>
+          <div class="feature-title-fr">Email Marketing System</div>
+          <div class="feature-desc">
+            Système d'abonnement newsletter pour envoyer des campagnes email aux parents et étudiants (nouveaux cours, événements, promotions). 
+            Gestion des listes, templates personnalisables, tracking des ouvertures/clics.
+          </div>
+          <span class="feature-tech">Mailchimp/SendGrid · Subscription forms · Campaign tracking</span>
+        </div>
+        <span class="feature-badge prio-critical">Critique</span>
+      </div>
+
+      <div class="feature-item high">
+        <div class="feature-num">3</div>
+        <div class="feature-content">
+          <div class="feature-title">Calendrier des cours en ligne</div>
+          <div class="feature-title-fr">Online Course Calendar</div>
+          <div class="feature-desc">
+            Affichage public du planning des cours (horaires, salles, profs) avec vue calendrier interactive. 
+            Permet aux parents/étudiants de visualiser les sessions à venir avant inscription. Sync possible avec Google Calendar.
+          </div>
+          <span class="feature-tech">FullCalendar.js · iCal export · Google Calendar API</span>
+        </div>
+        <span class="feature-badge prio-high">Haute</span>
+      </div>
+
+      <div class="feature-item high">
+        <div class="feature-num">4</div>
+        <div class="feature-content">
+          <div class="feature-title">Chatbot IA 24/24</div>
+          <div class="feature-title-fr">24/7 AI Chatbot</div>
+          <div class="feature-desc">
+            Assistant virtuel intelligent pour répondre aux questions fréquentes (horaires, tarifs, inscription, localisation) en temps réel. 
+            Multilingue (FR/AR/DE/EN), avec escalade vers un humain si nécessaire.
+          </div>
+          <span class="feature-tech">Dialogflow / OpenAI GPT · WebSocket · Multi-language NLP</span>
+        </div>
+        <span class="feature-badge prio-high">Haute</span>
+      </div>
+
+      <div class="feature-item high">
+        <div class="feature-num">5</div>
+        <div class="feature-content">
+          <div class="feature-title">Notifications Push Étudiants</div>
+          <div class="feature-title-fr">Student Push Notifications</div>
+          <div class="feature-desc">
+            Envoi de notifications push aux étudiants (nouveaux devoirs, changements d'horaire, messages profs, rappels de paiement). 
+            Support web + mobile (PWA). Personnalisables par type d'alerte.
+          </div>
+          <span class="feature-tech">Firebase Cloud Messaging · Service Worker · PWA notifications</span>
+        </div>
+        <span class="feature-badge prio-high">Haute</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── CONTENT FEATURES ── -->
+  <div class="section">
+    <div class="section-title">📝 Fonctionnalités de Contenu (Priorité Moyenne)</div>
+    <div class="feature-list">
+
+      <div class="feature-item medium">
+        <div class="feature-num">6</div>
+        <div class="feature-content">
+          <div class="feature-title">Prix des Formations</div>
+          <div class="feature-title-fr">Training Prices Display</div>
+          <div class="feature-desc">
+            Affichage transparent des tarifs des cours sur la page d'accueil et les pages services. 
+            Grille tarifaire détaillée (forfaits, packs, réductions, mode de paiement). Calculateur de coût personnalisé.
+          </div>
+          <span class="feature-tech">Pricing tables · Dynamic calculators · Discount logic</span>
+        </div>
+        <span class="feature-badge prio-medium">Moyenne</span>
+      </div>
+
+      <div class="feature-item medium">
+        <div class="feature-num">7</div>
+        <div class="feature-content">
+          <div class="feature-title">Avis Vérifiés (Badge Source Fiable)</div>
+          <div class="feature-title-fr">Verified Reviews System</div>
+          <div class="feature-desc">
+            Le spinner "Loading reviews..." a été corrigé, mais il manque un système de <strong>vérification des avis</strong> (badge "Avis vérifié" uniquement pour les étudiants réels). 
+            Intégration possible avec Google Reviews ou système interne de vérification par email/CIN.
+          </div>
+          <span class="feature-tech">Review verification · Google Reviews API · Trust badges</span>
+        </div>
+        <span class="feature-badge prio-medium">Moyenne</span>
+      </div>
+
+      <div class="feature-item medium">
+        <div class="feature-num">8</div>
+        <div class="feature-content">
+          <div class="feature-title">Profils des Enseignants</div>
+          <div class="feature-title-fr">Teacher Profile Pages</div>
+          <div class="feature-desc">
+            Pages dédiées pour chaque enseignant avec photo, bio, spécialités, diplômes, expérience, et avis des étudiants. 
+            Permet de renforcer la crédibilité et la transparence de l'équipe pédagogique.
+          </div>
+          <span class="feature-tech">Teacher DB model · Photo uploads · Bio editor · Student ratings</span>
+        </div>
+        <span class="feature-badge prio-medium">Moyenne</span>
+      </div>
+
+      <div class="feature-item medium">
+        <div class="feature-num">9</div>
+        <div class="feature-content">
+          <div class="feature-title">FAQ et Blog</div>
+          <div class="feature-title-fr">FAQ Section and Blog</div>
+          <div class="feature-desc">
+            <strong>FAQ :</strong> Section questions fréquentes (inscription, paiement, certificats, localisation) avec recherche intégrée.<br>
+            <strong>Blog :</strong> Articles sur l'apprentissage, conseils d'étude, success stories d'étudiants. Améliore le SEO et l'engagement.
+          </div>
+          <span class="feature-tech">CMS (Markdown/Rich Editor) · Search · SEO optimization · Tags</span>
+        </div>
+        <span class="feature-badge prio-medium">Moyenne</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── INTEGRATION FEATURES ── -->
+  <div class="section">
+    <div class="section-title">🔌 Fonctionnalités d'Intégration (Priorité Basse)</div>
+    <div class="feature-list">
+
+      <div class="feature-item low">
+        <div class="feature-num">10</div>
+        <div class="feature-content">
+          <div class="feature-title">Google Analytics</div>
+          <div class="feature-title-fr">Analytics Tracking</div>
+          <div class="feature-desc">
+            Suivi du trafic, comportement utilisateurs, taux de conversion (inscriptions, demandes contact). 
+            Dashboards personnalisés pour analyser les pages les plus visitées, sources de trafic, et entonnoirs de conversion.
+          </div>
+          <span class="feature-tech">Google Analytics 4 · Event tracking · Conversion funnels</span>
+        </div>
+        <span class="feature-badge prio-low">Basse</span>
+      </div>
+
+      <div class="feature-item low">
+        <div class="feature-num">11</div>
+        <div class="feature-content">
+          <div class="feature-title">Pixel Meta pour Retargeting</div>
+          <div class="feature-title-fr">Facebook Pixel</div>
+          <div class="feature-desc">
+            Installation du Meta Pixel pour tracker les visiteurs et créer des audiences de retargeting sur Facebook/Instagram. 
+            Campagnes publicitaires ciblées vers les utilisateurs ayant visité le site sans s'inscrire.
+          </div>
+          <span class="feature-tech">Meta Pixel · Custom audiences · Conversion events</span>
+        </div>
+        <span class="feature-badge prio-low">Basse</span>
+      </div>
+
+      <div class="feature-item low">
+        <div class="feature-num">12</div>
+        <div class="feature-content">
+          <div class="feature-title">CRM Connecté au Formulaire</div>
+          <div class="feature-title-fr">CRM Integration</div>
+          <div class="feature-desc">
+            Synchronisation automatique des demandes d'inscription et de contact vers un CRM externe (HubSpot, Zoho CRM, Salesforce). 
+            Permet de centraliser la gestion des leads et d'automatiser le suivi commercial.
+          </div>
+          <span class="feature-tech">HubSpot/Zoho API · Webhook automation · Lead scoring</span>
+        </div>
+        <span class="feature-badge prio-low">Basse</span>
+      </div>
+
+      <div class="feature-item low">
+        <div class="feature-num">13</div>
+        <div class="feature-content">
+          <div class="feature-title">Agenda en Ligne pour RDV</div>
+          <div class="feature-title-fr">Online Appointment Booking</div>
+          <div class="feature-desc">
+            Système de prise de rendez-vous en ligne avec sélection de créneau disponible (remplacement du modal actuel par une vraie disponibilité en temps réel). 
+            Confirmations par email/SMS, rappels automatiques, sync avec calendrier admin.
+          </div>
+          <span class="feature-tech">Calendly-like system · Time slots · Email/SMS reminders · Calendar sync</span>
+        </div>
+        <span class="feature-badge prio-low">Basse</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── NOTE ── -->
+  <div class="note-box">
+    <p>
+      <strong>📌 Note importante :</strong> Ces 13 fonctionnalités représentent des <em>extensions stratégiques</em> du système de base lancé en octobre 2025. 
+      Elles nécessitent une évaluation budgétaire, technique, et temporelle avant implémentation. 
+      La priorisation peut évoluer en fonction des retours utilisateurs et des objectifs business.
+    </p>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="footer">
+    <div>
+      <p>Document généré le 20 Mai 2026 (UTC+2)</p>
+      <p>Système actuel : Lancé Octobre 2025 · 17 correctifs appliqués (Mai 2026)</p>
+    </div>
+    <div class="logo-text">Nisrine School</div>
+  </div>
+
+</div>
+</body>
+</html>

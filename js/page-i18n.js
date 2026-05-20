@@ -56,6 +56,15 @@ class PageI18n {
             }
         });
 
+        // Translate data-i18n-html elements (preserves HTML like links)
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+            const key = el.getAttribute('data-i18n-html');
+            const val = this.get(key);
+            if (val) {
+                el.innerHTML = val;
+            }
+        });
+
         // Translate placeholders
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.getAttribute('data-i18n-placeholder');

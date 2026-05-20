@@ -130,7 +130,8 @@
                 "follow_btn": "Auf Instagram folgen",
                 "i_followed": "Ich folge",
                 "submit_registration": "Registrierung absenden (Zuerst folgen)",
-                "closed": "Geschlossen"
+                "closed": "Geschlossen",
+                "photo_consent": "Ich autorisiere Nisrine School, mein Passfoto im Rahmen der Verwaltung meines Schülerdossiers gemäß dem Gesetz 09-08 über den Schutz personenbezogener Daten und der <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Datenschutzrichtlinie</a> zu erfassen und zu verarbeiten. *"
             },
             "contact": {
                 "title": "Kontaktieren Sie uns",
@@ -147,7 +148,9 @@
                 "phone": "Ihr Telefon",
                 "select_service": "Wählen Sie einen Service",
                 "submit": "Nachricht senden",
-                "find_us": "Finden Sie uns auf der Karte"
+                "find_us": "Finden Sie uns auf der Karte",
+                "privacy_notice": "Ich autorisiere Nisrine School, meine persönlichen Daten gemäß der <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Datenschutzrichtlinie</a> und dem Gesetz 09-08 zu verarbeiten. Sie haben das Recht auf Zugriff, Berichtigung und Löschung Ihrer Daten. *",
+                "privacy_notice_info": "Ihre Daten werden gemäß unserer <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Datenschutzrichtlinie</a> und dem Gesetz 09-08 verarbeitet. Sie haben das Recht auf Zugriff, Berichtigung und Löschung Ihrer Daten."
             },
             "footer": {
                 "about_title": "NISRINE SCHULE",
@@ -838,7 +841,8 @@
                 "follow_btn": "Follow on Instagram",
                 "i_followed": "I followed",
                 "submit_registration": "Submit Registration (Follow us first)",
-                "closed": "Closed"
+                "closed": "Closed",
+                "photo_consent": "I authorize Nisrine School to collect and process my ID photo for the purpose of managing my student file, in accordance with Law 09-08 on personal data protection and the <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Privacy Policy</a>. *"
             },
             "contact": {
                 "title": "Contact Us",
@@ -855,7 +859,9 @@
                 "phone": "Your Phone",
                 "select_service": "Select a Service",
                 "submit": "Send Message",
-                "find_us": "Find Us on Map"
+                "find_us": "Find Us on Map",
+                "privacy_notice": "I authorize Nisrine School to process my personal data in accordance with the <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Privacy Policy</a> and Law 09-08. You have the right to access, rectify, and delete your data. *",
+                "privacy_notice_info": "Your data is processed in accordance with our <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Privacy Policy</a> and Law 09-08. You have the right to access, rectify, and delete your data."
             },
             "footer": {
                 "about_title": "NISRINE SCHOOL",
@@ -1571,7 +1577,8 @@
                 "follow_btn": "Suivre sur Instagram",
                 "i_followed": "J'ai suivi",
                 "submit_registration": "Soumettre l'inscription (Suivez-nous d'abord)",
-                "closed": "Fermé"
+                "closed": "Fermé",
+                "photo_consent": "J'autorise Nisrine School à collecter et traiter ma photo d'identité dans le cadre de la gestion de mon dossier étudiant, conformément à la loi 09-08 relative à la protection des données personnelles et à la <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Politique de Confidentialité</a>. *"
             },
             "contact": {
                 "title": "Contactez-nous",
@@ -1588,7 +1595,9 @@
                 "phone": "Votre Téléphone",
                 "select_service": "Sélectionnez un Service",
                 "submit": "Envoyer le Message",
-                "find_us": "Trouvez-nous sur la Carte"
+                "find_us": "Trouvez-nous sur la Carte",
+                "privacy_notice": "J'autorise Nisrine School à traiter mes données personnelles conformément à la <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Politique de Confidentialité</a> et à la loi 09-08. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données. *",
+                "privacy_notice_info": "Vos données sont traitées conformément à notre <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>Politique de Confidentialité</a> et à la loi 09-08. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données."
             },
             "footer": {
                 "about_title": "ÉCOLE NISRINE",
@@ -2304,7 +2313,8 @@
                 "follow_btn": "تابع على انستغرام",
                 "i_followed": "تابعت",
                 "submit_registration": "إرسال التسجيل (تابعنا أولاً)",
-                "closed": "مغلق"
+                "closed": "مغلق",
+                "photo_consent": "أوافق على قيام مدرسة نسرين بجمع ومعالجة صورتي الشخصية في إطار إدارة ملفي الطلابي، وفقاً للقانون 09-08 المتعلق بحماية البيانات الشخصية و<a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>سياسة الخصوصية</a>. *"
             },
             "contact": {
                 "title": "اتصل بنا",
@@ -2321,7 +2331,9 @@
                 "phone": "رقم الهاتف",
                 "select_service": "اختر خدمة",
                 "submit": "إرسال الرسالة",
-                "find_us": "اعثر علينا على الخريطة"
+                "find_us": "اعثر علينا على الخريطة",
+                "privacy_notice": "أوافق على قيام مدرسة نسرين بمعالجة بياناتي الشخصية وفقاً <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>لسياسة الخصوصية</a> والقانون 09-08. لديك الحق في الوصول إلى بياناتك وتصحيحها وحذفها. *",
+                "privacy_notice_info": "تتم معالجة بياناتك وفقاً <a href='/privacy-policy.html' target='_blank' style='color:#FF8C00;text-decoration:underline;'>لسياسة الخصوصية</a> والقانون 09-08. لديك الحق في الوصول إلى بياناتك وتصحيحها وحذفها."
             },
             "footer": {
                 "about_title": "مدرسة نسرين",
