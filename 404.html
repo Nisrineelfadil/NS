@@ -8,58 +8,27 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: #FAF7F2;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* ── Real Leaf Images (blurred decorations) ── */
-        .leaf-deco {
-            position: fixed;
-            pointer-events: none;
-            opacity: 0.5;
-            filter: blur(0.5px);
-            z-index: 0;
-        }
-        /* Left leaf: top-left corner, flipped horizontally so it faces inward */
-        .leaf-deco.left {
-            left: -30px;
-            top: -10px;
-            width: 260px;
-            transform-origin: top left;
-            transform: scaleX(-1) rotate(10deg);
-            animation: swayLeft 7s ease-in-out infinite;
-        }
-        @keyframes swayLeft {
-            0%, 100% { transform: scaleX(-1) rotate(10deg); }
-            50%       { transform: scaleX(-1) rotate(15deg); }
-        }
-        /* Right leaf: bottom-right corner, flipped both axes */
-        .leaf-deco.right {
-            right: -30px;
-            bottom: -10px;
-            width: 240px;
-            transform-origin: bottom right;
-            transform: scaleX(1) rotate(-170deg);
-            animation: swayRight 7s ease-in-out infinite;
-        }
-        @keyframes swayRight {
-            0%, 100% { transform: rotate(-170deg); }
-            50%       { transform: rotate(-175deg); }
+            display: flex;
+            flex-direction: column;
         }
 
         /* ── Layout ── */
         .container {
-            position: relative;
-            z-index: 1;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 40px 20px;
+            padding: 30px 40px;
             gap: 60px;
+            overflow: hidden;
         }
 
         /* ── Left Content ── */
@@ -345,21 +314,17 @@
 
         /* ── Responsive ── */
         @media (max-width: 820px) {
-            .container { flex-direction: column; padding: 60px 20px 40px; gap: 40px; min-height: 100vh; }
+            html, body { height: auto; overflow: auto; }
+            .container { flex-direction: column; padding: 40px 20px; gap: 30px; overflow: visible; }
             .left { text-align: center; }
             .error-subtitle, .error-cta-text { margin-left: auto; margin-right: auto; }
             .btn-group { justify-content: center; }
             .quote-box { margin-left: auto; margin-right: auto; }
             .right { display: none; }
-            .leaf-deco { display: none; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Real Leaf images (blurred decorations) -->
-    <img src="/Img/Leaf.png" class="leaf-deco left" alt="">
-    <img src="/Img/Leaf.png" class="leaf-deco right" alt="">
 
     <div class="container">
 
