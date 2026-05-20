@@ -14,12 +14,11 @@ export const TeacherAuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pending2FA, setPending2FA] = useState(null); // { tempToken, email }
 
   useEffect(() => {
-    // Check for existing auth on mount
     const storedToken = localStorage.getItem('teacherToken');
     const storedUser = localStorage.getItem('teacherUser');
-    
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
@@ -27,7 +26,12 @@ export const TeacherAuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const require2FA = (tempToken, email) => {
+    setPending2FA({ tempToken, email });
+  };
+
   const login = (userData, authToken) => {
+    setPending2FA(null);
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('teacherToken', authToken);
@@ -37,6 +41,7 @@ export const TeacherAuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
+    setPending2FA(null);
     localStorage.removeItem('teacherToken');
     localStorage.removeItem('teacherUser');
   };
@@ -45,6 +50,8 @@ export const TeacherAuthProvider = ({ children }) => {
     user,
     token,
     loading,
+    pending2FA,
+    require2FA,
     login,
     logout,
     isAuthenticated: !!token,

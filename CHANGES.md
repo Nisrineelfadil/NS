@@ -211,19 +211,31 @@
   - All translations preserve HTML `<a>` tags linking to `/privacy-policy.html`
 - **Why**: Morocco CNDP compliance (loi 09-08) + RGPD transparency requirements. Organizations collecting sensitive data (CIN, photos) must declare to CNDP and provide clear consent mechanisms. Fixes legal compliance gaps: no photo consent, no retention policy, no service form privacy notices.
 
-### 19. Performance Optimization — PageSpeed Score 41→Target 70+ (Chunk 3)
-- **Modified**: `index.html` — Fixed video loading performance
-  - Added `preload="none"` to gallery video players (mobile + desktop) — prevents ~83 MB of videos from loading until user plays them
-  - Added `preload="metadata"` to hero background video (autoplay still works, just loads less data upfront)
-  - Added `loading="lazy"` to video elements for lazy loading support
-  - Deferred all non-critical JavaScript (10+ scripts) — stops 2,550ms render blocking
-  - Optimized Google Fonts loading (async with media="print" trick + noscript fallback)
-- **Modified**: `server.js` — Added compression and aggressive caching
-  - Installed and enabled `compression` middleware — Gzip/Brotli compression for all responses (60-80% size reduction)
-  - Improved cache headers: Images/videos cached 1 year (`immutable`), JS/CSS 7 days, HTML always fresh
-  - Cache-Control headers now properly set based on file type for optimal performance
-- **Installed**: `compression` npm package (v1.7.4) — enables automatic Gzip/Brotli compression
-- **Why**: PageSpeed mobile score was 41/100 (failing) — 24.3 MB payload, 99.4s LCP, 2,550ms render blocking. Root causes: 9 videos (~83 MB) loading eagerly, no compression, weak cache headers, render-blocking JS. These changes target 50-70% performance improvement without image conversion (Phase 2 will handle WebP conversion).
+### 19. Performance Optimization — PageSpeed Desktop 31→64, Mobile 30→48 (Chunk 3)
+
+**Results achieved:**
+- Desktop: **31→64/100** (+33 pts), FCP 2.6s→0.8s, LCP 6.3s→3.2s, TBT 770ms→390ms
+- Mobile: **30→48/100** (+18 pts), TBT 1,440ms→340ms, payload 24.3MB→5.2MB (−79%)
+
+**Phase 1 — Server & video loading:**
+- **Modified**: `index.html` — `preload="none"` on gallery videos (prevents 83MB eager load), `preload="metadata"` on hero video, deferred 12 non-critical scripts (eliminates 2,550ms render blocking), async Google Fonts loading
+- **Modified**: `server.js` — enabled `compression` middleware (Gzip/Brotli, 60-80% reduction), cache headers: images/videos 1yr `immutable`, JS/CSS 7 days, HTML no-cache
+- **Installed**: `compression` npm package
+
+**Phase 2 — WebP images + Font Awesome optimization:**
+- **Created**: `scripts/convert-to-webp.js` — converts all images using sharp at quality 82
+- **Converted**: 43 images to WebP (60-95% smaller): `about.png` 3MB→235KB (92%), `logo.png` 432KB→61KB (86%), `Door.png` 1.4MB→67KB (95%), gallery PNGs 60-65%, video posters 60-68%
+- **Modified**: `index.html`, `404.html` — all image src updated to `.webp`
+- **Modified**: `js/simple-slider.js`, `js/student-life.js` — updated 23 image references to `.webp`
+- **Modified**: `index.html` — replaced Font Awesome `all.min.css` with modular `fontawesome + solid + brands + regular` only (skips unused light/duotone/sharp sets, ~60% CSS reduction)
+
+**Phase 3 — reCAPTCHA lazy loading:**
+- **Modified**: `index.html` — reCAPTCHA v3 now loads dynamically only when user scrolls 30% down OR focuses a form field (saves ~500KB on initial page load, still fully functional before any submission)
+
+**Remaining bottlenecks (require CDN or build tool to fix further):**
+- Mobile LCP 23.3s — caused by hero background video on slow 4G; would need CDN or video CDN hosting
+- Unused JS ~515KB — reCAPTCHA bundle (unavoidable without removing bot protection)
+- Unused CSS ~119KB — Font Awesome icons not used (would need icon subsetting build step)
 
 ---
 

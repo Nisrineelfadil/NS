@@ -261,4 +261,11 @@ managedStudentSchema.virtual('isPaymentOverdue').get(function() {
     return now > this.paymentDate;
 });
 
+managedStudentSchema.add({
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorEmail: { type: String, default: null },
+    twoFactorCode: { type: String, default: null },
+    twoFactorExpiry: { type: Date, default: null }
+});
+
 module.exports = mongoose.model('ManagedStudent', managedStudentSchema);

@@ -65,6 +65,11 @@ const adminAPI_instance = createAPIInstance('token', 'user'); // Admin uses gene
 export const studentAPI = {
   // Login
   login: (credentials) => studentAPI_instance.post('/grades/student/login', credentials),
+  // 2FA verify
+  verify2FA: (data) => studentAPI_instance.post('/grades/student/2fa/verify', data),
+  // Settings
+  getSettings: () => studentAPI_instance.get('/grades/student/settings'),
+  updateSettings: (data) => studentAPI_instance.put('/grades/student/settings', data),
   
   // Get student grades with filters
   getGrades: (params) => studentAPI_instance.get('/grades/student/grades', { params }),
@@ -100,6 +105,11 @@ export const studentAPI = {
 export const teacherAPI = {
   // Login
   login: (credentials) => teacherAPI_instance.post('/grades/teacher/login', credentials),
+  // 2FA verify
+  verify2FA: (data) => teacherAPI_instance.post('/grades/teacher/2fa/verify', data),
+  // Settings
+  getSettings: () => teacherAPI_instance.get('/grades/teacher/settings'),
+  updateSettings: (data) => teacherAPI_instance.put('/grades/teacher/settings', data),
   
   // Get teacher's groups
   getGroups: () => teacherAPI_instance.get('/grades/teacher/groups'),

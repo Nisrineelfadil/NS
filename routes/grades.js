@@ -8,6 +8,11 @@ const Grade = require('../models/Grade');
 const Group = require('../models/Group');
 const StudentMessage = require('../models/StudentMessage');
 const { notifyGradeUploaded } = require('../services/notificationService');
+const emailService = require('../services/emailService');
+
+function generate2FACode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -78,7 +83,7 @@ const verifyStudentToken = async (req, res, next) => {
 
 // ==================== TEACHER ROUTES ====================
 
-// Teacher login
+// Teacher login (with 2FA)
 router.post('/teacher/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -92,32 +97,104 @@ router.post('/teacher/login', async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        
+
+        // Only trigger 2FA if teacher has enabled it and set a personal email
+        if (teacher.twoFactorEnabled && teacher.twoFactorEmail) {
+            const code = generate2FACode();
+            teacher.twoFactorCode = code;
+            teacher.twoFactorExpiry = new Date(Date.now() + 10 * 60 * 1000);
+            await teacher.save();
+
+            emailService.initialize();
+            emailService.send2FACode(teacher.twoFactorEmail, code, teacher.fullName).catch(err => {
+                console.error('Teacher 2FA email error:', err.message);
+            });
+
+            const tempToken = jwt.sign(
+                { id: teacher._id, purpose: '2fa_teacher' },
+                process.env.JWT_SECRET,
+                { expiresIn: '10m' }
+            );
+            return res.json({ requires2FA: true, tempToken, email: teacher.twoFactorEmail });
+        }
+
+        // 2FA disabled — issue full token directly
         const token = jwt.sign(
-            { 
-                id: teacher._id, 
-                email: teacher.email, 
-                name: teacher.fullName,
-                role: 'teacher',
-                formations: teacher.formations
-            },
+            { id: teacher._id, email: teacher.email, name: teacher.fullName, role: 'teacher', formations: teacher.formations },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
-        
-        res.json({
-            token,
-            teacher: {
-                id: teacher._id,
-                fullName: teacher.fullName,
-                email: teacher.email,
-                formations: teacher.formations,
-                groups: teacher.groups
-            }
-        });
+        res.json({ token, teacher: { id: teacher._id, fullName: teacher.fullName, email: teacher.email, formations: teacher.formations, groups: teacher.groups } });
     } catch (error) {
         console.error('Teacher login error:', error);
         res.status(500).json({ error: 'Server error. Please try again.' });
+    }
+});
+
+// Teacher 2FA verify
+router.post('/teacher/2fa/verify', async (req, res) => {
+    try {
+        const { tempToken, code } = req.body;
+        let decoded;
+        try {
+            decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+        } catch {
+            return res.status(401).json({ error: 'Session expired. Please login again.' });
+        }
+        if (decoded.purpose !== '2fa_teacher') {
+            return res.status(401).json({ error: 'Invalid session.' });
+        }
+        const teacher = await Teacher.findById(decoded.id);
+        if (!teacher) return res.status(401).json({ error: 'Teacher not found.' });
+        if (!teacher.twoFactorExpiry || new Date() > teacher.twoFactorExpiry) {
+            return res.status(401).json({ error: 'Code expired. Please login again.' });
+        }
+        if (teacher.twoFactorCode !== code.trim()) {
+            return res.status(401).json({ error: 'Incorrect code. Please try again.' });
+        }
+        teacher.twoFactorCode = null;
+        teacher.twoFactorExpiry = null;
+        await teacher.save();
+
+        const token = jwt.sign(
+            { id: teacher._id, email: teacher.email, name: teacher.fullName, role: 'teacher', formations: teacher.formations },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        res.json({ token, teacher: { id: teacher._id, fullName: teacher.fullName, email: teacher.email, formations: teacher.formations, groups: teacher.groups } });
+    } catch (error) {
+        console.error('Teacher 2FA verify error:', error);
+        res.status(500).json({ error: 'Server error.' });
+    }
+});
+
+// Get teacher 2FA settings
+router.get('/teacher/settings', verifyTeacherToken, async (req, res) => {
+    try {
+        const teacher = await Teacher.findById(req.teacher.id).select('twoFactorEnabled twoFactorEmail');
+        if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+        res.json({ twoFactorEnabled: teacher.twoFactorEnabled, twoFactorEmail: teacher.twoFactorEmail });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update teacher 2FA settings
+router.put('/teacher/settings', verifyTeacherToken, async (req, res) => {
+    try {
+        const { twoFactorEnabled, twoFactorEmail } = req.body;
+        const teacher = await Teacher.findById(req.teacher.id);
+        if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+        if (twoFactorEnabled && twoFactorEmail) {
+            const taken = await Teacher.findOne({ twoFactorEmail: twoFactorEmail.trim(), _id: { $ne: teacher._id } });
+            if (taken) return res.status(409).json({ error: 'This email is already taken by another teacher. Please use a different email.' });
+        }
+        teacher.twoFactorEnabled = !!twoFactorEnabled;
+        teacher.twoFactorEmail = twoFactorEmail ? twoFactorEmail.trim() : null;
+        await teacher.save();
+        res.json({ success: true, twoFactorEnabled: teacher.twoFactorEnabled, twoFactorEmail: teacher.twoFactorEmail });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
@@ -628,14 +705,13 @@ router.delete('/teacher/grades/:id', verifyTeacherToken, async (req, res) => {
 
 // ==================== STUDENT ROUTES ====================
 
-// Student login
+// Student login (with 2FA)
 router.post('/student/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         
         const student = await ManagedStudent.findOne({ schoolEmail: email, status: 'active' });
         if (!student) {
-            // Check if account ever existed (could be archived/deleted)
             const anyAccount = await ManagedStudent.findOne({ schoolEmail: email });
             if (anyAccount && anyAccount.status !== 'active') {
                 return res.status(410).json({
@@ -643,7 +719,6 @@ router.post('/student/login', async (req, res) => {
                     accountDeleted: true
                 });
             }
-            // No account at all — either never existed or was purged after archiving
             return res.status(401).json({
                 error: 'No account found with this email. If you were a student in a previous season, your account may have been archived.',
                 accountDeleted: true
@@ -654,33 +729,104 @@ router.post('/student/login', async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        
+
+        // Only trigger 2FA if student has enabled it and set a personal email
+        if (student.twoFactorEnabled && student.twoFactorEmail) {
+            const code = generate2FACode();
+            student.twoFactorCode = code;
+            student.twoFactorExpiry = new Date(Date.now() + 10 * 60 * 1000);
+            await student.save();
+
+            emailService.initialize();
+            emailService.send2FACode(student.twoFactorEmail, code, student.fullName).catch(err => {
+                console.error('Student 2FA email error:', err.message);
+            });
+
+            const tempToken = jwt.sign(
+                { id: student._id, purpose: '2fa_student' },
+                process.env.JWT_SECRET,
+                { expiresIn: '10m' }
+            );
+            return res.json({ requires2FA: true, tempToken, email: student.twoFactorEmail });
+        }
+
+        // 2FA disabled — issue full token directly
         const token = jwt.sign(
-            { 
-                id: student._id, 
-                email: student.schoolEmail, 
-                name: student.fullName,
-                role: 'student'
-            },
+            { id: student._id, email: student.schoolEmail, name: student.fullName, role: 'student' },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
-        
-        res.json({
-            token,
-            student: {
-                id: student._id,
-                fullName: student.fullName,
-                schoolEmail: student.schoolEmail,
-                formation: student.formation,
-                filiere: student.filiere,
-                groupName: student.groupName,
-                photoPath: student.photoPath
-            }
-        });
+        res.json({ token, student: { id: student._id, fullName: student.fullName, schoolEmail: student.schoolEmail, formation: student.formation, filiere: student.filiere, groupName: student.groupName, photoPath: student.photoPath } });
     } catch (error) {
         console.error('Student login error:', error);
         res.status(500).json({ error: 'Server error. Please try again.' });
+    }
+});
+
+// Student 2FA verify
+router.post('/student/2fa/verify', async (req, res) => {
+    try {
+        const { tempToken, code } = req.body;
+        let decoded;
+        try {
+            decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+        } catch {
+            return res.status(401).json({ error: 'Session expired. Please login again.' });
+        }
+        if (decoded.purpose !== '2fa_student') {
+            return res.status(401).json({ error: 'Invalid session.' });
+        }
+        const student = await ManagedStudent.findById(decoded.id);
+        if (!student) return res.status(401).json({ error: 'Student not found.' });
+        if (!student.twoFactorExpiry || new Date() > student.twoFactorExpiry) {
+            return res.status(401).json({ error: 'Code expired. Please login again.' });
+        }
+        if (student.twoFactorCode !== code.trim()) {
+            return res.status(401).json({ error: 'Incorrect code. Please try again.' });
+        }
+        student.twoFactorCode = null;
+        student.twoFactorExpiry = null;
+        await student.save();
+
+        const token = jwt.sign(
+            { id: student._id, email: student.schoolEmail, name: student.fullName, role: 'student' },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        res.json({ token, student: { id: student._id, fullName: student.fullName, schoolEmail: student.schoolEmail, formation: student.formation, filiere: student.filiere, groupName: student.groupName, photoPath: student.photoPath } });
+    } catch (error) {
+        console.error('Student 2FA verify error:', error);
+        res.status(500).json({ error: 'Server error.' });
+    }
+});
+
+// Get student 2FA settings
+router.get('/student/settings', verifyStudentToken, async (req, res) => {
+    try {
+        const student = await ManagedStudent.findById(req.student.id).select('twoFactorEnabled twoFactorEmail');
+        if (!student) return res.status(404).json({ error: 'Student not found' });
+        res.json({ twoFactorEnabled: student.twoFactorEnabled, twoFactorEmail: student.twoFactorEmail });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update student 2FA settings
+router.put('/student/settings', verifyStudentToken, async (req, res) => {
+    try {
+        const { twoFactorEnabled, twoFactorEmail } = req.body;
+        const student = await ManagedStudent.findById(req.student.id);
+        if (!student) return res.status(404).json({ error: 'Student not found' });
+        if (twoFactorEnabled && twoFactorEmail) {
+            const taken = await ManagedStudent.findOne({ twoFactorEmail: twoFactorEmail.trim(), _id: { $ne: student._id } });
+            if (taken) return res.status(409).json({ error: 'This email is already taken by another student. Please use a different email.' });
+        }
+        student.twoFactorEnabled = !!twoFactorEnabled;
+        student.twoFactorEmail = twoFactorEmail ? twoFactorEmail.trim() : null;
+        await student.save();
+        res.json({ success: true, twoFactorEnabled: student.twoFactorEnabled, twoFactorEmail: student.twoFactorEmail });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
     }
 });
 

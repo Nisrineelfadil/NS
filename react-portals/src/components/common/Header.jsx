@@ -2,7 +2,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import Settings from './Settings';
 import './Header.css';
 
-const Header = ({ title, subtitle, showLogout = true, showSettings = true, children, user, logout }) => {
+const Header = ({ title, subtitle, showLogout = true, showSettings = true, children, user, logout, securityAPI }) => {
   const { t } = useLanguage();
 
   const getInitials = (name) => {
@@ -47,7 +47,7 @@ const Header = ({ title, subtitle, showLogout = true, showSettings = true, child
           </>
         )}
 
-        {showSettings && <Settings />}
+        {showSettings && <Settings securityAPI={securityAPI} />}
 
         {showLogout && (
           <button className="logout-btn" onClick={logout}>

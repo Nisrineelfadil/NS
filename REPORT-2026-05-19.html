@@ -371,7 +371,7 @@
   <!-- ── STATS ── -->
   <div class="summary-grid">
     <div class="stat-box">
-      <div class="num">18</div>
+      <div class="num">19</div>
       <div class="label">Fixes &amp; features</div>
     </div>
     <div class="stat-box">
@@ -379,7 +379,7 @@
       <div class="label">Faux positifs identifiés</div>
     </div>
     <div class="stat-box">
-      <div class="num">2</div>
+      <div class="num">3</div>
       <div class="label">Jours de sprint</div>
     </div>
     <div class="stat-box">
@@ -523,7 +523,7 @@
 
   <!-- ── DAY 3 (May 20) ── -->
   <div class="section">
-    <div class="section-title">📅 20 Mai 2026 — Conformité Légale RGPD/CNDP</div>
+    <div class="section-title">📅 20 Mai 2026 — Conformité Légale RGPD/CNDP + Performance</div>
     <div class="fix-list">
 
       <div class="fix-item legal">
@@ -540,6 +540,21 @@
           <span class="fix-files">CNDP-DECLARATION-GUIDE.md &nbsp; register.html &nbsp; privacy-policy.html &nbsp; index.html &nbsp; cv.html &nbsp; translate.html &nbsp; apply.html &nbsp; js/page-i18n.js &nbsp; js/languages.json</span>
         </div>
         <span class="fix-badge badge badge-red">Légal</span>
+      </div>
+
+      <div class="fix-item feature">
+        <div class="fix-num">19</div>
+        <div class="fix-content">
+          <div class="fix-title">Optimisation Performance — PageSpeed Desktop 31→64, Mobile 30→48</div>
+          <div class="fix-desc">
+            <strong>Résultats :</strong> Desktop <strong>31→64/100</strong> (+33 pts) · Mobile <strong>30→48/100</strong> (+18 pts) · Payload <strong>24.3 MB→5.2 MB</strong> (−79%) · TBT <strong>1 440ms→340ms</strong> (−76%) · Render blocking <strong>1 800ms→150ms</strong> (−92%)<br>
+            <strong>Phase 1 — Serveur &amp; vidéos :</strong> <code style="font-family:monospace;font-size:10px">preload="none"</code> sur les vidéos galerie (évite 83 MB de chargement) · 12 scripts JavaScript différés · Google Fonts async · Middleware <code style="font-family:monospace;font-size:10px">compression</code> Gzip/Brotli · Cache 1 an pour images/vidéos, 7 j pour JS/CSS<br>
+            <strong>Phase 2 — Images WebP :</strong> 43 images converties (60-95% plus petites) : <em>about.png</em> 3 MB→235 KB (92%), <em>logo.png</em> 432 KB→61 KB (86%), <em>Door.png</em> 1.4 MB→67 KB (95%) · Font Awesome remplacé par modules <code style="font-family:monospace;font-size:10px">solid + brands + regular</code> uniquement (élimine les sets inutilisés)<br>
+            <strong>Phase 3 — reCAPTCHA lazy :</strong> chargement différé au premier scroll (30%) ou focus formulaire → économise ~500 KB au chargement initial
+          </div>
+          <span class="fix-files">index.html &nbsp; server.js &nbsp; 404.html &nbsp; js/simple-slider.js &nbsp; js/student-life.js &nbsp; js/main.js &nbsp; scripts/convert-to-webp.js &nbsp; package.json &nbsp; Img/*.webp (43 fichiers)</span>
+        </div>
+        <span class="fix-badge badge badge-orange">Performance</span>
       </div>
 
     </div>
@@ -703,6 +718,14 @@
             <div class="tl-text">Conformité CNDP/RGPD · Consentements photo + données · Système traduction HTML · Notices légales</div>
           </div>
         </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-time">20 Mai — Soir (20h-21h)</div>
+            <div class="tl-text">Performance Chunk 3 · Vidéos lazy load · Gzip/Brotli · Cache agressif · 43 images→WebP · Font Awesome modulaire · reCAPTCHA lazy · Desktop 31→64 · Mobile 30→48</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -710,7 +733,7 @@
   <!-- ── FOOTER ── -->
   <div class="footer">
     <div>
-      <p>Rapport généré le 20 Mai 2026 à 4h15 (UTC+2)</p>
+      <p>Rapport mis à jour le 20 Mai 2026 à 21h15 (UTC+2)</p>
       <p>Stack : HTML · CSS · JavaScript (Vanilla) &nbsp;→&nbsp; Node.js · Express.js &nbsp;→&nbsp; MongoDB Atlas (Mongoose) &nbsp;→&nbsp; Vercel Serverless · Socket.io · JWT · Nodemailer · reCAPTCHA v3</p>
     </div>
     <div class="logo-text">Nisrine School</div>

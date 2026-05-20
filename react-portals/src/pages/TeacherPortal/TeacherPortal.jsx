@@ -176,7 +176,7 @@ const TeacherPortal = () => {
   return (
     <div className="teacher-portal">
       <div className="container">
-        <Header title={t('teacherPortal')} subtitle={user?.email} user={user} logout={logout} />
+        <Header title={t('teacherPortal')} subtitle={user?.email} user={user} logout={logout} securityAPI={teacherAPI} />
 
         {/* Tab Switcher */}
         <div className="portal-tabs">

@@ -85,7 +85,11 @@ const teacherSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorEmail: { type: String, default: null },
+    twoFactorCode: { type: String, default: null },
+    twoFactorExpiry: { type: Date, default: null }
 });
 
 // Hash password before saving

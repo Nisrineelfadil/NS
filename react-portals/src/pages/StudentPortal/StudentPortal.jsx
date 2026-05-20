@@ -175,7 +175,7 @@ const StudentPortal = () => {
   return (
     <div className="student-portal">
       <div className="container">
-        <Header title="Student Portal" subtitle={user?.schoolEmail} user={user} logout={logout}>
+        <Header title="Student Portal" subtitle={user?.schoolEmail} user={user} logout={logout} securityAPI={studentAPI}>
           <button 
             className="messages-btn" 
             onClick={() => setShowMessages(true)}
