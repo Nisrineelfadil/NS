@@ -97,7 +97,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -187,7 +188,7 @@
         <!-- Local Video Background -->
         <div class="video-background">
             <div class="video-foreground">
-                <video autoplay muted loop playsinline>
+                <video autoplay muted loop playsinline preload="metadata">
                     <source src="Img/be.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
@@ -466,7 +467,7 @@
                             <!-- Mobile Main Video Display -->
                             <div class="mobile-main-video">
                                 <div class="mobile-video-container">
-                                    <video id="mobile-video-player" controls>
+                                    <video id="mobile-video-player" controls preload="none" loading="lazy">
                                         <source src="Img/Video/Intro_V.mp4" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
@@ -570,7 +571,7 @@
                             
                             <div class="main-display-card">
                                 <div class="card-video main-video-display">
-                                    <video id="main-video-player" controls>
+                                    <video id="main-video-player" controls preload="none" loading="lazy">
                                         <source src="Img/Video/Intro_V.mp4" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
@@ -838,42 +839,42 @@
     </a>
 
     <!-- Student Slider JavaScript -->
-    <script src="js/simple-slider.js"></script>
+    <script src="js/simple-slider.js" defer></script>
 
     <!-- About Section Media Switcher -->
-    <script src="js/about-media-switcher.js"></script>
+    <script src="js/about-media-switcher.js" defer></script>
 
     <!-- Modern Gallery JavaScript -->
-    <script src="js/modern-gallery.js"></script>
+    <script src="js/modern-gallery.js" defer></script>
 
     <!-- Video Player JavaScript -->
-    <script src="js/video-player.js"></script>
+    <script src="js/video-player.js" defer></script>
 
     <!-- Video Gallery JavaScript -->
-    <script src="js/video-gallery.js"></script>
+    <script src="js/video-gallery.js" defer></script>
 
     <!-- Student Life JavaScript -->
-    <script src="js/student-life.js"></script>
+    <script src="js/student-life.js" defer></script>
 
     <!-- Film Reel JavaScript -->
-    <script src="js/film-reel.js"></script>
+    <script src="js/film-reel.js" defer></script>
 
     <!-- Page Translation Utility -->
-    <script src="js/page-i18n.js"></script>
+    <script src="js/page-i18n.js" defer></script>
 
     <!-- Registration Modal JavaScript -->
-    <script src="js/registration-modal.js"></script>
+    <script src="js/registration-modal.js" defer></script>
 
     <!-- Ratings JavaScript -->
-    <script src="js/ratings.js"></script>
+    <script src="js/ratings.js" defer></script>
 
     <!-- reCAPTCHA v3 -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr" async defer></script>
     <script>window.RECAPTCHA_SITE_KEY = '6LfjWvIsAAAAABZFTNW3vcxK077DwLF1aPXzMzHr';</script>
 
     <!-- JavaScript -->
-    <script src="js/main.js"></script>
-    <script src="js/animations.js"></script>
+    <script src="js/main.js" defer></script>
+    <script src="js/animations.js" defer></script>
 
     <!-- Email obfuscation: assemble email from data attributes at runtime -->
     <script>

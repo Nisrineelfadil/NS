@@ -211,6 +211,20 @@
   - All translations preserve HTML `<a>` tags linking to `/privacy-policy.html`
 - **Why**: Morocco CNDP compliance (loi 09-08) + RGPD transparency requirements. Organizations collecting sensitive data (CIN, photos) must declare to CNDP and provide clear consent mechanisms. Fixes legal compliance gaps: no photo consent, no retention policy, no service form privacy notices.
 
+### 19. Performance Optimization — PageSpeed Score 41→Target 70+ (Chunk 3)
+- **Modified**: `index.html` — Fixed video loading performance
+  - Added `preload="none"` to gallery video players (mobile + desktop) — prevents ~83 MB of videos from loading until user plays them
+  - Added `preload="metadata"` to hero background video (autoplay still works, just loads less data upfront)
+  - Added `loading="lazy"` to video elements for lazy loading support
+  - Deferred all non-critical JavaScript (10+ scripts) — stops 2,550ms render blocking
+  - Optimized Google Fonts loading (async with media="print" trick + noscript fallback)
+- **Modified**: `server.js` — Added compression and aggressive caching
+  - Installed and enabled `compression` middleware — Gzip/Brotli compression for all responses (60-80% size reduction)
+  - Improved cache headers: Images/videos cached 1 year (`immutable`), JS/CSS 7 days, HTML always fresh
+  - Cache-Control headers now properly set based on file type for optimal performance
+- **Installed**: `compression` npm package (v1.7.4) — enables automatic Gzip/Brotli compression
+- **Why**: PageSpeed mobile score was 41/100 (failing) — 24.3 MB payload, 99.4s LCP, 2,550ms render blocking. Root causes: 9 videos (~83 MB) loading eagerly, no compression, weak cache headers, render-blocking JS. These changes target 50-70% performance improvement without image conversion (Phase 2 will handle WebP conversion).
+
 ---
 
 ## False Positives from Diagnostic Report

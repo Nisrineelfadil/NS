@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
+const compression = require('compression');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -46,6 +47,9 @@ const notificationService = require('./services/notificationService');
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Enable Gzip/Brotli compression for all responses (must be early in middleware chain)
+app.use(compression());
 
 // Initialize HTTP server and Socket.IO (only in non-serverless environment)
 const isServerless = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME;
@@ -166,10 +170,25 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 // Serve static files FIRST (before HTML routes and API routes)
+// Aggressive caching for immutable assets (images, videos, fonts, JS, CSS)
 const staticOptions = {
-  maxAge: '1d', // Cache static files for 1 day
+  maxAge: '365d', // Cache for 1 year
   etag: true,
-  lastModified: true
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    // Images, videos, fonts = immutable (1 year cache)
+    if (filePath.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|woff|woff2|ttf|eot)$/i)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    // JS/CSS = 7 days (may update more frequently)
+    else if (filePath.match(/\.(js|css)$/i)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800');
+    }
+    // HTML = no cache (always fresh)
+    else if (filePath.match(/\.html$/i)) {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    }
+  }
 };
 
 // Use process.cwd() for Vercel serverless compatibility
