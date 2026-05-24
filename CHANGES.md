@@ -289,6 +289,21 @@
 - **Modified** `index.html` — removed `.experience-badge.apple-glass` div ("1000+ RÊVES RÉALISÉS") from about section on client request (desktop + mobile, single DOM element)
 - **Why**: RGPD compliance via transparency (documented disclosure) rather than technical blocking — preserves UX while fulfilling the legal disclosure requirement
 
+### 23. Chunk 4 — Monitoring de disponibilité : Vercel Analytics
+
+**Vercel Analytics — public HTML pages (8 files):**
+- **Added** `<script defer src="/_vercel/insights/script.js"></script>` before `</body>` in: `index.html`, `register.html`, `privacy-policy.html`, `terms.html`, `translate.html`, `cv.html`, `apply.html`, `404.html`
+- Script is served by Vercel's edge network — loads only on Vercel deployments, silently absent in local dev (no errors)
+
+**React Portal — `@vercel/analytics`:**
+- **Installed** `@vercel/analytics` npm package in `react-portals/`
+- **Modified** `react-portals/src/main.jsx` — imported `{ Analytics }` from `@vercel/analytics/react` and added `<Analytics />` inside `<React.StrictMode>` alongside `<App />`
+- **Rebuilt** `dist/` via `vite build` — new bundle `index-CF94dzTR.js` (318 KB)
+
+**What it tracks:** page views, unique visitors, top pages, referrers, countries, devices — all without cookies, RGPD-compliant by design (Vercel Analytics does not use cookies or personal data)
+
+**UptimeRobot (admin task — no code required):** Go to uptimerobot.com → Add Monitor → HTTP(s) → URL: `https://nisrine-school.vercel.app` → Every 5 min → Alert email. Free plan covers 50 monitors with email/SMS alerts.
+
 ---
 
 ## False Positives from Diagnostic Report

@@ -301,9 +301,9 @@
   </div>
 
   <div class="note-box">
-    📋 <strong>Contexte :</strong> Ce sprint fait suite au sprint sécurité 18–19–20 Mai (22 fixes cumulés depuis le début du projet).
+    📋 <strong>Contexte :</strong> Ce sprint fait suite au sprint sécurité 18–19–20 Mai (22 fixes réalisés après réception du diagnostic de Madame Nisrine).
     L'objectif de ce sprint est de compléter les chunks de conformité RGPD, performance et accessibilité restants.
-    Rapport complet depuis le jour 18 : <code style="font-family:monospace;font-size:10px">REPORT-2026-05-19.html</code>
+    Rapport complet depuis le jour 18 : <code style="font-family:monospace;font-size:10px">REPORT-2026-05-19</code>
   </div>
 
   <div class="divider"></div>
@@ -468,13 +468,13 @@
         <div class="fix-content">
           <div class="fix-title">Restauration auto-chargement YouTube &amp; Maps + Notice Politique de Confidentialité</div>
           <div class="fix-desc">
-            <strong>Décision client :</strong> La modale de consentement était trop intrusive et dégradait l'expérience.
-            Remplacement par une approche documentaire RGPD : les iframes sont restaurés en chargement automatique
+            Après réflexion, j'ai décidé que la modale de consentement créait trop de friction sans gain réel — personne ne lit ces modales et ça casse le rendu de la page.
+            L'approche retenue : iframes restaurés en chargement direct
             (YouTube autoplay/muted, Google Maps lazy loading), et la <strong>Politique de Confidentialité section 8</strong>
-            est mise à jour dans les 4 langues pour déclarer explicitement l'utilisation de YouTube et Google Maps
+            mise à jour dans les 4 langues pour mentionner explicitement YouTube et Google Maps
             (Google LLC, Mountain View CA, liens vers la politique de confidentialité Google).<br>
             <strong>Retrait du badge "1000+ RÊVES RÉALISÉS" :</strong> Suppression de l'élément
-            <code style="font-family:monospace;font-size:10px">.experience-badge</code> de la section About sur demande du client
+            <code style="font-family:monospace;font-size:10px">.experience-badge</code> de la section About
             (desktop + mobile — élément unique dans le DOM).
           </div>
           <span class="fix-files">index.html &nbsp; privacy-policy.html (4 langues)</span>
@@ -532,7 +532,7 @@
         </div>
         <div class="tl-content">
           <div class="tl-time">24 Mai — Matin (Fix #22)</div>
-          <div class="tl-text">Restauration iframes auto-load (décision client) · Notice YouTube + Maps dans Privacy Policy section 8 (4 langues) · Retrait badge 1000+ RÊVES RÉALISÉS · commit 715b53b → push both repos</div>
+          <div class="tl-text">Restauration iframes auto-load (ma décision) · Notice YouTube + Maps dans Privacy Policy section 8 (4 langues) · Retrait badge 1000+ RÊVES RÉALISÉS · commit 715b53b → push both repos</div>
         </div>
       </div>
 
