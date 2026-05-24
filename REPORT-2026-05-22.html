@@ -283,11 +283,11 @@
   <!-- ── STATS ── -->
   <div class="summary-grid">
     <div class="stat-box">
-      <div class="num">22</div>
+      <div class="num">24</div>
       <div class="label">Fixes &amp; features (total)</div>
     </div>
     <div class="stat-box">
-      <div class="num">2</div>
+      <div class="num">4</div>
       <div class="label">Fixes ce sprint</div>
     </div>
     <div class="stat-box">
@@ -482,6 +482,32 @@
         <span class="fix-badge badge-green">UX &amp; RGPD</span>
       </div>
 
+      <div class="fix-item feature">
+        <div class="fix-num">23</div>
+        <div class="fix-content">
+          <div class="fix-title">Chunk 4 — Monitoring de disponibilité : Vercel Analytics</div>
+          <div class="fix-desc">
+            J'ai ajouté Vercel Analytics sur l'ensemble du site pour avoir une vision claire du trafic réel — pages vues, visiteurs uniques, pays, appareils, sources. Aucun cookie, conformité RGPD native. Le script <code style="font-family:monospace;font-size:10px">/_vercel/insights/script.js</code> est injecté dans les 8 pages publiques. Pour le portail React, j'ai installé <code style="font-family:monospace;font-size:10px">@vercel/analytics</code> et ajouté le composant <code style="font-family:monospace;font-size:10px">&lt;Analytics /&gt;</code> dans <code style="font-family:monospace;font-size:10px">main.jsx</code>.<br>
+            <strong>UptimeRobot :</strong> tâche admin — uptimerobot.com → Ajouter un moniteur HTTP(s) → URL du site → toutes les 5 min → alerte email. Plan gratuit, 50 moniteurs inclus.
+          </div>
+          <span class="fix-files">index.html &nbsp; register.html &nbsp; privacy-policy.html &nbsp; terms.html &nbsp; translate.html &nbsp; cv.html &nbsp; apply.html &nbsp; 404.html &nbsp; react-portals/src/main.jsx &nbsp; package.json</span>
+        </div>
+        <span class="fix-badge badge-blue">Performance</span>
+      </div>
+
+      <div class="fix-item feature">
+        <div class="fix-num">24</div>
+        <div class="fix-content">
+          <div class="fix-title">Chunk 5 — Google Analytics 4 (G-2ZG85R5Q1G)</div>
+          <div class="fix-desc">
+            La propriété GA4 existait déjà pour le flux PWA. J'ai créé un nouveau flux web "Nisrine School — Site Principal" sur <code style="font-family:monospace;font-size:10px">nisrineschool.com</code> et obtenu le Measurement ID <strong>G-2ZG85R5Q1G</strong>. Le script <code style="font-family:monospace;font-size:10px">gtag.js</code> est injecté dans les 8 pages publiques en mode consentement : <code style="font-family:monospace;font-size:10px">analytics_storage</code> démarré à <em>denied</em> par défaut, bascule à <em>granted</em> dès que l'utilisateur clique OK sur la bannière cookies. Le portail React a son propre script gtag (denied par défaut — pas de bannière côté portail).<br>
+            GA4 apporte ce que Vercel Analytics ne couvre pas : durée de session, taux de rebond, événements (clics, scrolls, liens sortants), objectifs de conversion, démographie.
+          </div>
+          <span class="fix-files">index.html &nbsp; register.html &nbsp; privacy-policy.html &nbsp; terms.html &nbsp; translate.html &nbsp; cv.html &nbsp; apply.html &nbsp; 404.html &nbsp; react-portals/index.html &nbsp; react-portals/dist/</span>
+        </div>
+        <span class="fix-badge badge-blue">SEO</span>
+      </div>
+
     </div>
   </div>
 
@@ -538,10 +564,32 @@
 
       <div class="tl-item">
         <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">24 Mai — Matin (Fix #23)</div>
+          <div class="tl-text">Chunk 4 Monitoring · Vercel Analytics script sur 8 pages publiques · @vercel/analytics installé + Analytics dans React portal · vite build · commit 8f6dcc4</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">24 Mai — Matin (Fix #24)</div>
+          <div class="tl-text">Chunk 5 GA4 · Flux web G-2ZG85R5Q1G créé · gtag consent mode sur 8 pages · bannière cookies wireée · portail React + vite build</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
           <div class="tl-dot future"></div>
         </div>
         <div class="tl-content">
-          <div class="tl-time">Prochain sprint — Chunk 5 &amp; 6</div>
+          <div class="tl-time">Prochain sprint — Chunk 5 (suite) &amp; 6</div>
           <div class="tl-text" style="color:#94a3b8">À venir : Google Analytics 4 · Blog section · ARIA labels · Labels accessibles sur formulaires</div>
         </div>
       </div>

@@ -864,7 +864,18 @@
             }
         }
     </style>
-</head>
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2ZG85R5Q1G"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'analytics_storage': localStorage.getItem('cookieConsent') === 'accepted' ? 'granted' : 'denied'
+    });
+    gtag('js', new Date());
+    gtag('config', 'G-2ZG85R5Q1G');
+  </script></head>
 <body>
     <!-- Floating Particles -->
     <div class="magic-particles">

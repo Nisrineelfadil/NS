@@ -304,6 +304,21 @@
 
 **UptimeRobot (admin task — no code required):** Go to uptimerobot.com → Add Monitor → HTTP(s) → URL: `https://nisrine-school.vercel.app` → Every 5 min → Alert email. Free plan covers 50 monitors with email/SMS alerts.
 
+### 24. Chunk 5 — Google Analytics 4 (Measurement ID: G-2ZG85R5Q1G)
+
+**Context:** GA4 property already existed for the PWA stream (`G-QJRG5CMVYL`). Added a new web stream "Nisrine School — Site Principal" at `https://nisrineschool.com` → Measurement ID `G-2ZG85R5Q1G`.
+
+**Public HTML pages (8 files) — consent mode:**
+- **Added** GA4 `gtag.js` script to `<head>` of: `index.html`, `register.html`, `privacy-policy.html`, `terms.html`, `translate.html`, `cv.html`, `apply.html`, `404.html`
+- `analytics_storage` defaults to `'denied'` — reads `localStorage.getItem('cookieConsent')` at page load; only `'granted'` if user already accepted
+- **Modified** `index.html` cookie accept button `onclick` — fires `gtag('consent','update',{'analytics_storage':'granted'})` when user clicks OK on the banner
+
+**React Portal:**
+- **Modified** `react-portals/index.html` — added GA4 gtag in `<head>` with `analytics_storage: 'denied'` default (portal users are authenticated, no public cookie banner)
+- **Rebuilt** `dist/` via `vite build`
+
+**What GA4 adds over Vercel Analytics:** session duration, bounce rate, events (clicks, scrolls, outbound links), conversion goals, audience demographics, UTM campaign tracking
+
 ---
 
 ## False Positives from Diagnostic Report
