@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport Technique — Nisrine School — 22-23-24 Mai 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --orange: #FF8C00;
+    --red-orange: #e03000;
+    --dark: #1a1a2e;
+    --mid: #4a4a5a;
+    --light: #6b6b7b;
+    --bg: #FAF7F2;
+    --white: #ffffff;
+    --border: #e8e0d5;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --amber: #d97706;
+    --purple: #7c3aed;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0ece6;
+    color: var(--dark);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: var(--white);
+    margin: 20px auto;
+    padding: 16mm 18mm;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.15);
+    position: relative;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10mm;
+    padding-bottom: 6mm;
+    border-bottom: 3px solid var(--orange);
+  }
+  .header-left h1 { font-size: 20px; font-weight: 800; color: var(--dark); line-height: 1.2; }
+  .header-left h1 span { color: var(--orange); }
+  .header-left p { font-size: 11px; color: var(--light); margin-top: 4px; }
+  .header-right { text-align: right; }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-orange  { background: #FFF3E0; color: var(--orange);  border: 1px solid #FFD699; }
+  .badge-green   { background: #DCFCE7; color: var(--green);   border: 1px solid #86EFAC; }
+  .badge-red     { background: #FEE2E2; color: var(--red);     border: 1px solid #FCA5A5; }
+  .badge-blue    { background: #DBEAFE; color: var(--blue);    border: 1px solid #93C5FD; }
+  .badge-purple  { background: #EDE9FE; color: var(--purple);  border: 1px solid #C4B5FD; }
+  .badge-amber   { background: #FEF3C7; color: var(--amber);   border: 1px solid #FCD34D; }
+  .header-right .badge { margin-bottom: 6px; }
+  .header-right p { font-size: 10px; color: var(--light); margin-top: 4px; }
+
+  .section { margin-bottom: 8mm; }
+  .section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 5px 10px;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    border-radius: 6px;
+    margin-bottom: 4mm;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 6mm;
+  }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .stat-box .num  { font-size: 28px; font-weight: 800; color: var(--orange); line-height: 1; }
+  .stat-box .label { font-size: 10px; color: var(--light); margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* Day planning cards */
+  .day-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+  }
+  .day-card.done   { border-left: 4px solid var(--green); background: #F0FDF4; }
+  .day-card.plan   { border-left: 4px solid var(--blue);  background: #EFF6FF; }
+  .day-card.future { border-left: 4px solid #94a3b8;      background: #F8FAFC; }
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .day-title { font-size: 13px; font-weight: 800; color: var(--dark); }
+  .day-status {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .status-done   { background: #DCFCE7; color: var(--green); }
+  .status-plan   { background: #DBEAFE; color: var(--blue); }
+  .status-future { background: #F1F5F9; color: #64748b; }
+
+  /* Chunk description cards */
+  .chunk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0 10px; }
+  .chunk-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: white;
+  }
+  .chunk-card.c2 { border-top: 3px solid var(--blue); }
+  .chunk-card.c4 { border-top: 3px solid var(--amber); }
+  .chunk-card.c5 { border-top: 3px solid var(--green); }
+  .chunk-card.c6 { border-top: 3px solid var(--purple); }
+  .chunk-num  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .chunk-name { font-size: 12px; font-weight: 800; color: var(--dark); margin-bottom: 5px; }
+  .chunk-purpose { font-size: 10.5px; color: var(--mid); line-height: 1.5; margin-bottom: 6px; }
+  .chunk-tasks { list-style: none; padding: 0; }
+  .chunk-tasks li {
+    font-size: 10px;
+    color: var(--mid);
+    padding: 2px 0;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .chunk-tasks li::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: 700; }
+  .chunk-tasks li.done-task { color: var(--green); }
+  .chunk-tasks li.done-task::before { content: '✓'; color: var(--green); }
+
+  /* Fix entries */
+  .fix-list { display: flex; flex-direction: column; gap: 5px; }
+  .fix-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .fix-item.critical { border-left: 4px solid var(--red); }
+  .fix-item.security { border-left: 4px solid var(--orange); }
+  .fix-item.feature  { border-left: 4px solid var(--blue); }
+  .fix-item.ux       { border-left: 4px solid var(--green); }
+  .fix-item.rgpd     { border-left: 4px solid var(--purple); }
+  .fix-num {
+    min-width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    color: white; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .fix-content { flex: 1; }
+  .fix-title  { font-size: 12px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+  .fix-desc   { font-size: 11px; color: var(--mid); line-height: 1.5; }
+  .fix-files  {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--blue);
+    margin-top: 3px; background: #EFF6FF;
+    padding: 2px 6px; border-radius: 4px; display: inline-block;
+  }
+  .fix-badge  {
+    font-size: 9px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px;
+    flex-shrink: 0; align-self: flex-start; margin-top: 2px;
+  }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item  { display: flex; gap: 12px; padding-bottom: 6px; position: relative; }
+  .tl-item:not(:last-child) .tl-line { border-left: 2px dashed var(--border); }
+  .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--orange); border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--orange); flex-shrink: 0; margin-top: 3px;
+  }
+  .tl-dot.future { background: #94a3b8; box-shadow: 0 0 0 2px #94a3b8; }
+  .tl-line  { flex: 1; width: 2px; }
+  .tl-content { flex: 1; padding-bottom: 10px; }
+  .tl-time  { font-size: 10px; color: var(--light); font-weight: 600; margin-bottom: 2px; }
+  .tl-text  { font-size: 11.5px; color: var(--dark); }
+
+  /* Footer */
+  .footer {
+    margin-top: 8mm; padding-top: 4mm;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer p { font-size: 10px; color: var(--light); }
+  .footer .logo-text {
+    font-size: 12px; font-weight: 800;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .divider { height: 1px; background: var(--border); margin: 6mm 0; }
+
+  /* Note box */
+  .note-box {
+    background: #FFFBEB; border: 1px solid #FCD34D;
+    border-left: 4px solid var(--amber); border-radius: 8px;
+    padding: 8px 12px; font-size: 11px; color: var(--mid); line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 100%; }
+    .no-print { display: none; }
+  }
+
+  .print-btn {
+    position: fixed; top: 20px; right: 20px;
+    background: linear-gradient(135deg, var(--red-orange), var(--orange));
+    color: white; border: none; padding: 10px 20px;
+    border-radius: 50px; font-size: 13px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(224,48,0,0.35);
+    font-family: 'Inter', sans-serif; z-index: 100;
+  }
+  .print-btn:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">⬇ Speichern als PDF</button>
+
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Rapport Technique<br><span>Nisrine School</span></h1>
+      <p>Sprint Conformité RGPD &amp; Qualité — 22–23–24 Mai 2026</p>
+      <p style="margin-top:6px;font-size:10px;color:#aaa">Rédigé par : <strong style="color:#555">Zayd Dahhaoui</strong></p>
+    </div>
+    <div class="header-right">
+      <div class="badge badge-green">✓ Déployé sur Vercel</div><br>
+      <div class="badge badge-orange">Sprint en cours</div>
+      <p>Dépôt privé GitHub :<br>
+        <code style="font-size:9px;font-family:monospace">Zayddahhaoui0609/ns</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="summary-grid">
+    <div class="stat-box">
+      <div class="num">22</div>
+      <div class="label">Fixes &amp; features (total)</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">2</div>
+      <div class="label">Fixes ce sprint</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">3</div>
+      <div class="label">Jours de sprint</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">2</div>
+      <div class="label">Repos synchronisés</div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    📋 <strong>Contexte :</strong> Ce sprint fait suite au sprint sécurité 18–19–20 Mai (22 fixes cumulés depuis le début du projet).
+    L'objectif de ce sprint est de compléter les chunks de conformité RGPD, performance et accessibilité restants.
+    Rapport complet depuis le jour 18 : <code style="font-family:monospace;font-size:10px">REPORT-2026-05-19.html</code>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── JOUR 22 ── -->
+  <div class="section">
+    <div class="section-title">📅 Jour 22 Mai — Planification Chunk 2 &amp; Chunk 4</div>
+
+    <div class="day-card plan">
+      <div class="day-header">
+        <div class="day-title">22 Mai 2026 — Planification &amp; Analyse</div>
+        <span class="day-status status-plan">Planifié → Exécuté le 24</span>
+      </div>
+      <p style="font-size:11px;color:var(--mid);margin-bottom:8px;">
+        Journée consacrée à la planification détaillée des Chunks 2 et 4 du plan d'audit.
+        Chaque chunk cible une catégorie spécifique de conformité ou de qualité technique.
+      </p>
+
+      <div class="chunk-grid">
+
+        <!-- CHUNK 2 -->
+        <div class="chunk-card c2">
+          <div class="chunk-num" style="color:var(--blue)">🟠 Chunk 2</div>
+          <div class="chunk-name">Extensions RGPD</div>
+          <div class="chunk-purpose">
+            <strong>Objectif :</strong> Compléter la conformité RGPD au-delà des obligations légales de base (Chunk 1).
+            Ce chunk traite les services tiers qui collectent des données sans consentement explicite, les transferts
+            internationaux de données et la sécurité des ressources CDN externes.
+          </div>
+          <ul class="chunk-tasks">
+            <li class="done-task">Modale de consentement RGPD avant chargement des iframes YouTube et Google Maps</li>
+            <li class="done-task">Notice de transfert hors UE — Hébergement Vercel (USA) dans la Politique de Confidentialité</li>
+            <li class="done-task">Hashes SRI (Sub Resource Integrity) sur tous les liens CDN Font Awesome — 13 fichiers HTML</li>
+            <li>Audit des inclusions JS cross-domain (Google Fonts, reCAPTCHA) — évaluation du risque</li>
+          </ul>
+        </div>
+
+        <!-- CHUNK 4 -->
+        <div class="chunk-card c4">
+          <div class="chunk-num" style="color:var(--amber)">⚡ Chunk 4</div>
+          <div class="chunk-name">Performance</div>
+          <div class="chunk-purpose">
+            <strong>Objectif :</strong> Atteindre un score PageSpeed cible de 70+/100 sur desktop et 50+/100 sur mobile,
+            réduire le payload initial et assurer la disponibilité continue du service via monitoring.
+            Les optimisations visuelles (WebP, lazy loading) ont déjà été réalisées en sprint 1.
+          </div>
+          <ul class="chunk-tasks">
+            <li class="done-task">Conversion 43 images en WebP (60–95% réduction) — Sprint 18–20</li>
+            <li class="done-task">PageSpeed Desktop 31→64/100 · Mobile 30→48/100 — Sprint 18–20</li>
+            <li class="done-task">Gzip/Brotli + Cache agressif + Scripts différés — Sprint 18–20</li>
+            <li>Monitoring de disponibilité — Configurer UptimeRobot ou Vercel Analytics</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <p style="font-size:10.5px;color:var(--mid);margin-top:4px;">
+        <strong>Décision d'implémentation :</strong> Pour YouTube et Google Maps, après réflexion,
+        la modale de consentement a été remplacée par une <em>notice dans la Politique de Confidentialité</em>
+        (section 8 — Cookies &amp; Services tiers) afin de ne pas dégrader l'expérience utilisateur tout en restant
+        conforme RGPD via la transparence documentaire plutôt que le blocage technique.
+      </p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── JOUR 23 ── -->
+  <div class="section">
+    <div class="section-title">📅 Jour 23 Mai — Planification Chunk 5 &amp; Chunk 6</div>
+
+    <div class="day-card plan">
+      <div class="day-header">
+        <div class="day-title">23 Mai 2026 — Planification SEO &amp; Accessibilité</div>
+        <span class="day-status status-plan">Planifié — À implémenter</span>
+      </div>
+      <p style="font-size:11px;color:var(--mid);margin-bottom:8px;">
+        Journée consacrée à la planification des Chunks 5 (SEO) et 6 (Accessibilité),
+        qui améliorent la visibilité du site et l'inclusion des utilisateurs en situation de handicap.
+      </p>
+
+      <div class="chunk-grid">
+
+        <!-- CHUNK 5 -->
+        <div class="chunk-card c5">
+          <div class="chunk-num" style="color:var(--green)">🔍 Chunk 5</div>
+          <div class="chunk-name">SEO &amp; Contenu</div>
+          <div class="chunk-purpose">
+            <strong>Objectif :</strong> Améliorer le référencement naturel (SEO) du site pour augmenter
+            la visibilité sur Google, attirer de nouveaux étudiants et mesurer l'audience via Google Analytics 4.
+            Un bon SEO est essentiel pour la croissance organique de l'école.
+          </div>
+          <ul class="chunk-tasks">
+            <li>Section blog / actualités — Contenu frais pour le référencement (déjà dans le roadmap)</li>
+            <li>Fiche Google My Business — Tâche administrative, création manuelle par le client</li>
+            <li>Google Analytics 4 (GA4) — Installer le code de suivi pour mesurer le trafic</li>
+            <li>Slot réservé — À définir selon priorités du client</li>
+          </ul>
+        </div>
+
+        <!-- CHUNK 6 -->
+        <div class="chunk-card c6">
+          <div class="chunk-num" style="color:var(--purple)">♿ Chunk 6</div>
+          <div class="chunk-name">Accessibilité</div>
+          <div class="chunk-purpose">
+            <strong>Objectif :</strong> Rendre le site utilisable par tous, y compris les personnes
+            utilisant des lecteurs d'écran ou la navigation clavier. Conformité partielle WCAG 2.1 niveau AA.
+            Améliore également le SEO car les moteurs de recherche valorisent l'accessibilité.
+          </div>
+          <ul class="chunk-tasks">
+            <li>Balises ARIA sur tous les éléments interactifs — modales, dropdowns, boutons</li>
+            <li>Labels accessibles sur tous les formulaires — associations <code>&lt;label for&gt;</code> explicites</li>
+            <li>Slot réservé — Tests avec lecteur d'écran (NVDA/VoiceOver)</li>
+            <li>Slot réservé — Contraste des couleurs (ratio WCAG AA ≥ 4.5:1)</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── JOUR 24 (AUJOURD'HUI) ── -->
+  <div class="section">
+    <div class="section-title">✅ Jour 24 Mai — Travail réalisé aujourd'hui</div>
+
+    <div class="day-card done">
+      <div class="day-header">
+        <div class="day-title">24 Mai 2026 — Exécution Chunk 2 + Correctifs UX</div>
+        <span class="day-status status-done">Terminé · Commit db5153a + 715b53b</span>
+      </div>
+      <p style="font-size:11px;color:var(--mid);margin-bottom:10px;">
+        Implémentation complète du Chunk 2 RGPD Extensions, plus deux correctifs UX demandés par le client.
+        Tous les changements ont été commités et poussés vers les deux dépôts GitHub.
+      </p>
+    </div>
+
+    <div class="fix-list" style="margin-top:8px;">
+
+      <div class="fix-item rgpd">
+        <div class="fix-num">21</div>
+        <div class="fix-content">
+          <div class="fix-title">Chunk 2 RGPD Extensions — Conformité complète</div>
+          <div class="fix-desc">
+            <strong>Consentement tiers (YouTube &amp; Google Maps) :</strong> Implémentation initiale d'une modale
+            de consentement RGPD bloquant le chargement des iframes — <code style="font-family:monospace;font-size:10px">js/consent.js</code> créé,
+            iframes remplacés par des wrappers de consentement dans <code style="font-family:monospace;font-size:10px">index.html</code>. Chargement dynamique
+            de <code style="font-family:monospace;font-size:10px">about-media-switcher.js</code> après consentement pour éviter le tracking YouTube avant acceptation.<br>
+            <strong>Notice transfert hors UE :</strong> Section 6b ajoutée dans les 4 langues (FR/EN/DE/AR) de
+            <code style="font-family:monospace;font-size:10px">privacy-policy.html</code> — Vercel USA, Clauses Contractuelles Types, Data Privacy Framework EU-US.<br>
+            <strong>SRI (Sub Resource Integrity) :</strong> Hashes sha512 ajoutés sur tous les liens CDN Font Awesome
+            dans 13 fichiers HTML (index.html + 10 pages secondaires + react-portals). Protège contre les compromissions CDN.
+          </div>
+          <span class="fix-files">index.html &nbsp; privacy-policy.html &nbsp; js/consent.js &nbsp; translate.html &nbsp; terms.html &nbsp; student-portal.html &nbsp; register.html &nbsp; apply.html &nbsp; cv.html &nbsp; admin.html &nbsp; react-portals/*.html (13 fichiers)</span>
+        </div>
+        <span class="fix-badge badge-purple">RGPD</span>
+      </div>
+
+      <div class="fix-item ux">
+        <div class="fix-num">22</div>
+        <div class="fix-content">
+          <div class="fix-title">Restauration auto-chargement YouTube &amp; Maps + Notice Politique de Confidentialité</div>
+          <div class="fix-desc">
+            <strong>Décision client :</strong> La modale de consentement était trop intrusive et dégradait l'expérience.
+            Remplacement par une approche documentaire RGPD : les iframes sont restaurés en chargement automatique
+            (YouTube autoplay/muted, Google Maps lazy loading), et la <strong>Politique de Confidentialité section 8</strong>
+            est mise à jour dans les 4 langues pour déclarer explicitement l'utilisation de YouTube et Google Maps
+            (Google LLC, Mountain View CA, liens vers la politique de confidentialité Google).<br>
+            <strong>Retrait du badge "1000+ RÊVES RÉALISÉS" :</strong> Suppression de l'élément
+            <code style="font-family:monospace;font-size:10px">.experience-badge</code> de la section About sur demande du client
+            (desktop + mobile — élément unique dans le DOM).
+          </div>
+          <span class="fix-files">index.html &nbsp; privacy-policy.html (4 langues)</span>
+        </div>
+        <span class="fix-badge badge-green">UX &amp; RGPD</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── TIMELINE ── -->
+  <div class="section">
+    <div class="section-title">⏱ Timeline du sprint 22–24 Mai</div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">22 Mai — Matin (planification)</div>
+          <div class="tl-text">Analyse des chunks restants (2, 4, 5, 6) · Identification des tâches prioritaires · Planification Chunk 2 RGPD Extensions &amp; Chunk 4 Performance</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">23 Mai — Planification</div>
+          <div class="tl-text">Planification Chunk 5 (SEO &amp; Contenu) &amp; Chunk 6 (Accessibilité) · Définition des tâches et priorités · Roadmap visuel des prochaines implémentations</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">24 Mai — Matin (Fix #21)</div>
+          <div class="tl-text">Chunk 2 RGPD complet · js/consent.js créé · Modale consentement YouTube + Google Maps · Notice Vercel USA en 4 langues · SRI hashes sur 13 fichiers · commit db5153a</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">24 Mai — Matin (Fix #22)</div>
+          <div class="tl-text">Restauration iframes auto-load (décision client) · Notice YouTube + Maps dans Privacy Policy section 8 (4 langues) · Retrait badge 1000+ RÊVES RÉALISÉS · commit 715b53b → push both repos</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot-col">
+          <div class="tl-dot future"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">Prochain sprint — Chunk 5 &amp; 6</div>
+          <div class="tl-text" style="color:#94a3b8">À venir : Google Analytics 4 · Blog section · ARIA labels · Labels accessibles sur formulaires</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── TÂCHES RESTANTES ── -->
+  <div class="section">
+    <div class="section-title">📋 Tâches restantes (Chunks 4, 5, 6)</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+
+      <div style="padding:8px 12px;border-radius:8px;border:1px solid #FCD34D;border-left:4px solid var(--amber);background:#FFFBEB;">
+        <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:3px;">⚡ Chunk 4 — Monitoring de disponibilité</div>
+        <div style="font-size:11px;color:var(--mid);">Configurer UptimeRobot (gratuit) ou Vercel Analytics pour surveiller la disponibilité du site 24/7 et recevoir des alertes en cas de panne. Tâche de 15 minutes — dashboard administrateur.</div>
+      </div>
+
+      <div style="padding:8px 12px;border-radius:8px;border:1px solid #86EFAC;border-left:4px solid var(--green);background:#F0FDF4;">
+        <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:3px;">🔍 Chunk 5 — SEO &amp; Contenu</div>
+        <div style="font-size:11px;color:var(--mid);">
+          <strong>GA4 :</strong> Installer le code de suivi Google Analytics 4 pour mesurer le trafic, les pages vues et les conversions (inscriptions).<br>
+          <strong>Blog :</strong> Créer une section blog/actualités pour générer du contenu frais et améliorer le référencement naturel.<br>
+          <strong>Google My Business :</strong> Tâche administrative client — créer/revendiquer la fiche GMB pour apparaître dans les résultats locaux.
+        </div>
+      </div>
+
+      <div style="padding:8px 12px;border-radius:8px;border:1px solid #C4B5FD;border-left:4px solid var(--purple);background:#F5F3FF;">
+        <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:3px;">♿ Chunk 6 — Accessibilité</div>
+        <div style="font-size:11px;color:var(--mid);">
+          <strong>ARIA :</strong> Ajouter <code style="font-family:monospace;font-size:10px">aria-label</code>, <code style="font-family:monospace;font-size:10px">aria-expanded</code>, <code style="font-family:monospace;font-size:10px">role</code> sur toutes les modales, dropdowns et boutons interactifs.<br>
+          <strong>Labels formulaires :</strong> Vérifier que chaque <code style="font-family:monospace;font-size:10px">&lt;input&gt;</code> a un <code style="font-family:monospace;font-size:10px">&lt;label for&gt;</code> explicite ou un <code style="font-family:monospace;font-size:10px">aria-label</code> pour compatibilité lecteurs d'écran.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="footer">
+    <div>
+      <p>Rapport mis à jour le 24 Mai 2026 à 09h20 (UTC+2)</p>
+      <p>Stack : HTML · CSS · JavaScript (Vanilla) &nbsp;→&nbsp; Node.js · Express.js &nbsp;→&nbsp; MongoDB Atlas (Mongoose) &nbsp;→&nbsp; Vercel · Socket.io · JWT · Nodemailer · reCAPTCHA v3</p>
+    </div>
+    <div class="logo-text">Nisrine School</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -264,6 +264,33 @@
 
 ---
 
+## 2026-05-24
+
+### 21. Chunk 2 — RGPD Extensions (Consentement tiers, Transfert hors UE, SRI)
+
+**Consentement YouTube & Google Maps (`js/consent.js` + `index.html`):**
+- **Created** `js/consent.js` — RGPD consent manager blocking YouTube and Google Maps iframes until explicit user consent (localStorage per service, branded overlays with privacy notice and Load button)
+- On consent: injects iframe + dynamically loads `about-media-switcher.js` (prevents YouTube API from tracking before consent)
+- **Modified** `index.html` — replaced both iframes (`#about-youtube-video`, Google Maps) with consent wrapper divs; removed static `about-media-switcher.js` script tag; added `consent.js` instead
+
+**Cross-border transfer notice (`privacy-policy.html`):**
+- **Added** section 6b in all 4 languages (FR/EN/DE/AR) — discloses Vercel USA hosting, Standard Contractual Clauses (SCCs), EU-US Data Privacy Framework, links to Vercel privacy policy
+
+**SRI hashes on Font Awesome CDN (13 files):**
+- **Modified** `index.html` — 4 modular FA files + noscript variants — sha512 integrity + crossorigin attributes
+- **Modified** 10 other HTML pages using `all.min.css` — `integrity` + `crossorigin` added: `translate.html`, `terms.html`, `student-portal.html`, `student-management.html`, `register.html`, `my-registrations.html`, `cv.html`, `apply.html`, `cash-register.html`, `admin.html`, `privacy-policy.html`, `react-portals/index.html`, `react-portals/dist/index.html`
+- **Why**: SRI protects against CDN supply chain attacks — if cdnjs is compromised, the browser rejects tampered files
+
+### 22. Restauration auto-chargement YouTube & Maps + Notice Politique de Confidentialité + Retrait badge
+
+**Decision**: Consent overlay was too intrusive. Replaced with documentary RGPD approach.
+- **Modified** `index.html` — restored YouTube iframe (`autoplay=1&mute=1`, enablejsapi) and Google Maps iframe (`loading="lazy"`) to direct auto-load; re-added `about-media-switcher.js` static script tag; removed `consent.js` from page load
+- **Modified** `privacy-policy.html` — section 8 updated in all 4 languages (FR/EN/DE/AR): renamed to "Cookies & Services tiers/Third-Party Services/Drittanbieterdienste/الخدمات الخارجية", added explicit YouTube (Google LLC) and Google Maps (Google LLC) disclosure with links to Google's privacy policy and address (1600 Amphitheatre Parkway, Mountain View CA)
+- **Modified** `index.html` — removed `.experience-badge.apple-glass` div ("1000+ RÊVES RÉALISÉS") from about section on client request (desktop + mobile, single DOM element)
+- **Why**: RGPD compliance via transparency (documented disclosure) rather than technical blocking — preserves UX while fulfilling the legal disclosure requirement
+
+---
+
 ## False Positives from Diagnostic Report
 
 The client's diagnostic (OWASP ZAP + manual audit) flagged several items that are **not actual vulnerabilities** in this codebase:
