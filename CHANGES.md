@@ -237,6 +237,31 @@
 - Unused JS ~515KB — reCAPTCHA bundle (unavoidable without removing bot protection)
 - Unused CSS ~119KB — Font Awesome icons not used (would need icon subsetting build step)
 
+### 20. Two-Factor Authentication (2FA) — Teacher & Student Portals
+
+**Overview:** Optional 2FA for teacher and student portals. Each user can enable it in settings and register their own personal email (e.g. Gmail) to receive login codes. 2FA is off by default — no disruption to existing logins.
+
+**Backend (`routes/grades.js`):**
+- Modified `POST /grades/teacher/login` + `POST /grades/student/login` — conditional 2FA: if `twoFactorEnabled && twoFactorEmail`, generate 6-digit code, save with 10-minute expiry, send via `emailService.send2FACode` (fire-and-forget), return `{ requires2FA: true, tempToken, email }`; otherwise issue full JWT directly
+- Added `POST /grades/teacher/2fa/verify` + `POST /grades/student/2fa/verify` — validate `tempToken` (purpose-scoped JWT), check code against DB, clear code/expiry on success, return full auth token
+- Added `GET /grades/teacher/settings` + `GET /grades/student/settings` — return `twoFactorEnabled`, `twoFactorEmail` for logged-in user
+- Added `PUT /grades/teacher/settings` + `PUT /grades/student/settings` — save 2FA preferences; **blocks duplicate emails** across accounts (returns 409 with role-specific error: "already taken by another student/teacher")
+
+**Models:**
+- **Modified** `models/Teacher.js` — added `twoFactorEnabled` (Boolean, default false), `twoFactorEmail` (String), `twoFactorCode` (String), `twoFactorExpiry` (Date). Storage impact: ~50 bytes/teacher, negligible.
+- **Modified** `models/ManagedStudent.js` — same 4 fields added via `managedStudentSchema.add({})`
+
+**React frontend (`react-portals/`):**
+- **Modified** `src/services/api.js` — added `verify2FA()`, `getSettings()`, `updateSettings()` to both `teacherAPI` and `studentAPI`
+- **Modified** `src/context/TeacherAuthContext.jsx` + `StudentAuthContext.jsx` — added `pending2FA` state and `require2FA(tempToken, email)` helper
+- **Modified** `src/pages/TeacherPortal/components/LoginForm.jsx` + `src/pages/StudentPortal/components/LoginForm.jsx` — step-based login: `'credentials'` → `'2fa'`; 2FA screen shows masked email, 6-digit input (digits only, auto-limited), "← Back to login" link; `else { login(user, token) }` handles direct login when 2FA is off
+- **Modified** `src/components/common/Settings.jsx` — desktop: 🛡️ **2FA** button in header opens centered modal; mobile: 2FA section in existing settings drawer. Both show: toggle, personal email input (shown only when enabled), success/error feedback, Save button. Errors from API displayed verbatim.
+- **Modified** `src/components/common/Header.jsx` — added `securityAPI` prop, passed to `<Settings>`
+- **Modified** `src/pages/TeacherPortal/TeacherPortal.jsx` + `StudentPortal.jsx` — pass `securityAPI={teacherAPI/studentAPI}` to `<Header>`
+- **Rebuilt** `dist/` via `vite build`
+
+**Why**: Security best practice for institutional portals. Admin portal already had 2FA since sprint day 1 — this brings teacher and student portals to the same standard. Opt-in design avoids disrupting existing users.
+
 ---
 
 ## False Positives from Diagnostic Report

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rapport Technique — Nisrine School — 18-19 Mai 2026</title>
+<title>Rapport Technique — Nisrine School — 18-19-20 Mai 2026</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 
@@ -356,7 +356,7 @@
   <div class="header">
     <div class="header-left">
       <h1>Rapport Technique<br><span>Nisrine School</span></h1>
-      <p>Sprint Sécurité &amp; Fonctionnalités — 18–19 Mai 2026</p>
+      <p>Sprint Sécurité &amp; Fonctionnalités — 18–19–20 Mai 2026</p>
       <p style="margin-top:6px;font-size:10px;color:#aaa">Rédigé par : <strong style="color:#555">Zayd Dahhaoui</strong></p>
     </div>
     <div class="header-right">
@@ -371,7 +371,7 @@
   <!-- ── STATS ── -->
   <div class="summary-grid">
     <div class="stat-box">
-      <div class="num">19</div>
+      <div class="num">20</div>
       <div class="label">Fixes &amp; features</div>
     </div>
     <div class="stat-box">
@@ -557,6 +557,21 @@
         <span class="fix-badge badge badge-orange">Performance</span>
       </div>
 
+      <div class="fix-item feature">
+        <div class="fix-num">20</div>
+        <div class="fix-content">
+          <div class="fix-title">2FA Portails Enseignant &amp; Étudiant — Authentification à deux facteurs optionnelle</div>
+          <div class="fix-desc">
+            <strong>Fonctionnement :</strong> Opt-in — désactivé par défaut, zéro disruption pour les connexions existantes · Chaque utilisateur choisit d'activer la 2FA et renseigne son <em>email personnel</em> (Gmail, Hotmail…) dans les paramètres de sécurité · Code à 6 chiffres valide 10 min envoyé à cet email à chaque connexion<br>
+            <strong>Backend :</strong> <code style="font-family:monospace;font-size:10px">POST /grades/teacher|student/login</code> — 2FA conditionnelle (token direct si désactivée) · <code style="font-family:monospace;font-size:10px">POST /teacher|student/2fa/verify</code> — validation du code + émission du JWT final · <code style="font-family:monospace;font-size:10px">GET|PUT /teacher|student/settings</code> — lecture/sauvegarde des préférences 2FA · Blocage des emails en double (409 avec message spécifique « déjà pris par un autre étudiant/enseignant »)<br>
+            <strong>Modèles :</strong> <code style="font-family:monospace;font-size:10px">Teacher.js</code> + <code style="font-family:monospace;font-size:10px">ManagedStudent.js</code> — 4 champs ajoutés : <code style="font-family:monospace;font-size:10px">twoFactorEnabled</code>, <code style="font-family:monospace;font-size:10px">twoFactorEmail</code>, <code style="font-family:monospace;font-size:10px">twoFactorCode</code>, <code style="font-family:monospace;font-size:10px">twoFactorExpiry</code> (~50 octets/document, impact négligeable sur les 512 MB Atlas)<br>
+            <strong>React :</strong> LoginForm à 2 étapes (credentials → code) · Bouton 🛡️ 2FA dans le header → modal centré (desktop) ou section dans le drawer (mobile) · Toggle activation + saisie email personnel · Feedback succès/erreur instantané
+          </div>
+          <span class="fix-files">routes/grades.js &nbsp; models/Teacher.js &nbsp; models/ManagedStudent.js &nbsp; react-portals/src/services/api.js &nbsp; react-portals/src/context/Teacher|StudentAuthContext.jsx &nbsp; LoginForm.jsx (×2) &nbsp; Settings.jsx &nbsp; Header.jsx &nbsp; dist/</span>
+        </div>
+        <span class="fix-badge badge badge-purple">Sécurité</span>
+      </div>
+
     </div>
   </div>
 
@@ -726,6 +741,14 @@
             <div class="tl-text">Performance Chunk 3 · Vidéos lazy load · Gzip/Brotli · Cache agressif · 43 images→WebP · Font Awesome modulaire · reCAPTCHA lazy · Desktop 31→64 · Mobile 30→48</div>
           </div>
         </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-time">20 Mai — Nuit (21h-22h)</div>
+            <div class="tl-text">2FA Portails Enseignant &amp; Étudiant · Opt-in avec email personnel · Blocage emails en double · Modal desktop + drawer mobile · 17 fichiers · commit 8427cf7</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -733,7 +756,7 @@
   <!-- ── FOOTER ── -->
   <div class="footer">
     <div>
-      <p>Rapport mis à jour le 20 Mai 2026 à 21h15 (UTC+2)</p>
+      <p>Rapport mis à jour le 20 Mai 2026 à 22h10 (UTC+2)</p>
       <p>Stack : HTML · CSS · JavaScript (Vanilla) &nbsp;→&nbsp; Node.js · Express.js &nbsp;→&nbsp; MongoDB Atlas (Mongoose) &nbsp;→&nbsp; Vercel Serverless · Socket.io · JWT · Nodemailer · reCAPTCHA v3</p>
     </div>
     <div class="logo-text">Nisrine School</div>
