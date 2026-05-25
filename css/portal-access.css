@@ -187,32 +187,44 @@
     transform: scale(1.2);
 }
 
-/* Mobile-specific positioning */
-@media (max-width: 768px) {
+/* Mobile-specific positioning (matches sidebar breakpoint) */
+@media (max-width: 992px) {
     .portal-access-container {
         margin-left: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .portal-selector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
     }
 
     .portal-dropdown {
-        top: auto;
-        bottom: calc(100% + 10px);
-        right: auto;
-        left: -80px;
-        transform: translateY(20px) scale(0.95);
-        z-index: 100000;
+        position: static !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: none;
+        transform: none !important;
+        box-shadow: none;
+        border: none;
+        border-radius: 10px;
+        width: 100%;
+        min-width: unset;
+        margin-top: 8px;
+        padding: 8px 0;
+        background: #f8f8f8 !important;
     }
     
     .portal-dropdown.show {
-        transform: translateY(0) scale(1);
+        display: block;
     }
     
     .portal-dropdown::before {
-        top: auto;
-        bottom: -8px;
-        right: auto;
-        left: 100px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-top: none;
-        border-left: none;
+        display: none;
     }
 }

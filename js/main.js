@@ -152,11 +152,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Close the dropdown
             const languageSelector = document.querySelector('.language-selector');
             const languageDropdown = document.querySelector('.language-dropdown');
+            const langBtn = document.querySelector('.language-button');
             if (languageSelector) {
                 languageSelector.classList.remove('active');
             }
             if (languageDropdown) {
                 languageDropdown.classList.remove('show');
+                languageDropdown.style.display = 'none';
+            }
+            if (langBtn) {
+                langBtn.classList.remove('active');
+                langBtn.setAttribute('aria-expanded', 'false');
             }
             
             console.log('Language updated to:', langCode);
@@ -178,29 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Toggle dropdown
-        languageButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // Close portal dropdown if open
-            const portalDropdown = document.querySelector('.portal-dropdown');
-            const portalButton = document.querySelector('.portal-button');
-            if (portalDropdown) portalDropdown.classList.remove('show');
-            if (portalButton) portalButton.classList.remove('active');
-            
-            languageDropdown.classList.toggle('show');
-            languageButton.classList.toggle('active');
-            languageButton.setAttribute('aria-expanded', languageDropdown.classList.contains('show').toString());
-        });
-        
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!languageSelector.contains(e.target)) {
-                languageDropdown.classList.remove('show');
-                languageButton.classList.remove('active');
-                languageButton.setAttribute('aria-expanded', 'false');
-            }
-        });
+        // Toggle dropdown + outside-click are now set up synchronously in setupLanguageDropdown()
         
         // Use event delegation for language options (works even when dropdown is recreated)
         languageDropdown.addEventListener('click', (e) => {
@@ -285,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const langDropdown = document.querySelector('.language-dropdown');
             const langButton = document.querySelector('.language-button');
             if (langDropdown) langDropdown.classList.remove('show');
-            if (langButton) langButton.classList.remove('active');
+            if (langButton) { langButton.classList.remove('active'); langButton.setAttribute('aria-expanded', 'false'); }
             
             portalDropdown.classList.toggle('show');
             portalButton.classList.toggle('active');
@@ -387,10 +371,48 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Hamburger or navLinks not found:', { hamburger, navLinks });
     }
     
-    // Language selector is now handled by setupLanguageSwitcher() in initLanguageSwitcher()
+    // Language dropdown toggle (sync — must not be inside async initLanguageSwitcher)
+    const setupLanguageDropdown = () => {
+        const langSelector = document.querySelector('.language-selector');
+        const langButton = document.querySelector('.language-button');
+        const langDropdown = document.querySelector('.language-dropdown');
+        
+        if (!langSelector || !langButton || !langDropdown) {
+            console.error('Language dropdown elements not found');
+            return;
+        }
+        
+        langButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Close portal dropdown if open
+            const portalDropdown = document.querySelector('.portal-dropdown');
+            const portalBtn = document.querySelector('.portal-button');
+            if (portalDropdown) { portalDropdown.classList.remove('show'); portalDropdown.style.display = ''; }
+            if (portalBtn) { portalBtn.classList.remove('active'); portalBtn.setAttribute('aria-expanded', 'false'); }
+            
+            const isOpen = langDropdown.classList.toggle('show');
+            langDropdown.style.display = isOpen ? 'block' : 'none';
+            console.log('Language toggle clicked, isOpen:', isOpen);
+            langButton.classList.toggle('active');
+            langButton.setAttribute('aria-expanded', isOpen.toString());
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!langSelector.contains(e.target)) {
+                langDropdown.classList.remove('show');
+                langDropdown.style.display = 'none';
+                langButton.classList.remove('active');
+                langButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        console.log('Language dropdown initialized');
+    };
     
     // Initialize everything
     animateCounter();
+    setupLanguageDropdown();
     initLanguageSwitcher();
     setupPortalAccess();
     
@@ -414,6 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Close mobile menu if open
                     if (hamburger && navLinks) {
                         hamburger.classList.remove('active');
+                        hamburger.setAttribute('aria-expanded', 'false');
                         navLinks.classList.remove('active');
                         document.body.classList.remove('menu-open');
                     }

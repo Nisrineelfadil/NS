@@ -780,33 +780,33 @@
                 <p data-i18n="registration.applying_desc">Job application assistance (Bewerbung)</p>
             </div>
 
-            <form id="applyForm">
+            <form id="applyForm" aria-label="Formulaire de candidature">
                 <div class="form-group">
                     <label for="fullName">
                         <i class="fas fa-user"></i> <span data-i18n="registration.full_name">Full Name</span> *
                     </label>
-                    <input type="text" id="fullName" name="fullName" required>
+                    <input type="text" id="fullName" name="fullName" aria-required="true" required>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">
                         <i class="fas fa-phone"></i> <span data-i18n="registration.phone_number">Phone Number</span> *
                     </label>
-                    <input type="tel" id="phone" name="phone" required>
+                    <input type="tel" id="phone" name="phone" aria-required="true" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">
                         <i class="fas fa-envelope"></i> <span data-i18n="registration.email">Email</span> *
                     </label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" aria-required="true" required>
                 </div>
 
                 <div class="form-group">
                     <label for="jobType">
                         <i class="fas fa-briefcase"></i> <span data-i18n="registration.choose_job_type">Choose Job Type</span> *
                     </label>
-                    <select id="jobType" name="jobType" required>
+                    <select id="jobType" name="jobType" aria-required="true" required>
                         <option value="" data-i18n="registration.select_job">Select job type...</option>
                         <option value="ausbildung">Ausbildung</option>
                         <option value="arbeit">Arbeit</option>
