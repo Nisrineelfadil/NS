@@ -190,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             languageDropdown.classList.toggle('show');
             languageButton.classList.toggle('active');
+            languageButton.setAttribute('aria-expanded', languageDropdown.classList.contains('show').toString());
         });
         
         // Close when clicking outside
@@ -197,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!languageSelector.contains(e.target)) {
                 languageDropdown.classList.remove('show');
                 languageButton.classList.remove('active');
+                languageButton.setAttribute('aria-expanded', 'false');
             }
         });
         
@@ -287,6 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             portalDropdown.classList.toggle('show');
             portalButton.classList.toggle('active');
+            portalButton.setAttribute('aria-expanded', portalDropdown.classList.contains('show').toString());
         });
         
         // Close when clicking outside
@@ -294,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!portalSelector.contains(e.target)) {
                 portalDropdown.classList.remove('show');
                 portalButton.classList.remove('active');
+                portalButton.setAttribute('aria-expanded', 'false');
             }
         });
         
@@ -323,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
                 
                 hamburger.classList.add('active');
+                hamburger.setAttribute('aria-expanded', 'true');
                 navLinks.classList.add('active');
                 document.body.classList.add('menu-open');
                 
@@ -330,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.style.top = `-${scrollPosition}px`;
             } else {
                 hamburger.classList.remove('active');
+                hamburger.setAttribute('aria-expanded', 'false');
                 navLinks.classList.remove('active');
                 document.body.classList.remove('menu-open');
                 
@@ -351,6 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Helper function to close menu properly
         const closeMenu = () => {
             hamburger.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
             navLinks.classList.remove('active');
             document.body.classList.remove('menu-open');
             document.body.style.top = '';

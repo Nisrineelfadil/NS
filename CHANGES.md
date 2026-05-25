@@ -336,6 +336,31 @@
 - `index.html` already had complete OG + Twitter + JSON-LD structured data — untouched
 - All pages use `https://nisrineschool.com/Img/logo.png` as share image
 
+### 26. Chunk 6 — Accessibilité ARIA (WCAG 2.1)
+
+**`index.html` — 9 fixes:**
+- `<nav>` → added `aria-label="Navigation principale"` (landmark role)
+- `<div class="hamburger">` → changed to `<button>` with `aria-label="Ouvrir le menu de navigation"`, `aria-expanded="false"`, `aria-controls="nav-links"` — keyboard accessible
+- `<div class="nav-links">` → added `id="nav-links"` (target for `aria-controls`)
+- Portal button → added `aria-label="Accéder aux portails"`, `aria-haspopup="true"`, `aria-expanded="false"`
+- Language button → added `aria-label="Choisir la langue"`, `aria-haspopup="true"`, `aria-expanded="false"`
+- Decorative Font Awesome icons on portal/language buttons → `aria-hidden="true"`
+- Tab switcher → `role="tablist"`, each tab → `role="tab"` + `aria-selected` + `aria-controls`
+- Mobile video nav buttons → `aria-label="Vidéo précédente/suivante"`
+- Contact form → `aria-label="Formulaire de contact"` on `<form>`, `aria-label` + `aria-required="true"` on inputs without `<label>`
+
+**`js/main.js` — 6 fixes:**
+- `toggleMenu()` → sets `hamburger.setAttribute('aria-expanded', 'true'/'false')` on open/close
+- `closeMenu()` → resets `aria-expanded` to `false`
+- Language button click → updates `aria-expanded` after toggle
+- Language button outside-click → resets `aria-expanded` to `false`
+- Portal button click → updates `aria-expanded` after toggle
+- Portal button outside-click → resets `aria-expanded` to `false`
+
+**`register.html` — 2 fixes:**
+- `<form>` → added `aria-label="Formulaire d'inscription"`
+- All required `<input>` and `<select>` → added `aria-required="true"`
+
 ---
 
 ## False Positives from Diagnostic Report

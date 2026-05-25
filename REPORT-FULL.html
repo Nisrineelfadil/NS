@@ -111,7 +111,7 @@
 
   <!-- STATS -->
   <div class="summary-grid">
-    <div class="stat-box"><div class="num">25</div><div class="label">Fixes &amp; features</div></div>
+    <div class="stat-box"><div class="num">26</div><div class="label">Fixes &amp; features</div></div>
     <div class="stat-box"><div class="num">9</div><div class="label">Faux positifs identifiés</div></div>
     <div class="stat-box"><div class="num">6</div><div class="label">Jours de sprint</div></div>
     <div class="stat-box"><div class="num">2</div><div class="label">Repos synchronisés</div></div>
@@ -445,6 +445,20 @@
         <span class="fix-badge badge badge-blue">SEO</span>
       </div>
 
+      <div class="fix-item feature">
+        <div class="fix-num">26</div>
+        <div class="fix-content">
+          <div class="fix-title">Chunk 6 — Accessibilité ARIA (WCAG 2.1)</div>
+          <div class="fix-desc">
+            <strong>index.html (9 corrections) :</strong> nav aria-label, hamburger <code style="font-family:monospace;font-size:10px">&lt;div&gt;</code>→<code style="font-family:monospace;font-size:10px">&lt;button&gt;</code> (aria-label/expanded/controls), id sur nav-links, portal + language buttons (aria-label/haspopup/expanded), icônes aria-hidden, onglets role=tablist/tab/aria-selected, boutons vidéo aria-label, contact form aria-label + aria-required.<br>
+            <strong>js/main.js (6 corrections) :</strong> <code style="font-family:monospace;font-size:10px">aria-expanded</code> mis à jour dynamiquement sur hamburger (open/close/closeMenu), bouton langue et bouton portail (click + outside-click).<br>
+            <strong>register.html (2 corrections) :</strong> form aria-label, champs obligatoires aria-required="true".
+          </div>
+          <span class="fix-files">index.html &nbsp; js/main.js &nbsp; register.html</span>
+        </div>
+        <span class="fix-badge badge badge-purple">Accessibilité</span>
+      </div>
+
     </div>
   </div>
 
@@ -650,14 +664,21 @@
           <div class="tl-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
           <div class="tl-content">
             <div class="tl-time">25 Mai — Matin (Fix #25)</div>
-            <div class="tl-text">Chunk 5 SEO · sitemap.xml 9 URLs · OG + Twitter Card + canonical sur 6 pages</div>
+            <div class="tl-text">Chunk 5 SEO · sitemap.xml 9 URLs · OG + Twitter Card + canonical sur 6 pages · commit 16406e5</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content">
+            <div class="tl-time">25 Mai — Matin (Fix #26)</div>
+            <div class="tl-text">Chunk 6 ARIA · hamburger div→button · aria-expanded dynamique · role=tablist/tab · aria-required register.html</div>
           </div>
         </div>
         <div class="tl-item">
           <div class="tl-dot-col"><div class="tl-dot future"></div></div>
           <div class="tl-content">
-            <div class="tl-time">Prochain sprint — Chunk 6</div>
-            <div class="tl-text" style="color:#94a3b8">ARIA labels sur modales/menus · Labels accessibles sur formulaires (WCAG 2.1)</div>
+            <div class="tl-time">Prochain sprint</div>
+            <div class="tl-text" style="color:#94a3b8">Blog / Actualités · Google My Business (admin) · suite optimisations</div>
           </div>
         </div>
       </div>

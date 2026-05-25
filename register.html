@@ -977,31 +977,31 @@
             <p data-i18n="registration.fill_form">Remplissez le formulaire ci-dessous pour soumettre votre demande d'inscription</p>
             
             <!-- Registration Form -->
-            <form id="registrationForm" enctype="multipart/form-data">
+            <form id="registrationForm" enctype="multipart/form-data" aria-label="Formulaire d inscription">
                 <div class="form-group">
                     <label for="fullName"><i class="fas fa-user"></i> <span data-i18n="registration.full_name">Full Name</span> *</label>
-                    <input type="text" id="fullName" name="fullName" required>
+                    <input type="text" id="fullName" name="fullName" aria-required="true" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="dateOfBirth"><i class="fas fa-calendar"></i> <span data-i18n="registration.date_of_birth">Date of Birth</span> *</label>
-                    <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                    <input type="date" id="dateOfBirth" name="dateOfBirth" aria-required="true" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="city"><i class="fas fa-city"></i> <span data-i18n="registration.city">City / Quarter</span> *</label>
-                    <input type="text" id="city" name="city" required>
+                    <input type="text" id="city" name="city" aria-required="true" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="phoneNumber"><i class="fas fa-phone"></i> <span data-i18n="registration.gsm">GSM (Phone Number)</span> *</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" required>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="06XXXXXXXX" pattern="^0[5-7][0-9]{8}$" aria-required="true" required>
                     <small style="color: #666; font-size: 0.85rem;">Format: 06XXXXXXXX, 07XXXXXXXX, or 05XXXXXXXX (10 digits)</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="studyLevel"><i class="fas fa-book"></i> Niveau d'étude (Study Level) *</label>
-                    <select id="studyLevel" name="studyLevel" required>
+                    <select id="studyLevel" name="studyLevel" aria-required="true" required>
                         <option value="">Select your study level...</option>
                         <option value="Bac">Bac</option>
                         <option value="Niveau Bac">Niveau Bac</option>
@@ -1077,7 +1077,7 @@
                 
                 <div class="form-group">
                     <label for="photo"><i class="fas fa-camera"></i> <span data-i18n="registration.upload_photo">Upload Your Photo</span> *</label>
-                    <input type="file" id="photo" name="photo" accept="image/*" required>
+                    <input type="file" id="photo" name="photo" accept="image/*" aria-required="true" required>
                     <div id="photoPreview" class="photo-preview"></div>
                 </div>
 
