@@ -319,6 +319,23 @@
 
 **What GA4 adds over Vercel Analytics:** session duration, bounce rate, events (clicks, scrolls, outbound links), conversion goals, audience demographics, UTM campaign tracking
 
+### 25. Chunk 5 — SEO : Sitemap + Open Graph / Twitter Card
+
+**`public/sitemap.xml` — updated:**
+- Added 5 missing pages: `register.html`, `apply.html`, `privacy-policy.html`, `terms.html`, `translate.html`
+- Removed duplicate `#home` anchor entry (redundant with `/`)
+- Updated `<lastmod>` from `2026-02-20` → `2026-05-25` on all entries
+- Priorities: homepage `1.0`, register/apply `0.9`/`0.8`, legal pages `0.4`
+
+**Open Graph + Twitter Card + canonical — 6 pages:**
+- **Added** to `register.html`, `apply.html`, `cv.html`, `translate.html`, `privacy-policy.html`, `terms.html`:
+  - `<link rel="canonical">` — prevents duplicate content penalties
+  - `<meta name="description">` — SEO snippet in Google results
+  - `og:type`, `og:url`, `og:title`, `og:description`, `og:image` — Facebook/WhatsApp share preview
+  - `twitter:card`, `twitter:url`, `twitter:title`, `twitter:description`, `twitter:image` — Twitter/X share preview
+- `index.html` already had complete OG + Twitter + JSON-LD structured data — untouched
+- All pages use `https://nisrineschool.com/Img/logo.png` as share image
+
 ---
 
 ## False Positives from Diagnostic Report
