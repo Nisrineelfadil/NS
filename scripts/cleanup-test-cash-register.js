@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Cleanup Test Cash Register Data
  * Removes all test transactions and overlapping services created by generate-test-cash-register.js

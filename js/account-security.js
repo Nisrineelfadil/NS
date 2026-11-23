@@ -548,7 +548,21 @@
     }
 
     // ================================================================ wiring
+    // CFG-03: visible badge when this is not the production site (local/development database)
+    function showEnvironmentBadge() {
+        fetch(API + '/api/health').then(r => r.json()).then(h => {
+            if (h.environment === 'production' && h.database !== 'local') return;
+            const b = h && h.database === 'local' ? 'LOCAL — base de développement' : 'HORS PRODUCTION';
+            const el = document.createElement('div');
+            el.id = 'envBadge';
+            el.textContent = b;
+            el.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:99999;background:#0f766e;color:#fff;font:700 12px Arial;padding:6px 10px;border-radius:6px;opacity:.9;pointer-events:none;';
+            document.body.appendChild(el);
+        }).catch(() => {});
+    }
+
     function initLoginPage() {
+        showEnvironmentBadge();
         const link = document.getElementById('forgotPasswordLink'); if (link) link.textContent = t('forgot');
         const notice = sessionStorage.getItem('loginNotice');
         if (notice) {

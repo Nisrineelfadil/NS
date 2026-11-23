@@ -154,19 +154,18 @@ router.post('/register', authenticateAdmin, upload.single('photo'), async (req, 
             creditEarned: creditsEarned
         });
 
-        await student.save();
-        
-        // Upload photo to Mega.nz
+        // REG-02: the record used to be saved once with photoPath null BEFORE the upload, but photoPath is required
+        // by the Student model, so every front-desk registration failed. The id already exists before saving:
+        // upload the photo first (same upload and same fallback as before), then save the record once.
         try {
             student.photoPath = await imageStorageService.uploadRegistrationPhoto(req.file.buffer, student._id.toString());
-            await student.save();
             console.log('Admin registration photo uploaded to Mega');
         } catch (megaErr) {
             console.error('⚠️ Mega photo upload failed, falling back to base64:', megaErr.message);
             const photoBase64 = req.file.buffer.toString('base64');
             student.photoPath = `data:${req.file.mimetype};base64,${photoBase64}`;
-            await student.save();
         }
+        await student.save();
 
         // Update admin's credits and registration count
         const admin = await Admin.findById(req.admin.id);

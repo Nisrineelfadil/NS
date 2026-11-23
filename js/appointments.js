@@ -226,19 +226,19 @@ function createAppointmentRow(appointment) {
 
     row.innerHTML = `
         <td>${formattedDate}</td>
-        <td><strong>${appointment.fullName}</strong></td>
-        <td>${appointment.phoneNumber}</td>
-        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${appointment.purpose}">
-            ${appointment.purpose}
+        <td><strong>${nsEscape(appointment.fullName)}</strong></td>
+        <td>${nsEscape(appointment.phoneNumber)}</td>
+        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${nsEscape(appointment.purpose)}">
+            ${nsEscape(appointment.purpose)}
         </td>
         <td>
             <span class="badge ${priorityClass}">
-                <i class="fas ${priorityIcon}"></i> ${t('admin.appointments.' + appointment.priority)}
+                <i class="fas ${priorityIcon}"></i> ${nsEscape(t('admin.appointments.' + appointment.priority))}
             </span>
         </td>
         <td>
             <span class="badge ${statusClass}">
-                ${t('admin.appointments.' + appointment.status)}
+                ${nsEscape(t('admin.appointments.' + appointment.status))}
             </span>
         </td>
         <td>

@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Test Script for Clear Messages Endpoint
  * Run this to diagnose the exact error

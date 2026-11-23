@@ -320,8 +320,8 @@ function createNotificationHTML(notification) {
                 <i class="${iconClass}"></i>
             </div>
             <div class="notification-content" onclick="handleNotificationClick('${notification._id}', '${notification.type}', '${notification.relatedId}')">
-                <div class="notification-title">${translatedTitle}</div>
-                <div class="notification-message">${translatedMessage}</div>
+                <div class="notification-title">${nsEscape(translatedTitle)}</div>
+                <div class="notification-message">${nsEscape(translatedMessage)}</div>
                 <div class="notification-time">${timeAgo}</div>
             </div>
             <button class="notification-delete-btn" onclick="event.stopPropagation(); deleteNotification('${notification._id}')" title="Delete notification">

@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Check Database Size and Storage Usage
 // Usage: node scripts/check-database-size.js
 

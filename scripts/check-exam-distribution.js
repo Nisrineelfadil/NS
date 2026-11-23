@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Script to check exam number distribution in the database
  * Run with: node scripts/check-exam-distribution.js

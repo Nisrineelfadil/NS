@@ -36,91 +36,13 @@ class PaymentReminderService {
         return d;
     }
 
-    // Check for students who need payment reminders
+    // CFG-01: the calculation now lives in services/paymentJobs.js (same rules, plus preview mode and
+    // duplicate protection) and runs through services/jobRunner.js (lock + run history). Local timer only.
     async checkReminders() {
-        try {
-            console.log('🔔 Checking for payment reminders...');
-            const now = new Date();
-            const today = this.normalizeDate(now);
-            
-            // STEP 1: Reset paid students one day after payment date
-            await this.resetPaidStudents(now);
-            
-            // STEP 2: Find active students with pending payments
-            // Exclude 'annuel' (annual) students — they pay once for the full 10-month season
-            const students = await ManagedStudent.find({
-                status: 'active',
-                paymentStatus: { $ne: 'paid' },
-                paymentPlan: { $ne: 'annuel' }
-            });
-
-            let upcomingCount = 0;
-            let overdueCount = 0;
-
-            for (const student of students) {
-                const paymentDate = this.normalizeDate(student.paymentDate);
-                
-                // Check if payment is overdue (compare dates without time)
-                if (today > paymentDate && student.paymentStatus !== 'overdue') {
-                    student.paymentStatus = 'overdue';
-                    await student.save();
-                    overdueCount++;
-                    
-                    // Create overdue reminder if not already sent recently (every 7 days)
-                    const recentReminder = await PaymentReminder.findOne({
-                        student: student._id,
-                        reminderType: 'overdue',
-                        sentAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } // Last 7 days
-                    });
-                    
-                    if (!recentReminder) {
-                        await this.createReminder(student, 'overdue');
-                        // Send push notification for overdue payment
-                        notifyPaymentDue(student._id, {
-                            paymentAmount: student.paymentAmount,
-                            paymentDate: student.paymentDate,
-                            paymentStatus: 'overdue'
-                        }).catch(err => console.error('Failed to send payment notification:', err));
-                        console.log(`📧 Sent overdue reminder to ${student.fullName}`);
-                    }
-                }
-                // Check if reminder should be sent for upcoming payment
-                else if (student.paymentStatus === 'pending') {
-                    const reminderDate = new Date(student.paymentDate);
-                    reminderDate.setDate(reminderDate.getDate() - student.reminderDaysBefore);
-                    
-                    if (now >= reminderDate && now < student.paymentDate && !student.paymentReminderSent) {
-                        upcomingCount++;
-                        
-                        // Create upcoming payment reminder
-                        await this.createReminder(student, 'upcoming');
-                        
-                        // Send push notification for upcoming payment
-                        notifyPaymentDue(student._id, {
-                            paymentAmount: student.paymentAmount,
-                            paymentDate: student.paymentDate,
-                            paymentStatus: 'pending'
-                        }).catch(err => console.error('Failed to send payment notification:', err));
-                        
-                        // Mark as sent
-                        student.paymentReminderSent = true;
-                        student.lastReminderDate = now;
-                        await student.save();
-                    }
-                }
-            }
-
-            console.log(`Payment reminder check complete: ${upcomingCount} upcoming, ${overdueCount} overdue`);
-            
-            return {
-                upcomingCount,
-                overdueCount,
-                checkedAt: now
-            };
-        } catch (error) {
-            console.error('Error checking payment reminders:', error);
-            throw error;
-        }
+        const { runDaily } = require('./jobRunner');
+        const r = await runDaily({ trigger: 'local-timer', include: ['payments'] });
+        if (r && r.payments) console.log('Payment job:', JSON.stringify(r.payments.applied || r.payments.planned));
+        return r;
     }
 
     // Reset paid students one day after their payment date

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const imageStorageService = require('../services/imageStorageService');
+const { verifyMediaRequest } = require('../middleware/mediaSigning');
 
 /**
  * Media serving route - serves images/files from Mega.nz with caching
@@ -38,6 +39,14 @@ router.get('/:folder/:filename', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid filename' });
         }
 
+        // SEC-05: private files — a signed link (given only to signed-in users, see middleware/mediaSigning.js)
+        // or a staff token is required. Before: anyone with the address could download CIN scans and photos.
+        const access = verifyMediaRequest(req);
+        if (!access.ok) {
+            res.setHeader('Cache-Control', 'no-store');
+            return res.status(401).json({ success: false, message: 'Sign-in required' });
+        }
+
         // Download from Mega (with cache) — timeout after 15 seconds
         const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error('Download timeout')), 15000)
@@ -57,7 +66,8 @@ router.get('/:folder/:filename', async (req, res) => {
         // Set caching headers (cache for 1 hour in browser, 24 hours on CDN)
         res.setHeader('Content-Type', mimeType);
         res.setHeader('Content-Length', buffer.length);
-        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+        // private: never stored by shared caches/CDN (before: public, 24 h on the CDN)
+        res.setHeader('Cache-Control', access.maxAge ? `private, max-age=${access.maxAge}` : 'private, no-store');
         res.setHeader('ETag', `"${Buffer.from(folder + filename).toString('base64').substring(0, 16)}"`);
 
         res.send(buffer);

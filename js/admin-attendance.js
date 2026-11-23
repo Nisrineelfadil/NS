@@ -1554,19 +1554,54 @@ function toggleAbsencesList(index) {
     }
 }
 
+// SEC-07: optional reason for an attendance correction, kept in the Director's activity history.
+// Returns '' when left empty, null when the secretary cancels.
+// SEC-07: confirmation + optional reason for an attendance correction, in ONE window drawn inside the page
+// (browser pop-ups: prompt() is not supported by the Electron admin app, and some browsers block confirm()).
+// question = { fr, ar, note } shown at the top. Resolves to the reason text ('' if empty), or null on "Annuler".
+function askCorrectionReason(question) {
+    return new Promise(resolve => {
+        const el = (tag, css, text) => { const e = document.createElement(tag); if (css) e.style.cssText = css; if (text) e.textContent = text; return e; };
+        const overlay = el('div', 'position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:100000;padding:16px;');
+        const box = el('div', 'background:#fff;border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.3);font-family:inherit;');
+        if (question) {
+            box.append(el('div', 'font-weight:800;font-size:1.15rem;color:#0f172a;', question.fr));
+            if (question.ar) box.append(el('div', 'font-weight:800;font-size:1.15rem;color:#0f172a;direction:rtl;text-align:right;margin-top:4px;', question.ar));
+            if (question.note) box.append(el('div', 'margin-top:8px;padding:8px 10px;background:#fef2f2;color:#991b1b;border-radius:8px;font-size:.9rem;', question.note));
+            box.append(el('div', 'border-top:1px solid #e5e7eb;margin:14px 0 10px;'));
+        }
+        box.append(el('div', 'font-weight:600;font-size:.95rem;color:#334155;', 'Raison de la correction (facultatif)'));
+        box.append(el('div', 'font-weight:600;font-size:.95rem;color:#334155;direction:rtl;text-align:right;margin-top:2px;', 'سبب التصحيح (اختياري)'));
+        const input = el('textarea', 'width:100%;box-sizing:border-box;margin-top:14px;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:1rem;min-height:70px;resize:vertical;font-family:inherit;');
+        input.placeholder = 'ex. : certificat médical — مثال: شهادة طبية';
+        input.maxLength = 500;
+        const row = el('div', 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px;');
+        const cancel = el('button', 'padding:10px 18px;border:2px solid #e5e7eb;background:#fff;border-radius:10px;font-weight:600;cursor:pointer;', 'Annuler / إلغاء');
+        const ok = el('button', 'padding:10px 18px;border:none;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;cursor:pointer;', 'Valider / تأكيد');
+        cancel.type = ok.type = 'button';
+        row.append(cancel, ok); box.append(input, row); overlay.append(box);
+        const done = v => { document.removeEventListener('keydown', onKey, true); overlay.remove(); resolve(v); };
+        const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); done(null); } else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); done(input.value.trim()); } };
+        cancel.addEventListener('click', () => done(null));
+        ok.addEventListener('click', () => done(input.value.trim()));
+        overlay.addEventListener('click', e => { if (e.target === overlay) done(null); });
+        document.addEventListener('keydown', onKey, true);
+        document.body.append(overlay);
+        input.focus();
+    });
+}
+
 // Delete all absences for a student
 async function deleteStudentAbsences(studentId, studentName) {
-    const confirmed = confirm(
-        `⚠️ Delete all absences for ${studentName}?\n\n` +
-        `This will reset their absence count to 0.\n` +
-        `The student will see the updated count in their app.\n\n` +
-        `This action cannot be undone!`
-    );
-    
-    if (!confirmed) return;
+    const reason = await askCorrectionReason({
+        fr: `Supprimer toutes les absences de ${studentName} dans ce groupe ?`,
+        ar: `حذف جميع غيابات ${studentName} في هذه المجموعة؟`,
+        note: 'Le compteur d\'absences repasse à 0 dans l\'application de l\'élève. — يصبح عدد الغيابات 0 في تطبيق التلميذ.'
+    });
+    if (reason === null) return;
     
     try {
-        const response = await fetch(`/api/attendance/admin/student-absences/${studentId}?groupId=${clearAbsencesCurrentGroupId}`, {
+        const response = await fetch(`/api/attendance/admin/student-absences/${studentId}?groupId=${clearAbsencesCurrentGroupId}&reason=${encodeURIComponent(reason)}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
         });
@@ -1596,15 +1631,14 @@ async function deleteStudentAbsences(studentId, studentName) {
 
 // Delete a single absence record
 async function deleteSingleAbsence(studentId, absenceId, studentName) {
-    const confirmed = confirm(
-        `Delete this absence record for ${studentName}?\n\n` +
-        `The student will see the updated count in their app.`
-    );
-    
-    if (!confirmed) return;
+    const reason = await askCorrectionReason({
+        fr: `Supprimer cette absence de ${studentName} ?`,
+        ar: `حذف هذا الغياب لـ ${studentName}؟`
+    });
+    if (reason === null) return;
     
     try {
-        const response = await fetch(`/api/attendance/admin/student-absences/${studentId}?absenceIds=${absenceId}`, {
+        const response = await fetch(`/api/attendance/admin/student-absences/${studentId}?absenceIds=${absenceId}&reason=${encodeURIComponent(reason)}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${AdminAttendance.getToken()}` }
         });
@@ -1728,10 +1762,8 @@ async function loadEditPresencesGroups() {
     }
 }
 
-// Load groups from active season for the dropdown
-async function loadClearAbsencesGroups() {
-    const groupSelect = document.getElementById('clearAbsencesGroupSelect');
-    groupSelect.innerHTML = `<option value="">${t('selectAGroup')}</option>`;
+// Load students with presences for the selected group
+async function loadStudentsWithPresences() {
     const groupId = document.getElementById('editPresencesGroupSelect').value;
     
     if (!groupId) {
@@ -1908,12 +1940,12 @@ function togglePresencesList(index) {
 async function updateRecordStatus(recordId, newStatus, studentName) {
     const statusLabels = { present: 'Present', late: 'Late', absent: 'Absent' };
     
-    const confirmed = confirm(
-        `Change attendance status to "${statusLabels[newStatus]}" for ${studentName}?\n\n` +
-        `The student will see the updated status in their app.`
-    );
-    
-    if (!confirmed) return;
+    const labelsFr = { present: 'Présent', late: 'En retard', absent: 'Absent' }, labelsAr = { present: 'حاضر', late: 'متأخر', absent: 'غائب' };
+    const reason = await askCorrectionReason({
+        fr: `Marquer ${studentName} : « ${labelsFr[newStatus] || statusLabels[newStatus]} » ?`,
+        ar: `تسجيل ${studentName}: «${labelsAr[newStatus] || newStatus}»؟`
+    });
+    if (reason === null) return;
     
     try {
         const response = await fetch(`/api/attendance/admin/update-status/${recordId}`, {
@@ -1922,7 +1954,7 @@ async function updateRecordStatus(recordId, newStatus, studentName) {
                 'Authorization': `Bearer ${AdminAttendance.getToken()}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ newStatus })
+            body: JSON.stringify({ newStatus, reason })
         });
         
         if (!response.ok) {

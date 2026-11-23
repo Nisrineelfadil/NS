@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Cleanup Test Students by Email Pattern - Safe & Smart
 // Usage: node scripts/cleanup-by-email-pattern.js
 // Identifies test students by email pattern (name.lastname0-149@nisrineschool.com)

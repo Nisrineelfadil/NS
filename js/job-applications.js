@@ -290,19 +290,19 @@ function displayPendingApplications(applications) {
         return `
         <tr>
             <td>
-                <div class="applicant-name">${app.fullName}</div>
+                <div class="applicant-name">${nsEscape(app.fullName)}</div>
             </td>
             <td>
                 <div class="contact-info">
-                    <span><i class="fas fa-phone"></i> ${app.phone}</span>
-                    <span><i class="fas fa-envelope"></i> ${app.email}</span>
+                    <span><i class="fas fa-phone"></i> ${nsEscape(app.phone)}</span>
+                    <span><i class="fas fa-envelope"></i> ${nsEscape(app.email)}</span>
                 </div>
             </td>
             <td>
-                <span class="badge badge-info">${app.requestedJobType || 'Not specified'}</span>
+                <span class="badge badge-info">${nsEscape(app.requestedJobType || 'Not specified')}</span>
             </td>
             <td>
-                <span class="notes-preview">${app.notes ? (app.notes.substring(0, 50) + (app.notes.length > 50 ? '...' : '')) : '-'}</span>
+                <span class="notes-preview">${nsEscape(app.notes ? (app.notes.substring(0, 50) + (app.notes.length > 50 ? '...' : '')) : '-')}</span>
             </td>
             <td>${formatDate(app.createdAt)}</td>
             <td>
@@ -1094,8 +1094,8 @@ async function viewApplication(id) {
             
             // Fill basic details
             document.getElementById('detailName').textContent = app.fullName;
-            document.getElementById('detailPhone').innerHTML = `<a href="tel:${app.phone}">${app.phone}</a>`;
-            document.getElementById('detailEmail').innerHTML = `<a href="mailto:${app.email}">${app.email}</a>`;
+            document.getElementById('detailPhone').innerHTML = `<a href="tel:${nsEscape(app.phone)}">${nsEscape(app.phone)}</a>`;
+            document.getElementById('detailEmail').innerHTML = `<a href="mailto:${nsEscape(app.email)}">${nsEscape(app.email)}</a>`;
             document.getElementById('detailField').textContent = app.jobField === 'other' && app.customJobField 
                 ? app.customJobField 
                 : FIELD_LABELS[app.jobField] || app.jobField;

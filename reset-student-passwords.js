@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Script to reset passwords for students who don't have plain text passwords stored
 const mongoose = require('mongoose');
 const readline = require('readline');

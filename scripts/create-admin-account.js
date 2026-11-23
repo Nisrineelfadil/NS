@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Offline creation of a Director (super_admin) or developer (dev) account.
 // Replaces the removed public routes /api/admin/setup-super-admin and /api/admin/setup-dev.
 //

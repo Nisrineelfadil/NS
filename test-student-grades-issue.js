@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 require('dotenv').config();

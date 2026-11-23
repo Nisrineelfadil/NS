@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Generate Test Cash Register Data
  * Creates test transactions and overlapping (unpaid) services for the current month

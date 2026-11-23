@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Diagnostic Script: Check Branch Groups in Database
  * This will show the actual IDs and data in your database

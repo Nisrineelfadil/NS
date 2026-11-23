@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Setup Script - Create Super Admin Account (Nisrineelfadil)
  * Run this once to create the super admin account

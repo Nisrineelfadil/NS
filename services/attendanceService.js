@@ -50,58 +50,13 @@ class AttendanceService {
      * Mark absent students for expired sessions
      */
     async markAbsentStudents() {
+        // CFG-01: same rule, now in services/attendanceJobs.js via services/jobRunner.js (lock + run history)
         try {
-            console.log('🔍 Checking for expired attendance sessions...');
-
-            const AttendanceSession = require('../models/AttendanceSession');
-            const AttendanceRecord = require('../models/AttendanceRecord');
-
-            // Find all active sessions that have expired
-            const now = new Date();
-            const expiredSessions = await AttendanceSession.find({
-                status: 'active',
-                qrExpiresAt: { $lt: now }
-            });
-
-            if (expiredSessions.length === 0) {
-                console.log('✅ No expired sessions found');
-                return;
-            }
-
-            console.log(`📋 Found ${expiredSessions.length} expired session(s)`);
-
-            let totalMarked = 0;
-
-            for (const session of expiredSessions) {
-                // Mark all pending/absent (not scanned) students as absent with auto-flag
-                // Handle both 'pending' (new) and 'absent' (old) status for backward compatibility
-                const result = await AttendanceRecord.updateMany(
-                    {
-                        sessionId: session.sessionId,
-                        status: { $in: ['pending', 'absent'] },
-                        scanTime: null  // Only mark if they never scanned
-                    },
-                    {
-                        $set: { 
-                            status: 'absent',
-                            markedAbsentAutomatically: true 
-                        }
-                    }
-                );
-
-                totalMarked += result.modifiedCount;
-
-                // Update session status
-                session.status = 'expired';
-                await session.save();
-
-                console.log(`  ✓ Session ${session.sessionId} (${session.groupName} - ${session.formation}): ${result.modifiedCount} students marked absent`);
-            }
-
-            console.log(`✅ Total: ${totalMarked} students marked as absent across ${expiredSessions.length} sessions`);
-
+            const { runDaily } = require('./jobRunner');
+            const r = await runDaily({ trigger: 'local-timer', include: ['attendance'] });
+            if (r && r.attendance) console.log('Attendance job:', JSON.stringify(r.attendance.applied || r.attendance.planned));
         } catch (error) {
-            console.error('❌ Error in attendance service:', error);
+            console.error('❌ Error in attendance service:', error.message);
         }
     }
 

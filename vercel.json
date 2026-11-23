@@ -7,6 +7,12 @@
       "includeFiles": "{*.html,404.html,favicon.ico,css/**,js/**,Img/**,public/**,pwa/**,react-portals/dist/**,models/**,routes/**,services/**,middleware/**,config/**,utils/**,server.js}"
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 5 * * *"
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
@@ -14,7 +20,10 @@
     },
     {
       "src": "/downloads/(Nisrine-School-Admin-[0-9.]+\\.exe)",
-      "headers": { "Content-Disposition": "attachment", "Cache-Control": "public, max-age=86400" },
+      "headers": {
+        "Content-Disposition": "attachment",
+        "Cache-Control": "public, max-age=86400"
+      },
       "dest": "/downloads/$1"
     },
     {

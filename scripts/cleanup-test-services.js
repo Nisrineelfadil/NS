@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Cleanup Test Service Requests
  * Deletes all test service data created by generate-test-services.js

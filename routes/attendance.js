@@ -14,6 +14,29 @@ const ManagedStudent = require('../models/ManagedStudent');
 const Group = require('../models/Group');
 const Admin = require('../models/Admin');
 const Season = require('../models/Season');
+const { audit } = require('../services/audit');
+const { closeExpiredSessionsSoon } = require('../services/jobRunner');
+
+// SEC-07 — scope rules for attendance corrections.
+// Secretaries correct attendance of the ACTIVE season; the Director (and the developer) can correct any season.
+// Every correction or deletion is written to the permanent activity history with the original status.
+const isDirector = req => ['super_admin', 'dev'].includes(req.admin && req.admin.role);
+async function activeSeasonGroupIds() {
+    const s = await Season.findOne({ status: 'active' }).select('_id');
+    if (!s) return new Set();
+    return new Set((await Group.find({ season: s._id }).select('_id')).map(g => String(g._id)));
+}
+// returns an error message when the user may not change these records, otherwise null
+async function correctionNotAllowed(req, records) {
+    if (isDirector(req)) return null;
+    const allowed = await activeSeasonGroupIds();
+    const outside = records.filter(r => !allowed.has(String(r.groupId)));
+    return outside.length ? 'Only attendance of the active season can be corrected. Ask the Director for older seasons.' : null;
+}
+// Date shown in the school's time zone: attendance dates are stored at local midnight (23:00 UTC the day before),
+// so a UTC date would name the previous day.
+const schoolDay = d => new Date(d).toLocaleDateString('fr-CA', { timeZone: 'Africa/Casablanca' }); // YYYY-MM-DD
+const recordLabel = r => `${r.studentName || 'student'} — ${r.groupName || ''} — ${r.date ? schoolDay(r.date) : ''}`;
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'nisrine-school-secret-key-2024';
@@ -250,6 +273,7 @@ router.delete('/cancel/:sessionId', verifyToken, verifyTeacher, async (req, res)
 
 // Get teacher's active sessions
 router.get('/teacher/sessions', verifyToken, verifyTeacher, async (req, res) => {
+    await closeExpiredSessionsSoon(); // CFG-01: close expired QR sessions (throttled, respects JOBS_MODE)
     try {
         const { status, date, groupId } = req.query;
 
@@ -428,6 +452,7 @@ router.post('/scan', verifyToken, verifyStudent, async (req, res) => {
 
 // Get student's attendance history
 router.get('/student/history', verifyToken, verifyStudent, async (req, res) => {
+    await closeExpiredSessionsSoon(); // CFG-01
     try {
         const { formation, startDate, endDate, limit = 50 } = req.query;
 
@@ -490,6 +515,7 @@ router.get('/admin/seasons', authenticateAdmin, async (req, res) => {
 
 // Get all attendance records with filters
 router.get('/admin/records', authenticateAdmin, async (req, res) => {
+    await closeExpiredSessionsSoon(); // CFG-01
     try {
         const { groupId, teacherId, studentId, formation, status, startDate, endDate, season, search, page = 1, limit = 50 } = req.query;
 
@@ -699,6 +725,7 @@ router.get('/admin/stats', authenticateAdmin, async (req, res) => {
 
 // Get all sessions
 router.get('/admin/sessions', authenticateAdmin, async (req, res) => {
+    await closeExpiredSessionsSoon(); // CFG-01
     try {
         const { status, groupId, teacherId, startDate, endDate, page = 1, limit = 50 } = req.query;
 
@@ -748,88 +775,41 @@ router.get('/admin/sessions', authenticateAdmin, async (req, res) => {
 // ==================== AUTOMATED ABSENCE MARKING ====================
 
 // Mark absent students for expired sessions (called by cron job)
-router.post('/auto-mark-absent', async (req, res) => {
-    try {
-        // Find all active sessions that have expired
-        const now = new Date();
-        const expiredSessions = await AttendanceSession.find({
-            status: 'active',
-            qrExpiresAt: { $lt: now }
-        });
-
-        let totalMarked = 0;
-
-        for (const session of expiredSessions) {
-            // Mark all absent records as automatically marked
-            const result = await AttendanceRecord.updateMany(
-                {
-                    sessionId: session.sessionId,
-                    status: 'absent',
-                    markedAbsentAutomatically: false
-                },
-                {
-                    $set: { markedAbsentAutomatically: true }
-                }
-            );
-
-            totalMarked += result.modifiedCount;
-
-            // Update session status
-            session.status = 'expired';
-            await session.save();
-        }
-
-        res.json({
-            success: true,
-            message: `Marked ${totalMarked} students as absent across ${expiredSessions.length} sessions`,
-            sessionsProcessed: expiredSessions.length,
-            studentsMarked: totalMarked
-        });
-
-    } catch (error) {
-        console.error('Error auto-marking absent:', error);
-        res.status(500).json({ error: 'Failed to auto-mark absent', details: error.message });
-    }
+// CFG-01 / SEC-16: this route had no sign-in check and closed sessions for anyone who called it.
+// Expired sessions are now closed by the protected daily job (/api/cron/daily) and when attendance pages load.
+router.post('/auto-mark-absent', (req, res) => {
+    res.status(410).json({ success: false, message: 'Replaced by the scheduled job.' });
 });
 
 // Clear all presence records (with optional filters) - Admin only - DELETE
+// SEC-07: before, any employee could delete records of ANY status chosen in the address, across ALL seasons when
+// no group was given. Now: Director (or developer) only, one group required, only presence records, history kept.
+// (No screen uses this route: the "Edit presences" window works student by student.)
 router.delete('/admin/clear-presences', authenticateAdmin, async (req, res) => {
     try {
-        const { groupId, formation, startDate, endDate, status } = req.query;
-
-        // Build query for presence records only
-        let query = { status: status || 'present' };
-
-        if (groupId) {
-            query.groupId = groupId;
+        if (!isDirector(req)) {
+            return res.status(403).json({ success: false, message: 'Only the Director can delete the attendance records of a whole group.' });
         }
-
-        if (formation) {
-            query.formation = formation;
+        const { groupId, formation, startDate, endDate, reason } = req.query;
+        if (!groupId) {
+            return res.status(400).json({ success: false, message: 'Choose a group first.' });
         }
-
+        const query = { groupId, status: { $in: ['present', 'late'] } };
+        if (formation) query.formation = formation;
         if (startDate || endDate) {
             query.date = {};
-            if (startDate) {
-                query.date.$gte = new Date(startDate);
-            }
-            if (endDate) {
-                query.date.$lte = new Date(endDate);
-            }
+            if (startDate) query.date.$gte = new Date(startDate);
+            if (endDate) query.date.$lte = new Date(endDate);
         }
-
-        // Delete all matching presence records
-        const result = await AttendanceRecord.deleteMany(query);
-
-        console.log(`🗑️ Admin deleted ${result.deletedCount} presence record(s)`);
-        console.log(`   Filters: ${JSON.stringify(query)}`);
-
-        res.json({
-            success: true,
-            message: `${result.deletedCount} presence record(s) permanently deleted`,
-            deletedCount: result.deletedCount
+        const records = await AttendanceRecord.find(query).lean();
+        const result = await AttendanceRecord.deleteMany({ _id: { $in: records.map(r => r._id) } });
+        await audit(req, {
+            action: 'attendance.bulk_deleted', module: 'attendance',
+            target: { type: 'group', id: groupId, label: records[0] ? records[0].groupName : '' },
+            before: { count: records.length, records: records.slice(0, 300).map(r => ({ id: String(r._id), student: r.studentName, date: r.date, status: r.status })) },
+            reason, details: `${result.deletedCount} presence record(s) deleted`
         });
-
+        res.json({ success: true, message: `${result.deletedCount} presence record(s) permanently deleted`, deletedCount: result.deletedCount });
     } catch (error) {
         console.error('Error clearing presences:', error);
         res.status(500).json({ success: false, message: 'Failed to clear presences', error: error.message });
@@ -889,37 +869,35 @@ router.get('/admin/students-with-absences', authenticateAdmin, async (req, res) 
 });
 
 // Delete specific absence record(s) for a student - Admin only
+// Delete specific absence record(s) for a student — used by the "Clear absences" window.
+// SEC-07: a group or specific absences are now required (before: no filter = every absence of the student in every
+// season); secretaries work on the active season; each deleted absence is kept in the activity history.
 router.delete('/admin/student-absences/:studentId', authenticateAdmin, async (req, res) => {
     try {
         const { studentId } = req.params;
-        const { groupId, absenceIds } = req.query;
-
-        let query = {
-            studentId: studentId,
-            status: 'absent'
-        };
-
-        // If specific absence IDs provided, delete only those
-        if (absenceIds) {
-            const ids = absenceIds.split(',');
-            query._id = { $in: ids };
+        const { groupId, absenceIds, reason } = req.query;
+        if (!groupId && !absenceIds) {
+            return res.status(400).json({ success: false, message: 'Choose the group or the absences to delete.' });
         }
+        const query = { studentId, status: 'absent' };
+        if (absenceIds) query._id = { $in: String(absenceIds).split(',') };
+        if (groupId) query.groupId = groupId;
 
-        // If groupId provided, limit to that group
-        if (groupId) {
-            query.groupId = groupId;
+        const records = await AttendanceRecord.find(query).lean();
+        const refused = await correctionNotAllowed(req, records);
+        if (refused) return res.status(403).json({ success: false, message: refused });
+
+        const result = await AttendanceRecord.deleteMany({ _id: { $in: records.map(r => r._id) } });
+        for (const r of records) {
+            await audit(req, {
+                action: 'attendance.absence_deleted', module: 'attendance',
+                target: { type: 'attendance_record', id: r._id, label: recordLabel(r) },
+                before: { status: r.status, date: r.date, group: r.groupName, formation: r.formation, student: r.studentName },
+                after: null, reason
+            });
         }
-
-        const result = await AttendanceRecord.deleteMany(query);
-
         console.log(`🗑️ Admin deleted ${result.deletedCount} absence record(s) for student ${studentId}`);
-
-        res.json({
-            success: true,
-            message: `${result.deletedCount} absence record(s) deleted`,
-            deletedCount: result.deletedCount
-        });
-
+        res.json({ success: true, message: `${result.deletedCount} absence record(s) deleted`, deletedCount: result.deletedCount });
     } catch (error) {
         console.error('Error deleting student absences:', error);
         res.status(500).json({ success: false, message: 'Failed to delete absences', error: error.message });
@@ -927,43 +905,34 @@ router.delete('/admin/student-absences/:studentId', authenticateAdmin, async (re
 });
 
 // Clear all absence records (with optional filters) - Admin only - DELETE
+// SEC-07: before, any employee could delete records of ANY status chosen in the address, across ALL seasons when
+// no group was given. Now: Director (or developer) only, one group required, only absence records, history kept.
+// (No screen uses this route: the "Clear absences" window works student by student.)
 router.delete('/admin/clear-absences', authenticateAdmin, async (req, res) => {
     try {
-        const { groupId, formation, startDate, endDate, status } = req.query;
-
-        // Build query for absence records only
-        let query = { status: status || 'absent' };
-
-        if (groupId) {
-            query.groupId = groupId;
+        if (!isDirector(req)) {
+            return res.status(403).json({ success: false, message: 'Only the Director can delete the attendance records of a whole group.' });
         }
-
-        if (formation) {
-            query.formation = formation;
+        const { groupId, formation, startDate, endDate, reason } = req.query;
+        if (!groupId) {
+            return res.status(400).json({ success: false, message: 'Choose a group first.' });
         }
-
+        const query = { groupId, status: 'absent' };
+        if (formation) query.formation = formation;
         if (startDate || endDate) {
             query.date = {};
-            if (startDate) {
-                query.date.$gte = new Date(startDate);
-            }
-            if (endDate) {
-                query.date.$lte = new Date(endDate);
-            }
+            if (startDate) query.date.$gte = new Date(startDate);
+            if (endDate) query.date.$lte = new Date(endDate);
         }
-
-        // Delete all matching absence records
-        const result = await AttendanceRecord.deleteMany(query);
-
-        console.log(`🗑️ Admin deleted ${result.deletedCount} absence record(s)`);
-        console.log(`   Filters: ${JSON.stringify(query)}`);
-
-        res.json({
-            success: true,
-            message: `${result.deletedCount} absence record(s) permanently deleted`,
-            deletedCount: result.deletedCount
+        const records = await AttendanceRecord.find(query).lean();
+        const result = await AttendanceRecord.deleteMany({ _id: { $in: records.map(r => r._id) } });
+        await audit(req, {
+            action: 'attendance.bulk_deleted', module: 'attendance',
+            target: { type: 'group', id: groupId, label: records[0] ? records[0].groupName : '' },
+            before: { count: records.length, records: records.slice(0, 300).map(r => ({ id: String(r._id), student: r.studentName, date: r.date, status: r.status })) },
+            reason, details: `${result.deletedCount} absence record(s) deleted`
         });
-
+        res.json({ success: true, message: `${result.deletedCount} absence record(s) permanently deleted`, deletedCount: result.deletedCount });
     } catch (error) {
         console.error('Error clearing absences:', error);
         res.status(500).json({ success: false, message: 'Failed to clear absences', error: error.message });
@@ -971,36 +940,10 @@ router.delete('/admin/clear-absences', authenticateAdmin, async (req, res) => {
 });
 
 // Clear all presences (Admin only)
-router.post('/clear-presences', authenticateAdmin, async (req, res) => {
-    try {
-        console.log('🗑️ Admin clearing all presence records...');
-        
-        // Update all attendance records to set presence-related fields to 0
-        const result = await AttendanceRecord.updateMany(
-            {},
-            {
-                $set: {
-                    presenceCount: 0,
-                    status: 'absent' // Reset status since no presences
-                }
-            }
-        );
-        
-        console.log(`✅ Cleared presence records for ${result.modifiedCount} attendance records`);
-        
-        res.json({
-            success: true,
-            message: `All presence records cleared successfully (${result.modifiedCount} records updated)`,
-            modifiedCount: result.modifiedCount
-        });
-    } catch (error) {
-        console.error('Error clearing presences:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to clear presence records', 
-            error: error.message 
-        });
-    }
+// SEC-07: the old POST /clear-presences rewrote EVERY attendance record of every season to "absent"
+// (updateMany({})). Removed. Corrections are made student by student (update-status, windows, record edit).
+router.post('/clear-presences', authenticateAdmin, (req, res) => {
+    res.status(410).json({ success: false, message: 'This operation has been removed. Correct attendance student by student.' });
 });
 
 // Get students with presences (present/late) for a specific group - Admin only
@@ -1066,10 +1009,12 @@ router.get('/admin/students-with-presences', authenticateAdmin, async (req, res)
 });
 
 // Update attendance record status - Admin only
+// Change one attendance record (e.g. absent → present after a medical certificate) — "Edit presences" window.
+// SEC-07: secretaries correct the active season; optional reason; original status kept in the activity history.
 router.patch('/admin/update-status/:recordId', authenticateAdmin, async (req, res) => {
     try {
         const { recordId } = req.params;
-        const { newStatus } = req.body;
+        const { newStatus, reason } = req.body;
 
         if (!newStatus || !['present', 'late', 'absent'].includes(newStatus)) {
             return res.status(400).json({ success: false, message: 'Valid status (present, late, absent) is required' });
@@ -1079,10 +1024,17 @@ router.patch('/admin/update-status/:recordId', authenticateAdmin, async (req, re
         if (!record) {
             return res.status(404).json({ success: false, message: 'Attendance record not found' });
         }
+        const refused = await correctionNotAllowed(req, [record]);
+        if (refused) return res.status(403).json({ success: false, message: refused });
 
         const oldStatus = record.status;
         record.status = newStatus;
         await record.save();
+        await audit(req, {
+            action: 'attendance.corrected', module: 'attendance',
+            target: { type: 'attendance_record', id: record._id, label: recordLabel(record) },
+            before: { status: oldStatus }, after: { status: newStatus }, reason
+        });
 
         console.log(`✏️ Admin updated attendance record ${recordId}: ${oldStatus} → ${newStatus}`);
 
@@ -1105,28 +1057,38 @@ router.patch('/admin/update-status/:recordId', authenticateAdmin, async (req, re
 });
 
 // Bulk update attendance status for a student - Admin only
+// Bulk update attendance status for ONE student — Admin only.
+// SEC-07: specific records or a group are now required (before: no filter = every record of the student in every
+// season); secretaries work on the active season; each change is kept in the activity history.
 router.patch('/admin/bulk-update-status/:studentId', authenticateAdmin, async (req, res) => {
     try {
         const { studentId } = req.params;
-        const { recordIds, newStatus, groupId } = req.body;
+        const { recordIds, newStatus, groupId, reason } = req.body;
 
         if (!newStatus || !['present', 'late', 'absent'].includes(newStatus)) {
             return res.status(400).json({ success: false, message: 'Valid status (present, late, absent) is required' });
         }
-
-        let query = { studentId: studentId };
-
-        // If specific record IDs provided, update only those
-        if (recordIds && recordIds.length > 0) {
-            query._id = { $in: recordIds };
+        if ((!recordIds || recordIds.length === 0) && !groupId) {
+            return res.status(400).json({ success: false, message: 'Choose the group or the records to change.' });
         }
 
-        // If groupId provided, limit to that group
-        if (groupId) {
-            query.groupId = groupId;
-        }
+        const query = { studentId: studentId };
+        if (recordIds && recordIds.length > 0) query._id = { $in: recordIds };
+        if (groupId) query.groupId = groupId;
 
-        const result = await AttendanceRecord.updateMany(query, { $set: { status: newStatus } });
+        const records = await AttendanceRecord.find(query).lean();
+        const refused = await correctionNotAllowed(req, records);
+        if (refused) return res.status(403).json({ success: false, message: refused });
+
+        const toChange = records.filter(r => r.status !== newStatus);
+        const result = await AttendanceRecord.updateMany({ _id: { $in: toChange.map(r => r._id) } }, { $set: { status: newStatus } });
+        for (const r of toChange) {
+            await audit(req, {
+                action: 'attendance.corrected', module: 'attendance',
+                target: { type: 'attendance_record', id: r._id, label: recordLabel(r) },
+                before: { status: r.status }, after: { status: newStatus }, reason
+            });
+        }
 
         console.log(`✏️ Admin bulk updated ${result.modifiedCount} record(s) for student ${studentId} to ${newStatus}`);
 
@@ -1143,39 +1105,22 @@ router.patch('/admin/bulk-update-status/:studentId', authenticateAdmin, async (r
 });
 
 // Clear all absences (Admin only)
-router.post('/clear-absences', authenticateAdmin, async (req, res) => {
-    try {
-        console.log('🗑️ Admin clearing all absence records...');
-        
-        // Update all attendance records to set absence-related fields to 0
-        const result = await AttendanceRecord.updateMany(
-            {},
-            {
-                $set: {
-                    absenceCount: 0,
-                    status: 'present' // Reset status since no absences
-                }
-            }
-        );
-        
-        console.log(`✅ Cleared absence records for ${result.modifiedCount} attendance records`);
-        
-        res.json({
-            success: true,
-            message: `All absence records cleared successfully (${result.modifiedCount} records updated)`,
-            modifiedCount: result.modifiedCount
-        });
-    } catch (error) {
-        console.error('Error clearing absences:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to clear absence records', 
-            error: error.message 
-        });
-    }
+// SEC-07: the old POST /clear-absences rewrote EVERY attendance record of every season to "present"
+// (updateMany({})). Removed. Corrections are made student by student (update-status, windows, record edit).
+router.post('/clear-absences', authenticateAdmin, (req, res) => {
+    res.status(410).json({ success: false, message: 'This operation has been removed. Correct attendance student by student.' });
 });
 
 // Export monthly attendance to PDF or Excel (Admin only)
+// ATT-04: a download file name may only contain plain (ASCII) characters in the header. Group names contain
+// "–" and month names can contain accents, which made every export fail (500). Send a plain version first
+// (the admin page reads that one) and the exact name in the standard encoded form (RFC 6266 filename*).
+function setDownloadName(res, name) {
+    const plain = String(name).normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^A-Za-z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^-|-(?=\.)/g, '');
+    res.setHeader('Content-Disposition', `attachment; filename="${plain}"; filename*=UTF-8''${encodeURIComponent(name)}`);
+}
+
 router.get('/export/monthly', authenticateAdmin, async (req, res) => {
     try {
         const { groupId, season, month, format = 'pdf' } = req.query;
@@ -1334,8 +1279,7 @@ router.get('/export/monthly', authenticateAdmin, async (req, res) => {
             
             // Set response headers for PDF
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 
-                `attachment; filename=Rapport-Presence-${group.name}-${monthName}-${year}.pdf`);
+            setDownloadName(res, `Rapport-Presence-${group.name}-${monthName}-${year}.pdf`); // ATT-04
             
             doc.pipe(res);
             
@@ -1694,8 +1638,7 @@ router.get('/export/monthly', authenticateAdmin, async (req, res) => {
             
             // Set response headers for Excel
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 
-                `attachment; filename=Rapport-Presence-${group.name}-${monthName}-${year}.xlsx`);
+            setDownloadName(res, `Rapport-Presence-${group.name}-${monthName}-${year}.xlsx`); // ATT-04
             
             // Write to response
             await workbook.xlsx.write(res);
@@ -1790,10 +1733,7 @@ router.get('/export/group/:groupId', authenticateAdmin, async (req, res) => {
             'Content-Type',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         );
-        res.setHeader(
-            'Content-Disposition',
-            `attachment; filename=Attendance-${group.name}-${new Date().toISOString().split('T')[0]}.xlsx`
-        );
+        setDownloadName(res, `Attendance-${group.name}-${new Date().toISOString().split('T')[0]}.xlsx`); // ATT-04
         
         // Write to response
         await workbook.xlsx.write(res);
@@ -1997,11 +1937,22 @@ router.patch('/admin/records/:recordId', authenticateAdmin, async (req, res) => 
             return res.status(404).json({ error: 'Attendance record not found' });
         }
         
+        // SEC-07: secretaries correct the active season; original status kept in the activity history
+        const refused = await correctionNotAllowed(req, [record]);
+        if (refused) return res.status(403).json({ error: refused });
+
         const oldStatus = record.status;
+        const oldNotes = record.notes;
         record.status = status;
         record.notes = notes || record.notes;
         record.scanTime = status !== 'absent' ? new Date() : null;
         await record.save();
+        await audit(req, {
+            action: 'attendance.corrected', module: 'attendance',
+            target: { type: 'attendance_record', id: record._id, label: recordLabel(record) },
+            before: { status: oldStatus, notes: oldNotes || '' }, after: { status: record.status, notes: record.notes || '' },
+            reason: notes || req.body.reason || ''
+        });
         
         // Update session counts
         const session = await AttendanceSession.findById(record.session);

@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Quick Setup Script: Initialize Default Branch Groups
  * Run this to create the 8 default branch groups needed for student assignment

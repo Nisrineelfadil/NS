@@ -24,6 +24,9 @@ const connectDB = async () => {
         if (!process.env.MONGODB_URI) {
             throw new Error('MONGODB_URI environment variable is not defined');
         }
+        // CFG-03: outside production, never connect to a remote (possibly production) database by accident
+        const target = require('./environment').assertDatabaseAllowed(process.env.MONGODB_URI, 'server');
+        console.log(`🗄️  Database: ${target.location}${target.name ? ' / ' + target.name : ''} (NODE_ENV=${process.env.NODE_ENV || 'unset'})`);
 
         // Create connection promise
         connectionPromise = mongoose.connect(process.env.MONGODB_URI, {

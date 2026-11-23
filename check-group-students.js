@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Diagnostic script to check students in groups
 const mongoose = require('mongoose');
 require('dotenv').config();

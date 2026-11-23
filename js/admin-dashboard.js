@@ -648,18 +648,18 @@ function displayStudentsCards(students) {
         card.innerHTML = `
             <div class="student-card-header">
                 <div>
-                    <div class="student-name">${student.fullName}</div>
-                    <span class="badge ${statusClass}">${student.status}</span>
+                    <div class="student-name">${nsEscape(student.fullName)}</div>
+                    <span class="badge ${statusClass}">${nsEscape(student.status)}</span>
                 </div>
             </div>
             <div class="student-info">
                 <div class="student-info-item">
                     <i class="fas fa-phone"></i>
-                    <span>${student.phoneNumber}</span>
+                    <span>${nsEscape(student.phoneNumber)}</span>
                 </div>
                 <div class="student-info-item">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>${student.city}</span>
+                    <span>${nsEscape(student.city)}</span>
                 </div>
                 <div class="student-info-item">
                     <i class="fas fa-calendar"></i>
@@ -676,14 +676,14 @@ function displayStudentsCards(students) {
                     </button>
                 ` : ''}
                 ${student.status === 'approved' ? `
-                    <button class="action-btn btn-info" onclick="backupToMega('${student._id}', '${student.fullName.replace(/'/g, "\\'")}')">
+                    <button class="action-btn btn-info" onclick="backupToMega(${nsJsArg(student._id)}, ${nsJsArg(student.fullName)})">
                         <i class="fas fa-cloud"></i> ${adminT('registrations.backup', 'Backup')}
                     </button>
                 ` : ''}
                 <button class="action-btn btn-info" onclick="viewStudent('${student._id}')">
                     <i class="fas fa-eye"></i> ${adminT('registrations.view', 'View')}
                 </button>
-                <button class="action-btn btn-warning" onclick="downloadPDF('${student._id}', '${student.cin}')">
+                <button class="action-btn btn-warning" onclick="downloadPDF(${nsJsArg(student._id)}, ${nsJsArg(student.cin)})">
                     <i class="fas fa-download"></i> ${adminT('registrations.pdf', 'PDF')}
                 </button>
                 <button class="action-btn btn-danger" onclick="deleteStudent('${student._id}')">
@@ -899,7 +899,7 @@ document.querySelectorAll('.menu-item').forEach(item => {
                 loadEmployeeActivity()
             ]);
         }
-        if (tab === 'activity') loadActivityLogs();
+        if (tab === 'activity') { if (window.ActivityHistory) window.ActivityHistory.open(); } // ACT-01
         if (tab === 'sessions') loadLoginSessions();
         if (tab === 'settings') {
             // Load 2FA status
@@ -1230,9 +1230,9 @@ async function loadMessages() {
                 };
                 
                 row.innerHTML = `
-                    <td>${msg.fullName}</td>
-                    <td>${msg.phoneNumber}</td>
-                    <td style="max-width: 400px; white-space: normal; word-wrap: break-word; line-height: 1.5;">${msg.message}</td>
+                    <td>${nsEscape(msg.fullName)}</td>
+                    <td>${nsEscape(msg.phoneNumber)}</td>
+                    <td style="max-width: 400px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.5;">${nsEscape(msg.message)}</td>
                     <td>${new Date(msg.createdAt).toLocaleDateString()}</td>
                     <td><span class="badge ${msg.isRead ? 'badge-approved' : 'badge-pending'}">${msg.isRead ? adminT('messages.read', 'Read') : adminT('messages.unread', 'Unread')}</span></td>
                     <td>
@@ -1304,12 +1304,12 @@ async function loadEmployees() {
             data.employees.forEach(emp => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${emp.username}</td>
-                    <td>${emp.email || 'N/A'}</td>
+                    <td>${nsEscape(emp.username)}</td>
+                    <td>${nsEscape(emp.email || 'N/A')}</td>
                     <td><span class="badge ${emp.isActive ? 'badge-approved' : 'badge-rejected'}">${emp.isActive ? adminT('employees.active', 'Active') : adminT('employees.deactivate', 'Inactive')}</span></td>
                     <td>${new Date(emp.createdAt).toLocaleDateString()}</td>
                     <td>
-                        <button class="action-btn btn-info" onclick="changeEmployeePassword('${emp._id}', '${emp.username}')">
+                        <button class="action-btn btn-info" onclick="changeEmployeePassword(${nsJsArg(emp._id)}, ${nsJsArg(emp.username)})">
                             <i class="fas fa-key"></i> ${adminT('employees.change_password', 'Change Password')}
                         </button>
                         <button class="action-btn ${emp.isActive ? 'btn-warning' : 'btn-success'}" onclick="toggleEmployee('${emp._id}')">
@@ -1417,9 +1417,9 @@ async function loadActivityLogs() {
             data.activities.forEach(log => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${log.adminUsername || 'System'}</td>
-                    <td>${formatAction(log.action)}</td>
-                    <td>${log.details || 'N/A'}</td>
+                    <td>${nsEscape(log.adminUsername || 'System')}</td>
+                    <td>${nsEscape(formatAction(log.action))}</td>
+                    <td>${nsEscape(log.details || 'N/A')}</td>
                     <td>${new Date(log.timestamp).toLocaleString()}</td>
                 `;
                 tbody.appendChild(row);
@@ -1488,9 +1488,9 @@ async function loadLoginSessions() {
                 const platform = session.platform || 'unknown';
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${session.adminUsername || 'Unknown'}</td>
-                    <td>${session.ipAddress || 'N/A'}</td>
-                    <td title="${session.userAgent}">${session.userAgent ? session.userAgent.substring(0, 50) + '...' : 'N/A'}</td>
+                    <td>${nsEscape(session.adminUsername || 'Unknown')}</td>
+                    <td>${nsEscape(session.ipAddress || 'N/A')}</td>
+                    <td title="${nsEscape(session.userAgent)}">${nsEscape(session.userAgent ? session.userAgent.substring(0, 50) + '...' : 'N/A')}</td>
                     <td>
                         <span class="platform-badge ${platform}">
                             ${getPlatformIcon(platform)} ${platform.charAt(0).toUpperCase() + platform.slice(1)}
@@ -2105,9 +2105,9 @@ function displayServices(services) {
 
         row.innerHTML = `
             <td>${serviceIcon} ${serviceLabel}</td>
-            <td>${service.fullName}</td>
-            <td>${service.phone}</td>
-            <td>${service.email}</td>
+            <td>${nsEscape(service.fullName)}</td>
+            <td>${nsEscape(service.phone)}</td>
+            <td>${nsEscape(service.email)}</td>
             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td>${new Date(service.createdAt).toLocaleDateString()}</td>
             <td class="actions-cell">

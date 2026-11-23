@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Script to check student password hashing status
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');

@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Cleanup OLD Test Students - Safe Removal
 // Usage: node scripts/cleanup-old-test-students.js
 // This script removes ONLY students from old test batches (keeps real students safe!)

@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 require('dotenv').config();
 const mongoose = require('mongoose');
 const BranchGroup = require('../models/BranchGroup');

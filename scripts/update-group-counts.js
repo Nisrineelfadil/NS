@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Update Group Student Counts
 // Usage: node scripts/update-group-counts.js
 

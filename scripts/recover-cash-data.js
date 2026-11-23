@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * One-time recovery script to restore deleted cash transactions
  * and monthly notes from the archive JSON on Mega.nz

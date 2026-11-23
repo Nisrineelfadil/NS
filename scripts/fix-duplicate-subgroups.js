@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Fix Duplicate Subgroup Assignments
  * This script finds and fixes students who appear in multiple subgroups

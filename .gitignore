@@ -40,3 +40,7 @@ yarn-error.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# CFG-03: renamed production credentials file (never commit)
+.env.PRODUCTION-DO-NOT-USE.local
+.env.*.local

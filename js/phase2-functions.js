@@ -430,6 +430,8 @@ function showArchiveModal(data) {
 
     const { season, students, stats } = data;
     const totalGroups = (stats.totalLanguageGroups || 0) + (stats.totalBranchSubgroups || 0);
+    // SEA-01: sent back with the archive so the server checks it is the same season and the same student list
+    window.__archivePrepared = { seasonName: season.name, studentCount: (students || []).length };
 
     const modal = document.createElement('div');
     modal.id = 'archiveSeasonModal';
@@ -610,7 +612,7 @@ window.executeArchive = async function(seasonId) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ carryOverStudentIds })
+            body: JSON.stringify({ carryOverStudentIds, seasonName: (window.__archivePrepared || {}).seasonName, expectedStudentCount: (window.__archivePrepared || {}).studentCount })
         });
 
         if (!response.ok) {

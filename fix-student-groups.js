@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Script to fix student group assignments
 const mongoose = require('mongoose');
 const readline = require('readline');

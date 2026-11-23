@@ -21,6 +21,20 @@ const MonthlyNote = require('../models/MonthlyNote');
 const megaService = require('../services/megaService');
 
 const MEGA_ARCHIVE_FOLDER = '/Nisrine Archives';
+const crypto = require('crypto');
+const { audit } = require('../services/audit');
+
+// SEA-01: one archive at a time per season (a double click or two tabs cannot run it twice). Stored in the
+// database so it works on serverless hosting; a lock older than 30 minutes is considered abandoned.
+async function acquireArchiveLock(seasonId) {
+    const locks = mongoose.connection.db.collection('operationlocks');
+    const id = `season-archive:${seasonId}`;
+    await locks.deleteOne({ _id: id, at: { $lt: new Date(Date.now() - 30 * 60000) } });
+    try { await locks.insertOne({ _id: id, at: new Date() }); return true; } catch (e) { if (e.code === 11000) return false; throw e; }
+}
+async function releaseArchiveLock(seasonId) {
+    try { await mongoose.connection.db.collection('operationlocks').deleteOne({ _id: `season-archive:${seasonId}` }); } catch (e) { console.error('lock release', e.message); }
+}
 
 // Auth middleware (SEC-02). The former verifyToken accepted ANY signed token — student app and teacher portal
 // tokens included. Archive routes now require an active staff account (Director, developer or secretary),
@@ -155,8 +169,9 @@ router.get('/:seasonId/prepare', directorOnly, async (req, res) => {
 // Body: { carryOverStudentIds: [string] }
 // ============================================
 router.post('/:seasonId/archive', directorOnly, async (req, res) => {
+    let locked = false;
     try {
-        const { carryOverStudentIds = [] } = req.body;
+        const { carryOverStudentIds = [], seasonName, expectedStudentCount } = req.body;
         
         const season = await Season.findById(req.params.seasonId);
         if (!season) {
@@ -165,6 +180,18 @@ router.post('/:seasonId/archive', directorOnly, async (req, res) => {
 
         if (season.status === 'archived') {
             return res.status(400).json({ message: 'Cette saison est déjà archivée' });
+        }
+
+        // SEA-01: the archive must target the season the Director prepared on screen
+        if (seasonName !== season.name) {
+            return res.status(400).json({ message: 'La saison à archiver ne correspond pas à celle affichée. Rechargez la page et recommencez.' });
+        }
+        if (!Array.isArray(carryOverStudentIds)) {
+            return res.status(400).json({ message: 'Liste des étudiants conservés invalide.' });
+        }
+        locked = await acquireArchiveLock(season._id);
+        if (!locked) {
+            return res.status(409).json({ message: 'Un archivage de cette saison est déjà en cours.' });
         }
 
         console.log(`📦 Début de l'archivage de la saison ${season.name}...`);
@@ -196,6 +223,19 @@ router.post('/:seasonId/archive', directorOnly, async (req, res) => {
             group: { $in: languageGroupIds }
         }).select('+plainTextPassword').lean();
         const allStudentIds = allStudents.map(s => s._id);
+
+        // SEA-01: the selection must be exactly the students shown when the archive was prepared
+        const seasonIdSet = new Set(allStudentIds.map(id => id.toString()));
+        const unknown = carryOverStudentIds.filter(id => !seasonIdSet.has(String(id)));
+        if (unknown.length) {
+            return res.status(400).json({ message: `${unknown.length} étudiant(s) sélectionné(s) n'appartiennent pas à cette saison. Rechargez la page et recommencez.` });
+        }
+        // same list as the preparation screen: active students of the season's active language groups
+        const shownGroupIds = new Set(languageGroups.filter(g => g.status === 'active').map(g => g._id.toString()));
+        const shownCount = allStudents.filter(s => s.status === 'active' && s.group && shownGroupIds.has(s.group.toString())).length;
+        if (expectedStudentCount !== undefined && Number(expectedStudentCount) !== shownCount) {
+            return res.status(409).json({ message: `Les étudiants de la saison ont changé depuis la préparation (${expectedStudentCount} affichés, ${shownCount} maintenant). Rouvrez la fenêtre d'archivage.` });
+        }
 
         // Grades
         const grades = await Grade.find({
@@ -304,7 +344,14 @@ router.post('/:seasonId/archive', directorOnly, async (req, res) => {
             });
         }
 
-        console.log(`✅ Archive téléversée vers Mega: ${megaPath}`);
+        // SEA-01: read the stored archive back and compare it before deleting anything
+        const sha = b => crypto.createHash('sha256').update(b).digest('hex');
+        let stored = null;
+        try { stored = (await megaService.downloadServiceFile(megaPath)).fileBuffer; } catch (e) { stored = null; }
+        if (!stored || stored.length !== archiveBuffer.length || sha(stored) !== sha(archiveBuffer)) {
+            return res.status(500).json({ message: `L'archive n'a pas pu être vérifiée sur Mega. Aucune donnée n'a été supprimée. Réessayez plus tard.` });
+        }
+        console.log(`✅ Archive téléversée vers Mega et vérifiée: ${megaPath}`);
 
         // ---- STEP 4: Purge from MongoDB ----
 
@@ -401,6 +448,13 @@ router.post('/:seasonId/archive', directorOnly, async (req, res) => {
         await season.save();
 
         console.log(`✅ Archivage de la saison ${season.name} terminé avec succès!`);
+        await audit(req, {
+            action: 'season.archived', module: 'seasons',
+            target: { type: 'season', id: season._id, label: season.name },
+            before: { students: allStudents.length, carryOver: carryOverStudentObjIds.length },
+            after: { archivedStudents: studentsDeleted.deletedCount, grades: gradesDeleted.deletedCount, groups: groupsDeleted.deletedCount, attendanceRecords: attendanceRecordsDeleted.deletedCount, paymentHistory: payHistoryDeleted.deletedCount },
+            details: `Archive ${megaPath} (${formatBytes(archiveBuffer.length)}), verified before deletion`
+        });
 
         res.json({
             success: true,
@@ -429,6 +483,8 @@ router.post('/:seasonId/archive', directorOnly, async (req, res) => {
     } catch (error) {
         console.error('❌ Erreur archivage:', error);
         res.status(500).json({ message: 'Erreur serveur lors de l\'archivage', error: error.message });
+    } finally {
+        if (locked) await releaseArchiveLock(req.params.seasonId);
     }
 });
 

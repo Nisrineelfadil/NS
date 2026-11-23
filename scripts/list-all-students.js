@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // List All Students - View Current System Data
 // Usage: node scripts/list-all-students.js
 // This script shows ALL students currently in the system

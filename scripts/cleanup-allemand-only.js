@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 // Cleanup ONLY Allemand Test Students - Keep Real Students Safe
 // Usage: node scripts/cleanup-allemand-only.js
 // This script removes ONLY students in Allemand groups, keeps Group A/B/C safe

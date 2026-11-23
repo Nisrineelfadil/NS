@@ -9,6 +9,31 @@ const Group = require('../models/Group');
 const StudentMessage = require('../models/StudentMessage');
 const { notifyGradeUploaded } = require('../services/notificationService');
 const emailService = require('../services/emailService');
+const { authenticateAdmin, checkActiveStatus } = require('../middleware/authMiddleware');
+
+// SEC-04: groups a teacher may read students from — the same groups the teacher portal offers in
+// GET /teacher/groups (branch subgroups of the teacher's vocational formations; language groups of the
+// teacher's languages, limited to the groups assigned to the teacher when there are any).
+const BRANCH_FORMATIONS = ['Gériatrie', 'Aide soignant', 'Agent socio éducatif', 'Assistante sociale', 'Restauration', 'Cuisine', 'Informatique', 'Gestion hôtelière'];
+async function teacherAllowedGroupIds(teacher, seasonId) {
+    const BranchGroup = require('../models/BranchGroup');
+    const branches = (teacher.formations || []).filter(f => BRANCH_FORMATIONS.includes(f));
+    const languages = (teacher.formations || []).filter(f => !BRANCH_FORMATIONS.includes(f));
+    const ids = new Set();
+    if (branches.length) {
+        const bg = await BranchGroup.find({ formation: { $in: branches } }).select('_id');
+        const q = { groupType: 'branch', branchGroup: { $in: bg.map(b => b._id) } };
+        if (seasonId) q.season = seasonId;
+        (await Group.find(q).select('_id')).forEach(g => ids.add(String(g._id)));
+    }
+    if (languages.length) {
+        const q = { groupType: { $ne: 'branch' }, formation: { $in: languages } };
+        if (seasonId) q.season = seasonId;
+        if (teacher.groups && teacher.groups.length) q._id = { $in: teacher.groups };
+        (await Group.find(q).select('_id')).forEach(g => ids.add(String(g._id)));
+    }
+    return ids;
+}
 
 function generate2FACode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -293,6 +318,16 @@ router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
         const isBranch = branchFormations.includes(formation);
         
         let studentQuery = { status: 'active' };
+
+        // SEC-04: a teacher only reads students of the groups offered to them by the teacher portal
+        // (before: any group of the season, any subject, by passing its ID).
+        if (formation && !teacher.formations.includes(formation)) {
+            return res.status(403).json({ message: 'You do not teach this formation' });
+        }
+        const allowedGroups = await teacherAllowedGroupIds(teacher, targetSeason ? targetSeason._id : null);
+        if (groupId && !allowedGroups.has(String(groupId))) {
+            return res.status(403).json({ message: 'This group is not assigned to you' });
+        }
         
         if (isBranch) {
             // Branch teacher - groupId is a branch subgroup ID
@@ -325,17 +360,13 @@ router.get('/teacher/students', verifyTeacherToken, async (req, res) => {
                     } else {
                         return res.json([]);
                     }
-                } else if (teacher.groups.length > 0) {
-                    const teacherGroupIds = teacher.groups.map(g => g.toString());
-                    const validGroupIds = seasonGroupIds.filter(id => 
-                        teacherGroupIds.includes(id.toString())
-                    );
-                    studentQuery.group = { $in: validGroupIds };
                 } else {
-                    studentQuery.group = { $in: seasonGroupIds };
+                    // no group chosen: only the teacher's own groups (before: every group of the season when
+                    // the teacher had no explicit assignment)
+                    studentQuery.group = { $in: seasonGroupIds.filter(id => allowedGroups.has(id.toString())) };
                 }
-            } else if (teacher.groups.length > 0) {
-                studentQuery.group = { $in: teacher.groups };
+            } else {
+                studentQuery.group = groupId ? groupId : { $in: [...allowedGroups] };
             }
             
             // Filter by language formation
@@ -1411,7 +1442,8 @@ router.delete('/admin/teachers/:id', verifyToken, async (req, res) => {
 });
 
 // Get grades for a specific student (Admin)
-router.get('/admin/students/:studentId/grades', verifyToken, async (req, res) => {
+// SEC-04: staff only (secretary, Director, developer). Before: any valid token, including student and teacher tokens.
+router.get('/admin/students/:studentId/grades', authenticateAdmin, checkActiveStatus, async (req, res) => {
     try {
         const { formation, branch, semester, languageLevel, academicYear, examNumber, testType } = req.query;
         
@@ -1482,7 +1514,7 @@ router.get('/admin/students/:studentId/grades', verifyToken, async (req, res) =>
 });
 
 // Get all grades (Admin - with filters)
-router.get('/admin/grades', verifyToken, async (req, res) => {
+router.get('/admin/grades', authenticateAdmin, checkActiveStatus, async (req, res) => {
     try {
         const { formation, groupId, semester, academicYear, studentId, studentName } = req.query;
         

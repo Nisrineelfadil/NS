@@ -1,3 +1,4 @@
+require('../config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Migration Script: Move base64 images from MongoDB to Mega.nz
  * 

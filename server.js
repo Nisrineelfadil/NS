@@ -162,6 +162,14 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '10mb' })); // Use express.json instead of body-parser
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// SEC-05: private media links — signed in answers to signed-in users; signatures never stored from input
+const mediaSigning = require('./middleware/mediaSigning');
+app.use(mediaSigning.stripSignedMediaParams);
+app.use('/api', mediaSigning.signMediaInResponses);
+// ACT-01: activity history for every successful change (Director / development team view: /api/audit)
+const auditTrail = require('./middleware/auditTrail');
+app.use((req, res, next) => req.path.startsWith('/api/') ? auditTrail.preload(req, res, next) : next());
+app.use((req, res, next) => req.path.startsWith('/api/') ? auditTrail.record(req, res, next) : next());
 
 // Favicon handler - serve the actual favicon file (Vercel compatible)
 app.get('/favicon.ico', (req, res) => {
@@ -333,7 +341,9 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'production'
+    // CFG-03: real environment and database location (never credentials)
+    environment: process.env.NODE_ENV || 'development (NODE_ENV not set)',
+    database: require('./config/environment').describeDatabase().location
   });
 });
 
@@ -392,6 +402,8 @@ app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
 app.use('/api/season-archive', dbMiddleware, seasonArchiveRoutes);
 app.use('/api/account-security', dbMiddleware, require('./routes/accountSecurity'));
 app.use('/api/factory-reset', dbMiddleware, require('./routes/factoryReset'));
+app.use('/api/cron', dbMiddleware, require('./routes/cron')); // CFG-01 scheduled jobs (Vercel Cron)
+app.use('/api/audit', dbMiddleware, require('./routes/auditLog')); // ACT-01 activity history (read-only)
 // app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes); // DISABLED
 
 // 404 handler — API routes get JSON, browser routes get the custom 404 page

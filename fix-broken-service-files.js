@@ -1,3 +1,4 @@
+require('./config/environment').guardScript(require('path').basename(__filename)); // CFG-03: refuses remote/production databases
 /**
  * Fix service requests with broken file paths
  * Run with: node fix-broken-service-files.js

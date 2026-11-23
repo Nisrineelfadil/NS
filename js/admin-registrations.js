@@ -163,10 +163,10 @@ function displayRegistrations(students) {
     
     tbody.innerHTML = students.map(student => `
         <tr>
-            <td>${student.fullName}</td>
-            <td>${student.cin}</td>
+            <td>${nsEscape(student.fullName)}</td>
+            <td>${nsEscape(student.cin)}</td>
             <td>${student.formationChoisie.join(', ')}</td>
-            <td>${student.phoneNumber}</td>
+            <td>${nsEscape(student.phoneNumber)}</td>
             <td>${new Date(student.submittedAt).toLocaleDateString()}</td>
             <td><span class="credit-badge">${student.creditEarned || 1}</span></td>
             <td>
