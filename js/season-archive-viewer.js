@@ -73,11 +73,11 @@ async function loadArchivedSeasonsList() {
                         <h3 style="margin:0;color:#1e293b;font-size:1.15rem;font-weight:700;">${seasonName}</h3>
                         <span style="font-size:0.8rem;color:#94a3b8;">${archive.sizeFormatted || ''}</span>
                     </div>
-                    <button onclick="event.stopPropagation();deleteArchiveSeason('${_esc(seasonName)}')" title="${t('archiveDeleteArchive')}"
+                    ${typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'super_admin' || currentUser.role === 'dev') ? `<button onclick="event.stopPropagation();deleteArchiveSeason('${_esc(seasonName)}')" title="${t('archiveDeleteArchive')}"
                         style="width:34px;height:34px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;"
                         onmouseover="this.style.background='#fee2e2';this.style.borderColor='#f87171'" onmouseout="this.style.background='#fef2f2';this.style.borderColor='#fca5a5'">
                         <i class="fas fa-trash" style="color:#dc2626;font-size:0.8em;"></i>
-                    </button>
+                    </button>` : ''}
                 </div>
                 ${dateStr ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:#94a3b8;margin-bottom:16px;">
                     <i class="fas fa-calendar-check"></i> ${dateStr}

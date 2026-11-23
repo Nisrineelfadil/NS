@@ -13,6 +13,11 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/downloads/(Nisrine-School-Admin-[0-9.]+\\.exe)",
+      "headers": { "Content-Disposition": "attachment", "Cache-Control": "public, max-age=86400" },
+      "dest": "/downloads/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/api/index.js"
     }

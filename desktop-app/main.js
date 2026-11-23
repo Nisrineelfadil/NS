@@ -204,7 +204,7 @@ function showLoadingScreen() {
                 <h1>Nisrine School Admin</h1>
                 <p>Starting application...</p>
             </div>
-            <div class="version">Version 1.0.1</div>
+            <div class="version">Version ${app.getVersion()}</div>
         </body>
         </html>
     `;
@@ -292,7 +292,7 @@ function injectDesktopEnhancements() {
         
         // Mark as desktop app
         window.IS_DESKTOP_APP = true;
-        window.DESKTOP_VERSION = '1.0.1';
+        window.DESKTOP_VERSION = '${app.getVersion()}';
         
         // Desktop-specific optimizations
         if (typeof initDesktopOptimizations === 'function') {
@@ -369,7 +369,7 @@ function createAppMenu() {
                             type: 'info',
                             title: 'About',
                             message: 'Nisrine School Admin',
-                            detail: 'Version 1.0.1\n\nOptimized Desktop Application\n\n© 2025 Nisrine School'
+                            detail: `Version ${app.getVersion()}\n\nOptimized Desktop Application\n\n© 2025 Nisrine School`
                         });
                     }
                 },

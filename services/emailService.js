@@ -294,6 +294,37 @@ class EmailService {
         return await this.sendEmail(toEmail, subject, html);
     }
 
+    // Account recovery / factory-reset identity code (the code is never written to the logs)
+    async sendAccountCode(toEmail, code, adminName, purpose = 'temporary_access', minutes = 10) {
+        const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const isReset = purpose === 'factory_reset';
+        const subject = isReset
+            ? 'Nisrine School — Code de confirmation (réinitialisation)'
+            : 'Nisrine School — Code d\'accès temporaire';
+        const intro = isReset
+            ? 'Voici le code demandé pour confirmer la réinitialisation complète des données.'
+            : 'Voici votre code d\'accès temporaire. Votre mot de passe n\'a pas été modifié.';
+        const introAr = isReset
+            ? 'هذا هو الرمز المطلوب لتأكيد إعادة تعيين جميع البيانات.'
+            : 'هذا هو رمز الدخول المؤقت الخاص بك. لم يتم تغيير كلمة المرور الخاصة بك.';
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #c0392b; margin: 0 0 4px; text-align:center;">Nisrine School</h2>
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 26px; text-align: center; border: 1px solid #e9ecef;">
+                    <p style="color: #333; margin: 0 0 12px; font-size: 14px;">Bonjour <strong>${esc(adminName)}</strong>,</p>
+                    <p style="color: #555; margin: 0 0 16px; font-size: 14px;">${intro}</p>
+                    <div style="background: #fff; border: 2px dashed #c0392b; border-radius: 8px; padding: 18px; margin: 16px 0;">
+                        <span style="font-size: 34px; font-weight: bold; letter-spacing: 8px; color: #c0392b; font-family: monospace;">${esc(code)}</span>
+                    </div>
+                    <p style="color: #777; margin: 8px 0 0; font-size: 13px;">Ce code est valable ${minutes} minutes et ne peut être utilisé qu'une seule fois.</p>
+                    <p dir="rtl" style="color: #555; margin: 16px 0 0; font-size: 14px;">${introAr}<br>هذا الرمز صالح لمدة ${minutes} دقائق ويمكن استخدامه مرة واحدة فقط.</p>
+                </div>
+                <p style="color: #999; font-size: 12px; text-align: center; margin-top: 18px;">Si vous n'avez pas demandé ce code, ne le donnez à personne et prévenez la direction.</p>
+            </div>
+        `;
+        return await this.sendEmail(toEmail, subject, html);
+    }
+
     // Test email configuration
     async sendTestEmail(toEmail) {
         const subject = 'Test Email - Nisrine School TELC System';

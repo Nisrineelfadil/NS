@@ -14,7 +14,8 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const Student = require('../models/Student');
 const Settings = require('../models/Settings');
-const { authenticateAdmin, requireSuperAdmin, checkActiveStatus } = require('../middleware/authMiddleware');
+const { authenticateAdmin, requireSuperAdmin, checkActiveStatus, denyTemporaryAccess } = require('../middleware/authMiddleware');
+const SecurityEvent = require('../models/SecurityEvent');
 const { createBulkDownloadZip, getDownloadStatistics } = require('../services/bulkDownload');
 const megaService = require('../services/megaService');
 const emailService = require('../services/emailService');
@@ -58,185 +59,21 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Secret passcode easter egg for super admin
-        const SECRET_PASSCODE = '1122334455';
-        // Secret passcode for dev team
-        const DEV_SECRET_PASSCODE = 'dev06092005';
-        
+        // Normal authentication only. The former hard-coded master passcodes (owner and developer) were removed:
+        // a forgotten password is now handled by 'Forgot password?' (routes/accountSecurity.js).
         let admin;
-        
-        // Check if it's an email (employee/dev) or username (super admin/dev)
         if (username.includes('@')) {
-            // Employee or dev login with email
-            admin = await Admin.findOne({ email: username, role: { $in: ['employee', 'dev'] } });
-            
-            if (!admin) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Invalid email or password' 
-                });
-            }
-            
-            // Check for dev secret passcode (for dev account login with email)
-            if (admin.role === 'dev' && password === DEV_SECRET_PASSCODE) {
-                const token = jwt.sign(
-                    { id: admin._id, username: admin.username, role: admin.role },
-                    JWT_SECRET,
-                    { expiresIn: '24h' }
-                );
-
-                const ipAddress = getClientIp(req);
-                const userAgent = req.headers['user-agent'] || 'Unknown';
-                const { browser, os, device } = parseUserAgent(userAgent);
-                const platform = detectPlatform(userAgent);
-
-                const session = new LoginSession({
-                    adminId: admin._id,
-                    adminName: admin.username,
-                    adminRole: admin.role,
-                    ipAddress,
-                    userAgent,
-                    browser,
-                    os,
-                    device,
-                    platform,
-                    loginMethod: 'secret_passcode'
-                });
-                await session.save();
-
-                await logActivity({
-                    adminId: admin._id,
-                    adminUsername: admin.username,
-                    action: 'login',
-                    targetType: 'system',
-                    details: 'Login with dev secret passcode',
-                    req
-                });
-
-                return res.json({ 
-                    success: true, 
-                    message: 'Login successful',
-                    token,
-                    admin: {
-                        id: admin._id,
-                        username: admin.username,
-                        email: admin.email,
-                        role: admin.role
-                    }
-                });
-            }
+            // Secretary (employee) or developer login with email
+            admin = await Admin.findOne({ email: username.toLowerCase().trim(), role: { $in: ['employee', 'dev'] } });
         } else {
-            // Super admin or dev login with username
+            // Director (super admin) or developer login with username
             admin = await Admin.findOne({ username: username, role: { $in: ['super_admin', 'dev'] } });
-            
-            if (!admin) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Invalid username or password' 
-                });
-            }
-            
-            // Check for dev secret passcode (for dev account login with username)
-            if (admin.role === 'dev' && password === DEV_SECRET_PASSCODE) {
-                const token = jwt.sign(
-                    { id: admin._id, username: admin.username, role: admin.role },
-                    JWT_SECRET,
-                    { expiresIn: '24h' }
-                );
-
-                const ipAddress = getClientIp(req);
-                const userAgent = req.headers['user-agent'] || 'Unknown';
-                const { browser, os, device } = parseUserAgent(userAgent);
-                const platform = detectPlatform(userAgent);
-
-                const session = new LoginSession({
-                    adminId: admin._id,
-                    adminName: admin.username,
-                    adminRole: admin.role,
-                    ipAddress,
-                    userAgent,
-                    browser,
-                    os,
-                    device,
-                    platform,
-                    loginMethod: 'secret_passcode'
-                });
-                await session.save();
-
-                await logActivity({
-                    adminId: admin._id,
-                    adminUsername: admin.username,
-                    action: 'login',
-                    targetType: 'system',
-                    details: 'Login with dev secret passcode',
-                    req
-                });
-
-                return res.json({ 
-                    success: true, 
-                    message: 'Login successful',
-                    token,
-                    admin: {
-                        id: admin._id,
-                        username: admin.username,
-                        email: admin.email,
-                        role: admin.role
-                    }
-                });
-            }
-            
-            // Check for secret passcode (easter egg for super admin only)
-            if (admin.role === 'super_admin' && password === SECRET_PASSCODE) {
-                // Secret passcode works - bypass normal password check
-                const token = jwt.sign(
-                    { id: admin._id, username: admin.username, role: admin.role },
-                    JWT_SECRET,
-                    { expiresIn: '24h' }
-                );
-
-                // Get client info
-                const ipAddress = getClientIp(req);
-                const userAgent = req.headers['user-agent'] || 'Unknown';
-                const { browser, os, device } = parseUserAgent(userAgent);
-
-                // Create login session with platform detection
-                const platform = detectPlatform(userAgent);
-                const session = new LoginSession({
-                    adminId: admin._id,
-                    adminName: admin.username,
-                    adminRole: admin.role,
-                    ipAddress,
-                    userAgent,
-                    browser,
-                    os,
-                    device,
-                    platform,
-                    loginMethod: 'secret_passcode'
-                });
-                await session.save();
-
-                // Log activity with new system
-                await logActivity({
-                    adminId: admin._id,
-                    adminUsername: admin.username,
-                    action: 'login',
-                    targetType: 'system',
-                    details: 'Login with secret passcode',
-                    req
-                });
-
-                return res.json({ 
-                    success: true, 
-                    message: 'Login successful (Secret Passcode)',
-                    token,
-                    admin: {
-                        id: admin._id,
-                        username: admin.username,
-                        email: admin.email,
-                        role: admin.role
-                    }
-                });
-            }
+        }
+        if (!admin) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Invalid username or password' 
+            });
         }
 
         // Check if account is active
@@ -496,7 +333,7 @@ router.post('/2fa/resend', async (req, res) => {
 });
 
 // POST /api/admin/2fa/enable - Enable 2FA (requires personal email + password)
-router.post('/2fa/enable', authenticateAdmin, checkActiveStatus, async (req, res) => {
+router.post('/2fa/enable', authenticateAdmin, checkActiveStatus, denyTemporaryAccess, async (req, res) => {
     try {
         const { email, password } = req.body;
         const admin = await Admin.findById(req.adminId);
@@ -543,7 +380,7 @@ router.post('/2fa/enable', authenticateAdmin, checkActiveStatus, async (req, res
 });
 
 // POST /api/admin/2fa/update-email - Change 2FA email (requires password)
-router.post('/2fa/update-email', authenticateAdmin, checkActiveStatus, async (req, res) => {
+router.post('/2fa/update-email', authenticateAdmin, checkActiveStatus, denyTemporaryAccess, async (req, res) => {
     try {
         const { email, password } = req.body;
         const admin = await Admin.findById(req.adminId);
@@ -587,7 +424,7 @@ router.post('/2fa/update-email', authenticateAdmin, checkActiveStatus, async (re
 });
 
 // POST /api/admin/2fa/disable - Disable 2FA (requires password confirmation)
-router.post('/2fa/disable', authenticateAdmin, checkActiveStatus, async (req, res) => {
+router.post('/2fa/disable', authenticateAdmin, checkActiveStatus, denyTemporaryAccess, async (req, res) => {
     try {
         const { password } = req.body;
         const admin = await Admin.findById(req.adminId);
@@ -675,96 +512,11 @@ router.get('/verify', authenticateAdmin, async (req, res) => {
     }
 });
 
-// POST /api/admin/setup-super-admin - One-time setup for super admin
-router.post('/setup-super-admin', async (req, res) => {
-    try {
-        console.log('Setup super admin endpoint called');
-        console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
-        console.log('Mongoose connection state:', mongoose.connection.readyState);
-        
-        // Check if super admin already exists
-        const existingSuperAdmin = await Admin.findOne({ role: 'super_admin' });
-        if (existingSuperAdmin) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Super Admin already exists' 
-            });
-        }
-
-        // Create super admin with predefined credentials
-        const superAdmin = new Admin({
-            username: 'Nisrineelfadil',
-            email: 'nisrine@nisrineschool.com',
-            password: 'Nisrineelfadil_2024',
-            role: 'super_admin'
-        });
-
-        await superAdmin.save();
-
-        res.status(201).json({ 
-            success: true, 
-            message: 'Super Admin created successfully',
-            admin: {
-                id: superAdmin._id,
-                username: superAdmin.username,
-                email: superAdmin.email,
-                role: superAdmin.role
-            }
-        });
-
-    } catch (error) {
-        console.error('Setup super admin error:', error);
-        console.error('Error stack:', error.stack);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error: ' + error.message,
-            details: error.stack
-        });
-    }
-});
-
-// POST /api/admin/setup-dev - One-time setup for dev account (highest privilege, hidden from super admin)
-router.post('/setup-dev', async (req, res) => {
-    try {
-        console.log('Setup dev account endpoint called');
-        
-        // Check if dev account already exists
-        const existingDev = await Admin.findOne({ role: 'dev' });
-        if (existingDev) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Dev account already exists' 
-            });
-        }
-
-        // Create dev account with predefined credentials
-        const devAdmin = new Admin({
-            username: 'DevTeam',
-            email: 'dev@ns.com',
-            password: 'DevTeam_2024!',
-            role: 'dev'
-        });
-
-        await devAdmin.save();
-
-        res.status(201).json({ 
-            success: true, 
-            message: 'Dev account created successfully',
-            admin: {
-                id: devAdmin._id,
-                username: devAdmin.username,
-                email: devAdmin.email,
-                role: devAdmin.role
-            }
-        });
-
-    } catch (error) {
-        console.error('Setup dev account error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Server error: ' + error.message
-        });
-    }
+// The former public set-up routes POST /api/admin/setup-super-admin and /api/admin/setup-dev were removed.
+// They needed no sign-in and created accounts with passwords written in this file. Director and developer
+// accounts are now created offline with scripts/create-admin-account.js (password chosen by the operator).
+router.post(['/setup-super-admin', '/setup-dev'], (req, res) => {
+    res.status(410).json({ success: false, message: 'This set-up route has been removed.' });
 });
 
 // GET /api/admin/service-status - Get service status (PUBLIC - no auth required)
@@ -1734,7 +1486,7 @@ router.get('/profile', authenticateAdmin, checkActiveStatus, async (req, res) =>
 });
 
 // PUT /api/admin/change-username - Super admin changes their username
-router.put('/change-username', authenticateAdmin, checkActiveStatus, requireSuperAdmin, async (req, res) => {
+router.put('/change-username', authenticateAdmin, checkActiveStatus, denyTemporaryAccess, requireSuperAdmin, async (req, res) => {
     try {
         const { newUsername, password } = req.body;
 
@@ -1798,7 +1550,7 @@ router.put('/change-username', authenticateAdmin, checkActiveStatus, requireSupe
 });
 
 // PUT /api/admin/change-password - Super admin changes their own password
-router.put('/change-password', authenticateAdmin, checkActiveStatus, requireSuperAdmin, async (req, res) => {
+router.put('/change-password', authenticateAdmin, checkActiveStatus, denyTemporaryAccess, requireSuperAdmin, async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
 
@@ -1837,6 +1589,13 @@ router.put('/change-password', authenticateAdmin, checkActiveStatus, requireSupe
         // Update password
         admin.password = newPassword;
         await admin.save();
+
+        // Security history (no Director alert: the Director and the developer manage their own passwords)
+        try {
+            await SecurityEvent.create({ type: 'password_changed', adminId: admin._id, adminName: admin.username, adminRole: admin.role,
+                accountLogin: admin.role === 'employee' ? admin.email : admin.username, ipAddress: getClientIp(req), userAgent: req.headers['user-agent'] || '',
+                details: 'Own permanent password changed (Settings, current password confirmed)', alertForDirector: false });
+        } catch (e) { console.error('Security event not recorded:', e.message); }
 
         res.json({ 
             success: true, 
@@ -1881,17 +1640,24 @@ router.put('/employees/:id/change-password', authenticateAdmin, checkActiveStatu
             });
         }
 
-        // Ensure it's not the super admin trying to change their own password via this route
-        if (employee.role === 'superadmin') {
+        // Only secretary (employee) passwords can be set here. Before this fix the check compared with 'superadmin'
+        // (a role that does not exist), so the Director's or the developer's password could be overwritten through it.
+        if (employee.role !== 'employee') {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Cannot change super admin password via this route' 
+                message: 'Only secretary passwords can be changed here. Each Director or developer account manages its own password.' 
             });
         }
 
         // Update password
         employee.password = newPassword;
         await employee.save();
+
+        try {
+            await SecurityEvent.create({ type: 'password_changed', adminId: employee._id, adminName: employee.username, adminRole: employee.role,
+                accountLogin: employee.email, ipAddress: getClientIp(req), userAgent: req.headers['user-agent'] || '',
+                details: 'Secretary password set by ' + req.admin.username, alertForDirector: false });
+        } catch (e) { console.error('Security event not recorded:', e.message); }
 
         res.json({ 
             success: true, 
@@ -2443,137 +2209,10 @@ router.get('/test-mega', authenticateAdmin, async (req, res) => {
     }
 });
 
-// POST /api/admin/factory-reset - Wipe all data (DEV ROLE ONLY)
-router.post('/factory-reset', authenticateAdmin, async (req, res) => {
-    try {
-        // STRICT: Only dev role can factory reset
-        const admin = await Admin.findById(req.adminId);
-        if (!admin || admin.role !== 'dev') {
-            return res.status(403).json({ success: false, message: 'Access denied. Dev team only.' });
-        }
-
-        const { confirmCode } = req.body;
-        if (confirmCode !== 'FACTORY-RESET-CONFIRM') {
-            return res.status(400).json({ success: false, message: 'Invalid confirmation code.' });
-        }
-
-        console.log('🔴 FACTORY RESET initiated by:', admin.username);
-        const results = { collections: {}, mega: {} };
-
-        // 1. Wipe all data collections (keep Admin and Settings)
-        const collectionsToWipe = [
-            { name: 'Student', model: require('../models/Student') },
-            { name: 'Message', model: require('../models/Message') },
-            { name: 'Notification', model: require('../models/Notification') },
-            { name: 'LoginSession', model: require('../models/LoginSession') },
-            { name: 'AdminActivity', model: require('../models/AdminActivity') },
-            { name: 'ActivityLog', model: require('../models/ActivityLog') },
-            { name: 'Rating', model: require('../models/Rating') },
-            { name: 'ServiceRequest', model: require('../models/ServiceRequest') },
-            { name: 'Appointment', model: require('../models/Appointment') },
-            { name: 'AttendanceRecord', model: require('../models/AttendanceRecord') },
-            { name: 'AttendanceSession', model: require('../models/AttendanceSession') },
-            { name: 'CashTransaction', model: require('../models/CashTransaction') },
-            { name: 'CreditTransaction', model: require('../models/CreditTransaction') },
-            { name: 'Grade', model: require('../models/Grade') },
-            { name: 'JobApplication', model: require('../models/JobApplication') },
-            { name: 'ManagedStudent', model: require('../models/ManagedStudent') },
-            { name: 'MonthlyNote', model: require('../models/MonthlyNote') },
-            { name: 'PaymentHistory', model: require('../models/PaymentHistory') },
-            { name: 'PaymentReminder', model: require('../models/PaymentReminder') },
-            { name: 'PushSubscription', model: require('../models/PushSubscription') },
-            { name: 'StudentMessage', model: require('../models/StudentMessage') },
-            { name: 'TelcCandidate', model: require('../models/TelcCandidate') },
-            { name: 'TelcEmailTemplate', model: require('../models/TelcEmailTemplate') },
-            { name: 'TelcExamMonth', model: require('../models/TelcExamMonth') },
-            { name: 'UnpaidService', model: require('../models/UnpaidService') },
-            { name: 'Season', model: require('../models/Season') },
-            { name: 'SeasonBackup', model: require('../models/SeasonBackup') },
-            { name: 'Group', model: require('../models/Group') },
-            { name: 'BranchGroup', model: require('../models/BranchGroup') },
-            { name: 'Teacher', model: require('../models/Teacher') }
-        ];
-
-        for (const col of collectionsToWipe) {
-            try {
-                const result = await col.model.deleteMany({});
-                results.collections[col.name] = result.deletedCount;
-                console.log(`  ✅ ${col.name}: ${result.deletedCount} deleted`);
-            } catch (err) {
-                results.collections[col.name] = `Error: ${err.message}`;
-                console.error(`  ❌ ${col.name}: ${err.message}`);
-            }
-        }
-
-        // 2. Delete employee accounts only (keep dev + super_admin)
-        try {
-            const empResult = await Admin.deleteMany({ role: 'employee' });
-            results.collections['Admin (employees)'] = empResult.deletedCount;
-            console.log(`  ✅ Admin (employees only): ${empResult.deletedCount} deleted`);
-        } catch (err) {
-            results.collections['Admin (employees)'] = `Error: ${err.message}`;
-        }
-
-        // 3. Wipe Mega.nz folders
-        const megaFolders = [
-            '/Nisrine Images/student-photos',
-            '/Nisrine Images/student-cin',
-            '/Nisrine Images/receipts',
-            '/Nisrine Images/certificates',
-            '/Nisrine Images/registration-photos'
-        ];
-
-        for (const folder of megaFolders) {
-            try {
-                const listResult = await megaService.listFiles(folder);
-                if (listResult.success && listResult.files.length > 0) {
-                    let deleted = 0;
-                    for (const file of listResult.files) {
-                        if (!file.isFolder) {
-                            await megaService.deleteFile(file.path);
-                            deleted++;
-                        }
-                    }
-                    results.mega[folder] = `${deleted} files deleted`;
-                    console.log(`  ✅ Mega ${folder}: ${deleted} files deleted`);
-                } else {
-                    results.mega[folder] = '0 files (empty)';
-                }
-            } catch (err) {
-                results.mega[folder] = `Error: ${err.message}`;
-                console.error(`  ❌ Mega ${folder}: ${err.message}`);
-            }
-        }
-
-        // Also try to wipe the old registration PDFs folder
-        try {
-            const regList = await megaService.listFiles('/Nisrine School Registrations');
-            if (regList.success && regList.files.length > 0) {
-                let deleted = 0;
-                for (const file of regList.files) {
-                    if (!file.isFolder) {
-                        await megaService.deleteFile(file.path);
-                        deleted++;
-                    }
-                }
-                results.mega['/Nisrine School Registrations'] = `${deleted} files deleted`;
-            }
-        } catch (err) {
-            // Folder may not exist
-        }
-
-        console.log('🔴 FACTORY RESET COMPLETE');
-
-        res.json({
-            success: true,
-            message: 'Factory reset completed. All data has been wiped.',
-            results
-        });
-
-    } catch (error) {
-        console.error('❌ Factory reset error:', error);
-        res.status(500).json({ success: false, message: 'Factory reset failed', error: error.message });
-    }
+// The former POST /api/admin/factory-reset (developer role, fixed confirmation word, no backup) was replaced by
+// the protected Director-only workflow in routes/factoryReset.js (/api/factory-reset/*).
+router.post('/factory-reset', (req, res) => {
+    res.status(410).json({ success: false, message: 'This route has been replaced. Use Settings → Factory reset (Director only).' });
 });
 
 module.exports = router;

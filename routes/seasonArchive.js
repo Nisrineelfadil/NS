@@ -22,18 +22,13 @@ const megaService = require('../services/megaService');
 
 const MEGA_ARCHIVE_FOLDER = '/Nisrine Archives';
 
-// Auth middleware
-const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Non autorisé' });
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(401).json({ message: 'Token invalide' });
-    }
-};
+// Auth middleware (SEC-02). The former verifyToken accepted ANY signed token — student app and teacher portal
+// tokens included. Archive routes now require an active staff account (Director, developer or secretary),
+// and every operation that changes or deletes data requires the Director (super_admin or dev), matching the
+// rule already applied to season archive/activate/delete in routes/seasons.js.
+const { authenticateAdmin, requireSuperAdmin, checkActiveStatus } = require('../middleware/authMiddleware');
+const verifyToken = [authenticateAdmin, checkActiveStatus, (req, res, next) => { req.user = { id: req.adminId, role: req.admin.role, username: req.admin.username, name: req.admin.username, email: req.admin.email }; next(); }];
+const directorOnly = [...verifyToken, requireSuperAdmin];
 
 // ============================================
 // GET /api/season-archive/list
@@ -70,7 +65,7 @@ router.get('/list', verifyToken, async (req, res) => {
 // GET /api/season-archive/:seasonId/prepare
 // Preview: get all students and stats for the season before archiving
 // ============================================
-router.get('/:seasonId/prepare', verifyToken, async (req, res) => {
+router.get('/:seasonId/prepare', directorOnly, async (req, res) => {
     try {
         const season = await Season.findById(req.params.seasonId);
         if (!season) {
@@ -159,7 +154,7 @@ router.get('/:seasonId/prepare', verifyToken, async (req, res) => {
 // Main archive: collect data, upload to Mega, purge from MongoDB
 // Body: { carryOverStudentIds: [string] }
 // ============================================
-router.post('/:seasonId/archive', verifyToken, async (req, res) => {
+router.post('/:seasonId/archive', directorOnly, async (req, res) => {
     try {
         const { carryOverStudentIds = [] } = req.body;
         
@@ -482,7 +477,7 @@ router.get('/:seasonName/download', verifyToken, async (req, res) => {
 // POST /api/season-archive/:seasonName/recover-cash
 // Recover deleted cash transactions & monthly notes from archive
 // ============================================
-router.post('/:seasonName/recover-cash', verifyToken, async (req, res) => {
+router.post('/:seasonName/recover-cash', directorOnly, async (req, res) => {
     try {
         const { seasonName } = req.params;
         const megaPath = `${MEGA_ARCHIVE_FOLDER}/${seasonName}.json`;
@@ -538,7 +533,7 @@ router.post('/:seasonName/recover-cash', verifyToken, async (req, res) => {
 // DELETE /api/season-archive/:seasonName
 // Delete an archived season JSON from Mega.nz
 // ============================================
-router.delete('/:seasonName', verifyToken, async (req, res) => {
+router.delete('/:seasonName', directorOnly, async (req, res) => {
     try {
         const { seasonName } = req.params;
         const megaPath = `${MEGA_ARCHIVE_FOLDER}/${seasonName}.json`;

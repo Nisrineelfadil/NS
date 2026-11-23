@@ -1,6 +1,6 @@
 {
   "name": "nis",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "A modern, responsive website for Nisrine School, a German language center located in Fez, Morocco. This website showcases the school's services, about section, student testimonials, and contact information.",
   "main": "server.js",
   "scripts": {

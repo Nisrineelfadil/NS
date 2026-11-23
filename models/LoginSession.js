@@ -58,8 +58,14 @@ const loginSessionSchema = new mongoose.Schema({
     },
     loginMethod: {
         type: String,
-        enum: ['password', 'secret_passcode', '2fa_email'],
+        // 'secret_passcode' is kept only so that old history records stay readable; it can no longer be created.
+        enum: ['password', 'secret_passcode', '2fa_email', 'temporary_access'],
         default: 'password'
+    },
+    // Temporary access sessions (account recovery) expire at this time; checked on every request.
+    expiresAt: {
+        type: Date,
+        default: null
     }
 });
 

@@ -133,6 +133,7 @@ const authLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 app.use('/api/login', authLimiter);
+app.use('/api/account-security/recovery', authLimiter); // forgot-password requests and code checks
 
 // Sanitize user input against NoSQL injection (body + params only; req.query is read-only in Express 5)
 app.use((req, res, next) => {
@@ -211,6 +212,8 @@ app.use('/uploads', (req, res, next) => {
 app.use('/css', express.static(path.join(rootPath, 'css'), staticOptions));
 app.use('/js', express.static(path.join(rootPath, 'js'), staticOptions));
 app.use('/Img', express.static(path.join(rootPath, 'Img'), staticOptions));
+// Desktop application file (local server; on Vercel the file is served directly by the route in vercel.json)
+app.use('/downloads', express.static(path.join(rootPath, 'downloads'), { setHeaders: res => res.setHeader('Content-Disposition', 'attachment') }));
 // Serve React app assets (both paths for compatibility)
 app.use('/assets', express.static(path.join(rootPath, 'react-portals', 'dist', 'assets'), staticOptions));
 app.use('/react-portals/dist', express.static(path.join(rootPath, 'react-portals', 'dist'), staticOptions));
@@ -387,6 +390,8 @@ app.use('/api/season-backup', dbMiddleware, (req, res, next) => {
   next();
 }, seasonBackupRoutes);
 app.use('/api/season-archive', dbMiddleware, seasonArchiveRoutes);
+app.use('/api/account-security', dbMiddleware, require('./routes/accountSecurity'));
+app.use('/api/factory-reset', dbMiddleware, require('./routes/factoryReset'));
 // app.use('/api/push-notifications', dbMiddleware, pushNotificationsRoutes); // DISABLED
 
 // 404 handler — API routes get JSON, browser routes get the custom 404 page

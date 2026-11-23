@@ -107,7 +107,7 @@ function displaySeasons(seasons) {
                             <i class="fas fa-check-circle"></i> ${t('activate')}
                         </a>
                         ` : ''}
-                        ${season.status !== 'archived' ? `
+                        ${season.status !== 'archived' && typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'super_admin' || currentUser.role === 'dev') ? `
                         <a href="#" onclick="archiveSeason('${season._id}'); return false;" style="display: block; padding: 10px 15px; color: #f59e0b; text-decoration: none;">
                             <i class="fas fa-archive"></i> ${t('archiveToCloud')}
                         </a>
