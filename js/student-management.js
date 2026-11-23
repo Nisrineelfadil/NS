@@ -1937,16 +1937,27 @@ async function deleteStudent(studentId, studentName) {
     }
 }
 
+// SEC-07: confirmation + optional reason in the page window (askCorrectionReason, js/admin-attendance.js).
+// The server keeps absences of older seasons for secretaries and records every deleted absence.
 async function clearAbsenceHistory(studentId, studentName) {
-    if (!confirm(`⚠️ Clear ALL absence records for "${studentName}"?\n\nThis will permanently delete all absence history for this student. This action cannot be undone.`)) return;
-    
-    try {
-        const result = await apiRequest(`/students/${studentId}/clear-absences`, { 
-            method: 'DELETE' 
+    let reason;
+    if (typeof askCorrectionReason === 'function') {
+        reason = await askCorrectionReason({
+            fr: `Effacer les absences de ${studentName} ?`,
+            ar: `حذف غيابات ${studentName}؟`,
+            note: 'Secrétaire : seules les absences de la saison active sont effacées. Chaque absence effacée reste visible par la direction dans l\'historique. — السكرتيرة: تُحذف غيابات الموسم الحالي فقط.'
         });
-        
+        if (reason === null) return;
+    } else if (!confirm(`Effacer les absences de ${studentName} ?`)) return;
+
+    try {
+        const result = await apiRequest(`/students/${studentId}/clear-absences?reason=${encodeURIComponent(reason || '')}`, {
+            method: 'DELETE'
+        });
+
         if (result && result.success) {
-            showNotification(`✅ Absence history cleared for ${studentName}! (${result.deletedCount} record(s) removed)`, 'success');
+            const kept = result.keptOlderSeasons ? ` — ${result.keptOlderSeasons} absence(s) d'anciennes saisons conservée(s)` : '';
+            showNotification(`✅ ${result.deletedCount} absence(s) effacée(s) pour ${studentName}${kept}`, 'success');
             await loadStudents();
             await loadDashboardStats();
         }

@@ -20,12 +20,7 @@ const { closeExpiredSessionsSoon } = require('../services/jobRunner');
 // SEC-07 — scope rules for attendance corrections.
 // Secretaries correct attendance of the ACTIVE season; the Director (and the developer) can correct any season.
 // Every correction or deletion is written to the permanent activity history with the original status.
-const isDirector = req => ['super_admin', 'dev'].includes(req.admin && req.admin.role);
-async function activeSeasonGroupIds() {
-    const s = await Season.findOne({ status: 'active' }).select('_id');
-    if (!s) return new Set();
-    return new Set((await Group.find({ season: s._id }).select('_id')).map(g => String(g._id)));
-}
+const { isDirector, activeSeasonGroupIds, recordLabel } = require('../services/attendanceRules');
 // returns an error message when the user may not change these records, otherwise null
 async function correctionNotAllowed(req, records) {
     if (isDirector(req)) return null;
@@ -33,10 +28,6 @@ async function correctionNotAllowed(req, records) {
     const outside = records.filter(r => !allowed.has(String(r.groupId)));
     return outside.length ? 'Only attendance of the active season can be corrected. Ask the Director for older seasons.' : null;
 }
-// Date shown in the school's time zone: attendance dates are stored at local midnight (23:00 UTC the day before),
-// so a UTC date would name the previous day.
-const schoolDay = d => new Date(d).toLocaleDateString('fr-CA', { timeZone: 'Africa/Casablanca' }); // YYYY-MM-DD
-const recordLabel = r => `${r.studentName || 'student'} — ${r.groupName || ''} — ${r.date ? schoolDay(r.date) : ''}`;
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'nisrine-school-secret-key-2024';

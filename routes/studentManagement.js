@@ -1709,31 +1709,51 @@ router.post('/groups/:groupId/send-message', authenticateAdmin, async (req, res)
 // ==================== ATTENDANCE MANAGEMENT ROUTES ====================
 
 // Clear absence history for a student
+// "Effacer les absences" button of the student card.
+// SEC-07 (gap closed 2026-11-23): before, this deleted ALL absences of the student in EVERY season, for any staff
+// account, with no reason and no detail in the history. Now the same rules as the attendance screens apply:
+// secretaries delete only absences of the ACTIVE season (older ones are kept), the Director / developer any season;
+// the optional reason and every deleted absence (date, group, student) are written to the activity history.
 router.delete('/students/:id/clear-absences', authenticateAdmin, async (req, res) => {
     try {
         const studentId = req.params.id;
-        
+        const reason = String((req.query && req.query.reason) || '').slice(0, 500);
+
         // Verify student exists
         const student = await ManagedStudent.findById(studentId);
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
-        
-        // Import AttendanceRecord model
+
         const AttendanceRecord = require('../models/AttendanceRecord');
-        
-        // Delete all absence records for this student
-        const result = await AttendanceRecord.deleteMany({
-            studentId: studentId,
-            status: 'absent'
-        });
-        
-        console.log(`🗑️ Cleared ${result.deletedCount} absence record(s) for student: ${student.fullName} (${student.schoolEmail})`);
-        
-        res.json({ 
-            success: true, 
+        const { audit } = require('../services/audit');
+        const { isDirector, activeSeasonGroupIds, recordLabel } = require('../services/attendanceRules');
+
+        const all = await AttendanceRecord.find({ studentId: student._id, status: 'absent' }).lean();
+        let records = all;
+        if (!isDirector(req)) {
+            const allowed = await activeSeasonGroupIds();
+            records = all.filter(r => allowed.has(String(r.groupId)));
+        }
+        const keptOlder = all.length - records.length;
+
+        const result = await AttendanceRecord.deleteMany({ _id: { $in: records.map(r => r._id) } });
+        for (const r of records) {
+            await audit(req, {
+                action: 'attendance.absence_deleted', module: 'attendance',
+                target: { type: 'attendance_record', id: r._id, label: recordLabel(r) },
+                before: { status: r.status, date: r.date, group: r.groupName, formation: r.formation, student: r.studentName },
+                after: null, reason
+            });
+        }
+
+        console.log(`🗑️ Cleared ${result.deletedCount} absence record(s) for student: ${student.fullName}${keptOlder ? ` (${keptOlder} of older seasons kept)` : ''}`);
+
+        res.json({
+            success: true,
             message: `Absence history cleared for ${student.fullName}`,
             deletedCount: result.deletedCount,
+            keptOlderSeasons: keptOlder,
             studentName: student.fullName
         });
     } catch (error) {

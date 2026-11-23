@@ -35,6 +35,7 @@ const RULES = [
 const SKIP = [
     /^\/api\/attendance\/admin\/(update-status|bulk-update-status|student-absences|records|clear-presences|clear-absences)/,
     /^\/api\/season-archive\/[^/]+\/archive$/,
+    /^\/api\/student-management\/students\/[^/]+\/clear-absences$/, // recorded per absence by the route itself
     /^\/api\/factory-reset\//, /^\/api\/cron\//, /^\/api\/audit\//,
     /^\/api\/notifications\//, /^\/api\/account-security\/alerts/, /^\/api\/fcm\//, /^\/api\/push-notifications\//
 ];
